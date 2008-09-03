@@ -41,7 +41,6 @@ class AjaxController extends Zend_Controller_Action
 						}
 					};
 				";
-				
 				$results = $this->view->model->sparqlQuery($queryString);
 				
 				/*get rid of the ?s in the sparql results so they can be used with json*/
@@ -52,7 +51,6 @@ class AjaxController extends Zend_Controller_Action
 					array_push($this->view->results, array_combine($keys,$row));
 				}
 			}
-			
 			
 	}
 	

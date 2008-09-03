@@ -471,7 +471,9 @@ class Query extends Object
     */
     public static function getLanguageTag($var)
     {
-        $nAt = strpos($var, '@');
+	//XXX
+	$var = $var."";
+	$nAt = strpos($var, '@');
         if ($nAt === false) {
             return null;
         }
@@ -495,6 +497,8 @@ class Query extends Object
     */
     public function getDatatype($var)
     {
+	//XXX
+	$var = $var."";
         $nHatHat = strpos($var, '^^');
         if ($nHatHat === false) {
             return null;

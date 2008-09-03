@@ -593,16 +593,19 @@ Class SparqlEngine extends Object{
     * @return Array
     */
     protected function selectVars($table,$vars){
-        if($vars[0]=='*')
-        $vars = $this->query->getAllVars();
-        $resTable = array();
+        
+	//XXX
+	if($vars[0]->variable=='*'){
+        	$vars = $this->query->getAllVars();
+        }
+	$resTable = array();
         $hits = 0;
         foreach($table as $val){
-            foreach($vars as $var){
-                if(isset($val[(string)$var])){
-                    $resTable[$hits][(string)$var]=$val[(string)$var];
+	     foreach($vars as $var){
+                if(isset($val[$var->variable])){
+                    $resTable[$hits][$var->variable]=$val[$var->variable];
                 }else{
-                    $resTable[$hits][(string)$var]="";
+                    $resTable[$hits][$var->variable]="";
                 }
             }
             $hits++;
