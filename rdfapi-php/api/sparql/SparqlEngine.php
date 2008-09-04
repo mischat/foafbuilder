@@ -593,26 +593,34 @@ Class SparqlEngine extends Object{
     * @return Array
     */
     protected function selectVars($table,$vars){
-        
-	//XXX Datatype!
-	if($vars[0]->variable=='*'){
-        	$vars = $this->query->getAllVars();
+        //XXX
+        if($vars[0]->variable=='*') {
+                $vars = $this->query->getAllVars();
         }
-	$resTable = array();
+        $resTable = array();
         $hits = 0;
-        foreach($table as $val){
-	     foreach($vars as $var){
-                if(($var) && (isset($val[(string) $var]))){
-                    $resTable[$hits][(string) $var]=$val[(string) $var];
-                }else{
-                    $resTable[$hits][(string) $var]="";
-                }
+        foreach($table as $val) {
+             foreach($vars as $var) {
+		//PHP 5.1.6
+		if(!is_array($var)) {
+			if(isset($val[$var->variable])) {
+			    $resTable[$hits][$var->variable]=$val[$var->variable];
+			} else {
+			    $resTable[$hits][$var->variable]="";
+			}
+		//PHP 5.2.2
+		} else {
+			if(isset($val[(string) $var])){
+			    $resTable[$hits][(string) $var]=$val[(string) $var];
+			}else{
+			    $resTable[$hits][(string) $var]="";
+			}
+		}
             }
             $hits++;
         }
         return $resTable;
     }
-
     /**
     * Joins the results of the different Graphpatterns.
     *
