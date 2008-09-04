@@ -8,20 +8,30 @@ class IndexController extends Zend_Controller_Action
         $this->view->baseUrl = $this->_request->getBaseUrl();
     }
 
-    public static function getForm() {
-        require_once 'Zend/Form.php';
-        $form = new Zend_Form(array( 'method'   => 'post',
-        	                     'action'   => "javascript:loadFoafData($(foaf_uri));",
-                                     'elements' => array( 'foafUri' => array('text', array(
-    					                 'required' => true,
-                                                         'label' => 'Paste FOAF uri in here.' ) ),
-                                     'submit' => array('submit', array( 'label' => 'Load' )) ),
-                              ));
+	public static function getForm()
+    {
+/*        $form = new Zend_Form(array(
+            'method'   => 'post',
+        	'action'   => "javascript:loadFoafData($(foaf_uri));",
+            'elements' => array(
+                	'foafUri' => array('text', array(
+    					'required' => true,
+                    	'label' => 'Paste FOAF uri in here.'
+            		)    
+        	),
+            'submit' => array('submit', array(
+                    'label' => 'Load'
+             ))
+            ),
+        ));
+*/
+
         return $form;
     }
     
     public function indexAction(){
-        $this->view->form = $this->getForm();
+
+    	/* $this->view->form = $this->getForm();*/
     }
 	
     public function displayfoafAction()

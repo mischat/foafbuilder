@@ -3,8 +3,7 @@
 	//We don't want any HTML gubbins here
 	$this->layout()->setLayout('ajax');
 	
-	//FIXME: return this?  Or something else, or nothing?
 	//var_dump($this->results);
-$json = new Services_JSON();
-echo $json->encode($this->results);
+	$json = new Services_JSON();
+	echo $json->encode($this->results);
 ?>

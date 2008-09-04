@@ -28,15 +28,17 @@ class FoafData {
                 $this->graphset = $graphset;
     	    }
         } else {
-            $defaultNamespace = new Zend_Session_Namespace('Default');
-            $defaultNamespace->foafData = $this;
+        	//FIXME: get rid of this
+            echo("Pass in the uri!!!");
         }
     }
 
-    public function putInSession() {
-        $defaultNamespace = new Zend_Session_Namespace('Default');
-        $defaultNamespace->foafData = $this;	
-    }
+
+    //keep this after mischa's changes
+	public static function getFoafDataFromSession(){
+		$defaultNamespace = new Zend_Session_Namespace('Default');
+    	return $defaultNamespace->foafData;
+	}
     
     public function getModel() {
         return $this->model;	
