@@ -17,7 +17,6 @@
  */
  
 function sparql($model,$serializer){
-
   if (isset($_REQUEST['closure'])) {
      if (strtoupper($_REQUEST['closure']) == "TRUE" ) {
 	   $closure = True;
@@ -36,11 +35,13 @@ function sparql($model,$serializer){
   $query =rawurldecode($query); 
 
   $result = $model->sparqlQuery($query,'xml');	
-  if($result instanceof MemModel)
+  if($result instanceof MemModel) {
   	echo $serializer->Serialize($result);
-  else
+	print "mmm 0\n";
+  } else {
+	print "mmm 1\n";
   	echo $result;
-
+  }
 
 }
 

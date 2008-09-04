@@ -594,7 +594,7 @@ Class SparqlEngine extends Object{
     */
     protected function selectVars($table,$vars){
         
-	//XXX
+	//XXX Datatype!
 	if($vars[0]->variable=='*'){
         	$vars = $this->query->getAllVars();
         }
@@ -602,10 +602,10 @@ Class SparqlEngine extends Object{
         $hits = 0;
         foreach($table as $val){
 	     foreach($vars as $var){
-                if(isset($val[$var->variable])){
-                    $resTable[$hits][$var->variable]=$val[$var->variable];
+                if(($var) && (isset($val[(string) $var]))){
+                    $resTable[$hits][(string) $var]=$val[(string) $var];
                 }else{
-                    $resTable[$hits][$var->variable]="";
+                    $resTable[$hits][(string) $var]="";
                 }
             }
             $hits++;
