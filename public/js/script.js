@@ -1,14 +1,15 @@
-/*loads all the foaf data from the given file into the editor.*/
+/*loads all the foaf data from the given file (or the session if there is no uri) into the editor.*/
 function loadFoaf(){
 
 	//use json data and use addElement etc. stuff rather than using innerHTML
 	url = document.getElementById('foafUri').value;
-	if(url){
-  		$.post("/ajax/load-foaf", { uri: url}, function(data){populate(data);}, "json");
-	}
+  	$.post("/ajax/load-foaf", { uri: url}, function(data){populate(data);}, "json");
 }
 
 function populate(data){
+
+	triples = data;
+	
   	//TODO: add for loops to populate multiple fields here 
   	for(i = 0 ; i < data.length ; i++){
 	  	if(data[i].name.label){
@@ -29,7 +30,7 @@ function populate(data){
 			if(i == 0){
 				document.getElementById('nick').value = data[i].nick.label;
 			} else {
-			
+				
 			}
 		}
 	}
@@ -37,13 +38,7 @@ function populate(data){
 
 /*saves all the foaf data TODO: it might be a challenge making this quick*/
 function saveFoaf(){
-	url = document.getElementById('foafUri').value;
-	if(url){
-  		$.post("/ajax/save-foaf", { uri: url},
-  			function(data){
-    			alert(data.name); // John
-    			console.log(data.time); //  2pm
-		  }, 
-		"json");
-	}
+	jsonstring = JSON.serialize(triples);
+  	$.post("/ajax/save-foaf", {model : jsonstring.substring(1,jsonstring.length-1)}, function(data){populate(data);}, "json");
+  		
 }
