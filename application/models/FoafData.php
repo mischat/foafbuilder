@@ -1,44 +1,52 @@
 <?php
 
-require_once 'helpers/sparql.php';
+//require_once 'helpers/sparql.php';
+
 require_once 'RdfAPI.php';
-require_once 'dataset/NamedGraphMem.php';
-    	
+require_once 'dataset/DatasetMem.php';
+
 class FoafData {
     private $uri;
     private $model;
+    private $graphset;
     
     /*New from uri if uri present. if not just new.*/
     public function FoafData($uri = "") {
-        if($uri) {	
-            //$model = new MemModel();
-            //$model->load($uri);
-            //TODO This name shouldnt be hardcoded.
-            $graphset = ModelFactory::getDatasetMem('Dataset1');
-            $model = new NamedGraphMem($uri);
-            $model->load($uri);
-            $graphset->addNamedGraph($model);
-            if (!($graphset->containsNamedGraph($uri))) {
-                print "Triples model not add to the modelfactory\n";
-            }
-            if($model!=null) { 
-                //TODO Couldnt these be replaces by the below functions
-                $this->model = $model;
-                $this->uri = $uri;
-                $this->graphset = $graphset;
-    	    }
+        if($uri){
+			//$model = new MemModel();
+	        //$model->load($uri);
+	        //TODO This name shouldnt be hardcoded.
+	        $graphset = ModelFactory::getDatasetMem('Dataset1');
+	        $model = new NamedGraphMem($uri);
+	        $model->load($uri);
+	        $graphset->addNamedGraph($model);
+	        if (!($graphset->containsNamedGraph($uri))) {
+	        	print "Triples model not add to the modelfactory\n";
+	        }
+	        if($model!=null) { 
+	            $this->model = $model;
+	            $this->uri = $uri;
+	            $this->graphset = $graphset;
+	        }
+    	
+    		$this->putInSession();
         } else {
-        	//FIXME: get rid of this
-            echo("Pass in the uri!!!");
+        	//FIXME: sort this out so it isn't an echo
+        	echo("Something went wrong, there's no URI!");
         }
     }
-
-
-    //keep this after mischa's changes
-	public static function getFoafDataFromSession(){
-		$defaultNamespace = new Zend_Session_Namespace('Default');
+    
+    public static function getFromSession(){
+    	//TODO: use auth session for particular users
+    	$defaultNamespace = new Zend_Session_Namespace('Default');
     	return $defaultNamespace->foafData;
-	}
+    }
+    
+    public function putInSession(){
+    	//TODO: use auth session for particular users
+    	$defaultNamespace = new Zend_Session_Namespace();
+    	$defaultNamespace->foafData = $this;  
+    }
     
     public function getModel() {
         return $this->model;	

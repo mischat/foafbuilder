@@ -13,10 +13,9 @@ ini_set('display_errors', 1);
 // Step 3: Perform application-specific setup 
 // This allows you to setup the MVC environment to utilize. Later you can re-use this file for testing your applications 
 require '../application/bootstrap.php';  
-    
-//Start a session for the user: note-do we want to do this?
-Zend_Session::start();	
-	
+
+Zend_Session::start();
+
 // Step 4:  Dispatch the request using the front controller. 
 // The front controller is a singleton, and should be setup by now. We will grab 
 // an instance and dispatch it, which dispatches your application. 
