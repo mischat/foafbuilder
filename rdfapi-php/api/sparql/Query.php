@@ -1,6 +1,6 @@
 <?php
 require_once RDFAPI_INCLUDE_DIR . 'sparql/GraphPattern.php';
-
+require_once "FoafData.php";
 /**
 * The Class Query represents a SPARQL query.
 *
