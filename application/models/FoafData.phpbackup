@@ -38,28 +38,34 @@ class FoafData {
     
     public static function getFromSession(){
     	//TODO: use auth session for particular users
-    	//if(Zend_Session::sessionExists()){
-    		$defaultNamespace = new Zend_Session_Namespace('Default');
-    	//}
-    	//XXX This probably ought to be changed for production
-    	$defaultNamespace->setExpirationSeconds(10);
+    	$defaultNamespace = new Zend_Session_Namespace('Default');
+    	
+    	$dbstore = ModelFactory::getDbStore("mySql", "db.qdos.com", 'foafeditor', 'luke', 'TODO:/PW HERE');
+    	if(!$dbstore->isSetup('MySQL')){
+    		$dbstore->createTables('MySQL');	
+    	}
+    	
+    	$dataset1 = & $dbstore->getDatasetDb("Dataset1");
+    	if($dataset1 === false){
+    		$dataset1 = & $dbstore->getNewDatasetDb("Dataset1");   		
+    	}
+    	$namedGraph1 = & $dbstore->getNewDatasetDb("Dataset1");
+    	//$foafData->model; 	
+    	
+    	//TODO: do this and change put in session etc to alter the model of the 
+    	//appropriate named graph rather than just the model
     	return $defaultNamespace->foafData;
+    }
+    public function switchMainGraph(){
+    	//TODO: do we need this?	
+    	
     }
     
     public function putInSession(){
     	//TODO: use auth session for particular users
-    	//if(Zend_Session::sessionExists()){
-    		$defaultNamespace = new Zend_Session_Namespace();
-  
-    	//XXX This probably ought to be changed for production
-    	$defaultNamespace->setExpirationSeconds(10);
+    	$defaultNamespace = new Zend_Session_Namespace();
     	$defaultNamespace->foafData = $this;  
     }
-
-    public function killSession(){
-        Zend_Session::destroy();
-    }
-
     
     public function getModel() {
         return $this->model;	

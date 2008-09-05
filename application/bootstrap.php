@@ -41,6 +41,9 @@ if (isset($bootstrap) && $bootstrap) {
 	// Step 3: Point the front controller to your action controller directory. 
 	$frontController->setControllerDirectory('../application/controllers'); 
 	 
+	Zend_Session::setSaveHandler(new FoafSessionHandler());
+	Zend_Session::start();
+
 	// Step 4: Set the current environment 
 	// Set a variable in the front controller indicating the current environment -- 
 	// commonly one of development, staging, testing, production, but wholly 
