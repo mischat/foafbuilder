@@ -58,6 +58,19 @@ function displayToObjects(){
 	
 }
 
+//TODO THis is well dirty
+function clearObjects(){
+	
+	if(document.getElementById('name').value){
+		document.getElementById('name').value = null;
+	}
+	if(document.getElementById('homepage').value){
+		document.getElementById('homepage').value = null;
+	} 
+	if(document.getElementById('nick').value){
+		document.getElementById('nick').value = null;
+	}
+}
 
 
 /*saves all the foaf data TODO: it might be a challenge making this quick*/
@@ -67,4 +80,17 @@ function saveFoaf(){
 	//TODO use jquery event handler to deal with errors on this request
   	$.post("/ajax/save-foaf", {model : jsonstring}, function(){}, "json");
   		
+}
+
+/*Writes FOAF to screen*/
+function writeFoaf() {
+        //$.post("/writer/write-Foaf", { }, function(data){alert(data.name);console.log(data.time);},"json");
+        $.post("/writer/write-Foaf", { }, function(){},null);
+}
+
+/*Clears FOAF model from session*/
+function clearFoaf() {
+	clearObjects();
+        //$.post("/ajax/clear-Foaf", { }, function(data){alert(data.name);console.log(data.time);},"json");
+        $.post("/ajax/clear-Foaf", { }, function(){},null);
 }
