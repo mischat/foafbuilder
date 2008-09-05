@@ -7,13 +7,15 @@
 	<input type = 'text' id= 'foafUri' name = 'foafUri'/>
 	<input type = 'submit' value = 'Load'/>
 </form>
-<form action = "javascript:loadFoaf();">
-	<input type = 'submit' value = 'Load from session'/>
-</form>
 <form action = "javascript:saveFoaf();">
 	<input type = 'submit' value = 'Save'/>
 </form>
-
+<form action = "javascript:clearFoaf();">
+	<input type = 'submit' value = 'Clear'/>
+</form>
+<form action = "javascript:writeFoaf();">
+	<input type = 'submit' value = "Write" />
+</form>
 <div id="personal">
 	<div id="name_container">
 		<p>
@@ -52,4 +54,3 @@
 		</p>
 	</div>
 </div>
-

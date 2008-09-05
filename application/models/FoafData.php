@@ -47,6 +47,11 @@ class FoafData {
     	$defaultNamespace = new Zend_Session_Namespace();
     	$defaultNamespace->foafData = $this;  
     }
+
+    public function killSession(){
+        Zend_Session::destroy();
+    }
+
     
     public function getModel() {
         return $this->model;	

@@ -62,6 +62,7 @@ class AjaxController extends Zend_Controller_Action
             }
         } else {
             print "Error Instance of FoafData is null!\n";
+	    $this->view->isSuccess = 0;
         }       
     }
 	
@@ -83,7 +84,8 @@ class AjaxController extends Zend_Controller_Action
 				}
 			}
 	}
-	
+
+        //TODO could this be a private function	
 	public function applyChangesToModel($foafData,$changes_model)
 	{
 		
@@ -114,6 +116,15 @@ class AjaxController extends Zend_Controller_Action
 		}	
 		return $new_model;			
 	}
+        
+	public function clearFoafAction() {
+		$this->view->isSuccess = 0;
+		$foafData = FoafData::getFromSession();
+                if ($foafData) {
+                    $foafData->killSession();
+		    $this->view->isSuccess = 1;
+                }
+        }
 }
 	
 /* vi:set expandtab sts=4 sw=4: */
