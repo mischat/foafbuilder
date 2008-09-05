@@ -72,10 +72,8 @@ class AjaxController extends Zend_Controller_Action
 			require_once 'FoafData.php';
 			$changes_model = @$_POST['model'];
 			if($changes_model){
-				$foafData = new FoafData();	
+				$foafData = FoafData::getFromSession();	
 				if($foafData){
-		
-					$foafData = FoafData::getFromSession();
 				
 					$new_model = $this->applyChangesToModel($foafData,$changes_model);							
 					
