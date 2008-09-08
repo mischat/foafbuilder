@@ -30,24 +30,26 @@ class AjaxController extends Zend_Controller_Action
 	
             $queryString = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                 SELECT 
-                    ?name 
-                    ?homepage 
-                    ?nick
-                    ?location
+                    ?foafName 
+                    ?foafHomepage 
+                    ?foafNick
+                    ?foafLocation
+                    ?primaryTopic
                 FROM NAMED <".$this->view->uri.">
                 WHERE { 
                     ?z foaf:primaryTopic ?x.
+                    ?z foaf:primaryTopic ?primaryTopic.
                     OPTIONAL{
-                        ?x foaf:name ?name . 
+                        ?x foaf:name ?foafName . 
                     } .
                     OPTIONAL{
-                        ?x foaf:homepage ?homepage . 
+                        ?x foaf:homepage ?foafHomepage . 
                     } .
                     OPTIONAL{
-                        ?x foaf:nick ?nick . 
+                        ?x foaf:nick ?foafNick . 
                     } .
                     OPTIONAL{
-                        ?x foaf:based_near ?location . 
+                        ?x foaf:based_near ?foafLocation . 
                     } 
                 };
             ";
@@ -69,53 +71,78 @@ class AjaxController extends Zend_Controller_Action
 	public function saveFoafAction()
 	{
 			$this->view->isSuccess = 0;
-			
+	
 			require_once 'FoafData.php';
 			$changes_model = @$_POST['model'];
+
 			if($changes_model){
+				echo("changes model there".$changes_model);
+				
 				$foafData = FoafData::getFromSession();	
 				if($foafData){
-				
-					$new_model = $this->applyChangesToModel($foafData,$changes_model);							
-					
-					$foafData->setModel($new_model);
+					$this->applyChangesToModel($foafData,$changes_model);	
 					$foafData->putInSession();
 					$this->view->isSuccess = 1;
+				} else {
+					echo("there aint anything in the session");
+					
 				}
 			}
 	}
 
-        //TODO could this be a private function	
-	public function applyChangesToModel($foafData,$changes_model)
+        //TODO could this be a private function?
+	public function applyChangesToModel(&$foafData,&$changes_model)
 	{
 		
 		//json representing stuff that has been changed on the page (a bit like sparql results)
 		$json = new Services_JSON();
 		$almost_model = $json->decode(stripslashes($changes_model));
-		$new_model = $foafData->getModel();
-					
-		/*FIXME: this needs to be more sophisticated and do a similar thing to the query above rather
-		* than not taking account of the primary topic.  There ought to be a more simple way to do this.*/
-		$i=0;
-		foreach($foafData->getModel()->triples as $triple){
-			foreach($almost_model as $almost_row){
-				foreach($almost_row as $key => $value){
-					if($triple->pred->uri == "http://xmlns.com/foaf/0.1/".$key){
-						if(isset($value->uri) && isset($triple->obj->uri)){
-							//TODO: need to not just set all triples with this pred to this value.
-							$new_model->triples[$i]->obj->uri = $value->uri;	
-						}
-						if(isset($value->label) && isset($triple->obj->label)){
-							//TODO: need to not just set all triples with this pred to this value.
-							$new_model->triples[$i]->obj->label = $value->label;
-						}
+		$model = $foafData->getModel();
+
+		//TODO, extend these to all of them.  possibly use an array.
+		$foafNameCount = 0;
+		$foafHomepageCount = 0;
+				
+		foreach($almost_model as $almost_row){
+			foreach($almost_row as $key => $value){
+				/*an example of a key: foafName_3 which would mean that we're dealing with the third foafName*/
+
+				//TODO: need to do this for all predicates and to find a more sensible way of doing it. poss with an array.
+				if($key == 'foafName'){
+					$key = 'http://xmlns.com/foaf/0.1/name';
+					$index = $foafNameCount;
+					$foafNameCount++;
+				} else if($key == 'foafHomepage') {
+					$key = 'http://xmlns.com/foaf/0.1/homepage';
+					$index = $foafHomepageCount;
+					$foafHomepageCount++;
+				}
+				
+				/* Create a new statement from the values to be saved FIXME: this is innefficient.*/
+				if(isset($value->label)){
+					$new_statement = new Statement(new Resource($foafData->getUri()),new Resource($key),new Literal($value->label));
+				} else if(isset($value->uri)) {
+					$new_statement = new Statement(new Resource($foafData->getUri()),new Resource($key),new Resource($value->uri));		
+				} 
+				
+				if(isset($new_statement)){
+					/* Look for values with the appropriate predicate/object */
+					$found_model = $model->find(new Resource($almost_row->primaryTopic->uri),new Resource($key), NULL);
+	
+					/*
+					 * Remove a matching triple (if there) and add the new one whilst remembering that there can
+					 * be more than one e.g. foafName and we only want to remove the one at the appropriate index.
+					 */ 
+					if(isset($found_model->triples[$index])){
+						$model->remove($found_model->triples[$index]);
 					}
+					$model->add($new_statement);
 				}
 			}
-			$i++;
-		}	
-		return $new_model;			
-	}
+		}
+	//	return $model;
+	}	
+		
         
 	public function clearFoafAction() {
 		$this->view->isSuccess = 0;
