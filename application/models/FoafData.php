@@ -42,7 +42,7 @@ class FoafData {
     		$defaultNamespace = new Zend_Session_Namespace('Default');
     	//}
     	//XXX This probably ought to be changed for production
-    	$defaultNamespace->setExpirationSeconds(10);
+    	$defaultNamespace->setExpirationSeconds(10000);
     	return $defaultNamespace->foafData;
     }
     
@@ -52,7 +52,7 @@ class FoafData {
     		$defaultNamespace = new Zend_Session_Namespace();
   
     	//XXX This probably ought to be changed for production
-    	$defaultNamespace->setExpirationSeconds(10);
+    	$defaultNamespace->setExpirationSeconds(10000);
     	$defaultNamespace->foafData = $this;  
     }
 

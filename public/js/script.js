@@ -11,22 +11,39 @@ function objectsToDisplay(data){
 
 	triples = data;
 	
-  	//TODO: add for loops to populate/create multiple fields here 
+  	//TODO: add stuff to create elements if they don't already exist here.
+  	foafNameCount = 0;
+  	foafHomepageCount = 0;
+  	foafNickCount = 0;
+  	
   	for(i = 0 ; i < data.length ; i++){
-	  	if(data[i].name.label){
-	  		if(i == 0){
-				document.getElementById('name').value = data[i].name.label;
-			} 
+	  	if(data[i].foafName.label){
+	  		foafNameElement = document.getElementById('foafName_'+foafNameCount);
+	  		
+	  		if(foafNameElement){ 
+				foafNameElement.value = data[i].foafName.label;
+			} else {
+				//put create element code here
+			}
+			foafNameCount++; 
 		}
-		if(data[i].homepage.uri){
-			if(i == 0){
-				document.getElementById('homepage').value = data[i].homepage.uri;
-			} 
+		if(data[i].foafHomepage.uri){
+			foafHomepageElement = document.getElementById('foafHomepage_'+foafHomepageCount);
+			if(foafHomepageElement){
+				foafHomepageElement.value = data[i].foafHomepage.uri;
+			} else {
+				//put create element code here
+			}
+			foafHomepageCount++;
 		}
-		if(data[i].nick.label){
-			if(i == 0){
-				document.getElementById('nick').value = data[i].nick.label;
-			} 
+		if(data[i].foafNick.label){
+			foafNickElement = document.getElementById('foafNick_'+foafNickCount);
+			if(foafNickElement){
+				foafNickElement.value = data[i].foafNick.label;
+			} else {
+				//put create element code here
+			}
+			foafNickCount++; 
 		}
 	}
 }
@@ -35,24 +52,31 @@ function objectsToDisplay(data){
 //TODO: needs to cope with added, deleted and multiple triples
 //TODO: datatypes/languages
 
-//XXX We can't simply send the json back like this to be automatically decoded unfortunately.
 function displayToObjects(){
+
+  	foafNameCount = 0;
+  	foafHomepageCount = 0;
+  	foafNickCount = 0;
 	
   	for(i = 0 ; i < triples.length ; i++){
-	  	if(document.getElementById('name').value){
-	  		if(i == 0){
-				triples[i].name.label = document.getElementById('name').value;
-			} 
+  		alert('foafName_'.foafNameCount);
+  		foafNameElement = document.getElementById('foafName_'+foafNameCount);
+	  	if(foafNameElement){
+			triples[i].foafName.label = foafNameElement.value;
+			alert(foafNameElement.value);
+			foafNameCount++;
 		}
-		if(document.getElementById('homepage').value){
-			if(i == 0){
-				 triples[i].homepage.uri = document.getElementById('homepage').value;
-			} 
+		
+		foafHomepageElement = document.getElementById('foafHomepage_'+foafHomepageCount);
+		if(foafHomepageElement){
+			triples[i].foafHomepage.uri = foafHomepageElement.value;
+			foafHomepageCount++;	 
 		}
-		if(document.getElementById('nick').value){
-			if(i == 0){
-				 triples[i].nick.label = document.getElementById('nick').value;
-			} 
+		
+		foafNickElement = document.getElementById('foafNick_'+foafNickCount);
+		if(foafNickElement){
+			triples[i].foafNick.label = foafNickElement.value;
+			foafNickCount++;
 		}
 	}
 	
@@ -61,14 +85,14 @@ function displayToObjects(){
 //TODO THis is well dirty
 function clearObjects(){
 	
-	if(document.getElementById('name').value){
-		document.getElementById('name').value = null;
+	if(document.getElementById('foafName').value){
+		document.getElementById('foafName').value = null;
 	}
-	if(document.getElementById('homepage').value){
-		document.getElementById('homepage').value = null;
+	if(document.getElementById('foafHomepage').value){
+		document.getElementById('foafHomepage').value = null;
 	} 
-	if(document.getElementById('nick').value){
-		document.getElementById('nick').value = null;
+	if(document.getElementById('foafNick').value){
+		document.getElementById('foafNick').value = null;
 	}
 }
 
