@@ -74,10 +74,8 @@ class AjaxController extends Zend_Controller_Action
 	
 			require_once 'FoafData.php';
 			$changes_model = @$_POST['model'];
-
+			
 			if($changes_model){
-				echo("changes model there".$changes_model);
-				
 				$foafData = FoafData::getFromSession();	
 				if($foafData){
 					$this->applyChangesToModel($foafData,$changes_model);	
@@ -93,54 +91,63 @@ class AjaxController extends Zend_Controller_Action
         //TODO could this be a private function?
 	public function applyChangesToModel(&$foafData,&$changes_model)
 	{
-		
 		//json representing stuff that has been changed on the page (a bit like sparql results)
 		$json = new Services_JSON();
 		$almost_model = $json->decode(stripslashes($changes_model));
 		$model = $foafData->getModel();
 
-		//TODO, extend these to all of them.  possibly use an array.
+		//TODO, extend these to all of them.  possibly use an array.  WE shouldn't have to do everything
+		//TODO: extend to include language tabs etc.
+		//over and over again for each predicate.
 		$foafNameCount = 0;
 		$foafHomepageCount = 0;
-				
-		foreach($almost_model as $almost_row){
-			foreach($almost_row as $key => $value){
-				/*an example of a key: foafName_3 which would mean that we're dealing with the third foafName*/
-
-				//TODO: need to do this for all predicates and to find a more sensible way of doing it. poss with an array.
-				if($key == 'foafName'){
-					$key = 'http://xmlns.com/foaf/0.1/name';
-					$index = $foafNameCount;
-					$foafNameCount++;
-				} else if($key == 'foafHomepage') {
-					$key = 'http://xmlns.com/foaf/0.1/homepage';
-					$index = $foafHomepageCount;
-					$foafHomepageCount++;
+		$foafNickCount = 0;
+		
+		//TODO: tidy this up!
+		foreach($almost_model as $key => $predicate_array){
+			
+			if($key == 'foafNameValueArray'){
+				$type = 'literal';
+				$predicate_uri = 'http://xmlns.com/foaf/0.1/name';
+			} else if($key == 'foafHomepageValueArray') {
+				$type = 'resource';
+				$predicate_uri = 'http://xmlns.com/foaf/0.1/homepage';
+			} else if($key == 'foafNickValueArray') {
+				$type = 'literal';
+				$predicate_uri = 'http://xmlns.com/foaf/0.1/nick';
+			} else {
+				echo("Unknown predicate ".$key."\n");
+			}
+			
+			/*TODO: start from here down.  Need to go round and set all statements as appropriate*/		
+			for($index = 0; $index < count($predicate_array) ;$index++){
+				/* Create a new statement from the values to be saved FIXME: this is inefficient.*/
+				$predicate_resource = new Resource($predicate_uri);
+				if($type == 'literal'){
+					$value_res_or_literal = new Literal($predicate_array[$index]);
+				} else if($type == 'resource'){
+					$value_res_or_literal = new Resource($predicate_array[$index]);
+				} else {
+					//TODO: bnodes?
+					echo("Not a uri or a bnode!");
 				}
+				//TODO: need to get the primary topic in here somehow instead of doing .#me poss from session?
+				$primary_topic_resource = new Resource($foafData->getUri()."#me");
+				$new_statement = new Statement($primary_topic_resource,$predicate_resource,$value_res_or_literal);	
 				
-				/* Create a new statement from the values to be saved FIXME: this is innefficient.*/
-				if(isset($value->label)){
-					$new_statement = new Statement(new Resource($foafData->getUri()),new Resource($key),new Literal($value->label));
-				} else if(isset($value->uri)) {
-					$new_statement = new Statement(new Resource($foafData->getUri()),new Resource($key),new Resource($value->uri));		
-				} 
+				/* Look for values with the appropriate predicate/object */
+				$found_model = $model->find($primary_topic_resource,$predicate_resource, NULL);
 				
-				if(isset($new_statement)){
-					/* Look for values with the appropriate predicate/object */
-					$found_model = $model->find(new Resource($almost_row->primaryTopic->uri),new Resource($key), NULL);
-	
-					/*
-					 * Remove a matching triple (if there) and add the new one whilst remembering that there can
-					 * be more than one e.g. foafName and we only want to remove the one at the appropriate index.
-					 */ 
-					if(isset($found_model->triples[$index])){
-						$model->remove($found_model->triples[$index]);
-					}
-					$model->add($new_statement);
+				/* Remove a matching triple (if there) and add the new one whilst remembering that there can
+				 * be more than one e.g. foafName and we only want to remove the one at the appropriate index.*/ 
+				if(isset($found_model->triples[$index])){
+					echo("removing triple: ".$predicate_array[$index]." $key "."\n");
+					echo("index: ".$index."\n");
+					$model->remove($found_model->triples[$index]);
 				}
+				$model->add($new_statement);
 			}
 		}
-	//	return $model;
 	}	
 		
         
