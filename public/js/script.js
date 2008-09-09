@@ -2,9 +2,12 @@
 var foafNameValueArray;
 var foafHomepageValueArray;
 var foafNickValueArray;
+var foafPrimaryTopic;
 
 /*object to hold global variables in */
+//TODO: this object is a bit 'inside out'
 function PageDataObject(){
+	this.foafPrimaryTopic = foafPrimaryTopic;
 	this.foafNameValueArray = foafNameValueArray;
 	this.foafHomepageValueArray = foafHomepageValueArray;
 	this.foafNickValueArray = foafNickValueArray;
@@ -36,6 +39,7 @@ function loadFoaf(){
 function objectsToDisplay(data){
   	
  	/*create an array for each type of predicate and populate them using the object data*/
+ 	foafPrimaryTopic = data[0].primaryTopic.uri;
  	foafNameValueArray = new Array();
  	foafHomepageValueArray = new Array();
  	foafNickValueArray = new Array();
@@ -139,7 +143,7 @@ function objectsToDisplay(data){
 
 
 /*populates the triples objects with stuff from the actual display (i.e. what the user has changed)*/
-//TODO: needs to cope with added, deleted and multiple triples
+//TODO: needs to cope with added and deleted triples
 //TODO: datatypes/languages
 
 function displayToObjects(){
@@ -165,21 +169,6 @@ function displayToObjects(){
 	}
 }
 
-//TODO THis is well dirty
-function clearObjects(){
-	
-	if(document.getElementById('foafName').value){
-		document.getElementById('foafName').value = null;
-	}
-	if(document.getElementById('foafHomepage').value){
-		document.getElementById('foafHomepage').value = null;
-	} 
-	if(document.getElementById('foafNick').value){
-		document.getElementById('foafNick').value = null;
-	}
-}
-
-
 /*saves all the foaf data TODO: it might be a challenge making this quick*/
 function saveFoaf(){
 	displayToObjects();
@@ -197,9 +186,16 @@ function writeFoaf() {
 
 /*Clears FOAF model from session*/
 function clearFoaf() {
-	clearObjects();
         //$.post("/ajax/clear-Foaf", { }, function(data){alert(data.name);console.log(data.time);},"json");
         $.post("/ajax/clear-Foaf", { }, function(){},null);
+        
+        /*empty all the text inputs*/
+        var inputs = document.getElementsByTagName('input'); 
+        for(i=0 ; i<inputs.length ; i++){
+        	if(inputs[i].type=='text'){
+        		document.getElementById(inputs[i].id).value = null;
+        	}
+        }
 }
 
 

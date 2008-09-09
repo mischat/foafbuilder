@@ -62,6 +62,7 @@ class AjaxController extends Zend_Controller_Action
                 $keys = str_replace('?','',$keys);
                 array_push($this->view->results, array_combine($keys,$row));
             }
+            $foafData->setPrimaryTopic($results[0]['?primaryTopic']->uri);     	
         } else {
             print "Error Instance of FoafData is null!\n";
 	    $this->view->isSuccess = 0;
@@ -88,24 +89,26 @@ class AjaxController extends Zend_Controller_Action
 			}
 	}
 
-        //TODO could this be a private function?
 	public function applyChangesToModel(&$foafData,&$changes_model)
 	{
-		//json representing stuff that has been changed on the page (a bit like sparql results)
+		/*
+		 * TODO: it might be good to add functionality to save teh primary topic.
+		 */
+		//json representing stuff that is to be saved
 		$json = new Services_JSON();
 		$almost_model = $json->decode(stripslashes($changes_model));
 		$model = $foafData->getModel();
 
-		//TODO, extend these to all of them.  possibly use an array.  WE shouldn't have to do everything
-		//TODO: extend to include language tabs etc.
-		//over and over again for each predicate.
+		/*
+		 * TODO, extend these to all of them.  possibly use an array.  We shouldn't have to do everything manually
+		 * over and over for each predicate.  Also need to add language tabs etc.
+		 */
 		$foafNameCount = 0;
 		$foafHomepageCount = 0;
 		$foafNickCount = 0;
 		
-		//TODO: tidy this up!
 		foreach($almost_model as $key => $predicate_array){
-			
+			$skip=0;
 			if($key == 'foafNameValueArray'){
 				$type = 'literal';
 				$predicate_uri = 'http://xmlns.com/foaf/0.1/name';
@@ -115,37 +118,38 @@ class AjaxController extends Zend_Controller_Action
 			} else if($key == 'foafNickValueArray') {
 				$type = 'literal';
 				$predicate_uri = 'http://xmlns.com/foaf/0.1/nick';
-			} else {
+			} else if($key != 'foafPrimaryTopic'){
 				echo("Unknown predicate ".$key."\n");
+			} else {
+				$skip = 1;
 			}
-			
-			/*TODO: start from here down.  Need to go round and set all statements as appropriate*/		
-			for($index = 0; $index < count($predicate_array) ;$index++){
-				/* Create a new statement from the values to be saved FIXME: this is inefficient.*/
-				$predicate_resource = new Resource($predicate_uri);
-				if($type == 'literal'){
-					$value_res_or_literal = new Literal($predicate_array[$index]);
-				} else if($type == 'resource'){
-					$value_res_or_literal = new Resource($predicate_array[$index]);
-				} else {
-					//TODO: bnodes?
-					echo("Not a uri or a bnode!");
+			if(!$skip){
+				for($index = 0; $index < count($predicate_array) ;$index++){
+					/* Create a new statement from the values to be saved FIXME: this is inefficient.*/
+					$predicate_resource = new Resource($predicate_uri);
+					if($type == 'literal'){
+						$value_res_or_literal = new Literal($predicate_array[$index]);
+					} else if($type == 'resource'){
+						$value_res_or_literal = new Resource($predicate_array[$index]);
+					} else {
+						//TODO: bnodes?
+						echo("Not a uri or a bnode!");
+					}
+					//TODO: need to get the primary topic in here somehow instead of doing .#me poss from session?
+					$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
+					$new_statement = new Statement($primary_topic_resource,$predicate_resource,$value_res_or_literal);	
+					
+					/* Look for values with the appropriate predicate/object */
+					$found_model = $model->find($primary_topic_resource,$predicate_resource, NULL);
+					
+					/* Remove a matching triple (if there) and add the new one whilst remembering that there can
+					 * be more than one e.g. foafName and we only want to remove the one at the appropriate index.*/ 
+					if(isset($found_model->triples[$index])){
+						//TODO - worry about the ordering of sparql results
+					$model->remove($found_model->triples[0]);
+					}
+					$model->add($new_statement);
 				}
-				//TODO: need to get the primary topic in here somehow instead of doing .#me poss from session?
-				$primary_topic_resource = new Resource($foafData->getUri()."#me");
-				$new_statement = new Statement($primary_topic_resource,$predicate_resource,$value_res_or_literal);	
-				
-				/* Look for values with the appropriate predicate/object */
-				$found_model = $model->find($primary_topic_resource,$predicate_resource, NULL);
-				
-				/* Remove a matching triple (if there) and add the new one whilst remembering that there can
-				 * be more than one e.g. foafName and we only want to remove the one at the appropriate index.*/ 
-				if(isset($found_model->triples[$index])){
-					echo("removing triple: ".$predicate_array[$index]." $key "."\n");
-					echo("index: ".$index."\n");
-					$model->remove($found_model->triples[$index]);
-				}
-				$model->add($new_statement);
 			}
 		}
 	}	

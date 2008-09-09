@@ -9,6 +9,7 @@ class FoafData {
     private $uri;
     private $model;
     private $graphset;
+    private $primaryTopic;
     
     /*New from uri if uri present. if not just new.*/
     public function FoafData($uri = "") {
@@ -71,6 +72,14 @@ class FoafData {
 
     public function getUri() {
         return $this->uri;
+    }
+    
+ 	public function getPrimaryTopic() {
+        return $this->primaryTopic;
+    }
+    
+ 	public function setPrimaryTopic($primaryTopic) {
+        $this->primaryTopic = $primaryTopic;
     }
     
     public function setModel($model) {
