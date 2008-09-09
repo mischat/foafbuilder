@@ -156,7 +156,11 @@ class AjaxController extends Zend_Controller_Action
 	
         //TODO really dirty	
 	public function clearFoafAction() {
-                @Zend_Session::destroy();
+                if(@Zend_Session::destroy()) {
+                    echo("Session destroyed properly");
+                } else {
+                    echo("Session not destroyed properly");
+                }
         }
 }
 	

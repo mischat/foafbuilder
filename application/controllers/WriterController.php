@@ -22,7 +22,9 @@ class WriterController extends Zend_Controller_Action
 
             $newDocUri = @$_POST['uri'];
             if (!$newDocUri) {
+                print "DO i ever get here...\n";
                 $newDocUri = $this->view->uri;
+                print "This is the value of $newDocUri..\n";
             }
 
             //TODO must make sure that we handle having a non "#me" foaf:Person URI
@@ -35,6 +37,7 @@ class WriterController extends Zend_Controller_Action
             $this->view->model->replace($oldPersonUriRes,NULL,NULL,$newPersonUriRes);
             $this->view->model->replace(NULL,NULL,$oldPersonUriRes,$newPersonUriRes);
 
+            $this->view->model->setBaseUri(NULL);
             $result = $this->view->model->find(NULL, NULL, NULL);
             echo($result->writeRdfToString());
         } else {
