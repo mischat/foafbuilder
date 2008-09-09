@@ -153,15 +153,10 @@ class AjaxController extends Zend_Controller_Action
 			}
 		}
 	}	
-		
-        
+	
+        //TODO really dirty	
 	public function clearFoafAction() {
-		$this->view->isSuccess = 0;
-		$foafData = FoafData::getFromSession();
-                if ($foafData) {
-                    $foafData->killSession();
-		    $this->view->isSuccess = 1;
-                }
+                @Zend_Session::destroy();
         }
 }
 	
