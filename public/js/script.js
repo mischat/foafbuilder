@@ -1,7 +1,15 @@
 /*global variables containing all the data on the page*/
+//simple ones, i.e. a single triple with the object being a uri or literal
 var foafNameValueArray;
 var foafHomepageValueArray;
 var foafNickValueArray;
+var foafBirthdayValueArray;
+var foafDateOfBirthValueArray;
+
+//more complicated ones
+var bioBirthdayArray;
+
+//just a string
 var foafPrimaryTopic;
 
 /*object to hold global variables in */
@@ -11,8 +19,11 @@ function PageDataObject(){
 	this.foafNameValueArray = foafNameValueArray;
 	this.foafHomepageValueArray = foafHomepageValueArray;
 	this.foafNickValueArray = foafNickValueArray;
+	this.foafBirthdayValueArray = foafBirthdayValueArray;
+	this.foafDateOfBirthValueArray = foafDateOfBirthValueArray;
+	this.bioBirthdayArray = bioBirthdayArray;
 }
-
+//TODO XXX carry on from here down adding bioBirthdayArray etc.
 
 /*for uniquing an array*/
 Array.prototype.dedup = function () {

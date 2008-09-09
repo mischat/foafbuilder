@@ -28,17 +28,35 @@ class AjaxController extends Zend_Controller_Action
             $this->view->uri = $foafData->getURI();	
             $this->view->graphset= $foafData->getGraphset();	
 	
-            $queryString = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            $queryString = "
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+            PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 SELECT 
-                    ?foafName 
+                	?primaryTopic
+                    
+                	?foafName 
                     ?foafHomepage 
                     ?foafNick
                     ?foafLocation
-                    ?primaryTopic
+                    
+                    ?foafBirthday
+                    ?foafDateOfBirth
+                    ?bioBirthday
+                    
+                    ?geoLatLong
+                    ?geoLatLong
+                    ?geoLatitude
+                    ?geoLongitude
+                    
                 FROM NAMED <".$this->view->uri.">
-                WHERE { 
-                    ?z foaf:primaryTopic ?x.
-                    ?z foaf:primaryTopic ?primaryTopic.
+                WHERE 
+                		
+                	{ 
+                    ?z foaf:primaryTopic ?x .
+                    ?z foaf:primaryTopic ?primaryTopic .
+                    
                     OPTIONAL{
                         ?x foaf:name ?foafName . 
                     } .
@@ -49,12 +67,26 @@ class AjaxController extends Zend_Controller_Action
                         ?x foaf:nick ?foafNick . 
                     } .
                     OPTIONAL{
-                        ?x foaf:based_near ?foafLocation . 
-                    } 
+                    	?x foaf:birthday ?foafBirthday .
+                    }
+                    OPTIONAL{
+                        ?x foaf:based_near ?l .
+                        ?l geo:lat ?geoLatitude .
+                        ?l geo:lat ?geoLongitude .
+                    } .
+                    OPTIONAL{
+                    	?x foaf:based_near ?l .
+                    	?l geo:lat_long ?geoLatLong
+        			}
+        			OPTIONAL{
+        				?x bio:event ?e .
+        				?e rdf:type bio:Birth .
+        				bio:birth bio:date ?bioBirthday .
+        			}
                 };
             ";
+            
             $results = $this->view->graphset->sparqlQuery($queryString);
-
             //get rid of the ?s in the sparql results so they can be used with json
             $this->view->results = array();
             foreach($results as $row) {
@@ -121,6 +153,7 @@ class AjaxController extends Zend_Controller_Action
 			} else if($key != 'foafPrimaryTopic'){
 				echo("Unknown predicate ".$key."\n");
 			} else {
+				//we don't need to do these steps for the foaf primary topic
 				$skip = 1;
 			}
 			if(!$skip){
@@ -164,4 +197,3 @@ class AjaxController extends Zend_Controller_Action
         }
 }
 	
-/* vi:set expandtab sts=4 sw=4: */

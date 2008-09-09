@@ -1,6 +1,7 @@
 <h3>Add FOAF File below:</h3>
 <?
 //TODO: move some of this data out of here
+//TODO: decide whether to populate entirely in javsacript or not and tidy this up accordingly.
 ?>
 <p>Shove Your URI in here:</p>
 <form action = "javascript:loadFoaf();">
@@ -44,8 +45,20 @@
 	</div>
 	<div id="foafBirthday_container">
 		<p>
-			<span>Birthday: </span>
+			<span>Birthday (foafBirthday): </span>
 			<input id='foafBirthday_0' value='<? echo($this->birthday);?>'> 
+		</p>
+	</div>
+	<div id="foafBirthday_container">
+		<p>
+			<span>Birthday (fromBio): MAKE NOT WRITEABLE?</span>
+			<input id='bioBirthday_0' value='<? echo($this->birthday);?>'> 
+		</p>
+	</div>
+	<div id="foafBirthday_container">
+		<p>
+			<span>Birthday, (foafDateOFBirth): </span>
+			<input id='foafDateOfBirth_0' value='<? echo($this->birthday);?>'> 
 		</p>
 	</div>
 	<div id="foafHomepage_container">
