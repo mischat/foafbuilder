@@ -12,13 +12,15 @@ class WriterController extends Zend_Controller_Action
         require_once 'FoafData.php';
         //NOTE: keep this change after mischa's alterations.
         $foafData = FoafData::getFromSession();
-
-        if($foafData) {
+    
+        if ($foafData) {
             $this->view->model = $foafData->getModel();
             $this->view->uri = $foafData->getURI();
             $this->view->graphset= $foafData->getGraphset();
             $result = $this->view->model->find(NULL, NULL, NULL);
-            print $result->writeRdfToString();
+            echo($result->writeRdfToString());
+        } else {
+            echo("Nothing to Write, Session is empty");
         }
     }
 
