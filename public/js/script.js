@@ -181,7 +181,8 @@ function saveFoaf(){
 /*Writes FOAF to screen*/
 function writeFoaf() {
         //$.post("/writer/write-Foaf", { }, function(data){alert(data.name);console.log(data.time);},"json");
-        $.post("/writer/write-Foaf", { }, function(){},null);
+	url = document.getElementById('writeUri').value;
+        $.post("/writer/write-Foaf", {uri: url }, function(){},null);
 }
 
 /*Clears FOAF model from session*/

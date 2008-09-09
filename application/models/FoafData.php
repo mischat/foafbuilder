@@ -14,7 +14,7 @@ class FoafData {
     /*New from uri if uri present. if not just new.*/
     public function FoafData($uri = "") {
         if($uri){
-			//$model = new MemModel();
+	    	//$model = new MemModel();
 	        //$model->load($uri);
 	        //TODO This name shouldnt be hardcoded.
 	        $graphset = ModelFactory::getDatasetMem('Dataset1');
@@ -24,6 +24,22 @@ class FoafData {
 	        if (!($graphset->containsNamedGraph($uri))) {
 	        	print "Triples model not add to the modelfactory\n";
 	        }
+
+                $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
+                $result = $model->sparqlQuery($query);
+    
+                $oldUri = $result[0]['?prim']->uri;
+
+                if (!$oldUri) {
+                    echo ("No primarytopic set in foaf file!");
+                }
+
+                $oldUriRes = new Resource($oldUri);
+                $newUri = "http://".md5($oldUri);
+                $newUriRes = new Resource($newUri);
+                $model->replace($oldUriRes,NULL,NULL,$newUriRes);
+                $model->replace(NULL,NULL,$oldUriRes,$newUriRes);
+              
 	        if($model!=null) { 
 	            $this->model = $model;
 	            $this->uri = $uri;
@@ -40,7 +56,7 @@ class FoafData {
     public static function getFromSession(){
     	//TODO: use auth session for particular users
     	//if(Zend_Session::sessionExists()){
-    		$defaultNamespace = new Zend_Session_Namespace('Default');
+        $defaultNamespace = new Zend_Session_Namespace('Default');
     	//}
     	//XXX This probably ought to be changed for production
     	$defaultNamespace->setExpirationSeconds(10000);
@@ -57,11 +73,6 @@ class FoafData {
     	$defaultNamespace->foafData = $this;  
     }
 
-    public function killSession(){
-        Zend_Session::destroy();
-    }
-
-    
     public function getModel() {
         return $this->model;	
     }
@@ -74,11 +85,11 @@ class FoafData {
         return $this->uri;
     }
     
- 	public function getPrimaryTopic() {
+    public function getPrimaryTopic() {
         return $this->primaryTopic;
     }
     
- 	public function setPrimaryTopic($primaryTopic) {
+    public function setPrimaryTopic($primaryTopic) {
         $this->primaryTopic = $primaryTopic;
     }
     
@@ -93,5 +104,6 @@ class FoafData {
     public function setGraphset($graphset) {
     	$this->graphset= $graphset;
     }
+
 }
 /* vi:set expandtab sts=4 sw=4: */
