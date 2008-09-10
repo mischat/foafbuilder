@@ -22,12 +22,9 @@ class WriterController extends Zend_Controller_Action
 
             $newDocUri = @$_POST['uri'];
             if (!$newDocUri) {
-                print "DO i ever get here...\n";
                 $newDocUri = $this->view->uri;
-                print "This is the value of $newDocUri..\n";
             }
 
-            //TODO must make sure that we handle having a non "#me" foaf:Person URI
             $newDocUriRes = new Resource($newDocUri);
             $newPersonUriRes = new Resource($newDocUri."#me");
             $oldPersonUriRes = new Resource($this->view->primaryTopic);
