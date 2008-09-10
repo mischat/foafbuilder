@@ -24,7 +24,7 @@ class AjaxController extends Zend_Controller_Action
 			
         if($foafData) {
             $this->view->model = $foafData->getModel();	
-           // var_dump($this->view->model);
+            //var_dump($this->view->model);
             $this->view->uri = $foafData->getURI();	
             $this->view->graphset= $foafData->getGraphset();	
 	
@@ -84,7 +84,7 @@ class AjaxController extends Zend_Controller_Action
         			OPTIONAL{
         				?x bio:event ?e .
         				?e rdf:type bio:Birth .
-        				bio:Birth bio:date ?bioBirthday .
+        				?e bio:date ?bioBirthday .
         			}
                 };
             ";
