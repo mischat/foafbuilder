@@ -46,6 +46,7 @@ function objectsToDisplay(data){
 	for(arrayName in pageData){
 		/*populate all the arrays in the pageData object (one for each field)*/		 	
 	  	if(arrayName != 'foafPrimaryTopic'){
+		
 			var name = arrayName.substring(0,arrayName.length-10);
 			for(k=0 ; k < data.length; k++){
 			  	if(data[k][name].label){
@@ -61,7 +62,7 @@ function objectsToDisplay(data){
 		  		
 			/*either create a new element or fill in the old one for all fields of a given type 
 			* (e.g. there may be many foaf:nicks)*/
-			for(i=0 ; i<pageData[arrayName].length; i++){
+			for(i=0 ; i < pageData[arrayName].length; i++){
 				element = document.getElementById(name+'_'+thisElementCount); 
 			 	/*either create a new element or fill in the old one*/
 			 	if(!element){ 
