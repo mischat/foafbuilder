@@ -14,6 +14,7 @@ class AjaxController extends Zend_Controller_Action
     {
         require_once 'FoafData.php';
         require_once 'FieldNames.php';
+        require_once 'Field.php';
       
         $uri = @$_POST['uri'];
         if($uri) {
@@ -69,7 +70,7 @@ class AjaxController extends Zend_Controller_Action
 				}
 			}
 	}
-	
+	/*builds a sparql query for a given fieldNamesObject*/
 	private function buildSparqlQuery($fieldNamesObject){
 		require_once 'FieldNames.php';
 		$queryString = "
@@ -81,7 +82,7 @@ class AjaxController extends Zend_Controller_Action
             
        	/*Add ?foafName ?foafHomepage etc.*/
         $allFieldNamesArray = $fieldNamesObject->getAllFieldNames();
-        foreach($allFieldNamesArray as $fieldName => $queryPiece){
+        foreach($allFieldNamesArray as $fieldName => $field){
         	$queryString .= "?".$fieldName." ";	
         }
          
@@ -92,15 +93,14 @@ class AjaxController extends Zend_Controller_Action
                     ?z foaf:primaryTopic ?x .
                     ?z foaf:primaryTopic ?primaryTopic .";
             
-        $simpleFieldNamesArray = $fieldNamesObject->getSimpleFieldNames();
-        foreach($allFieldNamesArray as $fieldName => $queryPiece){
-        	$queryString .= " OPTIONAL { $queryPiece . } .";	
+        foreach($allFieldNamesArray as $fieldName => $field){
+        	$queryString .= " OPTIONAL { ".$field->getQueryBit()." . } .";	
         }
-        //echo($queryString);
 
         return $queryString;
 	}
 	
+	/*does the actual saving to the model*/
 	public function applyChangesToModel(&$foafData,&$changes_model)
 	{
 		/*

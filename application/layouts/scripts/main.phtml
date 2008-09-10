@@ -17,11 +17,13 @@
         		<?
         			//TODO: this'll have to change if we make the fieldNames object page specific
     				require_once 'FieldNames.php';
+    				require_once 'Field.php';
+    				
     				$fieldNamesObject = new FieldNames();
     				$allFieldNames = $fieldNamesObject->getAllFieldNames();
     				 
     				/*generate javascript to declare an array for each field on the page*/
-    				foreach($allFieldNames as $fieldName => $queryBit){
+    				foreach($allFieldNames as $fieldName => $field){
     					echo("this.".$fieldName."ValueArray = new Array();"."\n");
     				}
     	    	
