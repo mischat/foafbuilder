@@ -1,2 +1,60 @@
-<h2>About this application</h2>
-<p><? echo($this->intro_text); ?></p>
+<? $this->layout()->setLayout('ajax') ?>
+<rdf:RDF
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+      xmlns:bio="http://purl.org/vocab/bio/0.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/"
+      xmlns:admin="http://webns.net/mvcb/">
+
+<foaf:PersonalProfileDocument rdf:about="">
+  <foaf:maker rdf:resource="#me"/>
+  <foaf:primaryTopic rdf:resource="#me"/>
+  <admin:generatorAgent rdf:resource="http://www.ldodds.com/foaf/foaf-a-matic"/>
+  <admin:errorReportsTo rdf:resource="mailto:leigh@ldodds.com"/>
+</foaf:PersonalProfileDocument>
+
+<foaf:Person rdf:ID="me">
+	
+	<foaf:birthday>12-06</foaf:birthday>
+	<foaf:dateOfBirth>1983-12-06</foaf:dateOfBirth>
+	
+	<bio:event>
+    		<bio:Birth>
+     	 		<bio:date>1999-12-31</bio:date>
+    		</bio:Birth>
+ 	 </bio:event>
+
+
+	<foaf:name>Luke Wilson-Mawer</foaf:name>
+	<foaf:title>Mr</foaf:title>
+	<foaf:givenname>Luke</foaf:givenname>
+	<foaf:family_name>Wilson-Mawer</foaf:family_name>
+	<foaf:nick>mynicknamehere</foaf:nick>
+	<foaf:nick>lwm</foaf:nick>
+	<foaf:mbox_sha1sum>cdd70a4226b1b980e49b6e3a85471ac4d94d7483</foaf:mbox_sha1sum>
+	<foaf:depiction rdf:resource="http://profile.ak.facebook.com/profile5/267/125/n722905495_9884.jpg"/>
+	<foaf:workplaceHomepage rdf:resource="http://www.garlik.com/"/>
+	<foaf:schoolHomepage rdf:resource="http://www.ucl.ac.uk/"/>
+	<foaf:knows>
+		<foaf:Person>
+			<foaf:name>Steve Harris</foaf:name>
+			<foaf:mbox_sha1sum>26a374ad4de937252c044f7dd45aa48ecbdb4f16</foaf:mbox_sha1sum>
+			<rdfs:seeAlso rdf:resource="http://plugin.org.uk/swh.xrdf"/>
+		</foaf:Person>
+	</foaf:knows>
+	<foaf:knows>
+	<foaf:Person>
+		<foaf:name>Tom Ilube</foaf:name>
+		<foaf:mbox_sha1sum>a8084b745be5ca1d33f89025be2587f8f92d6d52</foaf:mbox_sha1sum>
+		<rdfs:seeAlso rdf:resource="http://qdos.com/people/tom.xrdf"/></foaf:Person>
+	</foaf:knows>
+	<foaf:knows>
+		<foaf:Person>
+			<foaf:name>Gurpreet Syan</foaf:name>
+			<foaf:mbox_sha1sum>e3df651c653b04f78815cedc8d6c43b754678188</foaf:mbox_sha1sum>
+		</foaf:Person>
+	</foaf:knows>
+</foaf:Person>
+
+</rdf:RDF>

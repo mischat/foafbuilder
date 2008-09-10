@@ -1,27 +1,19 @@
 /*global variables containing all the data on the page*/
-//simple ones, i.e. a single triple with the object being a uri or literal
-var foafNameValueArray;
-var foafHomepageValueArray;
-var foafNickValueArray;
-var foafBirthdayValueArray;
-var foafDateOfBirthValueArray;
-
-//more complicated ones
-var bioBirthdayArray;
-
-//just a string
-var foafPrimaryTopic;
+var PageDataObject;
 
 /*object to hold global variables in */
 //TODO: this object is a bit 'inside out'
 function PageDataObject(){
-	this.foafPrimaryTopic = foafPrimaryTopic;
-	this.foafNameValueArray = foafNameValueArray;
-	this.foafHomepageValueArray = foafHomepageValueArray;
-	this.foafNickValueArray = foafNickValueArray;
-	this.foafBirthdayValueArray = foafBirthdayValueArray;
-	this.foafDateOfBirthValueArray = foafDateOfBirthValueArray;
-	this.bioBirthdayArray = bioBirthdayArray;
+	this.foafPrimaryTopic = new Array();
+	
+	this.foafNameValueArray = new Array();
+	this.foafHomepageValueArray = new Array();
+	this.foafNickValueArray = new Array();
+	
+	this.foafBirthdayValueArray = new Array();
+	this.foafDateOfBirthValueArray = new Array();
+	
+	this.bioBirthdayValueArray = new Array();
 }
 //TODO XXX carry on from here down adding bioBirthdayArray etc.
 
@@ -49,107 +41,56 @@ function loadFoaf(){
 /*populates form fields etc from javascript objects (from json) and fills out the global arrays */ 
 function objectsToDisplay(data){
   	
- 	/*create an array for each type of predicate and populate them using the object data*/
- 	foafPrimaryTopic = data[0].primaryTopic.uri;
- 	foafNameValueArray = new Array();
- 	foafHomepageValueArray = new Array();
- 	foafNickValueArray = new Array();
- 	
- 	foafNameCount = 0;
-  	foafHomepageCount = 0;
-  	foafNickCount = 0;
- 
- 	for(i = 0 ; i < data.length ; i++){
- 		if(data[i].foafName.label){
- 			foafNameValueArray[foafNameCount] = data[i].foafName.label;
- 			foafNameCount++;
- 		}
- 		if(data[i].foafHomepage.uri){
- 			foafHomepageValueArray[foafHomepageCount] = data[i].foafHomepage.uri;
- 			foafHomepageCount++;
- 		}
- 		if(data[i].foafNick.label){
- 			foafNickValueArray[foafNickCount] = data[i].foafNick.label;
- 			foafNickCount++;
- 		}
- 	}
- 	
- 	/*unique each array and then render the appropriate elements*/
- 	foafNameValueArray = foafNameValueArray.dedup();
- 	foafHomepageValueArray = foafHomepageValueArray.dedup();
- 	foafNickValueArray = foafNickValueArray.dedup();
- 	
-  	for(i = 0 ; i < foafNameValueArray.length; i++){
-  		foafNameElement = document.getElementById('foafName_'+i); 
-  		/*either create a new element or fill in the old one*/
-  		if(!foafNameElement){ 
-  			newFoafNameElement = document.createElement('input');
-  			newFoafNameElement.id = 'foafName_'+i;
-  			newFoafNameElement.setAttribute('value',foafNameValueArray[i]);
-  			document.getElementById('foafName_container').appendChild(newFoafNameElement);
-		} else {
-			foafNameElement.value = foafNameValueArray[i]
-		}
-	}	
-	for(i = 0 ; i < foafHomepageValueArray.length; i++){
-		/*either create a new element or fill in the old one*/
-  		foafHomepageElement = document.getElementById('foafHomepage_'+i); 
-  		if(!foafHomepageElement){ 
-  			newFoafHomepageElement = document.createElement('input');
-  			newFoafHomepageElement.id = 'foafHomepage_'+i;
-  			newFoafHomepageElement.setAttribute('value',foafHomepageValueArray[i]);
-  			document.getElementById('foafHomepage_container').appendChild(newFoafHomepageElement);
-		} else {
-			foafHomepageElement.value = foafHomepageValueArray[i];
-		}
-	}	
-	for(i = 0 ; i < foafNickValueArray.length; i++){
-		/*either create a new element or fill in the old one*/
-  		foafNickElement = document.getElementById('foafNick_'+i); 
-  		if(!foafNickElement){ 
-  			newFoafNickElement = document.createElement('input');
-  			newFoafNickElement.id = 'foafNick_'+i;
-  			newFoafNickElement.setAttribute('value',foafNickValueArray[i]);
-  			document.getElementById('foafNick_container').appendChild(newFoafNickElement);
-		} else {
-			foafNickElement.value = foafNickValueArray[i];
-		}
-	} 
+  	pageData = new PageDataObject();
+
+	for(arrayName in pageData){
+		/*populate all the arrays in the pageData object (one for each field)*/		 	
+	  	if(arrayName != 'foafPrimaryTopic'){
+			var name = arrayName.substring(0,arrayName.length-10);
+			for(k=0 ; k < data.length; k++){
+			  	if(data[k][name].label){
+			  		//alert(data[k][name].label);
+			 		pageData[arrayName][pageData[arrayName].length] = data[k][name].label;
+			 	} else if(data[k][name].uri){
+			 		pageData[arrayName][pageData[arrayName].length] = data[k][name].uri;
+			 	} 
+		 	}
+		 	pageData[arrayName] = pageData[arrayName].dedup();
 	
-	/*Clean up any extra unfilled fields*/
-	j = foafNameValueArray.length;
-	while(document.getElementById('foafName_'+j)){
-		elementToEmptyOrRemove = document.getElementById('foafName_'+j);
-		/*if it is the first element then simply empty it*/
-		if(j==0){
-			elementToEmptyOrRemove.value="";
-		} else {
-			elementToEmptyOrRemove.parentNode.removeChild(elementToEmptyOrRemove);
-		}
-		j++;
-	}
-	j = foafHomepageValueArray.length;
-	while(document.getElementById('foafHomepage_'+j)){
-		elementToEmptyOrRemove = document.getElementById('foafHomepage_'+j);
-		/*if it is the first element then simply empty it*/
-		if(j==0){
-			elementToEmptyOrRemove.value="";
-		} else {
-			elementToEmptyOrRemove.parentNode.removeChild(elementToEmptyOrRemove);
-		}
-		j++;
-	}
-	j = foafNickValueArray.length;
-	while(document.getElementById('foafNick_'+j)){
-		elementToEmptyOrRemove = document.getElementById('foafNick_'+j);
-		/*if it is the first element then simply empty it*/
-		if(j==0){
-			elementToEmptyOrRemove.value="";
-		} else {
-			elementToEmptyOrRemove.parentNode.removeChild(elementToEmptyOrRemove);
-		}
-		j++;
-	}
+		 	/*to keep track of which element we're on*/
+		  	thisElementCount = 0;
+		  		
+			/*either create a new element or fill in the old one for all fields of a given type 
+			* (e.g. there may be many foaf:nicks)*/
+			for(i=0 ; i<pageData[arrayName].length; i++){
+				alert(pageData[arrayName][i]);
+				element = document.getElementById(name+'_'+thisElementCount); 
+			 	/*either create a new element or fill in the old one*/
+			 	if(!element){ 
+			  		newElement = document.createElement('input');
+			  		newElement.id = name+'_'+thisElementCount;
+			  		newElement.setAttribute('value',pageData[arrayName][i]);
+			  		document.getElementById(name+'_container').appendChild(newElement);
+				} else {
+					element.value = pageData[arrayName][i];
+				}
+				thisElementCount++;
+			}		
+		
+			 /*Clean up any extra unfilled fields*/
+			var j = pageData[arrayName].length;
+			while(document.getElementById(name+'_'+j)){
+				elementToEmptyOrRemove = document.getElementById(name+'_'+j);
+				/*if it is the first element then simply empty it*/
+				if(j==0){
+					elementToEmptyOrRemove.value="";
+				} else {
+					elementToEmptyOrRemove.parentNode.removeChild(elementToEmptyOrRemove);
+				}
+				j++;
+			}//end while
+	  	}//end if
+	}//end for
 }
 
 
