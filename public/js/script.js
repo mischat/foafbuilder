@@ -102,22 +102,19 @@ function displayToObjects(){
   	foafNameCount = 0;
   	foafHomepageCount = 0;
   	foafNickCount = 0;
-
-	for(i = 0 ; i < foafNameValueArray.length ; i++){
-		if(document.getElementById('foafName_'+i)){
-			foafNameValueArray[i] = document.getElementById('foafName_'+i).value;
-		}
-	}
-	for(i = 0 ; i < foafHomepageValueArray.length ; i++){
-		if(document.getElementById('foafHomepage_'+i)){
-			foafHomepageValueArray[i] = document.getElementById('foafHomepage_'+i).value;
-		}
-	}
-	for(i = 0 ; i < foafNickValueArray.length ; i++){
-		if(document.getElementById('foafNick_'+i)){
-			foafNickValueArray[i] = document.getElementById('foafNick_'+i).value;
-		}
-	}
+  	
+  	/*loop through all the arrays (for foafName, foafHomepage etc) defined in the pageData object*/
+	for(arrayName in pageData){
+		if(arrayName != "foafPrimaryTopic"){
+			//chop off the ArrayValue bit at the end.
+			var name = arrayName.substring(0,arrayName.length-10);
+			for(i = 0 ; i < pageData[arrayName].length ; i++){
+				if(document.getElementById(name+'_'+i)){
+					pageData[arrayName][i] = document.getElementById(name+'_'+i).value;
+				}
+			}
+		}//end if
+	}//end for
 }
 
 /*saves all the foaf data TODO: it might be a challenge making this quick*/
