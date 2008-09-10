@@ -13,9 +13,7 @@ class FoafData {
     
     /*New from uri if uri present. if not just new.*/
     public function FoafData($uri = "") {
-        if($uri){
-	    	//$model = new MemModel();
-	        //$model->load($uri);
+        if($uri) {
 	        //TODO This name shouldnt be hardcoded.
 	        $graphset = ModelFactory::getDatasetMem('Dataset1');
 	        $model = new NamedGraphMem($uri);
@@ -25,28 +23,31 @@ class FoafData {
 	        	print "Triples model not add to the modelfactory\n";
 	        }
 
-                $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
-                $result = $model->sparqlQuery($query);
-    
-                $oldUri = $result[0]['?prim']->uri;
+            $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
+            $result = $model->sparqlQuery($query);
 
-                if (!$oldUri) {
-                    echo ("No primarytopic set in foaf file!");
-                }
+            //TODO must make sure that we handle having a non "#me" foaf:Person URI
+            $oldUri = $result[0]['?prim']->uri;
 
-                $oldUriRes = new Resource($oldUri);
-                $newUri = "http://".md5($oldUri);
-                $newUriRes = new Resource($newUri);
-                $model->replace($oldUriRes,NULL,NULL,$newUriRes);
-                $model->replace(NULL,NULL,$oldUriRes,$newUriRes);
-              
-	        if($model!=null) { 
-	            $this->model = $model;
-	            $this->uri = $uri;
-	            $this->graphset = $graphset;
-	        }
-    	
-    		$this->putInSession();
+            if (!$oldUri) {
+                echo ("No primarytopic set in foaf file!");
+            }
+
+            $oldUriRes = new Resource($oldUri);
+            $newUri = "http://".md5($oldUri);
+            $newUriRes = new Resource($newUri);
+            $model->replace($oldUriRes,NULL,NULL,$newUriRes);
+            $model->replace(NULL,NULL,$oldUriRes,$newUriRes);
+            if (!preg_match("/#me$/",$oldUri,$patterns)) {
+                $model->add(new Statement($newUriRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldUriRes));
+            }
+          
+	    if($model!=null) { 
+	        $this->model = $model;
+	        $this->uri = $uri;
+	        $this->graphset = $graphset;
+	    }
+		$this->putInSession();
         } else {
         	//FIXME: sort this out so it isn't an echo
         	echo("Something went wrong, there's no URI!");
