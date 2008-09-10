@@ -70,6 +70,9 @@ class AjaxController extends Zend_Controller_Action
                     	?x foaf:birthday ?foafBirthday .
                     }
                     OPTIONAL{
+                    	?x foaf:dateOfBirth ?foafDateOfBirth .
+                    }
+                    OPTIONAL{
                         ?x foaf:based_near ?l .
                         ?l geo:lat ?geoLatitude .
                         ?l geo:lat ?geoLongitude .
@@ -81,7 +84,7 @@ class AjaxController extends Zend_Controller_Action
         			OPTIONAL{
         				?x bio:event ?e .
         				?e rdf:type bio:Birth .
-        				bio:birth bio:date ?bioBirthday .
+        				bio:Birth bio:date ?bioBirthday .
         			}
                 };
             ";
