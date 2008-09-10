@@ -42,7 +42,6 @@ class FoafData {
                 echo ("No primarytopic set in foaf file!");
             }
 
-
             $oldUriRes = new Resource($oldUri);
             $newUri = "http://".md5($oldUri);
             $newUriRes = new Resource($newUri);
@@ -66,21 +65,16 @@ class FoafData {
     
     public static function getFromSession(){
     	//TODO: use auth session for particular users
-    	//if(Zend_Session::sessionExists()){
         $defaultNamespace = new Zend_Session_Namespace('Garlik');
-    	//}
     	//XXX This probably ought to be changed for production
-    	$defaultNamespace->setExpirationSeconds(10000);
     	return $defaultNamespace->foafData;
     }
     
     public function putInSession(){
     	//TODO: use auth session for particular users
-    	//if(Zend_Session::sessionExists()){
-    		$defaultNamespace = new Zend_Session_Namespace('Garlik');
-  
+    	$defaultNamespace = new Zend_Session_Namespace('Garlik');
     	//XXX This probably ought to be changed for production
-    	$defaultNamespace->setExpirationSeconds(10000);
+    	//$defaultNamespace->setExpirationSeconds(9999999999);
     	$defaultNamespace->foafData = $this;  
     }
 

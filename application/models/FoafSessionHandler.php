@@ -9,7 +9,6 @@ class FoafSessionHandler implements Zend_Session_SaveHandler_Interface{
 		
 	}
 	function write($id,$data){
-		
 		$dir_path = "/tmp/foafeditor_sessions";
 		if( !is_dir($dir_path)){
 			 mkdir( $dirPath );
@@ -17,7 +16,6 @@ class FoafSessionHandler implements Zend_Session_SaveHandler_Interface{
  	 	$session_file = $dir_path."/session_".$id;
  	 	$handle = @fopen($session_file, "w");
   		if ($handle) {
-  			
     		$return = fwrite($handle, $data);
     		fclose($handle);
     		return $return;

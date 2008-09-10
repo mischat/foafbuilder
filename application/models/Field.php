@@ -5,11 +5,17 @@ class Field {
 	private $name;
 	private $queryBit;
 	private $type;//bnode or literal.  TODO: Should be an enumerator really.
+	private $predicateUri;
 	
-	public function Field($name, $queryBit, $type){
+	/*predicateUri is only appropriate for simple ones (one triple only)*/
+	public function Field($name, $queryBit, $type, $predicateUri = NULL){
 		$this->name = $name;
 		$this->queryBit = $queryBit;
-		$type->type = $type;
+		$this->type = $type;
+		
+		if($predicateUri){
+			$this->predicateUri = $predicateUri;		
+		}
 	}
 	
 	public function getName(){
@@ -31,6 +37,13 @@ class Field {
 	}
 	public function setType($type){
 		$this->type = $type;
+	}
+	
+	public function getPredicateUri(){
+		return $this->predicateUri;
+	}
+	public function setPredicateUri($predicateUri){
+		$this->predicateUri = $predicateUri;
 	}
 }
 ?>
