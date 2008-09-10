@@ -1,22 +1,3 @@
-/*global variables containing all the data on the page*/
-var PageDataObject;
-
-/*object to hold global variables in */
-//TODO: this object is a bit 'inside out'
-function PageDataObject(){
-	this.foafPrimaryTopic = new Array();
-	
-	this.foafNameValueArray = new Array();
-	this.foafHomepageValueArray = new Array();
-	this.foafNickValueArray = new Array();
-	
-	this.foafBirthdayValueArray = new Array();
-	this.foafDateOfBirthValueArray = new Array();
-	
-	this.bioBirthdayValueArray = new Array();
-}
-//TODO XXX carry on from here down adding bioBirthdayArray etc.
-
 /*for uniquing an array*/
 Array.prototype.dedup = function () {
   var newArray = new Array ();
