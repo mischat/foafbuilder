@@ -49,7 +49,6 @@ function objectsToDisplay(data){
 			var name = arrayName.substring(0,arrayName.length-10);
 			for(k=0 ; k < data.length; k++){
 			  	if(data[k][name].label){
-			  		//alert(data[k][name].label);
 			 		pageData[arrayName][pageData[arrayName].length] = data[k][name].label;
 			 	} else if(data[k][name].uri){
 			 		pageData[arrayName][pageData[arrayName].length] = data[k][name].uri;
@@ -63,7 +62,6 @@ function objectsToDisplay(data){
 			/*either create a new element or fill in the old one for all fields of a given type 
 			* (e.g. there may be many foaf:nicks)*/
 			for(i=0 ; i<pageData[arrayName].length; i++){
-				alert(pageData[arrayName][i]);
 				element = document.getElementById(name+'_'+thisElementCount); 
 			 	/*either create a new element or fill in the old one*/
 			 	if(!element){ 
