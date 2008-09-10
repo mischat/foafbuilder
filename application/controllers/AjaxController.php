@@ -19,7 +19,9 @@ class AjaxController extends Zend_Controller_Action
         $uri = @$_POST['uri'];
         if($uri) {
             $foafData = new FoafData($uri);	
+            echo("getting data from uri: ".$uri);
         } else {
+        	echo("getting from session");
 			$foafData = FoafData::getFromSession();
 		}
 			
@@ -29,7 +31,9 @@ class AjaxController extends Zend_Controller_Action
             $this->view->model = $foafData->getModel();	
             $this->view->uri = $foafData->getURI();	
             $this->view->graphset= $foafData->getGraphset();
-
+			
+            //var_dump($this->view->model);
+            //echo("+++++++++++============++++++++++++++");
             /*build up a sparql query to get the values of all the fields we need*/
             //TODO: make this relative to the page, possibly more than one function or controller.
 			$fieldNamesObject = new FieldNames();
@@ -103,6 +107,8 @@ class AjaxController extends Zend_Controller_Action
 	/*does the actual saving to the model*/
 	public function applyChangesToModel(&$foafData,&$changes_model)
 	{
+		require_once 'Field.php';
+		require_once 'FieldNames.php';
 		/*
 		 * TODO: it might be good to add functionality to save teh primary topic.
 		 */
@@ -112,31 +118,29 @@ class AjaxController extends Zend_Controller_Action
 		$model = $foafData->getModel();
 
 		/*
-		 * TODO, extend these to all of them.  possibly use an array.  We shouldn't have to do everything manually
-		 * over and over for each predicate.  Also need to add language tabs etc.
+		 * TODO Need to add language tags etc.
 		 */
 		$foafNameCount = 0;
 		$foafHomepageCount = 0;
 		$foafNickCount = 0;
 		
+		//get all the detail for each of the fields
+		$fieldNames = new FieldNames();
+		
+		//TODO: extend over all fields, not just simple ones
+		$simpleFieldNameArray = $fieldNames->getSimpleFieldNames();
+		
+		/*loop through all the rows in the sparql results style 'almost model'*/
 		foreach($almost_model as $key => $predicate_array){
-			$skip=0;
-			if($key == 'foafNameValueArray'){
-				$type = 'literal';
-				$predicate_uri = 'http://xmlns.com/foaf/0.1/name';
-			} else if($key == 'foafHomepageValueArray') {
-				$type = 'resource';
-				$predicate_uri = 'http://xmlns.com/foaf/0.1/homepage';
-			} else if($key == 'foafNickValueArray') {
-				$type = 'literal';
-				$predicate_uri = 'http://xmlns.com/foaf/0.1/nick';
-			} else if($key != 'foafPrimaryTopic'){
-				echo("Unknown predicate ".$key."\n");
-			} else {
-				//we don't need to do these steps for the foaf primary topic
-				$skip = 1;
-			}
-			if(!$skip){
+			
+			if(isset($simpleFieldNameArray[substr($key,0,-10)]) && $key != 'foafPrimaryTopic'){
+				
+				/*get some details about the field we're dealing with*/
+				$field = $simpleFieldNameArray[substr($key,0,-10)];
+				$type = $field->getType();
+				$predicate_uri = $field->getPredicateUri();	
+				
+				/*loop through writing out triples*/
 				for($index = 0; $index < count($predicate_array) ;$index++){
 					/* Create a new statement from the values to be saved FIXME: this is inefficient.*/
 					$predicate_resource = new Resource($predicate_uri);
@@ -159,13 +163,16 @@ class AjaxController extends Zend_Controller_Action
 					 * be more than one e.g. foafName and we only want to remove the one at the appropriate index.*/ 
 					if(isset($found_model->triples[$index])){
 						//TODO - worry about the ordering of sparql results
-					$model->remove($found_model->triples[0]);
+						$model->remove($found_model->triples[0]);
 					}
 					$model->add($new_statement);
-				}
-			}
-		}
-	}	
+				}//end for	
+			} else {
+				echo("unrecognised triple:".$key."\n");	
+			}//end if
+		}//end foreach
+	}
+	
 	
         //TODO really dirty	
 	public function clearFoafAction() {
