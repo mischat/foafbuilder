@@ -13,91 +13,37 @@ class AjaxController extends Zend_Controller_Action
     public function loadFoafAction() 
     {
         require_once 'FoafData.php';
+        require_once 'FieldNames.php';
       
         $uri = @$_POST['uri'];
         if($uri) {
             $foafData = new FoafData($uri);	
         } else {
-			//NOTE: keep this change after mischa's alterations.
 			$foafData = FoafData::getFromSession();
 		}
 			
         if($foafData) {
+        	/*push some stuff to the view TODO: do we need to push this to the view here 
+        	 * since javascript is doing most of the rendering? */
             $this->view->model = $foafData->getModel();	
-            //var_dump($this->view->model);
             $this->view->uri = $foafData->getURI();	
-            $this->view->graphset= $foafData->getGraphset();	
-	
-            $queryString = "
-            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-            PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-            PREFIX bio: <http://purl.org/vocab/bio/0.1/>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                SELECT 
-                	?primaryTopic
-                    
-                	?foafName 
-                    ?foafHomepage 
-                    ?foafNick
-                    ?foafLocation
-                    
-                    ?foafBirthday
-                    ?foafDateOfBirth
-                    ?bioBirthday
-                    
-                    ?geoLatLong
-                    ?geoLatLong
-                    ?geoLatitude
-                    ?geoLongitude
-                    
-                FROM NAMED <".$this->view->uri.">
-                WHERE 
-                		
-                	{ 
-                    ?z foaf:primaryTopic ?x .
-                    ?z foaf:primaryTopic ?primaryTopic .
-                    
-                    OPTIONAL{
-                        ?x foaf:name ?foafName . 
-                    } .
-                    OPTIONAL{
-                        ?x foaf:homepage ?foafHomepage . 
-                    } .
-                    OPTIONAL{
-                        ?x foaf:nick ?foafNick . 
-                    } .
-                    OPTIONAL{
-                    	?x foaf:birthday ?foafBirthday .
-                    }
-                    OPTIONAL{
-                    	?x foaf:dateOfBirth ?foafDateOfBirth .
-                    }
-                    OPTIONAL{
-                        ?x foaf:based_near ?l .
-                        ?l geo:lat ?geoLatitude .
-                        ?l geo:lat ?geoLongitude .
-                    } .
-                    OPTIONAL{
-                    	?x foaf:based_near ?l .
-                    	?l geo:lat_long ?geoLatLong
-        			}
-        			OPTIONAL{
-        				?x bio:event ?e .
-        				?e rdf:type bio:Birth .
-        				?e bio:date ?bioBirthday .
-        			}
-                };
-            ";
+            $this->view->graphset= $foafData->getGraphset();
+
+            /*build up a sparql query to get the values of all the fields we need*/
+            //TODO: make this relative to the page, possibly more than one function or controller.
+			$fieldNamesObject = new FieldNames();
+            $queryString = $this->buildSparqlQuery($fieldNamesObject);           
+            $results = $this->view->graphset->sparqlQuery($queryString.";");
             
-            $results = $this->view->graphset->sparqlQuery($queryString);
-            //get rid of the ?s in the sparql results so they can be used with json
+            /*get rid of the ?s in the sparql results so they can be used with json*/
             $this->view->results = array();
             foreach($results as $row) {
                 $keys = array_keys($row);
                 $keys = str_replace('?','',$keys);
                 array_push($this->view->results, array_combine($keys,$row));
             }
-            $foafData->setPrimaryTopic($results[0]['?primaryTopic']->uri);     	
+           
+            $foafData->setPrimaryTopic($results[0]['?primaryTopic']->uri);      	
         } else {
             print "Error Instance of FoafData is null!\n";
 	    $this->view->isSuccess = 0;
@@ -123,7 +69,38 @@ class AjaxController extends Zend_Controller_Action
 				}
 			}
 	}
+	
+	private function buildSparqlQuery($fieldNamesObject){
+		require_once 'FieldNames.php';
+		$queryString = "
+        	PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+        	PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+        	PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                SELECT ?primaryTopic ";
+            
+       	/*Add ?foafName ?foafHomepage etc.*/
+        $allFieldNamesArray = $fieldNamesObject->getAllFieldNames();
+        foreach($allFieldNamesArray as $fieldName => $queryPiece){
+        	$queryString .= "?".$fieldName." ";	
+        }
+         
+        $queryString .= "
+        	FROM NAMED <".$this->view->uri.">
+            	WHERE 	
+                { 
+                    ?z foaf:primaryTopic ?x .
+                    ?z foaf:primaryTopic ?primaryTopic .";
+            
+        $simpleFieldNamesArray = $fieldNamesObject->getSimpleFieldNames();
+        foreach($allFieldNamesArray as $fieldName => $queryPiece){
+        	$queryString .= " OPTIONAL { $queryPiece . } .";	
+        }
+        //echo($queryString);
 
+        return $queryString;
+	}
+	
 	public function applyChangesToModel(&$foafData,&$changes_model)
 	{
 		/*

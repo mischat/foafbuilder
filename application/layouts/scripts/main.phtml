@@ -6,6 +6,28 @@
         <script type="text/javascript" src="/js/json.js"></script>
         <script type="text/javascript" src="/js/jquery-1.2.6.min.js"></script>
         <script type="text/javascript" src="/js/script.js"></script>
+        <script>
+        	/*global variables containing all the data on the page*/
+			var PageDataObject;
+			
+			/*object to hold global variables in */
+			//TODO: this object is a bit 'inside out'
+			function PageDataObject(){
+				this.foafPrimaryTopic = new Array();
+        		<?
+        			//TODO: this'll have to change if we make the fieldNames object page specific
+    				require_once 'FieldNames.php';
+    				$fieldNamesObject = new FieldNames();
+    				$allFieldNames = $fieldNamesObject->getAllFieldNames();
+    				 
+    				/*generate javascript to declare an array for each field on the page*/
+    				foreach($allFieldNames as $fieldName => $queryBit){
+    					echo("this.".$fieldName."ValueArray = new Array();"."\n");
+    				}
+    	    	
+        		?>	
+			}
+		</script>
     </head>
     <body>
         <h1>Foaf Editor</h1>
