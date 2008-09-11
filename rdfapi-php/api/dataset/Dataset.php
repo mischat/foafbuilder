@@ -75,11 +75,15 @@ class Dataset
     * @return String/array
     */
     function sparqlQuery($query,$resultform = false){
+    	echo(microtime(). "1"."\n");
         include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SPARQL);
+        echo(microtime(). "2"."\n");
         $parser = new SparqlParser();
+        echo(microtime(). "3"."\n");
         $q = $parser->parse($query);
-
+ 		echo(microtime(). "4"."\n");
         $eng = SparqlEngine::factory();
+        echo(microtime(). "5"."\n");
         return $eng->queryModel($this,$q,$resultform);
     }
 

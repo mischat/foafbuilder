@@ -22,6 +22,7 @@ class FoafData {
 	        if (!($graphset->containsNamedGraph($uri))) {
 	        	print "Triples model not add to the modelfactory\n";
 	        }
+<<<<<<< HEAD:application/models/FoafData.php
                 $result = $model->find(new Resource($uri),new Resource('http://xmlns.com/foaf/0.1/primaryTopic'),NULL);
                 $oldUri = "";
                 $it = $result->getStatementIterator();
@@ -57,7 +58,7 @@ class FoafData {
 	        $this->graphset = $graphset;
 	    }
 		$this->putInSession();
-        } else {
+       } else {
         	//FIXME: sort this out so it isn't an echo
         	echo("Something went wrong, there's no URI!");
         }
@@ -75,7 +76,7 @@ class FoafData {
     	$defaultNamespace = new Zend_Session_Namespace('Garlik');
     	//XXX This probably ought to be changed for production
     	//$defaultNamespace->setExpirationSeconds(9999999999);
-    	$defaultNamespace->foafData = $this;  
+    	$defaultNamespace->foafData = $this; 
     }
 
     public function getModel() {
