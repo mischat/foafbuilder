@@ -67,7 +67,7 @@ class FoafData {
     public static function getFromSession(){
     	//TODO: use auth session for particular users
     	//if(Zend_Session::sessionExists()){
-        $defaultNamespace = new Zend_Session_Namespace('Default');
+        $defaultNamespace = new Zend_Session_Namespace('Garlik');
     	//}
     	//XXX This probably ought to be changed for production
     	$defaultNamespace->setExpirationSeconds(10000);
@@ -77,7 +77,7 @@ class FoafData {
     public function putInSession(){
     	//TODO: use auth session for particular users
     	//if(Zend_Session::sessionExists()){
-    		$defaultNamespace = new Zend_Session_Namespace();
+    		$defaultNamespace = new Zend_Session_Namespace('Garlik');
   
     	//XXX This probably ought to be changed for production
     	$defaultNamespace->setExpirationSeconds(10000);
