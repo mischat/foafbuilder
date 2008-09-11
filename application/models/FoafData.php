@@ -22,16 +22,26 @@ class FoafData {
 	        if (!($graphset->containsNamedGraph($uri))) {
 	        	print "Triples model not add to the modelfactory\n";
 	        }
-
+                $result = $model->find(new Resource($uri),new Resource('http://xmlns.com/foaf/0.1/primaryTopic'),NULL);
+                $oldUri = "";
+                $it = $result->getStatementIterator();
+                while ($it->hasNext()) {
+                    $statement = $it->next();
+                    if ($it->getCurrentPosition() == 0) {
+                        $oldUri = (string) $statement->getLabelObject();
+                    }
+                } 
+/*
             $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
             $result = $model->sparqlQuery($query);
 
             //TODO must make sure that we handle having a non "#me" foaf:Person URI
             $oldUri = $result[0]['?prim']->uri;
-
+*/
             if (!$oldUri) {
                 echo ("No primarytopic set in foaf file!");
             }
+
 
             $oldUriRes = new Resource($oldUri);
             $newUri = "http://".md5($oldUri);
