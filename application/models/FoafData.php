@@ -4,6 +4,7 @@
 
 require_once 'RdfAPI.php';
 require_once 'dataset/DatasetMem.php';
+require_once 'sparql/SparqlParser.php';
 
 class FoafData {
     private $uri;
@@ -22,7 +23,7 @@ class FoafData {
 	        if (!($graphset->containsNamedGraph($uri))) {
 	        	print "Triples model not add to the modelfactory\n";
 	        }
-<<<<<<< HEAD:application/models/FoafData.php
+	        /*
                 $result = $model->find(new Resource($uri),new Resource('http://xmlns.com/foaf/0.1/primaryTopic'),NULL);
                 $oldUri = "";
                 $it = $result->getStatementIterator();
@@ -32,13 +33,15 @@ class FoafData {
                         $oldUri = (string) $statement->getLabelObject();
                     }
                 } 
-/*
+			*/
+	        
+	        /*Could swap these two lines with commented out block above*/
             $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
             $result = $model->sparqlQuery($query);
 
             //TODO must make sure that we handle having a non "#me" foaf:Person URI
             $oldUri = $result[0]['?prim']->uri;
-*/
+
             if (!$oldUri) {
                 echo ("No primarytopic set in foaf file!");
             }

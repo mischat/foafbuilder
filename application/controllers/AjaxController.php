@@ -17,11 +17,9 @@ class AjaxController extends Zend_Controller_Action
         require_once 'Field.php';
       
         $uri = @$_POST['uri'];
-        if($uri) {
+        if($uri && $uri != "") {
             $foafData = new FoafData($uri);	
-            echo("getting data from uri: ".$uri);
         } else {
-        	echo("getting from session");
 			$foafData = FoafData::getFromSession();
 		}
 			
