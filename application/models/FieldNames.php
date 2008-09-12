@@ -20,12 +20,12 @@ class FieldNames {
 		 * ?x in the query is the uri of the person we're concerned with.
 		 * NOTE: generates sub optimal queries (see e.g. geoLatitude/geoLongitude
 		 */
-		@$this->simpleFieldNameArray['foafTitle'] = new Field('foafTitle', '?x foaf:name ?foafName', 'literal');
-		@$this->simpleFieldNameArray['foafName'] = new Field('foafName', '?x foaf:name ?foafName', 'literal');
-		@$this->simpleFieldNameArray['foafHomepage'] = new Field('foafHomepage', '?x foaf:homepage ?foafHomepage','resource');
-		@$this->simpleFieldNameArray['foafNick'] = new Field('foafNick', '?x foaf:nick ?foafNick','literal');
-		@$this->simpleFieldNameArray['foafBirthday'] = new Field('foafBirthday','?x foaf:birthday ?foafBirthday','literal');
-		@$this->simpleFieldNameArray['foafDateOfBirth'] = new Field('foafDateOfBirth','?x foaf:dateOfBirth ?foafDateOfBirth','literal');
+		@$this->simpleFieldNameArray['foafTitle'] = new Field('foafTitle', '?x foaf:name ?foafName', 'literal',"http://xmlns.com/foaf/0.1/title");
+		@$this->simpleFieldNameArray['foafName'] = new Field('foafName', '?x foaf:name ?foafName', 'literal','http://xmlns.com/foaf/0.1/name');
+		@$this->simpleFieldNameArray['foafHomepage'] = new Field('foafHomepage', '?x foaf:homepage ?foafHomepage','resource','http://xmlns.com/foaf/0.1/homepage');
+		@$this->simpleFieldNameArray['foafNick'] = new Field('foafNick', '?x foaf:nick ?foafNick','literal','http://xmlns.com/foaf/0.1/nick');
+		@$this->simpleFieldNameArray['foafBirthday'] = new Field('foafBirthday','?x foaf:birthday ?foafBirthday','literal','http://xmlns.com/foaf/0.1/birthday');
+		@$this->simpleFieldNameArray['foafDateOfBirth'] = new Field('foafDateOfBirth','?x foaf:dateOfBirth ?foafDateOfBirth','literal','http://xmlns.com/foaf/0.1/dateOfBirth');
 		//$this->simpleFieldNameArray['foafPostCode'] = '?x foaf:homepage ?foafHomepage';
 		
 		/*a slightly different one, since this is obtained through more than one triple in the sparql query*/

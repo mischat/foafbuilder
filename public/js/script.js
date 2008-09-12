@@ -79,10 +79,6 @@ function objectsToDisplay(data){
 //TODO: datatypes/languages
 
 function displayToObjects(){
-
-  	foafNameCount = 0;
-  	foafHomepageCount = 0;
-  	foafNickCount = 0;
   	
   	/*loop through all the arrays (for foafName, foafHomepage etc) defined in the pageData object*/
 	for(arrayName in pageData){
@@ -101,7 +97,7 @@ function displayToObjects(){
 /*saves all the foaf data TODO: it might be a challenge making this quick*/
 function saveFoaf(){
 	displayToObjects();
-	jsonstring = JSON.serialize(new PageDataObject());
+	jsonstring = JSON.serialize(pageData);
 	//TODO use jquery event handler to deal with errors on this request
   	$.post("/ajax/save-foaf", {model : jsonstring}, function(){}, "json");
   		
