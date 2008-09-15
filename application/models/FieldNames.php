@@ -2,6 +2,9 @@
 /*TODO: maybe the OO should go deeper than this and maybe this should be called something different e.g. querypieces.
 Perhaps all fieldNames should have there own class, which inherits from a fieldNames interface?  The interface could contain
 methods like getQueryBit, getName, saveToModel etc.*/
+require_once "SimpleField.php";
+require_once "BioBirthdayField.php";
+
 
 class FieldNames {
 	
@@ -18,32 +21,37 @@ class FieldNames {
 		 * TODO: extend this to define constants for whichever page is being viewed
 		 * e.g. The basics, Contact details etc.  Could pass in a page parameter or something.
 		 * ?x in the query is the uri of the person we're concerned with.
-		 * NOTE: generates sub optimal queries (see e.g. geoLatitude/geoLongitude
 		 */
-		@$this->simpleFieldNameArray['foafTitle'] = new Field('foafTitle', '?x foaf:name ?foafName', 'literal',"http://xmlns.com/foaf/0.1/title");
-		@$this->simpleFieldNameArray['foafName'] = new Field('foafName', '?x foaf:name ?foafName', 'literal','http://xmlns.com/foaf/0.1/name');
-		@$this->simpleFieldNameArray['foafHomepage'] = new Field('foafHomepage', '?x foaf:homepage ?foafHomepage','resource','http://xmlns.com/foaf/0.1/homepage');
-		@$this->simpleFieldNameArray['foafNick'] = new Field('foafNick', '?x foaf:nick ?foafNick','literal','http://xmlns.com/foaf/0.1/nick');
-		@$this->simpleFieldNameArray['foafBirthday'] = new Field('foafBirthday','?x foaf:birthday ?foafBirthday','literal','http://xmlns.com/foaf/0.1/birthday');
-		@$this->simpleFieldNameArray['foafDateOfBirth'] = new Field('foafDateOfBirth','?x foaf:dateOfBirth ?foafDateOfBirth','literal','http://xmlns.com/foaf/0.1/dateOfBirth');
+		@$this->simpleFieldNameArray['foafTitle'] = 
+			new SimpleField('foafTitle', '?x foaf:name ?foafName', 'literal',"http://xmlns.com/foaf/0.1/title");
+		@$this->simpleFieldNameArray['foafName'] = 
+			new SimpleField('foafName', '?x foaf:name ?foafName', 'literal','http://xmlns.com/foaf/0.1/name');
+		@$this->simpleFieldNameArray['foafHomepage'] = 
+			new SimpleField('foafHomepage', '?x foaf:homepage ?foafHomepage','resource','http://xmlns.com/foaf/0.1/homepage');
+		@$this->simpleFieldNameArray['foafNick'] = 
+			new SimpleField('foafNick', '?x foaf:nick ?foafNick','literal','http://xmlns.com/foaf/0.1/nick');
+		@$this->simpleFieldNameArray['foafBirthday'] = 
+			new SimpleField('foafBirthday','?x foaf:birthday ?foafBirthday','literal','http://xmlns.com/foaf/0.1/birthday');
+		@$this->simpleFieldNameArray['foafDateOfBirth'] = 
+			new SimpleField('foafDateOfBirth','?x foaf:dateOfBirth ?foafDateOfBirth','literal','http://xmlns.com/foaf/0.1/dateOfBirth');
 		//$this->simpleFieldNameArray['foafPostCode'] = '?x foaf:homepage ?foafHomepage';
 		
 		/*a slightly different one, since this is obtained through more than one triple in the sparql query*/
-		@$this->complicatedFieldNameArray['bioBirthday'] = new Field(
+		$this->simpleFieldNameArray['bioBirthday'] = new BioBirthdayField(
 															'bioBirthday',
 															'?x bio:event ?e .
         											 		 ?e rdf:type bio:Birth .
-        											 		 ?e bio:date ?bioBirthday .',
+        											 		 ?e bio:date ?bioBirthday',
 															 'literal');
-		@$this->complicatedFieldNameArray['geoLat'] =  new Field(
+		@$this->complicatedFieldNameArray['geoLat'] =  new SimpleField(
 															'geoLat',
 														  	'?x foaf:based_near ?l .
                         								  	?l geo:lat ?geoLat .
                         								  	?l geo:long ?geoLong
                         								  	?l geo:lat_long ?geoLatLong',
 															'literal');
-		@$this->complicatedFieldNameArray['geoLong'] = new Field('geoLong','','literal');//queryBit not required, since we get it with geoLat
-		@$this->complicatedFieldNameArray['geoLatLong'] =  new Field('geoLatLong','','literal');
+		@$this->complicatedFieldNameArray['geoLong'] = new SimpleField('geoLong','','literal');//queryBit not required, since we get it with geoLat
+		@$this->complicatedFieldNameArray['geoLatLong'] =  new SimpleField('geoLatLong','','literal');
 	}
 	
 	//TODO: for multiple pages pass in page parameter here.
