@@ -33,9 +33,9 @@ class AjaxController extends Zend_Controller_Action
             /*build up a sparql query to get the values of all the fields we need*/
             //TODO: make this relative to the page, possibly more than one function or controller.
 			$fieldNamesObject = new FieldNames();
-            $queryString = $this->buildSparqlQuery($fieldNamesObject);           
+            $queryString = $this->buildSparqlQuery($fieldNamesObject);          
             $results = $this->view->graphset->sparqlQuery($queryString.";");
-            
+
             /*get rid of the ?s in the sparql results so they can be used with json*/
             $this->view->results = array();
             foreach($results as $row) {
@@ -47,7 +47,7 @@ class AjaxController extends Zend_Controller_Action
             $foafData->setPrimaryTopic($results[0]['?primaryTopic']->uri);      	
         } else {
             print "Error Instance of FoafData is null!\n";
-	    $this->view->isSuccess = 0;
+	    	$this->view->isSuccess = 0;
         }       
     }
 	
@@ -104,6 +104,7 @@ class AjaxController extends Zend_Controller_Action
 	public function applyChangesToModel(&$foafData,&$changes_model)
 	{
 		require_once 'Field.php';
+		require_once 'SimpleField.php';
 		require_once 'FieldNames.php';
 		/*
 		 * TODO: it might be good to add functionality to save the primary topic.
@@ -116,14 +117,11 @@ class AjaxController extends Zend_Controller_Action
 		/*
 		 * TODO Need to add language tags etc.
 		 */
-		$foafNameCount = 0;
-		$foafHomepageCount = 0;
-		$foafNickCount = 0;
 		
 		//get all the detail for each of the fields
 		$fieldNames = new FieldNames();
 		
-		//TODO: extend over all fields, not just simple ones
+		/*TODO: extend over all fields, not just simple ones, so here need to create the appropriate type of field*/
 		$simpleFieldNameArray = $fieldNames->getSimpleFieldNames();
 		
 		/*loop through all the rows in the sparql results style 'almost model'*/
@@ -133,36 +131,13 @@ class AjaxController extends Zend_Controller_Action
 				
 				/*get some details about the field we're dealing with*/
 				$field = $simpleFieldNameArray[substr($key,0,-10)];
-				$type = $field->getType();
-				$predicate_uri = $field->getPredicateUri();	
 				
 				/*loop through writing out triples*/
 				for($index = 0; $index < count($predicate_array) ;$index++){
-					/* Create a new statement from the values to be saved FIXME: this is inefficient.*/
-					$predicate_resource = new Resource($predicate_uri);
-					if($type == 'literal'){
-						$value_res_or_literal = new Literal($predicate_array[$index]);
-					} else if($type == 'resource'){
-						$value_res_or_literal = new Resource($predicate_array[$index]);
-					} else {
-						//TODO: bnodes?
-						echo("Not a uri or a bnode!");
-					}
-					//TODO: need to get the primary topic in here somehow instead of doing .#me poss from session?
-					$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
-					$new_statement = new Statement($primary_topic_resource,$predicate_resource,$value_res_or_literal);	
-					
-					/* Look for values with the appropriate predicate/object */
-					$found_model = $model->find($primary_topic_resource,$predicate_resource, NULL);
-					
-					/* Remove a matching triple (if there) and add the new one whilst remembering that there can
-					 * be more than one e.g. foafName and we only want to remove the one at the appropriate index.*/ 
-					if(isset($found_model->triples[$index])){
-						//TODO - worry about the ordering of sparql results
-						$model->remove($found_model->triples[0]);
-					}
-					$model->add($new_statement);
+					echo("Saving: ".$field->getName()."\n");
+					$field->saveToModel(&$foafData, $predicate_array[$index], $index);
 				}//end for	
+				
 			} else {
 				echo("unrecognised triple:".$key."\n");	
 			}//end if

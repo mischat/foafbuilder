@@ -1,21 +1,11 @@
 <?php
-/*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
-class Field {
+
+abstract class Field{
+	protected $name;
+	protected $queryBit;
+	protected $type;//bnode or literal.  TODO: Should be an enumerator really.
 	
-	private $name;
-	private $queryBit;
-	private $type;//bnode or literal.  TODO: Should be an enumerator really.
-	private $predicateUri;
-	
-	/*predicateUri is only appropriate for simple ones (one triple only)*/
-	public function Field($name, $queryBit, $type, $predicateUri = NULL){
-		$this->name = $name;
-		$this->queryBit = $queryBit;
-		$this->type = $type;
-		
-		if($predicateUri){
-			$this->predicateUri = $predicateUri;		
-		}
+	public function Field(){	
 	}
 	
 	public function getName(){
@@ -39,11 +29,11 @@ class Field {
 		$this->type = $type;
 	}
 	
-	public function getPredicateUri(){
-		return $this->predicateUri;
+	public function saveToModel(&$foafData, $value, $index){
+	
 	}
-	public function setPredicateUri($predicateUri){
-		$this->predicateUri = $predicateUri;
-	}
+	
+	//some sort of save thing ought to go here
 }
+
 ?>
