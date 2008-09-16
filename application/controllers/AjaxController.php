@@ -96,7 +96,8 @@ class AjaxController extends Zend_Controller_Action
         foreach($allFieldNamesArray as $fieldName => $field){
         	$queryString .= " OPTIONAL { ".$field->getQueryBit()." . } .";	
         }
-
+		
+        //var_dump($queryString);
         return $queryString;
 	}
 	
@@ -106,9 +107,7 @@ class AjaxController extends Zend_Controller_Action
 		require_once 'Field.php';
 		require_once 'SimpleField.php';
 		require_once 'FieldNames.php';
-		/*
-		 * TODO: it might be good to add functionality to save the primary topic.
-		 */
+
 		//json representing stuff that is to be saved
 		$json = new Services_JSON();
 		$almost_model = $json->decode(stripslashes($changes_model));
@@ -131,7 +130,7 @@ class AjaxController extends Zend_Controller_Action
 				
 				/*get some details about the field we're dealing with*/
 				$field = $simpleFieldNameArray[substr($key,0,-10)];
-				
+					
 				/*loop through writing out triples*/
 				for($index = 0; $index < count($predicate_array) ;$index++){
 					echo("Saving: ".$field->getName()." at index: ".$index."\n");

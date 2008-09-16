@@ -4,7 +4,9 @@ Perhaps all fieldNames should have there own class, which inherits from a fieldN
 methods like getQueryBit, getName, saveToModel etc.*/
 require_once "SimpleField.php";
 require_once "BioBirthdayField.php";
-
+require_once "GeoLatLongField.php";
+require_once "GeoLatField.php";
+require_once "GeoLongField.php";
 
 class FieldNames {
 	
@@ -43,15 +45,19 @@ class FieldNames {
         											 		 ?e rdf:type bio:Birth .
         											 		 ?e bio:date ?bioBirthday',
 															 'literal');
-		@$this->complicatedFieldNameArray['geoLat'] =  new SimpleField(
-															'geoLat',
+		@$this->simpleFieldNameArray['geoLatLong'] =  new GeoLatLongField(
+															'geoLatLong',
 														  	'?x foaf:based_near ?l .
-                        								  	?l geo:lat ?geoLat .
-                        								  	?l geo:long ?geoLong
                         								  	?l geo:lat_long ?geoLatLong',
 															'literal');
-		@$this->complicatedFieldNameArray['geoLong'] = new SimpleField('geoLong','','literal');//queryBit not required, since we get it with geoLat
-		@$this->complicatedFieldNameArray['geoLatLong'] =  new SimpleField('geoLatLong','','literal');
+		$this->simpleFieldNameArray['geoLat'] =  new GeoLatField('geoLat',
+														  	'?x foaf:based_near ?l .
+                        								  	?l geo:lat ?geoLat',
+															'literal');
+		$this->simpleFieldNameArray['geoLong'] =  new GeoLongField('geoLong',
+														  	'?x foaf:based_near ?l .
+                        								  	?l geo:long ?geoLong',
+															'literal');
 	}
 	
 	//TODO: for multiple pages pass in page parameter here.
