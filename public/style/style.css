@@ -191,7 +191,95 @@ padding-left:10px;
 text-align:left;
 width:100%;
 }
+/* ABOVE THIS LINE IDENTICAL TO FOAF.QDOS.COM, title/footer*/
+/*-------right col-------*/
+.rightCol{
+width:500px;
+float: left;
+border-right: 1px solid #eeeeee;
+border-bottom: 1px solid #eeeeee;
+border-top: 1px solid #eeeeee;
+height:1000px;
+}
+.editorElement{
+background-color: #eeeeee;
+}
+.fieldLabel{
+font-family:Arial,Helvetica,sans-serif;
+font-size:12px;
+color:#999999;
+font-weight:600;
+}
+.fieldLabelContainer{
+width:120px;
+padding-left:20px;
+float:left;
+}
+.fieldValueContainer{
 
+}
+.fieldContainer{
+padding-top: 20px;
+padding-bottom:20px;
+border-bottom: 1px solid #dddddd;
+margin-left:20px;
+margin-right:20px;
+}
+
+/*-------left col-------*/
+#leftCol{
+width:280px;
+height:1000px;
+float: left;
+border: 1px solid #eeeeee;
+}
+.editorTitle{
+padding-right:20px;
+height:25px;
+background-image: url(/images/pink_background.gif);
+}
+.editorElementIcon{
+float:left;
+}
+.editorTitleText{
+	padding-top:4px;
+	padding-left:5px;
+	padding-bottom:2px;
+	height:25px;
+	font-size:14px;
+	color: #ffffff;
+	font-family:Arial,Helvetica,sans-serif;
+}
+.editorSubTitleEven{
+height:15px;
+width:230px;
+margin-left:40px;
+margin-right:10px;
+margin-top:2px;
+margin-bottom:2px;
+padding-left:2px;
+padding-top:1px;
+font-family:Arial,Helvetica,sans-serif;
+font-size:12px;
+color:#000000;
+font-weight:600;
+background-color:#ffffff;
+}
+.editorSubTitleOdd{
+height:15px;
+width:230px;
+margin-left:40px;
+margin-right:10px;
+margin-top:2px;
+margin-bottom:2px;
+padding-left:2px;
+padding-top:1px;
+font-family:Arial,Helvetica,sans-serif;
+font-size:12px;
+color:#000000;
+font-weight:600;
+background-color:#eeeeee;
+}
 
 
 

@@ -4,79 +4,215 @@
 //TODO: decide whether to populate entirely in javsacript or not and tidy this up accordingly.
 ?>
 <p>Shove Your URI in here:</p>
-<form action = "javascript:loadFoaf();">
-	<input type = 'text' id= 'foafUri' name = 'foafUri'/>
-	<input type = 'submit' value = 'Load'/>
-</form>
-<form action = "javascript:saveFoaf();">
-	<input type = 'submit' value = 'Save'/>
-</form>
-<form action = "javascript:clearFoaf();">
-	<input type = 'submit' value = 'Clear'/>
-</form>
-<form action = "javascript:writeFoaf();">
-	<input type = 'text' id= 'writeUri' name = 'writeUri'/>
-	<input type = 'submit' value = "Write" />
-</form>
-<div id="personal">
-	<div id="foafName_container">
-		<p>
-			<span>Name: </span>
-			<input id='foafName_0' value='<? echo($this->name);?>'/> 
-		</p>
+<table cellspacing="10">
+	<tr>
+		<td>
+			<form action = "javascript:loadFoaf();">
+				<input type = 'text' id= 'foafUri' name = 'foafUri'/>
+				<input type = 'submit' value = 'Load'/>
+			</form>
+		</td>
+		<td>
+			<form action = "javascript:writeFoaf();">
+				<input type = 'text' id= 'writeUri' name = 'writeUri'/>
+				<input type = 'submit' value = "Write" />
+			</form>
+		</td>
+		<td>
+			<form action = "javascript:saveFoaf();">
+				<input type = 'submit' value = 'Save'/>
+			</form>
+		</td>
+		<td>
+			<form action = "javascript:clearFoaf();">
+				<input type = 'submit' value = 'Clear'/>
+			</form>
+		</td>
+	</tr>
+</table>
+<div id="leftCol">
+	<div onclick="getThisPage('theBasics')" class="editorElement">
+		<div class="editorTitle">
+			<img class="editorElementIcon" src="/images/basics_icon.gif"/>
+			<div id="theBasicsTitle" class="editorTitleText">The basics</div>
+		</div>
+		<div class="editorSubTitleEven">
+			Real name
+		</div>
+		<div class="editorSubTitleOdd">
+			Nicknames
+		</div>
+		<div class="editorSubTitleEven">
+			Location
+		</div>
+		<div class="editorSubTitleOdd">
+			Birthday
+		</div>
+		<div class="editorSubTitleEven">
+			Homepages
+		</div>
 	</div>
-	<div id="foafNick_container">
-		<p>
-			<span>Nicknames: </span>
-			<input id='foafNick_0' value='<? echo($this->nick);?>'>
-		</p>
+	<div class="editorElement">
+		<div class="editorTitle">
+			<img class="editorElementIcon" src="/images/contact_icon.gif"/>
+			<div class="editorTitleText">Contact details</div>
+		</div>
+		<div class="editorSubTitleEven">
+			Email
+		</div>
+		<div class="editorSubTitleOdd">
+			Phones
+		</div>
+		<div class="editorSubTitleEven">
+			Addresses
+		</div>
+		<div class="editorSubTitleOdd">
+			Online
+		</div>
 	</div>
-	<div id="foafUsername_container">
-		<p>
-			<span>Usernames: </span>
-			<input id='foafUsername_0' value='<? echo($this->username);?>'> 
-		</p>
+	<div class="editorElement">
+		<div class="editorTitle">
+			<img class="editorElementIcon" src="/images/pictures_icon.gif"/>
+			<div class="editorTitleText">Pictures</div>
+		</div>
+		<div class="editorSubTitleEven">
+			Main Image
+		</div>
+		<div class="editorSubTitleOdd">
+			Others
+		</div>
 	</div>
-	<div id="geoLat_container">
-		<p>
-			<span>Geo Latitude: </span>
+	<div class="editorElement">
+		<div class="editorTitle">
+			<img class="editorElementIcon" src="/images/accounts_icon.gif"/>
+			<div class="editorTitleText">Accounts</div>
+		</div>
+		<div class="editorSubTitleEven">
+			Identity
+		</div>
+		<div class="editorSubTitleOdd">
+			Sharing
+		</div>
+		<div class="editorSubTitleEven">
+			Network
+		</div>
+	</div>
+	<div class="editorElement">
+		<div class="editorTitle">
+			<img class="editorElementIcon" src="/images/friends_icon.gif"/>
+			<div class="editorTitleText">Friends</div>
+		</div>
+		<div class="editorSubTitleEven">
+			Work
+		</div>
+		<div class="editorSubTitleOdd">
+			Personal
+		</div>
+	</div>
+	<div class="editorElement">
+		<div class="editorTitle">
+			<img class="editorElementIcon" src="/images/interests_icon.gif"/>
+			<div class="editorTitleText">Interests</div>
+		</div>
+		<div class="editorSubTitleEven">
+			Professional
+		</div>
+		<div class="editorSubTitleOdd">
+			Personal
+		</div>
+	</div>
+	<div class="editorElement">
+		<div class="editorTitle">
+			<img class="editorElementIcon" src="/images/other_icon.gif"/>
+			<div class="editorTitleText">Other</div>
+		</div>
+		<div class="editorSubTitleEven">
+			Professional
+		</div>
+		<div class="editorSubTitleOdd">
+			Personal
+		</div>
+	</div>
+</div><!-- end leftCol -->
+<div class="rightCol" id="personal">
+	<div class="fieldContainer">
+		<div class="fieldLabelContainer">
+			<span class="fieldLabel">Name</span>
+		</div>
+		<div class="fieldValueContainer" id="foafName_container">
+			<input id='foafName_0' value='<? echo($this->location);?>'>
+		</div>
+	</div>
+	
+	<div class="fieldContainer">
+		<div class="fieldLabelContainer">
+			<span class="fieldLabel">Nicknames</span>
+		</div>
+		<div class="fieldValueContainer" id="foafNick_container">
+			<input id='foafNick_0' value='<? echo($this->location);?>'>
+		</div>
+	</div>
+	
+	<div class="fieldContainer">
+		<div class="fieldLabelContainer">
+			<span class="fieldLabel">Geo Latitude</span>
+		</div>
+		<div class="fieldValueContainer" id="geoLat_container">
 			<input id='geoLat_0' value='<? echo($this->location);?>'>
-		</p>
+		</div>
 	</div>
-	<div id="geoLong_container">
-		<p>
-			<span>Geo Longitude: </span>
+	
+	<div class="fieldContainer">
+		<div class="fieldLabelContainer">
+			<span class="fieldLabel">Geo Longitude</span>
+		</div>
+		<div class="fieldValueContainer" id="geoLong_container">
 			<input id='geoLong_0' value='<? echo($this->location);?>'>
-		</p>
+		</div>
 	</div>
-	<div id="geoLatLong_container">
-		<p>
-			<span>Geo LatLong: </span>
+	
+	<div class="fieldContainer">
+		<div class="fieldLabelContainer">
+			<span class="fieldLabel">Geo LatLong</span>
+		</div>
+		<div class="fieldValueContainer" id="geoLatLong_container">
 			<input id='geoLatLong_0' value='<? echo($this->location);?>'>
-		</p>
+		</div>
 	</div>
-	<div id="foafBirthday_container">
-		<p>
-			<span>Birthday (foafBirthday): </span>
-			<input id='foafBirthday_0' value='<? echo($this->birthday);?>'> 
-		</p>
-	</div>
-	<div id="foafBirthday_container">
-		<p>
-			<span>Birthday (fromBio): MAKE NOT WRITEABLE?</span>
+	
+	<div class="fieldContainer">
+		<div class="fieldLabelContainer">
+			<span class="fieldLabel">Birthday (bioBirthday)</span>
+		</div>
+		<div class="fieldValueContainer" id="bioBirthday_container">
 			<input id='bioBirthday_0' value='<? echo($this->birthday);?>'> 
-		</p>
+		</div>
 	</div>
-	<div id="foafBirthday_container">
-		<p>
-			<span>Birthday, (foafDateOFBirth): </span>
+	
+	<div class="fieldContainer">
+		<div class="fieldLabelContainer">
+			<span class="fieldLabel">Birthday (foafBirthday)</span>
+		</div>
+		<div class="fieldValueContainer" id="foafBirthday_container">
+			<input id='foafBirthday_0' value='<? echo($this->birthday);?>'> 
+		</div>
+	</div>
+	
+	<div class="fieldContainer">
+		<div class="fieldLabelContainer">
+			<span class="fieldLabel">Birthday (foafDateOFBirth)</span>
+		</div>
+		<div class="fieldValueContainer" id="foafDateOfBirth_container">
 			<input id='foafDateOfBirth_0' value='<? echo($this->birthday);?>'> 
-		</p>
+		</div>
 	</div>
-	<div id="foafHomepage_container">
-		<p>
-			<span>Homepage: </span>
-			<input id='foafHomepage_0' value='<? echo($this->homepage);?>'> 
-		</p>
+	
+	<div class="fieldContainer">
+		<div class="fieldLabelContainer">
+			<span class="fieldLabel">Homepages</span>
+		</div>
+		<div class="fieldValueContainer" id="foafHomepage_container">
+			<input id='foafHomepage_0' value='<? echo($this->homepage);?>'/> 
+		</div>
 	</div>
 </div>
