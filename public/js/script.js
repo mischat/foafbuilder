@@ -85,8 +85,10 @@ function displayToObjects(){
 		if(arrayName != "foafPrimaryTopic"){
 			//chop off the ArrayValue bit at the end.
 			var name = arrayName.substring(0,arrayName.length-10);
-			for(i = 0 ; i < pageData[arrayName].length ; i++){
-				if(document.getElementById(name+'_'+i)){
+			
+			for(i=0; document.getElementById(name+'_'+i); i++){
+				//TODO: what about validation.  Where's it to go?
+				if(document.getElementById(name+'_'+i) != ""){
 					pageData[arrayName][i] = document.getElementById(name+'_'+i).value;
 				}
 			}
@@ -94,7 +96,7 @@ function displayToObjects(){
 	}//end for
 }
 
-/*saves all the foaf data TODO: it might be a challenge making this quick*/
+/*saves all the foaf data*/
 function saveFoaf(){
 	displayToObjects();
 	jsonstring = JSON.serialize(pageData);
