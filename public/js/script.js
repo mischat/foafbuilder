@@ -124,5 +124,10 @@ function clearFoaf() {
         }
 }
 
+/*gets the appropriate page, e.g. the basics, contact details or whatever.*/
+function getThisPage(){
+	
+}
+
 
 
