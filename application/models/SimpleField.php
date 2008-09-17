@@ -23,7 +23,7 @@ class SimpleField extends Field{
 		$this->predicateUri = $predicateUri;
 	}
 	/*saves the appropriate triples in the model at the appropriate index and replace them with $value*/
-	public function saveToModel(&$foafData, $value){
+	public function &saveToModel($foafData, $value){
 
 		require_once 'SimpleField.php';
 		require_once 'FieldNames.php';
