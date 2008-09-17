@@ -1,13 +1,13 @@
 <h3>Add FOAF File below:</h3>
 <?
 //TODO: move some of this data out of here
-//TODO: decide whether to populate entirely in javsacript or not and tidy this up accordingly.
+//TODO: decide whether to populate entirely (i.e. generate the actual fields in javsacript) or not and tidy this up accordingly.
 ?>
 <p>Shove Your URI in here:</p>
 <table cellspacing="10">
 	<tr>
 		<td>
-			<form action = "javascript:loadFoaf();">
+			<form action = "javascript:loadFoaf('load-the-basics');">
 				<input type = 'text' id= 'foafUri' name = 'foafUri'/>
 				<input type = 'submit' value = 'Load'/>
 			</form>
@@ -31,10 +31,11 @@
 	</tr>
 </table>
 <div id="leftCol">
-	<div onclick="getThisPage('theBasics')" class="editorElement">
-		<div class="editorTitle">
+<? //TODO: perhaps the load-the-basics name should be generated somehow ?>
+	<div onclick="loadFoaf('load-the-basics');" class="editorElement">
+		<div id="load-the-basics" class="editorTitle">
 			<img class="editorElementIcon" src="/images/basics_icon.gif"/>
-			<div id="theBasicsTitle" class="editorTitleText">The basics</div>
+			<div class="editorTitleText">The basics</div>
 		</div>
 		<div class="editorSubTitleEven">
 			Real name
@@ -52,8 +53,8 @@
 			Homepages
 		</div>
 	</div>
-	<div class="editorElement">
-		<div class="editorTitle">
+	<div onclick="loadFoaf('load-contact-details');" class="editorElement">
+		<div id='load-contact-details' class="editorTitle">
 			<img class="editorElementIcon" src="/images/contact_icon.gif"/>
 			<div class="editorTitleText">Contact details</div>
 		</div>
@@ -137,10 +138,10 @@
 <div class="rightCol" id="personal">
 	<div class="fieldContainer">
 		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Name</span>
+			<span class="fieldLabel">Real Name</span>
 		</div>
 		<div class="fieldValueContainer" id="foafName_container">
-			<input id='foafName_0' value='<? echo($this->location);?>'>
+			<input id='foafName_0' value=''>
 		</div>
 	</div>
 	
@@ -149,7 +150,7 @@
 			<span class="fieldLabel">Nicknames</span>
 		</div>
 		<div class="fieldValueContainer" id="foafNick_container">
-			<input id='foafNick_0' value='<? echo($this->location);?>'>
+			<input id='foafNick_0' value=''>
 		</div>
 	</div>
 	
@@ -158,7 +159,7 @@
 			<span class="fieldLabel">Geo Latitude</span>
 		</div>
 		<div class="fieldValueContainer" id="geoLat_container">
-			<input id='geoLat_0' value='<? echo($this->location);?>'>
+			<input id='geoLat_0' value=''>
 		</div>
 	</div>
 	
@@ -167,7 +168,7 @@
 			<span class="fieldLabel">Geo Longitude</span>
 		</div>
 		<div class="fieldValueContainer" id="geoLong_container">
-			<input id='geoLong_0' value='<? echo($this->location);?>'>
+			<input id='geoLong_0' value=''>
 		</div>
 	</div>
 	
@@ -176,7 +177,7 @@
 			<span class="fieldLabel">Geo LatLong</span>
 		</div>
 		<div class="fieldValueContainer" id="geoLatLong_container">
-			<input id='geoLatLong_0' value='<? echo($this->location);?>'>
+			<input id='geoLatLong_0' value=''>
 		</div>
 	</div>
 	
@@ -185,7 +186,7 @@
 			<span class="fieldLabel">Birthday (bioBirthday)</span>
 		</div>
 		<div class="fieldValueContainer" id="bioBirthday_container">
-			<input id='bioBirthday_0' value='<? echo($this->birthday);?>'> 
+			<input id='bioBirthday_0' value=''> 
 		</div>
 	</div>
 	
@@ -194,7 +195,7 @@
 			<span class="fieldLabel">Birthday (foafBirthday)</span>
 		</div>
 		<div class="fieldValueContainer" id="foafBirthday_container">
-			<input id='foafBirthday_0' value='<? echo($this->birthday);?>'> 
+			<input id='foafBirthday_0' value=''> 
 		</div>
 	</div>
 	
@@ -203,7 +204,7 @@
 			<span class="fieldLabel">Birthday (foafDateOFBirth)</span>
 		</div>
 		<div class="fieldValueContainer" id="foafDateOfBirth_container">
-			<input id='foafDateOfBirth_0' value='<? echo($this->birthday);?>'> 
+			<input id='foafDateOfBirth_0' value=''> 
 		</div>
 	</div>
 	
@@ -212,7 +213,7 @@
 			<span class="fieldLabel">Homepages</span>
 		</div>
 		<div class="fieldValueContainer" id="foafHomepage_container">
-			<input id='foafHomepage_0' value='<? echo($this->homepage);?>'/> 
+			<input id='foafHomepage_0' value=''/> 
 		</div>
 	</div>
 </div>

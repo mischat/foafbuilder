@@ -9,32 +9,54 @@ class AjaxController extends Zend_Controller_Action
     {
         $this->view->baseUrl = $this->_request->getBaseUrl();
     }
-
-    public function loadFoafAction() 
+    private $queryString;
+	private $fieldNamesObject; 
+	private $foafData;
+	
+    public function loadTheBasicsAction() 
     {
-        require_once 'FoafData.php';
+    	/*build up a sparql query to get the values of all the fields we need*/
+    	$this->loadFoaf();   
+		$this->fieldNamesObject = new FieldNames('theBasics');
+    	$this->buildSparqlQuery();
+    	$this->putResultsIntoView();
+    }
+    
+   public function loadContactDetailsAction() 
+    {
+    	/*build up a sparql query to get the values of all the fields we need*/
+    	$this->loadFoaf();   
+		$this->fieldNamesObject = new FieldNames('contactDetails');
+    	$this->buildSparqlQuery();
+    	$this->putResultsIntoView();
+    }
+    
+	/*gets the foaf (either from the uri or from the session) as well as adding stuff to the view*/
+    private function loadFoaf(){
+    	require_once 'FoafData.php';
         require_once 'FieldNames.php';
         require_once 'Field.php';
-      
+       
         $uri = @$_POST['uri'];
         if($uri && $uri != "") {
-            $foafData = new FoafData($uri);	
+            $this->foafData = new FoafData($uri);	
         } else {
-			$foafData = FoafData::getFromSession();
+			$this->foafData = FoafData::getFromSession();
 		}
 			
-        if($foafData) {
+        if($this->foafData) {
         	/*push some stuff to the view TODO: do we need to push this to the view here 
         	 * since javascript is doing most of the rendering? */
-            $this->view->model = $foafData->getModel();	
-            $this->view->uri = $foafData->getURI();	
-            $this->view->graphset= $foafData->getGraphset();
-			
-            /*build up a sparql query to get the values of all the fields we need*/
-            //TODO: make this relative to the page, possibly more than one function or controller.
-			$fieldNamesObject = new FieldNames();
-            $queryString = $this->buildSparqlQuery($fieldNamesObject);          
-            $results = $this->view->graphset->sparqlQuery($queryString.";");
+             $this->view->model =   $this->foafData->getModel();	
+             $this->view->uri =   $this->foafData->getURI();	
+             $this->view->graphset =   $this->foafData->getGraphset();    
+        }
+    }
+    
+    private function putResultsIntoView(){
+		  
+    	if($this->foafData){
+            $results = $this->view->graphset->sparqlQuery($this->queryString.";");	
 
             /*get rid of the ?s in the sparql results so they can be used with json*/
             $this->view->results = array();
@@ -44,12 +66,41 @@ class AjaxController extends Zend_Controller_Action
                 array_push($this->view->results, array_combine($keys,$row));
             }
            
-            $foafData->setPrimaryTopic($results[0]['?primaryTopic']->uri);      	
+            $this->foafData->setPrimaryTopic($results[0]['?primaryTopic']->uri);      	
         } else {
             print "Error Instance of FoafData is null!\n";
 	    	$this->view->isSuccess = 0;
-        }       
+        }     
+    	
     }
+    
+	/*builds a sparql query for 'The basics' page*/
+	private function buildSparqlQuery(){
+		require_once 'FieldNames.php';
+		$this->queryString = "
+        	PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+        	PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+        	PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                SELECT ?primaryTopic ";
+            
+       	/*Add ?foafName ?foafHomepage etc.*/
+        $allFieldNamesArray = $this->fieldNamesObject->getAllFieldNames();
+        foreach($allFieldNamesArray as $fieldName => $field){
+        	$this->queryString .= "?".$fieldName." ";	
+        }
+         
+        $this->queryString .= "
+        	FROM NAMED <".$this->view->uri.">
+            	WHERE 	
+                { 
+                    ?z foaf:primaryTopic ?x .
+                    ?z foaf:primaryTopic ?primaryTopic .";
+            
+        foreach($allFieldNamesArray as $fieldName => $field){
+        	 $this->queryString .= " OPTIONAL { ".$field->getQueryBit()." . } .";	
+        }
+	}
 	
 	public function saveFoafAction()
 	{
@@ -66,39 +117,8 @@ class AjaxController extends Zend_Controller_Action
 					$this->view->isSuccess = 1;
 				} else {
 					echo("there aint anything in the session");
-					
 				}
 			}
-	}
-	/*builds a sparql query for a given fieldNamesObject*/
-	private function buildSparqlQuery($fieldNamesObject){
-		require_once 'FieldNames.php';
-		$queryString = "
-        	PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-        	PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-        	PREFIX bio: <http://purl.org/vocab/bio/0.1/>
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                SELECT ?primaryTopic ";
-            
-       	/*Add ?foafName ?foafHomepage etc.*/
-        $allFieldNamesArray = $fieldNamesObject->getAllFieldNames();
-        foreach($allFieldNamesArray as $fieldName => $field){
-        	$queryString .= "?".$fieldName." ";	
-        }
-         
-        $queryString .= "
-        	FROM NAMED <".$this->view->uri.">
-            	WHERE 	
-                { 
-                    ?z foaf:primaryTopic ?x .
-                    ?z foaf:primaryTopic ?primaryTopic .";
-            
-        foreach($allFieldNamesArray as $fieldName => $field){
-        	$queryString .= " OPTIONAL { ".$field->getQueryBit()." . } .";	
-        }
-		
-        //var_dump($queryString);
-        return $queryString;
 	}
 	
 	/*does the actual saving to the model*/
@@ -118,10 +138,10 @@ class AjaxController extends Zend_Controller_Action
 		 */
 		
 		//get all the detail for each of the fields
-		$fieldNames = new FieldNames();
+		$fieldNames = new FieldNames('all');
 		
 		/*TODO: extend over all fields, not just simple ones, so here need to create the appropriate type of field*/
-		$simpleFieldNameArray = $fieldNames->getSimpleFieldNames();
+		$simpleFieldNameArray = $fieldNames->getAllFieldNames();
 		
 		/*loop through all the rows in the sparql results style 'almost model'*/
 		foreach($almost_model as $key => $predicate_array){

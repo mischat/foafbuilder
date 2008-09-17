@@ -4,16 +4,13 @@ require_once 'Field.php';
 /*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
 class BioBirthdayField extends Field{
 	
-	private $predicateUri;
-	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
-	public function BioBirthdayField($name, $queryBit, $type, $predicateUri = NULL){
-		$this->name = $name;
-		$this->queryBit = $queryBit;
-		$this->type = $type;
-		if($predicateUri){
-			$this->predicateUri = $predicateUri;		
-		}
+	public function BioBirthdayField(){
+		$this->name = 'bioBirthday';
+		$this->queryBit = '?x bio:event ?e .
+        				  ?e rdf:type bio:Birth .
+        				  ?e bio:date ?bioBirthday';
+		$this->type = 'literal';
 	}
 
 	public function getPredicateUri(){
