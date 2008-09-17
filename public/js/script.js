@@ -12,11 +12,21 @@ Array.prototype.dedup = function () {
 
 
 /*loads all the foaf data from the given file (or the session if there is no uri) into the editor.*/
-function loadFoaf(){
+function loadFoaf(name){
 
-	//TODO use jquery event handler to deal with errors on this request
 	url = document.getElementById('foafUri').value;
-  	$.post("/ajax/load-foaf", { uri: url}, function(data){objectsToDisplay(data);}, "json");
+  	
+  	//TODO: change name from personal and perhaps just generate things rather than doing this.
+  	$.post("/index/"+name, { uri: url}, function(data2){document.getElementById('personal').innerHTML=data2;});
+  	
+  	//TODO use jquery event handler to deal with errors on requests
+  	$.post("/ajax/"+name, { uri: url}, function(data){objectsToDisplay(data);}, "json");
+  	
+  	//FIXME: this is most definitely only available on FF3.
+  	//for(element in document.getElementsByClassName('editorTitle')){
+  		//element.style.backgroundImage = 'url(/images/pink_background.gif)';
+  	//}
+  	document.getElementById(name).style.backgroundImage='url(/images/blue_background.gif)';
 }
 
 /*populates form fields etc from javascript objects (from json) and fills out the global arrays */ 
@@ -25,16 +35,20 @@ function objectsToDisplay(data){
   	pageData = new PageDataObject();
 
 	for(arrayName in pageData){
+				
 		/*populate all the arrays in the pageData object (one for each field)*/		 	
 	  	if(arrayName != 'foafPrimaryTopic'){
 		
 			var name = arrayName.substring(0,arrayName.length-10);
+
 			for(k=0 ; k < data.length; k++){
-			  	if(data[k][name].label){
-			 		pageData[arrayName][pageData[arrayName].length] = data[k][name].label;
-			 	} else if(data[k][name].uri){
-			 		pageData[arrayName][pageData[arrayName].length] = data[k][name].uri;
-			 	} 
+				if(data[k][name]){
+				  	if(data[k][name].label){
+				 		pageData[arrayName][pageData[arrayName].length] = data[k][name].label;
+				 	} else if(data[k][name].uri){
+				 		pageData[arrayName][pageData[arrayName].length] = data[k][name].uri;
+				 	} 
+				 }
 		 	}
 		 	pageData[arrayName] = pageData[arrayName].dedup();
 	
@@ -45,6 +59,7 @@ function objectsToDisplay(data){
 			* (e.g. there may be many foaf:nicks)*/
 			for(i=0 ; i < pageData[arrayName].length; i++){
 				element = document.getElementById(name+'_'+thisElementCount); 
+				
 			 	/*either create a new element or fill in the old one*/
 			 	if(!element){ 
 			  		newElement = document.createElement('input');

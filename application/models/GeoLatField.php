@@ -4,16 +4,11 @@ require_once 'Field.php';
 /*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
 class GeoLatField extends Field{
 	
-	private $predicateUri;
-	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
-	public function GeoLatField($name, $queryBit, $type, $predicateUri = NULL){
-		$this->name = $name;
-		$this->queryBit = $queryBit;
-		$this->type = $type;
-		if($predicateUri){
-			$this->predicateUri = $predicateUri;		
-		}
+	public function GeoLatField(){
+		$this->name = 'geoLat';
+		$this->queryBit = '?x foaf:based_near ?l . ?l geo:lat ?geoLat';
+		$this->type = 'literal';
 	}
 
 	public function getPredicateUri(){

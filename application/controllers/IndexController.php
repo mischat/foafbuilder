@@ -33,7 +33,15 @@ class IndexController extends Zend_Controller_Action
 
     	/* $this->view->form = $this->getForm();*/
     }
+    //TODO: worry about what sort of validation to do.
+	public function loadTheBasicsAction(){
+		
+	}
 	
+	public function loadContactDetailsAction(){
+		
+	}
+    
     public function displayfoafAction()
     {
         require_once 'FoafData.php';

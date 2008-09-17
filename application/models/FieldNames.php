@@ -11,12 +11,9 @@ require_once "GeoLongField.php";
 class FieldNames {
 	
 	//an array containing all the fieldNames in this object
-	private $simpleFieldNameArray = Array();
+	private $allFieldNames = Array();
 
-	//TODO: how will this array actually work?
-	private $complicatedFieldNameArray = Array();
-
-	public function FieldNames(){
+	public function FieldNames($type){
 		//TODO: possibly we don't want two different arrays here
 		require_once 'Field.php';
 		/*
@@ -24,53 +21,55 @@ class FieldNames {
 		 * e.g. The basics, Contact details etc.  Could pass in a page parameter or something.
 		 * ?x in the query is the uri of the person we're concerned with.
 		 */
-		@$this->simpleFieldNameArray['foafTitle'] = 
+		switch($type){
+			/*
+			 * TODO: not sure about the 'all option here' and indeed whether or not this option should be used
+			 * when saving and in main.phtml.
+			 */
+			case "theBasics":
+				$this->instantiateTheBasicsFields();
+				break;
+			case "contactDetails":
+				$this->instantiateContactDetailsFields();
+				break;
+			case "all":
+				$this->instantiateTheBasicsFields();
+				$this->instantiateContactDetailsFields();
+				break;	
+		}
+	}
+	
+	/*instantiates arrays of fields for all the items on the basics page*/
+	private function instantiateTheBasicsFields(){
+		$this->allFieldNames['foafTitle'] = 
 			new SimpleField('foafTitle', '?x foaf:name ?foafName', 'literal',"http://xmlns.com/foaf/0.1/title");
-		@$this->simpleFieldNameArray['foafName'] = 
+		$this->allFieldNames['foafName'] = 
 			new SimpleField('foafName', '?x foaf:name ?foafName', 'literal','http://xmlns.com/foaf/0.1/name');
-		@$this->simpleFieldNameArray['foafHomepage'] = 
+		$this->allFieldNames['foafHomepage'] = 
 			new SimpleField('foafHomepage', '?x foaf:homepage ?foafHomepage','resource','http://xmlns.com/foaf/0.1/homepage');
-		@$this->simpleFieldNameArray['foafNick'] = 
+		$this->allFieldNames['foafNick'] = 
 			new SimpleField('foafNick', '?x foaf:nick ?foafNick','literal','http://xmlns.com/foaf/0.1/nick');
-		@$this->simpleFieldNameArray['foafBirthday'] = 
+		$this->allFieldNames['foafBirthday'] = 
 			new SimpleField('foafBirthday','?x foaf:birthday ?foafBirthday','literal','http://xmlns.com/foaf/0.1/birthday');
-		@$this->simpleFieldNameArray['foafDateOfBirth'] = 
+		$this->allFieldNames['foafDateOfBirth'] = 
 			new SimpleField('foafDateOfBirth','?x foaf:dateOfBirth ?foafDateOfBirth','literal','http://xmlns.com/foaf/0.1/dateOfBirth');
-		//$this->simpleFieldNameArray['foafPostCode'] = '?x foaf:homepage ?foafHomepage';
-		
-		/*a slightly different one, since this is obtained through more than one triple in the sparql query*/
-		$this->simpleFieldNameArray['bioBirthday'] = new BioBirthdayField(
-															'bioBirthday',
-															'?x bio:event ?e .
-        											 		 ?e rdf:type bio:Birth .
-        											 		 ?e bio:date ?bioBirthday',
-															 'literal');
-		@$this->simpleFieldNameArray['geoLatLong'] =  new GeoLatLongField(
-															'geoLatLong',
-														  	'?x foaf:based_near ?l .
-                        								  	?l geo:lat_long ?geoLatLong',
-															'literal');
-		$this->simpleFieldNameArray['geoLat'] =  new GeoLatField('geoLat',
-														  	'?x foaf:based_near ?l .
-                        								  	?l geo:lat ?geoLat',
-															'literal');
-		$this->simpleFieldNameArray['geoLong'] =  new GeoLongField('geoLong',
-														  	'?x foaf:based_near ?l .
-                        								  	?l geo:long ?geoLong',
-															'literal');
+					
+		$this->allFieldNames['bioBirthday'] = new BioBirthdayField();
+		$this->allFieldNames['geoLatLong'] =  new GeoLatLongField();
+		$this->allFieldNames['geoLat'] =  new GeoLatField();
+		$this->allFieldNames['geoLong'] =  new GeoLongField();	
 	}
 	
-	//TODO: for multiple pages pass in page parameter here.
-	public function getSimpleFieldNames(){
-		return $this->simpleFieldNameArray;
-	}
-	
-	public function getComplicatedFieldNames(){
-		return $this->complicatedFieldNameArray;
+	private function instantiateContactDetailsFields(){
+		$this->allFieldNames['foafMbox'] = 
+			new SimpleField('foafMbox', '?x foaf:mbox ?foafMbox', 'literal',"http://xmlns.com/foaf/0.1/mbox");
+		$this->allFieldNames['foafPhone'] = 
+			new SimpleField('foafPhone', '?x foaf:phone ?foafPhone', 'literal','http://xmlns.com/foaf/0.1/phone');
 	}
 	
 	public function getAllFieldNames(){
-		return array_merge($this->complicatedFieldNameArray,$this->simpleFieldNameArray);
+		return $this->allFieldNames;
 	}
+	
 }
 ?>

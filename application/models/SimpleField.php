@@ -46,7 +46,8 @@ class SimpleField extends Field{
 		/* Remove a matching triple (if there) and add the new one whilst remembering that there can
 		 * be more than one e.g. foafName and we only want to remove the one at the appropriate index.*/ 
 		if(isset($found_model->triples[0])){
-			$foafData->getModel()->remove($found_model->triples[0]);
+				$foafData->getModel()->remove($found_model->triples[0]);
+				var_dump($foafData->getModel());
 		}
 		$foafData->getModel()->add($new_statement);
 	}

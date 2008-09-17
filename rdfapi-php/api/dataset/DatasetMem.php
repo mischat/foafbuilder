@@ -154,7 +154,9 @@ class DatasetMem extends Dataset
 	 */
 	function &getNamedGraph($graphName)
 	{
-		if (!isset($this->graphs[$graphName])) return NULL;
+		if (!isset($this->graphs[$graphName])){
+			return NULL;
+		}
 		return $this->graphs[$graphName];
 	}
 

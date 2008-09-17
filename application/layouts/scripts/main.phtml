@@ -12,19 +12,25 @@
 			var PageDataObject;
 			
 			/*object to hold global variables in */
-			//TODO: this object is a bit 'inside out'
 			function PageDataObject(){
 				this.foafPrimaryTopic = new Array();
         		<?
-        			//TODO: this'll have to change if we make the fieldNames object page specific
     				require_once 'FieldNames.php';
     				require_once 'Field.php';
     				
-    				$fieldNamesObject = new FieldNames();
-    				$allFieldNames = $fieldNamesObject->getAllFieldNames();
+    				//TODO: add utility method or something to field names to get them all
+    				//TODO: worry about whether stuff will be cleared out when moving from page to page
+    				$basicFieldNamesObject = new FieldNames('theBasics');
+    				$contactFieldNamesObject = new FieldNames('contactDetails');
+    				
+    				$basicFieldNames = $basicFieldNamesObject->getAllFieldNames();
+    				$contactFieldNames = $contactFieldNamesObject->getAllFieldNames();
     				 
     				/*generate javascript to declare an array for each field on the page*/
-    				foreach($allFieldNames as $fieldName => $field){
+    				foreach($basicFieldNames as $fieldName => $field){
+    					echo("this.".$fieldName."ValueArray = new Array();"."\n");
+    				}
+    				foreach($contactFieldNames as $fieldName => $field){
     					echo("this.".$fieldName."ValueArray = new Array();"."\n");
     				}
     	    	
