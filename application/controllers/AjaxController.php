@@ -154,7 +154,7 @@ class AjaxController extends Zend_Controller_Action
 				/*loop through writing out triples*/
 				for($index = 0; $index < count($predicate_array) ;$index++){
 					echo("Saving: ".$field->getName()." at index: ".$index."\n");
-					$field->saveToModel(&$foafData, $predicate_array[$index]);
+					$field->saveToModel($foafData, $predicate_array[$index]);
 				}//end for	
 				
 			} else {
