@@ -129,7 +129,7 @@ class AjaxController extends Zend_Controller_Action
     	
     }
     
-	/*builds a sparql query for 'The basics' page*/
+	/*builds a sparql query*/
 	private function buildSparqlQuery(){
 		require_once 'FieldNames.php';
 		$this->queryString = "

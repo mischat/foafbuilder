@@ -24,7 +24,12 @@ function loadFoaf(name){
   	//$.post("/index/"+name, { uri: url}, function(data2){document.getElementById('personal').innerHTML=data2;});
   	
   	//TODO use jquery event handler to deal with errors on requests
-  	$.post("/ajax/"+name, { uri: url}, function(data){objectsToDisplay(data);}, "json");
+  	//TODO perhaps this is bad.  There certainly should be less hardcoding here.
+  	if(name == 'load-accounts'){
+  		$.post("/ajax/"+name, { uri: url}, function(data){accountsObjectsToDisplay(data);}, "json");
+  	} else {
+  		$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);}, "json");
+  	}
   	
   	//FIXME: this is broken
   	document.getElementById('load-contact-details').style.backgroundImage = 'url(/images/pink_background.gif)';
@@ -78,7 +83,7 @@ function clearFoaf() {
 
 
 /*populates form fields etc from javascript objects (from json) and fills out the global arrays */ 
-function objectsToDisplay(data){
+function genericObjectsToDisplay(data){
   	
   	pageData = new PageDataObject();
 	
@@ -116,6 +121,48 @@ function objectsToDisplay(data){
 		}//end if
 	}//end for
 }
+
+function accountsObjectsToDisplay(data){	
+	pageData = new PageDataObject();
+	
+	//TODO: perhaps some fading here further down the line
+  	document.getElementById('personal').innerHTML = '';
+  			
+  	/*populate all the arrays in the pageData object (one for each field)*/	
+	for(arrayName in pageData){			
+	  	if(arrayName != 'foafPrimaryTopic'){
+			var name = arrayName.substring(0,arrayName.length-10);
+
+			for(k=0 ; k < data.length; k++){
+				/*render blank fields for accounts*/
+				if(data[k][name] != null){		
+				  	if(data[k][name].label){
+				 		pageData[arrayName][pageData[arrayName].length] = data[k][name].label;
+				 	} else if(data[k][name].uri){
+				 		pageData[arrayName][pageData[arrayName].length] = data[k][name].uri;
+				 	} else{
+				 		pageData[arrayName][pageData[arrayName].length] = "";
+				 	}
+				 } 
+		 	}
+		 	/*don't dedup in this case*/
+		 	//pageData[arrayName] = pageData[arrayName].dedup();
+		}//end if
+	}
+	
+	
+	for(arrayName in pageData){		 	
+	  	if(arrayName != 'foafPrimaryTopic'){
+	  		var name = arrayName.substring(0,arrayName.length-10);
+	  		
+			for(i=0 ; i < pageData[arrayName].length; i++){
+			 	/*either create a new element or fill in the old one*/
+			 	createElement(name,pageData[arrayName][i],i);
+			}		
+		}//end if
+	}//end for
+}
+
 
 /*populates the triples objects with stuff from the actual display (i.e. what the user has changed)*/
 //TODO: needs to cope with added and deleted triples and scary random stuff like combining different ways of describing a birthday

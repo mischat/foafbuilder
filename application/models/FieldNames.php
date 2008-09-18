@@ -104,6 +104,8 @@ class FieldNames {
 	}
 	
 	private function instantiateAccountsFields(){
+		
+		/*TODO: need to get this so that it saves properly and loads so that it views.*/
 		$this->allFieldNames['accountServiceHomepage'] = 
 			new SimpleField('accountServiceHomepage', 'Account Service Homepage', '
 				?x foaf:holdsAccount ?a . 
