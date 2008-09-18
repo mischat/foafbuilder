@@ -1,5 +1,6 @@
 <?php
 require_once 'Field.php';
+/*FIXME: this field is currently not used*/
 
 /*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
 class AccountsField extends Field{
