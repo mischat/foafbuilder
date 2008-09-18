@@ -6,8 +6,9 @@ class GeoLongField extends Field{
 	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
 	public function GeoLongField(){
+		$this->label ='Location';
 		$this->name = 'geoLong';
-		$this->queryBit = '?x foaf:based_near ?l .	?l geo:long ?geoLong';
+		$this->queryBit = '?x foaf:based_near ?l . ?l geo:long ?geoLong';
 		$this->type = 'literal';
 	}
 
@@ -20,7 +21,7 @@ class GeoLongField extends Field{
 	/*saves the appropriate triples in the model at the appropriate index and replace them with $value*/
 	/*FIXME: perhaps the sparql bit at the start of this class is overkill? Also, need to add nearest airport stuff.*/
 	public function saveToModel(&$foafData, $value){
-		echo("SAVING Long");
+		echo("SAVING long");
 		require_once 'SimpleField.php';
 		require_once 'FieldNames.php';
 

@@ -1,3 +1,12 @@
+<?
+require_once 'FieldNames.php';
+require_once 'Field.php';
+    
+//TODO: put this stuff in a controller, something like initialisationController
+$fieldNamesObject = new FieldNames('all');
+$fieldNames = $fieldNamesObject->getAllFieldNames();
+?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
     <head>
@@ -7,35 +16,22 @@
         <script type="text/javascript" src="/js/json.js"></script>
         <script type="text/javascript" src="/js/jquery-1.2.6.min.js"></script>
         <script type="text/javascript" src="/js/script.js"></script>
+        <script type="text/javascript" src="/js/calendar.js"></script>
         <script>
         	/*global variables containing all the data on the page*/
 			var PageDataObject;
+			var fieldLabelsArray = new Array();
 			
 			/*object to hold global variables in */
 			function PageDataObject(){
 				this.foafPrimaryTopic = new Array();
-        		<?
-    				require_once 'FieldNames.php';
-    				require_once 'Field.php';
-    				
-    				//TODO: add utility method or something to field names to get them all
-    				//TODO: worry about whether stuff will be cleared out when moving from page to page
-    				$basicFieldNamesObject = new FieldNames('theBasics');
-    				$contactFieldNamesObject = new FieldNames('contactDetails');
-    				
-    				$basicFieldNames = $basicFieldNamesObject->getAllFieldNames();
-    				$contactFieldNames = $contactFieldNamesObject->getAllFieldNames();
-    				 
-    				/*generate javascript to declare an array for each field on the page*/
-    				foreach($basicFieldNames as $fieldName => $field){
-    					echo("this.".$fieldName."ValueArray = new Array();"."\n");
-    				}
-    				foreach($contactFieldNames as $fieldName => $field){
-    					echo("this.".$fieldName."ValueArray = new Array();"."\n");
-    				}
-    	    	
+        		<? 
+        			renderFieldArrayDeclarations($fieldNames);
         		?>	
 			}
+			<?
+				buildFieldLabelsArray($fieldNames);
+			?>
 		</script>
     </head>
     <body>
@@ -71,5 +67,27 @@
 			</div>
 	</body>
 </html>
+
+
+<?
+//TODO: think of a more intelligent way of getting this stuff to the view... json?
+function renderFieldArrayDeclarations($fieldNames){
+
+    /*generate javascript to declare an array for each field on the page
+      and to create an array of field labels*/
+    foreach($fieldNames as $fieldName => $field){
+    	echo("this.".$fieldName."ValueArray = new Array();"."\n");
+    }
+}
+
+function buildFieldLabelsArray($fieldNames){
+	/*fill up the fieldLabelsArray with stuff*/
+	foreach($fieldNames as $fieldName => $field){
+    	echo("fieldLabelsArray['".$fieldName."'] ='".$field->getLabel()."'\n");
+    }
+}
+
+
+?>
                  
   

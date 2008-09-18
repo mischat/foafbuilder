@@ -7,7 +7,8 @@ class SimpleField extends Field{
 	private $predicateUri;
 	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
-	public function SimpleField($name, $queryBit, $type, $predicateUri = NULL){
+	public function SimpleField($name, $label, $queryBit, $type, $predicateUri = NULL){
+		$this->label = $label;
 		$this->name = $name;
 		$this->queryBit = $queryBit;
 		$this->type = $type;
@@ -23,7 +24,7 @@ class SimpleField extends Field{
 		$this->predicateUri = $predicateUri;
 	}
 	/*saves the appropriate triples in the model at the appropriate index and replace them with $value*/
-	public function &saveToModel($foafData, $value){
+	public function saveToModel(&$foafData, &$value){
 
 		require_once 'SimpleField.php';
 		require_once 'FieldNames.php';
@@ -47,7 +48,6 @@ class SimpleField extends Field{
 		 * be more than one e.g. foafName and we only want to remove the one at the appropriate index.*/ 
 		if(isset($found_model->triples[0])){
 				$foafData->getModel()->remove($found_model->triples[0]);
-				var_dump($foafData->getModel());
 		}
 		$foafData->getModel()->add($new_statement);
 	}

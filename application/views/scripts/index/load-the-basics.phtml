@@ -1,84 +1,24 @@
 <?
+//TODO: build this whole thing out of javascript
 //We don't want any HTML gubbins here
 $this->layout()->setLayout('ajax');	
 ?>		
-	<div class="fieldContainer">
-		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Name</span>
-		</div>
-		<div class="fieldValueContainer" id="foafName_container">
-			<input id='foafName_0' value=''>
-		</div>
-	</div>
 	
-	<div class="fieldContainer">
-		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Nicknames</span>
-		</div>
-		<div class="fieldValueContainer" id="foafNick_container">
-			<input id='foafNick_0' value=''>
-		</div>
-	</div>
-	
-	<div class="fieldContainer">
-		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Geo Latitude</span>
-		</div>
-		<div class="fieldValueContainer" id="geoLat_container">
-			<input id='geoLat_0' value=''>
-		</div>
-	</div>
-	
-	<div class="fieldContainer">
-		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Geo Longitude</span>
-		</div>
-		<div class="fieldValueContainer" id="geoLong_container">
-			<input id='geoLong_0' value=''>
-		</div>
-	</div>
-	
-	<div class="fieldContainer">
-		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Geo LatLong</span>
-		</div>
-		<div class="fieldValueContainer" id="geoLatLong_container">
-			<input id='geoLatLong_0' value=''>
-		</div>
-	</div>
-	
-	<div class="fieldContainer">
-		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Birthday (bioBirthday)</span>
-		</div>
-		<div class="fieldValueContainer" id="bioBirthday_container">
-			<input id='bioBirthday_0' value=''> 
-		</div>
-	</div>
-	
-	<div class="fieldContainer">
-		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Birthday (foafBirthday)</span>
-		</div>
-		<div class="fieldValueContainer" id="foafBirthday_container">
-			<input id='foafBirthday_0' value=''> 
-		</div>
-	</div>
-	
-	<div class="fieldContainer">
-		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Birthday (foafDateOFBirth)</span>
-		</div>
-		<div class="fieldValueContainer" id="foafDateOfBirth_container">
-			<input id='foafDateOfBirth_0' value=''> 
-		</div>
-	</div>
-	
-	<div class="fieldContainer">
-		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Homepages</span>
-		</div>
-		<div class="fieldValueContainer" id="foafHomepage_container">
-			<input id='foafHomepage_0' value=''/> 
-		</div>
-	</div>
+	<? /*
+	    * need to add this stuff as an alternative to based_near
+	    * 
+	    * 
+	    *  <contact:nearestAirport> 
+      <wn:Airport>
+        <air:name>Greater Binghamton Edwin A Link Fld</air:name>
+        <air:iataCode>BGM</air:iataCode>
+        <air:icaoCode>KBGM</air:icaoCode>
+        <air:sameIndividualAs rdf:resource="http://www.daml.org/cgi-bin/airport?BGM"/>
+        <air:location>Binghamton, New York, United States</air:location>
+        <air:latitude>42.20861111111111</air:latitude>
+        <air:longitude>-75.97972222222222</air:longitude>
+        <air:elevation>1636</air:elevation>
+       </wn:Airport>
+    </contact:nearestAirport>
+	    * 
+	    */ ?>

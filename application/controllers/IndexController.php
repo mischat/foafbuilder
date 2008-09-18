@@ -25,7 +25,6 @@ class IndexController extends Zend_Controller_Action
             ),
         ));
 */
-
         return $form;
     }
     
@@ -33,7 +32,7 @@ class IndexController extends Zend_Controller_Action
 
     	/* $this->view->form = $this->getForm();*/
     }
-    //TODO: worry about what sort of validation to do.
+    //TODO: worry about what sort of validation to do + possibly seed the view here.
 	public function loadTheBasicsAction(){
 		
 	}
@@ -42,6 +41,10 @@ class IndexController extends Zend_Controller_Action
 		
 	}
     
+	public function loadPicturesAction(){
+		
+	}
+	
     public function displayfoafAction()
     {
         require_once 'FoafData.php';
