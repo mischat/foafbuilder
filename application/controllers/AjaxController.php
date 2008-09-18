@@ -31,6 +31,15 @@ class AjaxController extends Zend_Controller_Action
     	$this->putResultsIntoView();
     }
     
+   public function loadPicturesAction() 
+    {
+    	/*build up a sparql query to get the values of all the fields we need*/
+    	$this->loadFoaf();   
+		$this->fieldNamesObject = new FieldNames('pictures');
+    	$this->buildSparqlQuery();
+    	$this->putResultsIntoView();
+    }
+    
 	/*gets the foaf (either from the uri or from the session) as well as adding stuff to the view*/
     private function loadFoaf(){
     	require_once 'FoafData.php';
@@ -104,21 +113,21 @@ class AjaxController extends Zend_Controller_Action
 	
 	public function saveFoafAction()
 	{
-			$this->view->isSuccess = 0;
+		$this->view->isSuccess = 0;
 	
-			require_once 'FoafData.php';
-			$changes_model = @$_POST['model'];
-			
-			if($changes_model){
-				$foafData = FoafData::getFromSession();	
-				if($foafData){
-					$this->applyChangesToModel($foafData,$changes_model);	
-					$foafData->putInSession();
-					$this->view->isSuccess = 1;
-				} else {
-					echo("there aint anything in the session");
-				}
+		require_once 'FoafData.php';
+		$changes_model = @$_POST['model'];
+		
+		if($changes_model){
+			$foafData = FoafData::getFromSession();	
+			if($foafData){
+				$this->applyChangesToModel($foafData,$changes_model);	
+				$foafData->putInSession();
+				$this->view->isSuccess = 1;
+			} else {
+				echo("there aint anything in the session");
 			}
+		}
 	}
 	
 	/*does the actual saving to the model*/
@@ -150,7 +159,7 @@ class AjaxController extends Zend_Controller_Action
 				
 				/*get some details about the field we're dealing with*/
 				$field = $simpleFieldNameArray[substr($key,0,-10)];
-					
+					//echo(substr($key,0,-10));
 				/*loop through writing out triples*/
 				for($index = 0; $index < count($predicate_array) ;$index++){
 					echo("Saving: ".$field->getName()." at index: ".$index."\n");

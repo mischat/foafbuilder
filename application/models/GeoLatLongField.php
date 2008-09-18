@@ -5,6 +5,7 @@ class GeoLatLongField extends Field{
 	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
 	public function GeoLatLongField(){
+		$this->label ='Location';
 		$this->name = 'geoLatLong';
 		$this->queryBit = '?x foaf:based_near ?l . ?l geo:lat_long ?geoLatLong';
 		$this->type = 'literal';

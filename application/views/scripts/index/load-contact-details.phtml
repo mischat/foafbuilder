@@ -1,22 +1,21 @@
 <?
+//TODO: eventually build this whole thing out of javascript
 //We don't want any HTML gubbins here
 $this->layout()->setLayout('ajax');	
 ?>	
-	<div class="fieldContainer">
-		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Email</span>
-		</div>
-		<div class="fieldValueContainer" id="foafMbox_container">
-			<input id='foafMbox_0' value=''>
-		</div>
-	</div>
 	
-	<div class="fieldContainer">
-		<div class="fieldLabelContainer">
-			<span class="fieldLabel">Phone</span>
-		</div>
-		<div class="fieldValueContainer" id="foafPhone_container">
-			<input id='foafPhone_0' value=''>
-		</div>
-	</div>
+	<? /*
+	    * TODO: add addresses here e.g.
+	    * <contact:home rdf:parseType="Resource">
+			<rdf:type rdf:resource="http://www.w3.org/2000/10/swap/pim/contact#ContactLocation"/>
+			<contact:address rdf:parseType="Resource">
+			<contact:city>Fontainebleau</contact:city>
+			<contact:country>France</contact:country>
+			<contact:postalCode>77300</contact:postalCode>
+			<contact:street>21 rue Saint Honore</contact:street>
+			</contact:address>
+			<geo:lat>48.404532</geo:lat>
+			<geo:long>2.700448</geo:long>
+			</contact:home>
+	    */  ?>
 	

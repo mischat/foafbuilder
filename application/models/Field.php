@@ -4,6 +4,7 @@ abstract class Field{
 	protected $name;
 	protected $queryBit;
 	protected $type;//bnode or literal.  TODO: Should be an enumerator really.
+	protected $label;
 	
 	public function Field(){	
 	}
@@ -27,6 +28,13 @@ abstract class Field{
 	}
 	public function setType($type){
 		$this->type = $type;
+	}
+	
+	public function getLabel(){
+		return $this->label;
+	}
+	public function setLabel($label){
+		$this->label = $label;
 	}
 	
 	public function saveToModel(&$foafData, $value, $index){

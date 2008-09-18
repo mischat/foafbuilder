@@ -6,6 +6,7 @@ class BioBirthdayField extends Field{
 	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
 	public function BioBirthdayField(){
+		$this->label ='Birthday';
 		$this->name = 'bioBirthday';
 		$this->queryBit = '?x bio:event ?e .
         				  ?e rdf:type bio:Birth .
