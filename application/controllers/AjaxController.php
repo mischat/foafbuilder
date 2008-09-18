@@ -40,6 +40,52 @@ class AjaxController extends Zend_Controller_Action
     	$this->putResultsIntoView();
     }
     
+   public function loadAccountsAction() 
+    {
+    	/*build up a sparql query to get the values of all the fields we need*/
+    	$this->loadFoaf();   
+		$this->fieldNamesObject = new FieldNames('accounts');
+    	$this->buildSparqlQuery();
+    	$this->putResultsIntoView();
+    }
+    
+   public function loadFriendsAction() 
+    {
+    	/*build up a sparql query to get the values of all the fields we need*/
+    	$this->loadFoaf();   
+		$this->fieldNamesObject = new FieldNames('friends');
+    	$this->buildSparqlQuery();
+    	$this->putResultsIntoView();
+    }
+    
+   	public function loadBlogsAction() 
+    {
+    	/*build up a sparql query to get the values of all the fields we need*/
+    	$this->loadFoaf();   
+		$this->fieldNamesObject = new FieldNames('blogs');
+    	$this->buildSparqlQuery();
+    	$this->putResultsIntoView();
+    }
+    
+    public function loadInterestsAction() 
+    {
+    	/*build up a sparql query to get the values of all the fields we need*/
+    	$this->loadFoaf();   
+		$this->fieldNamesObject = new FieldNames('interests');
+    	$this->buildSparqlQuery();
+    	$this->putResultsIntoView();
+    }
+    
+    public function loadOtherAction() 
+    {
+    	/*build up a sparql query to get the values of all the fields we need*/
+    	$this->loadFoaf();   
+		$this->fieldNamesObject = new FieldNames('other');
+    	$this->buildSparqlQuery();
+    	$this->putResultsIntoView();
+    }
+    
+    
 	/*gets the foaf (either from the uri or from the session) as well as adding stuff to the view*/
     private function loadFoaf(){
     	require_once 'FoafData.php';
@@ -66,7 +112,7 @@ class AjaxController extends Zend_Controller_Action
 		  
     	if($this->foafData){
             $results = $this->view->graphset->sparqlQuery($this->queryString.";");	
-
+	
             /*get rid of the ?s in the sparql results so they can be used with json*/
             $this->view->results = array();
             foreach($results as $row) {
@@ -109,6 +155,7 @@ class AjaxController extends Zend_Controller_Action
         foreach($allFieldNamesArray as $fieldName => $field){
         	 $this->queryString .= " OPTIONAL { ".$field->getQueryBit()." . } .";	
         }
+ 
 	}
 	
 	public function saveFoafAction()

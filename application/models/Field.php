@@ -3,8 +3,9 @@
 abstract class Field{
 	protected $name;
 	protected $queryBit;
-	protected $type;//bnode or literal.  TODO: Should be an enumerator really.
+	protected $type;//resource or literal.  TODO: Should be an enumerator really.
 	protected $label;
+	protected $keepNulls;//whether we keep the field even if empty (i.e. render an empty box);
 	
 	public function Field(){	
 	}
@@ -35,6 +36,13 @@ abstract class Field{
 	}
 	public function setLabel($label){
 		$this->label = $label;
+	}
+	
+	public function setKeepNulls($keepNulls){
+		$this->keepNulls = $keepNulls;
+	}
+	public function getKeepNulls(){
+		return $this->keepNulls;
 	}
 	
 	public function saveToModel(&$foafData, $value, $index){

@@ -20,8 +20,6 @@ Array.prototype.dedup = function () {
 function loadFoaf(name){
 
 	url = document.getElementById('foafUri').value;
-	
-  	
   	//we're now generating everything from javascript so we don't need to do this.
   	//$.post("/index/"+name, { uri: url}, function(data2){document.getElementById('personal').innerHTML=data2;});
   	
@@ -29,11 +27,15 @@ function loadFoaf(name){
   	$.post("/ajax/"+name, { uri: url}, function(data){objectsToDisplay(data);}, "json");
   	
   	//FIXME: this is broken
-  	//for(element in document.getElementsByClassName('editorTitle')){
   	document.getElementById('load-contact-details').style.backgroundImage = 'url(/images/pink_background.gif)';
   	document.getElementById('load-the-basics').style.backgroundImage = 'url(/images/pink_background.gif)';
   	document.getElementById('load-pictures').style.backgroundImage = 'url(/images/pink_background.gif)';
-  	//}
+  	document.getElementById('load-accounts').style.backgroundImage = 'url(/images/pink_background.gif)';
+  	document.getElementById('load-friends').style.backgroundImage = 'url(/images/pink_background.gif)';
+  	document.getElementById('load-blogs').style.backgroundImage = 'url(/images/pink_background.gif)';
+  	document.getElementById('load-interests').style.backgroundImage = 'url(/images/pink_background.gif)';
+  	document.getElementById('load-other').style.backgroundImage = 'url(/images/pink_background.gif)';
+  	
   	document.getElementById(name).style.backgroundImage='url(/images/blue_background.gif)';
 }
 
@@ -89,13 +91,14 @@ function objectsToDisplay(data){
 			var name = arrayName.substring(0,arrayName.length-10);
 
 			for(k=0 ; k < data.length; k++){
-				if(data[k][name]){
+				if(data[k][name]){		
+					/*the average field, just slam it in the appropriate array and don't put in any empty fields*/
 				  	if(data[k][name].label){
 				 		pageData[arrayName][pageData[arrayName].length] = data[k][name].label;
 				 	} else if(data[k][name].uri){
 				 		pageData[arrayName][pageData[arrayName].length] = data[k][name].uri;
 				 	} 
-				 }
+				 } 
 		 	}
 		 	pageData[arrayName] = pageData[arrayName].dedup();
 		}//end if

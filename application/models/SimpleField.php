@@ -7,7 +7,8 @@ class SimpleField extends Field{
 	private $predicateUri;
 	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
-	public function SimpleField($name, $label, $queryBit, $type, $predicateUri = NULL){
+	public function SimpleField($name, $label, $queryBit, $type, $keepNulls, $predicateUri = NULL){
+		$this->keepNulls = $keepNulls;
 		$this->label = $label;
 		$this->name = $name;
 		$this->queryBit = $queryBit;
