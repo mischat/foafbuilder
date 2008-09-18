@@ -1,8 +1,8 @@
 <?
 require_once 'FieldNames.php';
 require_once 'Field.php';
-    
-//TODO: put this stuff in a controller, something like initialisationController
+  
+//TODO: really need put this stuff in a controller, something like initialisationController.  Should also use json for the fieldnames - javascript stuff
 $fieldNamesObject = new FieldNames('all');
 $fieldNames = $fieldNamesObject->getAllFieldNames();
 ?>
@@ -21,6 +21,7 @@ $fieldNames = $fieldNamesObject->getAllFieldNames();
         	/*global variables containing all the data on the page*/
 			var PageDataObject;
 			var fieldLabelsArray = new Array();
+			var keepNullsArray = new Array();
 			
 			/*object to hold global variables in */
 			function PageDataObject(){
@@ -31,6 +32,7 @@ $fieldNames = $fieldNamesObject->getAllFieldNames();
 			}
 			<?
 				buildFieldLabelsArray($fieldNames);
+				//buildKeepNullsArray($fieldNames);
 			?>
 		</script>
     </head>
@@ -72,7 +74,6 @@ $fieldNames = $fieldNamesObject->getAllFieldNames();
 <?
 //TODO: think of a more intelligent way of getting this stuff to the view... json?
 function renderFieldArrayDeclarations($fieldNames){
-
     /*generate javascript to declare an array for each field on the page
       and to create an array of field labels*/
     foreach($fieldNames as $fieldName => $field){
@@ -81,9 +82,16 @@ function renderFieldArrayDeclarations($fieldNames){
 }
 
 function buildFieldLabelsArray($fieldNames){
-	/*fill up the fieldLabelsArray with stuff*/
+	/*fill up the fieldLabelsArray with stuff (what is each type of field called)*/
 	foreach($fieldNames as $fieldName => $field){
     	echo("fieldLabelsArray['".$fieldName."'] ='".$field->getLabel()."'\n");
+    }
+}
+
+function buildKeepNullsArray($fieldNames){
+	/*fill up the buildKeepNullsArray with stuff (so we know whether to keep track of null values)*/
+	foreach($fieldNames as $fieldName => $field){
+    	echo("keepNullsArray['".$fieldName."'] ='".$field->getKeepNulls()."'\n");
     }
 }
 
