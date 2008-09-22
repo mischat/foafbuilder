@@ -123,8 +123,7 @@ function renderAccountFields(i, data, containerElement){
 		var holdsAccountElement = createHoldsAccountElement(containerElement,accountBnodeId);
 		
 		/*create an element for the foafAccountProfilePage*/
-		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]
-			&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri){
+		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]){
 			createAccountsInputElement('foafAccountProfilePage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri, holdsAccountElement);	
 		} else {
 			/*create an empty element*/
@@ -132,8 +131,7 @@ function renderAccountFields(i, data, containerElement){
 		}
 		
 		/*create an element for the foafAccountName*/
-		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0]
-			&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label){
+		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0]){
 			createAccountsInputElement('foafAccountName', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label, holdsAccountElement);	
 		} else {
 			/*create an empty element*/
@@ -141,8 +139,7 @@ function renderAccountFields(i, data, containerElement){
 		}
 		
 		/*create an element for the foafAccountProfilePage*/
-		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]
-			&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri){
+		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]){
 			createAccountsInputElement('foafAccountServiceHomepage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
 		} else {
 			/*create an empty element*/
@@ -185,18 +182,14 @@ function displayToObjects(){
   			var bNodeId = containerElement.childNodes[i].id;
   			
   			for(k=0; k < containerElement.childNodes[i].childNodes.length; k++){
+  			
   				//do the right thing for the right element, and miss any elements we don't care about.
   				if(holdsAccountElement.childNodes[k].id == 'foafAccountProfilePage'){
-  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountProfilePage'][0].uri= holdsAccountElement.childNodes[k].value;
-  				
+  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountProfilePage'] = [{uri : holdsAccountElement.childNodes[k].value}];
   				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountName'){
-  				
-  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountName'][0].label = holdsAccountElement.childNodes[k].value;
-  				
+  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountName'] = [{label : holdsAccountElement.childNodes[k].value}];
   				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountServiceHomepage'){		
-  				i
-  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountServiceHomepage'][0].uri = holdsAccountElement.childNodes[k].value;				
-  				
+  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountServiceHomepage'] = [{uri : holdsAccountElement.childNodes[k].value}];				
   				} 
   			}
   		//} 
