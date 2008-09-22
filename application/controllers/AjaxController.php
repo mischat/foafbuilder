@@ -17,16 +17,18 @@ class AjaxController extends Zend_Controller_Action
     {
     	/*build up a sparql query to get the values of all the fields we need*/
     	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('theBasics');
-    	$this->buildSparqlQuery();
-    	$this->putResultsIntoView();
+		$this->fieldNamesObject = new FieldNames('theBasics',$this->foafData);  	
+		$this->view->results = array();
+		foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+			array_push($this->view->results,$field->getData());	
+		}
     }
     
    public function loadContactDetailsAction() 
     {
     	/*build up a sparql query to get the values of all the fields we need*/
     	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('contactDetails');
+		$this->fieldNamesObject = new FieldNames('contactDetails',$this->foafData);
     	$this->buildSparqlQuery();
     	$this->putResultsIntoView();
     }
@@ -35,7 +37,7 @@ class AjaxController extends Zend_Controller_Action
     {
     	/*build up a sparql query to get the values of all the fields we need*/
     	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('pictures');
+		$this->fieldNamesObject = new FieldNames('pictures',$this->foafData);
     	$this->buildSparqlQuery();
     	$this->putResultsIntoView();
     }
@@ -44,7 +46,7 @@ class AjaxController extends Zend_Controller_Action
     {
     	/*build up a sparql query to get the values of all the fields we need*/
     	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('accounts');
+		$this->fieldNamesObject = new FieldNames('accounts',$this->foafData);
     	$this->buildSparqlQuery();
     	$this->putResultsIntoView();
     }
@@ -53,7 +55,7 @@ class AjaxController extends Zend_Controller_Action
     {
     	/*build up a sparql query to get the values of all the fields we need*/
     	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('friends');
+		$this->fieldNamesObject = new FieldNames('friends',$this->foafData);
     	$this->buildSparqlQuery();
     	$this->putResultsIntoView();
     }
@@ -62,7 +64,7 @@ class AjaxController extends Zend_Controller_Action
     {
     	/*build up a sparql query to get the values of all the fields we need*/
     	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('blogs');
+		$this->fieldNamesObject = new FieldNames('blogs',$this->foafData);
     	$this->buildSparqlQuery();
     	$this->putResultsIntoView();
     }
@@ -71,7 +73,7 @@ class AjaxController extends Zend_Controller_Action
     {
     	/*build up a sparql query to get the values of all the fields we need*/
     	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('interests');
+		$this->fieldNamesObject = new FieldNames('interests',$this->foafData);
     	$this->buildSparqlQuery();
     	$this->putResultsIntoView();
     }
@@ -80,7 +82,7 @@ class AjaxController extends Zend_Controller_Action
     {
     	/*build up a sparql query to get the values of all the fields we need*/
     	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('other');
+		$this->fieldNamesObject = new FieldNames('other',$this->foafData);
     	$this->buildSparqlQuery();
     	$this->putResultsIntoView();
     }

@@ -2,9 +2,7 @@
 require_once 'FieldNames.php';
 require_once 'Field.php';
   
-//TODO: really need put this stuff in a controller, something like initialisationController.  Should also use json for the fieldnames - javascript stuff
-$fieldNamesObject = new FieldNames('all');
-$fieldNames = $fieldNamesObject->getAllFieldNames();
+
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -18,22 +16,7 @@ $fieldNames = $fieldNamesObject->getAllFieldNames();
         <script type="text/javascript" src="/js/script.js"></script>
         <script type="text/javascript" src="/js/calendar.js"></script>
         <script>
-        	/*global variables containing all the data on the page*/
-			var PageDataObject;
-			var fieldLabelsArray = new Array();
-			var keepNullsArray = new Array();
-			
-			/*object to hold global variables in */
-			function PageDataObject(){
-				this.foafPrimaryTopic = new Array();
-        		<? 
-        			renderFieldArrayDeclarations($fieldNames);
-        		?>	
-			}
-			<?
-				buildFieldLabelsArray($fieldNames);
-				//buildKeepNullsArray($fieldNames);
-			?>
+       
 		</script>
     </head>
     <body>
@@ -70,32 +53,5 @@ $fieldNames = $fieldNamesObject->getAllFieldNames();
 	</body>
 </html>
 
-
-<?
-//TODO: think of a more intelligent way of getting this stuff to the view... json?
-function renderFieldArrayDeclarations($fieldNames){
-    /*generate javascript to declare an array for each field on the page
-      and to create an array of field labels*/
-    foreach($fieldNames as $fieldName => $field){
-    	echo("this.".$fieldName."ValueArray = new Array();"."\n");
-    }
-}
-
-function buildFieldLabelsArray($fieldNames){
-	/*fill up the fieldLabelsArray with stuff (what is each type of field called)*/
-	foreach($fieldNames as $fieldName => $field){
-    	echo("fieldLabelsArray['".$fieldName."'] ='".$field->getLabel()."'\n");
-    }
-}
-
-function buildKeepNullsArray($fieldNames){
-	/*fill up the buildKeepNullsArray with stuff (so we know whether to keep track of null values)*/
-	foreach($fieldNames as $fieldName => $field){
-    	echo("keepNullsArray['".$fieldName."'] ='".$field->getKeepNulls()."'\n");
-    }
-}
-
-
-?>
-                 
+           
   
