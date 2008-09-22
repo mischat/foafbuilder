@@ -2,10 +2,9 @@
 
 abstract class Field{
 	protected $name;
-	protected $queryBit;
 	protected $type;//resource or literal.  TODO: Should be an enumerator really.
 	protected $label;
-	protected $keepNulls;//whether we keep the field even if empty (i.e. render an empty box);
+	protected $data;//whether we keep the field even if empty (i.e. render an empty box);
 	
 	public function Field(){	
 	}
@@ -15,13 +14,6 @@ abstract class Field{
 	}
 	public function setName($name){
 		$this->name = $name;
-	}
-	
-	public function getQueryBit(){
-		return $this->queryBit;
-	}
-	public function setQueryBit($queryBit){
-		$this->queryBit = $queryBit;
 	}
 	
 	public function getType(){
@@ -38,11 +30,11 @@ abstract class Field{
 		$this->label = $label;
 	}
 	
-	public function setKeepNulls($keepNulls){
-		$this->keepNulls = $keepNulls;
+	public function setData($data){
+		$this->data = $data;
 	}
-	public function getKeepNulls(){
-		return $this->keepNulls;
+	public function getData(){
+		return $this->data;
 	}
 	
 	public function saveToModel(&$foafData, $value, $index){

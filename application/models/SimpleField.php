@@ -7,23 +7,31 @@ class SimpleField extends Field{
 	private $predicateUri;
 	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
-	public function SimpleField($name, $label, $queryBit, $type, $keepNulls, $predicateUri = NULL){
-		$this->keepNulls = $keepNulls;
-		$this->label = $label;
-		$this->name = $name;
-		$this->queryBit = $queryBit;
-		$this->type = $type;
-		if($predicateUri){
-			$this->predicateUri = $predicateUri;		
+	//TODO: should label be here
+	public function SimpleField($name, $label, $predicateUri, $foafData, $type){
+		
+		$queryString = "SELECT ?".$name." WHERE {<".$foafData->getPrimaryTopic()."> <".$predicateUri."> ?".$name." }";
+		$results = $foafData->getModel()->SparqlQuery($queryString);		
+		$this->data = array();
+		$this->data['fields'] = array();
+		
+		/*mangle the results so that they can be easily rendered*/
+		if(isset($results[0])){
+			foreach($results as $row) {
+	           	$keys = array_keys($row);
+	        	$keys = str_replace('?','',$keys);
+	        	array_push($this->data['fields'], array_combine($keys,$row));
+	    	}
 		}
+        
+        $this->data['displayLabel'] = $label;
+        $this->data['name'] = $name;
+        $this->name = $name;
+		$this->label = $label;
+		$this->type = $type;
+		$this->predicateUri = $predicateUri;		
 	}
 
-	public function getPredicateUri(){
-		return $this->predicateUri;
-	}
-	public function setPredicateUri($predicateUri){
-		$this->predicateUri = $predicateUri;
-	}
 	/*saves the appropriate triples in the model at the appropriate index and replace them with $value*/
 	public function saveToModel(&$foafData, &$value){
 
@@ -51,6 +59,14 @@ class SimpleField extends Field{
 				$foafData->getModel()->remove($found_model->triples[0]);
 		}
 		$foafData->getModel()->add($new_statement);
+	}
+	
+
+	public function getPredicateUri(){
+		return $this->predicateUri;
+	}
+	public function setPredicateUri($predicateUri){
+		$this->predicateUri = $predicateUri;
 	}
 }
 ?>

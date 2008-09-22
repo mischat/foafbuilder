@@ -51,6 +51,8 @@ class FoafData {
             $newUriRes = new Resource($newUri);
             $model->replace($oldUriRes,NULL,NULL,$newUriRes);
             $model->replace(NULL,NULL,$oldUriRes,$newUriRes);
+            $this->primaryTopic = $newUri;
+            
             if (!preg_match("/#me$/",$oldUri,$patterns)) {
                 $model->add(new Statement($newUriRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldUriRes));
             }

@@ -1,3 +1,6 @@
+/*global variable for storing data*/
+var globalFieldData;
+
 /*---------------------------------------utils---------------------------------------*/
 
 /*for uniquing an array*/
@@ -84,42 +87,88 @@ function clearFoaf() {
 
 /*populates form fields etc from javascript objects (from json) and fills out the global arrays */ 
 function genericObjectsToDisplay(data){
-  	
-  	pageData = new PageDataObject();
-	
-	//TODO: perhaps some fading here further down the line
-  	document.getElementById('personal').innerHTML = '';
-  			
-  	/*populate all the arrays in the pageData object (one for each field)*/	
-	for(arrayName in pageData){			
-	  	if(arrayName != 'foafPrimaryTopic'){
-			var name = arrayName.substring(0,arrayName.length-10);
 
-			for(k=0 ; k < data.length; k++){
-				if(data[k][name]){		
-					/*the average field, just slam it in the appropriate array and don't put in any empty fields*/
-				  	if(data[k][name].label){
-				 		pageData[arrayName][pageData[arrayName].length] = data[k][name].label;
-				 	} else if(data[k][name].uri){
-				 		pageData[arrayName][pageData[arrayName].length] = data[k][name].uri;
-				 	} 
-				 } 
-		 	}
-		 	pageData[arrayName] = pageData[arrayName].dedup();
-		}//end if
+	globalFieldData = data;
+	  	
+	document.getElementById('personal');
+
+	//TODO: perhaps some fading here further down the line
+  	document.getElementById('personal').innerHTML = '';	
+  	
+  	//TODO: perhaps don't need this loop
+	for(i=0 ; i < data.length; i++){	
+		var name = data[i].name;
+		var containerElement = createFieldContainer(name, data[i].displayLabel);
+		
+		/*loop through all the simple fields and render them*/	
+		if(data[i].fields){
+			
+			renderSimpleFields(i, name, data);
+
+		/*render an account field*/
+		} else if(data[i].foafHoldsAccountFields){
+			//TODO: make this shiny i.e. use dropdowns and icons etc.
+			/*create a mother element for each account*/
+			
+			//createAccountsInputElement(name, '', k, holdsAccountElement);	
+			for(accountBnodeId in data[i].foafHoldsAccountFields){
+				
+				/*create a container for this account. E.g. a Skype account represented by accountBnodeId=bNode3*/
+				var holdsAccountElement = createHoldsAccountElement(containerElement,accountBnodeId);
+				
+				/*create an element for the foafAccountProfilePage*/
+				if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]
+					&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri){
+					createAccountsInputElement('foafAccountProfilePage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri, holdsAccountElement);	
+				} else {
+					/*create an empty element*/
+					createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
+				}
+				
+				/*create an element for the foafAccountName*/
+				if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0]
+					&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label){
+					createAccountsInputElement('foafAccountName', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label, holdsAccountElement);	
+				} else {
+					/*create an empty element*/
+					createAccountsInputElement('foafAccountName', '', holdsAccountElement);	
+				}
+				
+				/*create an element for the foafAccountProfilePage*/
+				if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]
+					&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri){
+					createAccountsInputElement('foafAccountServiceHomepage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
+				} else {
+					/*create an empty element*/
+					createAccountsInputElement('foafAccountServiceHomepage', '', holdsAccountElement);	
+				}
+			}
+
+		}
 	}
+}
+
+/*renders the appropriate simple fields for the index i in the json data, data with the name name*/
+function renderSimpleFields(i, name, data){
+	for(k=0 ; k < data[i].fields.length; k++){
+		if(data[i].fields[k][name].label){
+			createGenericInputElement(name, data[i].fields[k][name].label, k);
+		} else if(data[i].fields[k][name].uri){
+			createGenericInputElement(name, data[i].fields[k][name].uri, k);
+		} 
+	}
+	if(data[i].fields.length == 0){
+		createGenericInputElement(name, "", k);
+	}
+}
+
+function createHoldsAccountElement(attachElement, bnodeId){
+	var holdsAccountElement = document.createElement("div");
+	holdsAccountElement.setAttribute('class','holdsAccount');
+	holdsAccountElement.id = bnodeId;
+	attachElement.appendChild(holdsAccountElement);
 	
-	
-	for(arrayName in pageData){		 	
-	  	if(arrayName != 'foafPrimaryTopic'){
-	  		var name = arrayName.substring(0,arrayName.length-10);
-	  		
-			for(i=0 ; i < pageData[arrayName].length; i++){
-			 	/*either create a new element or fill in the old one*/
-			 	createElement(name,pageData[arrayName][i],i);
-			}		
-		}//end if
-	}//end for
+	return holdsAccountElement;
 }
 
 function accountsObjectsToDisplay(data){	
@@ -215,12 +264,12 @@ function createElement(name,value,thisElementCount){
 }
 
 /*creates and appends a field container for the given name if it is not already there*/
-function createFirstFieldContainer(name){
-	if(!document.getElementById(name+'_container')){
+function createFieldContainer(name,label){
+	//if(!document.getElementById(name+'_container')){
 		/*label*/
 		newFieldLabelContainer = document.createElement('div');
 		newFieldLabelContainer.setAttribute("class","fieldLabelContainer");
-		textNode = document.createTextNode(fieldLabelsArray[name]);
+		textNode = document.createTextNode(label);
 		newFieldLabelContainer.appendChild(textNode);
 
 		/*value*/
@@ -237,7 +286,27 @@ function createFirstFieldContainer(name){
 		container.appendChild(newFieldContainer);
 		newFieldContainer.appendChild(newFieldLabelContainer);
 		newFieldContainer.appendChild(newFieldValueContainer);
+		
+		return newFieldValueContainer;
+	//}
+}
+
+/*creates and appends an account input element to the appropriate field container*/
+/*TODO: need one of these for each different type of account element*/
+function createAccountsInputElement(name, value, element){
+	newElement = document.createElement('input');
+	newElement.id = name;
+	newElement.setAttribute('value',value);
+	
+	/*if there is a specific container we want to put it in*/
+	if(element){
+		name = element.id;
 	}
+	
+	document.getElementById(name).appendChild(newElement);
+	newElement.setAttribute('class','fieldInput');
+	
+	return newElement;
 }
 
 /*creates and appends a generic input element to the appropriate field container*/
