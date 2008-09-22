@@ -28,11 +28,11 @@ function loadFoaf(name){
   	
   	//TODO use jquery event handler to deal with errors on requests
   	//TODO perhaps this is bad.  There certainly should be less hardcoding here.
-  	if(name == 'load-accounts'){
-  		$.post("/ajax/"+name, { uri: url}, function(data){accountsObjectsToDisplay(data);}, "json");
-  	} else {
+  	//if(name == 'load-accounts'){
+  	//	$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);}, "json");
+  //	} else {
   		$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);}, "json");
-  	}
+  	//}
   	
   	//FIXME: this is broken
   	document.getElementById('load-contact-details').style.backgroundImage = 'url(/images/pink_background.gif)';
@@ -50,7 +50,7 @@ function loadFoaf(name){
 /*saves all the foaf data*/
 function saveFoaf(){
 	displayToObjects();
-	jsonstring = JSON.serialize(pageData);
+	jsonstring = JSON.serialize(globalFieldData);
 	
 	//updateFoafDateOfBirthElements();
 	
@@ -107,43 +107,46 @@ function genericObjectsToDisplay(data){
 
 		/*render an account field*/
 		} else if(data[i].foafHoldsAccountFields){
-			//TODO: make this shiny i.e. use dropdowns and icons etc.
-			/*create a mother element for each account*/
-			
-			//createAccountsInputElement(name, '', k, holdsAccountElement);	
-			for(accountBnodeId in data[i].foafHoldsAccountFields){
-				
-				/*create a container for this account. E.g. a Skype account represented by accountBnodeId=bNode3*/
-				var holdsAccountElement = createHoldsAccountElement(containerElement,accountBnodeId);
-				
-				/*create an element for the foafAccountProfilePage*/
-				if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]
-					&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri){
-					createAccountsInputElement('foafAccountProfilePage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri, holdsAccountElement);	
-				} else {
-					/*create an empty element*/
-					createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
-				}
-				
-				/*create an element for the foafAccountName*/
-				if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0]
-					&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label){
-					createAccountsInputElement('foafAccountName', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label, holdsAccountElement);	
-				} else {
-					/*create an empty element*/
-					createAccountsInputElement('foafAccountName', '', holdsAccountElement);	
-				}
-				
-				/*create an element for the foafAccountProfilePage*/
-				if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]
-					&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri){
-					createAccountsInputElement('foafAccountServiceHomepage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
-				} else {
-					/*create an empty element*/
-					createAccountsInputElement('foafAccountServiceHomepage', '', holdsAccountElement);	
-				}
-			}
+		
+			renderAccountFields(i, data, containerElement);
+		}
+	}
+}
 
+function renderAccountFields(i, data, containerElement){
+	//TODO: make this shiny i.e. use dropdowns and icons etc.
+	
+	//createAccountsInputElement(name, '', k, holdsAccountElement);	
+	for(accountBnodeId in data[i].foafHoldsAccountFields){
+		
+		/*create a container for this account. E.g. a Skype account represented by accountBnodeId=bNode3*/
+		var holdsAccountElement = createHoldsAccountElement(containerElement,accountBnodeId);
+		
+		/*create an element for the foafAccountProfilePage*/
+		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]
+			&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri){
+			createAccountsInputElement('foafAccountProfilePage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri, holdsAccountElement);	
+		} else {
+			/*create an empty element*/
+			createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
+		}
+		
+		/*create an element for the foafAccountName*/
+		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0]
+			&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label){
+			createAccountsInputElement('foafAccountName', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label, holdsAccountElement);	
+		} else {
+			/*create an empty element*/
+			createAccountsInputElement('foafAccountName', '', holdsAccountElement);	
+		}
+		
+		/*create an element for the foafAccountProfilePage*/
+		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]
+			&& data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri){
+			createAccountsInputElement('foafAccountServiceHomepage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
+		} else {
+			/*create an empty element*/
+			createAccountsInputElement('foafAccountServiceHomepage', '', holdsAccountElement);	
 		}
 	}
 }
@@ -162,64 +165,39 @@ function renderSimpleFields(i, name, data){
 	}
 }
 
-function createHoldsAccountElement(attachElement, bnodeId){
-	var holdsAccountElement = document.createElement("div");
-	holdsAccountElement.setAttribute('class','holdsAccount');
-	holdsAccountElement.id = bnodeId;
-	attachElement.appendChild(holdsAccountElement);
-	
-	return holdsAccountElement;
-}
-
-function accountsObjectsToDisplay(data){	
-	pageData = new PageDataObject();
-	
-	//TODO: perhaps some fading here further down the line
-  	document.getElementById('personal').innerHTML = '';
-  			
-  	/*populate all the arrays in the pageData object (one for each field)*/	
-	for(arrayName in pageData){			
-	  	if(arrayName != 'foafPrimaryTopic'){
-			var name = arrayName.substring(0,arrayName.length-10);
-
-			for(k=0 ; k < data.length; k++){
-				/*render blank fields for accounts*/
-				if(data[k][name] != null){		
-				  	if(data[k][name].label){
-				 		pageData[arrayName][pageData[arrayName].length] = data[k][name].label;
-				 	} else if(data[k][name].uri){
-				 		pageData[arrayName][pageData[arrayName].length] = data[k][name].uri;
-				 	} else{
-				 		pageData[arrayName][pageData[arrayName].length] = "";
-				 	}
-				 } 
-		 	}
-		 	/*don't dedup in this case*/
-		 	//pageData[arrayName] = pageData[arrayName].dedup();
-		}//end if
-	}
-	
-	
-	for(arrayName in pageData){		 	
-	  	if(arrayName != 'foafPrimaryTopic'){
-	  		var name = arrayName.substring(0,arrayName.length-10);
-	  		
-			for(i=0 ; i < pageData[arrayName].length; i++){
-			 	/*either create a new element or fill in the old one*/
-			 	createElement(name,pageData[arrayName][i],i);
-			}		
-		}//end if
-	}//end for
-}
-
-
 /*populates the triples objects with stuff from the actual display (i.e. what the user has changed)*/
 //TODO: needs to cope with added and deleted triples and scary random stuff like combining different ways of describing a birthday
 //TODO: datatypes/languages
 
-function displayToObjects(){
+function displayToObjects(){  
+	
+	/*first do accounts stuff*/	
+	/*TODO This will change when the display is improved*/
+  	var containerElement = document.getElementById('foafHoldsAccount_container');
   	
+  	for(holdsAccountNodes in containerElement.childNodes){
+  		
+  		/*check that the container is the one we want*/
+  		if(holdsAccountNodes.class == "holdsAccount"){
+  		
+  			globalFieldData[holdsAccountNodes.id] = array();
+  			
+  			for(inputElement in holdsAccountNodes.childNodes){
+  				/*do the right thing for the right element, and miss any elements we don't care about.*/
+  				if(inputElement.id == 'foafAccountProfilePage'){
+  					globalFieldData[holdsAccountNodes.id]['foafAccountProfilePage'] = inputElement.value;
+  				} else if (inputElement.id == 'foafAccountName'){
+  					globalFieldData[holdsAccountNodes.id]['foafAccountName'] = inputElement.value;
+  				} else if (inputElement.id == 'foafAccountServiceHomepage'){
+  					globalFieldData[holdsAccountNodes.id]['foafAccountServiceHomepage'] = inputElement.value;
+  				}
+  			}
+  		}
+  	}
+  	
+  	//TODO: sort this out.  This used to use the arrays that were defined in main.phtml but they aren't there anymore.
   	/*loop through all the arrays (for foafName, foafHomepage etc) defined in the pageData object*/
+	/*
 	for(arrayName in pageData){
 		if(arrayName != "foafPrimaryTopic"){
 			//chop off the ArrayValue bit at the end.
@@ -233,6 +211,7 @@ function displayToObjects(){
 			}
 		}//end if
 	}//end for
+	*/
 }
 
 /*------------------------------------------------------------------------------*/
@@ -308,6 +287,17 @@ function createAccountsInputElement(name, value, element){
 	
 	return newElement;
 }
+
+
+function createHoldsAccountElement(attachElement, bnodeId){
+	var holdsAccountElement = document.createElement("div");
+	holdsAccountElement.setAttribute('class','holdsAccount');
+	holdsAccountElement.id = bnodeId;
+	attachElement.appendChild(holdsAccountElement);
+	
+	return holdsAccountElement;
+}
+
 
 /*creates and appends a generic input element to the appropriate field container*/
 function createGenericInputElement(name, value, thisElementCount, contname){
