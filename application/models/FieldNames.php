@@ -86,9 +86,6 @@ class FieldNames {
 		$this->allFieldNames['foafBirthday'] = 
 			new SimpleField('foafBirthday', 'Birthday', 'http://xmlns.com/foaf/0.1/birthday',$this->foafData,'literal');
 			
-		$this->allFieldNames['foafHoldsAccount'] = 
-			new HoldsAccountField($this->foafData);
-			
 		//$this->allFieldNames['bioBirthday'] = new BioBirthdayField();
 		//$this->allFieldNames['geoLatLong'] =  new GeoLatLongField();
 		//$this->allFieldNames['geoLat'] =  new GeoLatField();
@@ -111,27 +108,8 @@ class FieldNames {
 	}
 	
 	private function instantiateAccountsFields(){
-		
-		/*TODO: need to get this so that it saves properly and loads so that it views.*/
-		$this->allFieldNames['accountServiceHomepage'] = 
-			new SimpleField('accountServiceHomepage', 'Account Service Homepage', '
-				?x foaf:holdsAccount ?a . 
-				?a rdf:type foaf:OnlineAccount 
-				OPTIONAL{
-					?a foaf:accountProfilePage ?accountProfilePage .
-				} .
-				OPTIONAL{
-					?a foaf:accountServiceHomepage ?accountServiceHomepage .
-				} .
-				OPTIONAL{
-					?a foaf:accountName ?accountName .
-				}'
-			, 'resource',true,'http://xmlns.com/foaf/0.1/accountServiceHomepage');
-		/*note: no queries for this as everything is included in the query above*/
-		$this->allFieldNames['accountProfilePage'] = 
-			new SimpleField('accountProfilePage', 'Account Profile Homepage', '', 'resource',true, 'http://xmlns.com/foaf/0.1/accountProfilePage');
-		$this->allFieldNames['accountName'] = 
-			new SimpleField('accountName', 'Account Name', '', 'resource',true, 'http://xmlns.com/foaf/0.1/accountName');
+		$this->allFieldNames['foafHoldsAccount'] = 
+			new HoldsAccountField($this->foafData);
 	}
 	
 	private function instantiateFriendsFields(){
