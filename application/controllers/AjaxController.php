@@ -210,24 +210,22 @@ class AjaxController extends Zend_Controller_Action
 		 */
 		
 		//get all the detail for each of the fields
-		$fieldNames = new FieldNames('all');
-		
-		/*TODO: extend over all fields, not just simple ones, so here need to create the appropriate type of field*/
-		$simpleFieldNameArray = $fieldNames->getAllFieldNames();
+		//TODO: Just doing accounts right now.
+		$fieldNames = new FieldNames('accounts',$foafData);
+		$allFieldNames = $fieldNames->getAllFieldNames();
 		
 		/*loop through all the rows in the sparql results style 'almost model'*/
-		foreach($almost_model as $key => $predicate_array){
+		foreach($almost_model[0] as $key => $value){
 					
-			if(isset($simpleFieldNameArray[substr($key,0,-10)]) && $key != 'foafPrimaryTopic'){
+			/*get rid of 'fields at the end of the name'*/
+			if(isset($allFieldNames[substr($key,0,-6)])){
 				
-				/*get some details about the field we're dealing with*/
-				$field = $simpleFieldNameArray[substr($key,0,-10)];
-					//echo(substr($key,0,-10));
-				/*loop through writing out triples*/
-				for($index = 0; $index < count($predicate_array) ;$index++){
-					echo("Saving: ".$field->getName()." at index: ".$index."\n");
-					$field->saveToModel($foafData, $predicate_array[$index]);
-				}//end for	
+				echo("Saving fields of type: ".$key);
+				/*get some details about the fields we're dealing with*/
+				$field = $allFieldNames[substr($key,0,-6)];
+				
+				/*save them using the appropriate method*/
+				$field->saveToModel($foafData, $value);
 				
 			} else {
 				echo("unrecognised triple:".$key."\n");	

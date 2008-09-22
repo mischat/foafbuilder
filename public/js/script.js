@@ -172,27 +172,35 @@ function renderSimpleFields(i, name, data){
 function displayToObjects(){  
 	
 	/*first do accounts stuff*/	
-	/*TODO This will change when the display is improved*/
+	/*TODO This will change when the display is improved + need a bit less hardcoding possibly*/
   	var containerElement = document.getElementById('foafHoldsAccount_container');
-  	
-  	for(holdsAccountNodes in containerElement.childNodes){
-  		
-  		/*check that the container is the one we want*/
-  		if(holdsAccountNodes.class == "holdsAccount"){
-  		
-  			globalFieldData[holdsAccountNodes.id] = array();
+ 	
+ 	alert('display To objects called');
+  	for(i=0; i < containerElement.childNodes.length; i++){
+  		/*TODO check that the container is the one we want*/
+  	//	if(holdsAccountNodes.className == "holdsAccount"){
+  			//globalFieldData[i].foafHoldsAccountFields[containerElement.childNodes[i].id] = new Array();
   			
-  			for(inputElement in holdsAccountNodes.childNodes){
-  				/*do the right thing for the right element, and miss any elements we don't care about.*/
-  				if(inputElement.id == 'foafAccountProfilePage'){
-  					globalFieldData[holdsAccountNodes.id]['foafAccountProfilePage'] = inputElement.value;
-  				} else if (inputElement.id == 'foafAccountName'){
-  					globalFieldData[holdsAccountNodes.id]['foafAccountName'] = inputElement.value;
-  				} else if (inputElement.id == 'foafAccountServiceHomepage'){
-  					globalFieldData[holdsAccountNodes.id]['foafAccountServiceHomepage'] = inputElement.value;
-  				}
+  			var holdsAccountElement = containerElement.childNodes[i];
+  			var bNodeId = containerElement.childNodes[i].id;
+  			
+  			for(k=0; k < containerElement.childNodes[i].childNodes.length; k++){
+  				//do the right thing for the right element, and miss any elements we don't care about.
+  				if(holdsAccountElement.childNodes[k].id == 'foafAccountProfilePage'){
+  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountProfilePage'][0].uri= holdsAccountElement.childNodes[k].value;
+  				
+  				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountName'){
+  				
+  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountName'][0].label = holdsAccountElement.childNodes[k].value;
+  				
+  				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountServiceHomepage'){		
+  				i
+  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountServiceHomepage'][0].uri = holdsAccountElement.childNodes[k].value;				
+  				
+  				} 
   			}
-  		}
+  		//} 
+  		
   	}
   	
   	//TODO: sort this out.  This used to use the arrays that were defined in main.phtml but they aren't there anymore.
