@@ -1,6 +1,59 @@
 /*global variable for storing data*/
 var globalFieldData;
 
+/*--------------------------permanent data functions---------------------------*/
+/*variable storing online account urls (e.g. www.skype.com) and keying them against their names (e.g. skype)*/
+
+//TODO possibly this should be a global array
+function getAllOnlineAccounts(){
+	//TODO: need to increase this list.  See allAccountServiceurls file.
+	var oA = new Array();
+	oA['Skype'] = 'http://www.skype.com/';
+	oA['Yahoo'] = 'http://messenger.yahoo.com/';
+	oA['MSN'] = 'http://messenger.msn.com/';
+	oA['Delicious'] = 'http://del.icio.us';
+	oA['Flickr'] = 'http://www.flickr.com/';
+	oA['Livejournal'] = 'http://www.livejournal.com/';
+	
+	return oA;
+}
+
+//XXX not really a data function but it seems to fit best here.  Turns a username into a profile page url, returns null if it can't.
+//TODO: increase this list and arrange in a more sensible way. Possibly use QDOS here?
+function getUrlFromOnlineAccounts(username,type){
+	
+	var allAccountsArray = getAllOnlineAccounts();
+
+	if(typeof(allAccountsArray[type]) == 'undefined'){
+		return null;
+	} else {
+		switch(type){
+			case 'Skype':
+				return null;
+				break;
+			case 'MSN':
+				return null;
+				break;
+			case 'Yahoo':
+				return null;
+				break;
+			case 'Delicious':
+				return 'http://del.icio.us/'+username+'/';
+				break;
+			case 'Flickr':
+				return 'http://www.flickr.com/people/'+username+'/';
+				break;
+			case 'Livejournal':
+				return 'http://'+username+'.livejournal.com/';
+				break;
+			default:
+				return null;
+				break;
+		}
+	}
+	
+}
+
 
 /*------------------------------------------------------------------------------*/
 
@@ -102,13 +155,13 @@ function renderAccountFields(i, data, containerElement){
 		/*create a container for this account. E.g. a Skype account represented by accountBnodeId=bNode3*/
 		var holdsAccountElement = createHoldsAccountElement(containerElement,accountBnodeId);
 		
-		/*create an element for the foafAccountProfilePage*/
-		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]){
-			createAccountsInputElement('foafAccountProfilePage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri, holdsAccountElement);	
+		/*create an element for the foafAccountServiceHomepage*/
+		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]){
+			createFoafAccountServiceHomepageInputElement(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
 		} else {
 			/*create an empty element*/
-			createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
-		}	
+			createFoafAccountServiceHomepageInputElement('', holdsAccountElement);	
+		}
 		/*create an element for the foafAccountName*/
 		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0]){
 			createAccountsInputElement('foafAccountName', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label, holdsAccountElement);	
@@ -117,13 +170,16 @@ function renderAccountFields(i, data, containerElement){
 			createAccountsInputElement('foafAccountName', '', holdsAccountElement);	
 		}
 		/*create an element for the foafAccountProfilePage*/
-		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]){
-			createAccountsInputElement('foafAccountServiceHomepage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
+		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]){
+			createAccountsInputElement('foafAccountProfilePage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri, holdsAccountElement);	
 		} else {
 			/*create an empty element*/
-			createAccountsInputElement('foafAccountServiceHomepage', '', holdsAccountElement);	
+			createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
 		}
-		
+		/*hide/show the profilePage url as appropriate*/	
+		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri){
+			toggleHiddenAccountInputElements(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri,holdsAccountElement,'');
+		}
 	}
 	/*a link to add another account*/	
 	createAccountsAddElement(containerElement);
@@ -156,11 +212,14 @@ function displayToObjects(){
   	/*an array of keys that have not been removed from the dom tree*/
  	var doNotCleanArray = new Array();
  	
+ 	
   	for(i=0; i < containerElement.childNodes.length; i++){
-  
-  	
+  		
   		var holdsAccountElement = containerElement.childNodes[i];
   		var bNodeId = containerElement.childNodes[i].id;
+  		
+		/*some mangling to autogenerate profilePage urils */
+  		updateProfilePageUrl(holdsAccountElement);
   		
   		/*we don't want to clean this from the globalFieldData*/
   		doNotCleanArray[bNodeId] = bNodeId;
@@ -175,13 +234,7 @@ function displayToObjects(){
   				if(holdsAccountElement.childNodes[k].value != ''){
   				
 	  				//do the right thing for the right element, and miss any elements we don't care about.
-	  				if(holdsAccountElement.childNodes[k].id == 'foafAccountProfilePage'){
-	  					/*create a new element if this account is new*/
-	  					if(!globalFieldData[0].foafHoldsAccountFields[bNodeId]){
-	  						globalFieldData[0].foafHoldsAccountFields[bNodeId] = new Object;
-	  					}
-	  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountProfilePage'] = [{uri : holdsAccountElement.childNodes[k].value}];
-	  				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountName'){
+	  				if (holdsAccountElement.childNodes[k].id == 'foafAccountName'){
 	  					/*create a new element if this account is new*/
 	  					if(!globalFieldData[0].foafHoldsAccountFields[bNodeId]){
 	  						globalFieldData[0].foafHoldsAccountFields[bNodeId] = new Object;
@@ -189,6 +242,12 @@ function displayToObjects(){
 	  					if(globalFieldData[0].foafHoldsAccountFields[bNodeId]){
 	  						globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountName'] = [{label : holdsAccountElement.childNodes[k].value}];
 	  					}
+	  				} else if(holdsAccountElement.childNodes[k].id == 'foafAccountProfilePage'){
+	  					/*create a new element if this account is new*/
+	  					if(!globalFieldData[0].foafHoldsAccountFields[bNodeId]){
+	  						globalFieldData[0].foafHoldsAccountFields[bNodeId] = new Object;
+	  					}
+	  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountProfilePage'] = [{uri : holdsAccountElement.childNodes[k].value}];
 	  				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountServiceHomepage'){		
 	  					/*create a new element if this account is new*/
 	  					if(!globalFieldData[0].foafHoldsAccountFields[bNodeId]){
@@ -250,7 +309,6 @@ function createElement(name,value,thisElementCount){
 		createFoafDepictionElement(name, value, thisElementCount);
 		
 	} else {
-	
 		createFirstFieldContainer(name);
 		createGenericInputElement(name, value, thisElementCount);
 		
@@ -295,11 +353,42 @@ function createAccountsInputElement(name, value, element){
 	/*if there is a specific container we want to put it in*/
 	if(!element){
 		var element = document.getElementById(name);
-	} 
+	}
+	/*to make sure the url is automatically generated as we enter this*/ 
+	/*if(name == 'foafAccountName'){
+		newElement.setAttribute('onchange', 'updateProfilePageUrl(this.parentNode);');
+	}*/
 	element.appendChild(newElement);
 	newElement.setAttribute('class','fieldInput');
 
 	return newElement;
+}
+
+/*renders a dropdown box with a list of possible accountServiceHomepages in it (e.g. skype, msn etc)*/
+function createFoafAccountServiceHomepageInputElement(value,container){
+	selectElement = document.createElement("select");
+	
+
+	var allAccounts = getAllOnlineAccounts();
+	
+	selectElement[0] = new Option('Other','',false,false);
+	var y=1;
+				
+	/*loop through all online accounts and create options from them*/
+	for(key in allAccounts){
+		if(key != 'dedup'){
+			selectElement[y] = new Option(key,allAccounts[key],false,false);
+			y++;
+		}
+	}
+	selectElement.id = 'foafAccountServiceHomepage';
+	selectElement.className = 'fieldInput';
+	selectElement.value = value;
+	
+	/*show the hidden input elements if there is no option matching this id here*/
+	selectElement.setAttribute('onchange',"toggleHiddenAccountInputElements(this.value,this.parentNode, '')");
+	
+	container.appendChild(selectElement);
 }
 
 function createAccountsAddElement(container){
@@ -307,9 +396,10 @@ function createAccountsAddElement(container){
 	/*create add link and attach it to the container*/
 	var addDiv = document.createElement("div");
 	addDiv.id = "addLinkContainer";
+	addDiv.className = "addLinkContainer";
 	var addLink = document.createElement('a');
-	addLink.appendChild(document.createTextNode("Add"));
-	addLink.id="addLink";
+	addLink.appendChild(document.createTextNode("+Add another Account"));
+	addLink.className="addLink";
 	addLink.setAttribute("onclick" , "createEmptyHoldsAccountElement(this.parentNode.parentNode,null)");
 	addDiv.appendChild(addLink);
 	container.appendChild(addDiv);
@@ -333,9 +423,11 @@ function createHoldsAccountElement(attachElement, bnodeId){
 	/*create remove link and attach it to the holds account div*/
 	var removeDiv = document.createElement("div");
 	removeDiv.id = "removeLinkContainer";
+	removeDiv.className = "removeLinkContainer";
 	var removeLink = document.createElement('a');
-	removeLink.appendChild(document.createTextNode("Remove"));
+	removeLink.appendChild(document.createTextNode("- Remove this account"));
 	removeLink.id="removeLink";
+	removeLink.className="removeLink";
 	removeLink.setAttribute("onclick" , "this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);");
 	removeDiv.appendChild(removeLink);
 	holdsAccountElement.appendChild(removeDiv);
@@ -350,9 +442,9 @@ function createEmptyHoldsAccountElement(container){
 	var holdsAccountElement = createHoldsAccountElement(container, '');
 	
 	/*generate fields to fill it up*/
-	createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);
-	createAccountsInputElement('foafAccountServiceHomepage', '', holdsAccountElement);
+	createFoafAccountServiceHomepageInputElement('', holdsAccountElement);
 	createAccountsInputElement('foafAccountName', '', holdsAccountElement);
+	createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);
 	
 	/*remove the add element and re add it (to make sure it's at the bottom)*/
 	var addElement = document.getElementById('addLinkContainer');
@@ -499,20 +591,75 @@ function updateFoafDateOfBirthElements(){
 	document.getElementById('foafDateOfBirth_container').childNodes[i];
 }
 
-/*------------------------------miscellaneous utils-------------------------------*/
+/*when an account dropdown is changed, this renders the appropriate hidden or showing fields 
+for the users profile page and/or the account provider box*/
+function toggleHiddenAccountInputElements(selectedValue,container,prePopulateValue){
 
-
-/*for uniquing an array*/
-Array.prototype.dedup = function () {
-  var newArray = new Array ();
-  var seen = new Object ();
-  for ( var i = 0; i < this.length; i++ ) {
-    if ( seen[ this[i] ] ) continue;
-    newArray.push( this[i] );
-    seen[ this[i] ] = 1;
-  }
-  return newArray;
+	var allArrayNames = getAllOnlineAccounts();
+	var allArrayNamesInverted = new Array();
+	
+	/*swap keys and values for convenience*/
+	for(key in allArrayNames){
+		allArrayNamesInverted[allArrayNames[key]] = key;
+	}
+	
+	/*loop through the elements in the container in question and replace things as required*/
+	for(var u=0; u<container.childNodes.length; u++){
+	
+		/*if Other has been selected in the dropdown (so selectedValue is '')*/ 
+		if(typeof(allArrayNamesInverted[selectedValue]) == 'undefined'){
+			if(container.childNodes[u].id == 'foafAccountProfilePage'){
+				//TODO possibly add some nice onclick functionality here
+				container.childNodes[u].value = 'Add URL of account service provider here';
+				container.childNodes[u].style.display = 'inline';
+			}
+		} else {
+			if(container.childNodes[u].id == 'foafAccountProfilePage'){
+				/*hide the profile page box and set its value to blank.  On saving we'll fill it in.*/
+				container.childNodes[u].value = '';
+				container.childNodes[u].style.display = 'none';
+			}
+		}
+	}
+	
 }
+
+/*generates the profilePAgeURl from the username*/
+function updateProfilePageUrl(container){
+	//get username value to generate the uri for this account
+	var allArrayNames = getAllOnlineAccounts();
+	/*get all the usernames and invert them.  FIXME: this is going to become very slow if the inverted array names is not a global variable*/
+	var allArrayNamesInverted = new Array();
+	for(key in allArrayNames){
+		allArrayNamesInverted[allArrayNames[key]] = key;
+	}
+	
+	var accountServicePageElement = null;
+	var username = null;
+	var profilePageElement = null;
+	
+	/*find out what the username is and which element we need to set*/
+	for(var z=0; z<container.childNodes.length; z++){
+		if(container.childNodes[z].id == 'foafAccountName'){
+			username = container.childNodes[z].value;
+		}
+		else if(container.childNodes[z].id == 'foafAccountProfilePage'){
+			profilePageElement = container.childNodes[z];
+		}
+		else if(container.childNodes[z].id == 'foafAccountServiceHomepage'){
+			accountServicePageElement = container.childNodes[z];
+		}
+	}
+	
+	if(username != null && accountServicePageElement && profilePageElement){
+		var pageValue = getUrlFromOnlineAccounts(username,allArrayNamesInverted[accountServicePageElement.value]);
+		if(pageValue){
+			profilePageElement.value = pageValue;
+		}
+	} 
+}
+
+/*------------------------------miscellaneous utils-------------------------------*/
 
 /*generates a random string*/
 function createRandomString(varLength) {
