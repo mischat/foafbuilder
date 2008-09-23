@@ -206,7 +206,7 @@ width:100%;
 	font-size:12px;
 	color:#999999;
 	font-weight:600;
-	width:120px;
+	width:60px;
 	padding-left:20px;
 	height:20px;
 	float:left;
@@ -216,7 +216,7 @@ width:100%;
 	left:140px;
 	width:330px;
 	/*to counteract the size of the fieldLabelContainer*/
-	top:-20px;
+	/*top:-20px;*/
 	
 }
 .fieldContainer{
@@ -291,7 +291,49 @@ width:100%;
 	font-weight:600;
 	background-color:#eeeeee;
 }
-/*the date stuff is a bit hacked.  Will have to come back to this*/
+/*accounts stuff*/
+.addLink{
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:10px;		
+}
+.removeLink{
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:10px;		
+}
+.removeLinkContainer{
+	float:right;
+	padding-left:150px;
+	margin-bottom:5px;
+	margin-top:5px;	
+}
+#foafAccountName{
+	width:140px;
+	float:left;
+	margin-left:0px;
+	margin-right:0px;
+	margin-top:0px;
+	margin-left:10px;
+	/*matches that from foafAccountServiceHomepageInputElement*/
+	margin-bottom:5px;
+}
+#foafAccountServiceHomepage{
+	float:left;
+	width:100px;
+	margin-top:0px;
+	margin-left:0px;
+	margin-right:0px;
+	/*matches that from foafAccountName*/
+	margin-bottom:5px;
+}
+.holdsAccount{
+	border-bottom: 1px solid #EEEEEE;
+	height:100px;
+}
+#addLinkContainer{
+	margin-top:10px;
+}
+
+/*the date stuff below is a bit hacked.  Will have to come back to this*/
 .dateSelector{
 	margin-bottom:5px;
 	margin-right:10px;
