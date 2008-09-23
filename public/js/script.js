@@ -1,19 +1,6 @@
 /*global variable for storing data*/
 var globalFieldData;
 
-/*---------------------------------------utils---------------------------------------*/
-
-/*for uniquing an array*/
-Array.prototype.dedup = function () {
-  var newArray = new Array ();
-  var seen = new Object ();
-  for ( var i = 0; i < this.length; i++ ) {
-    if ( seen[ this[i] ] ) continue;
-    newArray.push( this[i] );
-    seen[ this[i] ] = 1;
-  }
-  return newArray;
-}
 
 /*------------------------------------------------------------------------------*/
 
@@ -23,18 +10,11 @@ Array.prototype.dedup = function () {
 function loadFoaf(name){
 
 	url = document.getElementById('foafUri').value;
-  	//we're now generating everything from javascript so we don't need to do this.
-  	//$.post("/index/"+name, { uri: url}, function(data2){document.getElementById('personal').innerHTML=data2;});
-  	
+
   	//TODO use jquery event handler to deal with errors on requests
   	//TODO perhaps this is bad.  There certainly should be less hardcoding here.
-  	//if(name == 'load-accounts'){
-  	//	$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);}, "json");
-  //	} else {
-  		$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);}, "json");
-  	//}
+  	$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);}, "json");
   	
-  	//FIXME: this is broken
   	document.getElementById('load-contact-details').style.backgroundImage = 'url(/images/pink_background.gif)';
   	document.getElementById('load-the-basics').style.backgroundImage = 'url(/images/pink_background.gif)';
   	document.getElementById('load-pictures').style.backgroundImage = 'url(/images/pink_background.gif)';
@@ -48,15 +28,15 @@ function loadFoaf(name){
 }
 
 /*saves all the foaf data*/
-function saveFoaf(){
+function saveFoaf(name){
 	displayToObjects();
 	jsonstring = JSON.serialize(globalFieldData);
 	
 	//updateFoafDateOfBirthElements();
 	
 	//TODO use jquery event handler to deal with errors on this request
-  	$.post("/ajax/save-foaf", {model : jsonstring}, function(){}, "json");
-  		
+  	$.post("/ajax/save-foaf", {model : jsonstring});
+  	
 }
 
 /*Writes FOAF to screen*/
@@ -128,8 +108,7 @@ function renderAccountFields(i, data, containerElement){
 		} else {
 			/*create an empty element*/
 			createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
-		}
-		
+		}	
 		/*create an element for the foafAccountName*/
 		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0]){
 			createAccountsInputElement('foafAccountName', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label, holdsAccountElement);	
@@ -137,7 +116,6 @@ function renderAccountFields(i, data, containerElement){
 			/*create an empty element*/
 			createAccountsInputElement('foafAccountName', '', holdsAccountElement);	
 		}
-		
 		/*create an element for the foafAccountProfilePage*/
 		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]){
 			createAccountsInputElement('foafAccountServiceHomepage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
@@ -145,7 +123,10 @@ function renderAccountFields(i, data, containerElement){
 			/*create an empty element*/
 			createAccountsInputElement('foafAccountServiceHomepage', '', holdsAccountElement);	
 		}
+		
 	}
+	/*a link to add another account*/	
+	createAccountsAddElement(containerElement);
 }
 
 /*renders the appropriate simple fields for the index i in the json data, data with the name name*/
@@ -171,29 +152,62 @@ function displayToObjects(){
 	/*first do accounts stuff*/	
 	/*TODO This will change when the display is improved + need a bit less hardcoding possibly*/
   	var containerElement = document.getElementById('foafHoldsAccount_container');
+  	
+  	/*an array of keys that have not been removed from the dom tree*/
+ 	var doNotCleanArray = new Array();
  	
- 	alert('display To objects called');
   	for(i=0; i < containerElement.childNodes.length; i++){
-  		/*TODO check that the container is the one we want*/
-  	//	if(holdsAccountNodes.className == "holdsAccount"){
-  			//globalFieldData[i].foafHoldsAccountFields[containerElement.childNodes[i].id] = new Array();
-  			
-  			var holdsAccountElement = containerElement.childNodes[i];
-  			var bNodeId = containerElement.childNodes[i].id;
-  			
-  			for(k=0; k < containerElement.childNodes[i].childNodes.length; k++){
-  			
-  				//do the right thing for the right element, and miss any elements we don't care about.
-  				if(holdsAccountElement.childNodes[k].id == 'foafAccountProfilePage'){
-  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountProfilePage'] = [{uri : holdsAccountElement.childNodes[k].value}];
-  				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountName'){
-  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountName'] = [{label : holdsAccountElement.childNodes[k].value}];
-  				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountServiceHomepage'){		
-  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountServiceHomepage'] = [{uri : holdsAccountElement.childNodes[k].value}];				
-  				} 
-  			}
-  		//} 
+  
+  	
+  		var holdsAccountElement = containerElement.childNodes[i];
+  		var bNodeId = containerElement.childNodes[i].id;
   		
+  		/*we don't want to clean this from the globalFieldData*/
+  		doNotCleanArray[bNodeId] = bNodeId;
+  		
+  		/*ignore all elements that don't don't contain accounts (such as add/remove links)*/
+  		if(holdsAccountElement.className == "holdsAccount"){
+  			//globalFieldData[i].foafHoldsAccountFields[containerElement.childNodes[i].id] = new Array();
+		
+			
+  			for(k=0; k < containerElement.childNodes[i].childNodes.length; k++){
+  				
+  				if(holdsAccountElement.childNodes[k].value != ''){
+  				
+	  				//do the right thing for the right element, and miss any elements we don't care about.
+	  				if(holdsAccountElement.childNodes[k].id == 'foafAccountProfilePage'){
+	  					/*create a new element if this account is new*/
+	  					if(!globalFieldData[0].foafHoldsAccountFields[bNodeId]){
+	  						globalFieldData[0].foafHoldsAccountFields[bNodeId] = new Object;
+	  					}
+	  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountProfilePage'] = [{uri : holdsAccountElement.childNodes[k].value}];
+	  				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountName'){
+	  					/*create a new element if this account is new*/
+	  					if(!globalFieldData[0].foafHoldsAccountFields[bNodeId]){
+	  						globalFieldData[0].foafHoldsAccountFields[bNodeId] = new Object;
+	  					}
+	  					if(globalFieldData[0].foafHoldsAccountFields[bNodeId]){
+	  						globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountName'] = [{label : holdsAccountElement.childNodes[k].value}];
+	  					}
+	  				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountServiceHomepage'){		
+	  					/*create a new element if this account is new*/
+	  					if(!globalFieldData[0].foafHoldsAccountFields[bNodeId]){
+	  						globalFieldData[0].foafHoldsAccountFields[bNodeId] = new Object;
+	  					}
+	  					if(globalFieldData[0].foafHoldsAccountFields[bNodeId]){
+	  						globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountServiceHomepage'] = [{uri : holdsAccountElement.childNodes[k].value}];				
+	  					}
+	  				} 	
+	  			} 
+  			}
+  		} 
+  	}
+  	
+  	/*remove all elements (accounts) from the globalFieldData object that have been removed from the dom tree*/
+  	for(key in globalFieldData[0].foafHoldsAccountFields){
+  		if(!doNotCleanArray[key]){
+  			delete globalFieldData[0].foafHoldsAccountFields[key];
+  		}
   	}
   	
   	//TODO: sort this out.  This used to use the arrays that were defined in main.phtml but they aren't there anymore.
@@ -279,24 +293,71 @@ function createAccountsInputElement(name, value, element){
 	newElement.setAttribute('value',value);
 	
 	/*if there is a specific container we want to put it in*/
-	if(element){
-		name = element.id;
-	}
-	
-	document.getElementById(name).appendChild(newElement);
+	if(!element){
+		var element = document.getElementById(name);
+	} 
+	element.appendChild(newElement);
 	newElement.setAttribute('class','fieldInput');
-	
+
 	return newElement;
+}
+
+function createAccountsAddElement(container){
+
+	/*create add link and attach it to the container*/
+	var addDiv = document.createElement("div");
+	addDiv.id = "addLinkContainer";
+	var addLink = document.createElement('a');
+	addLink.appendChild(document.createTextNode("Add"));
+	addLink.id="addLink";
+	addLink.setAttribute("onclick" , "createEmptyHoldsAccountElement(this.parentNode.parentNode,null)");
+	addDiv.appendChild(addLink);
+	container.appendChild(addDiv);
+
 }
 
 
 function createHoldsAccountElement(attachElement, bnodeId){
+	
+	/*if new, create a random id*/
+	if(!bnodeId){
+		var bnodeId = createRandomString(50);
+	}
+	
+	/*create holdsAccount div and attach it to the element given*/
 	var holdsAccountElement = document.createElement("div");
 	holdsAccountElement.setAttribute('class','holdsAccount');
 	holdsAccountElement.id = bnodeId;
 	attachElement.appendChild(holdsAccountElement);
 	
+	/*create remove link and attach it to the holds account div*/
+	var removeDiv = document.createElement("div");
+	removeDiv.id = "removeLinkContainer";
+	var removeLink = document.createElement('a');
+	removeLink.appendChild(document.createTextNode("Remove"));
+	removeLink.id="removeLink";
+	removeLink.setAttribute("onclick" , "this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);");
+	removeDiv.appendChild(removeLink);
+	holdsAccountElement.appendChild(removeDiv);
+	
 	return holdsAccountElement;
+}
+
+/*creates a holds account element and fills it with empty fields*/
+function createEmptyHoldsAccountElement(container){
+	
+	/*create a new holdsaccount div*/
+	var holdsAccountElement = createHoldsAccountElement(container, '');
+	
+	/*generate fields to fill it up*/
+	createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);
+	createAccountsInputElement('foafAccountServiceHomepage', '', holdsAccountElement);
+	createAccountsInputElement('foafAccountName', '', holdsAccountElement);
+	
+	/*remove the add element and re add it (to make sure it's at the bottom)*/
+	var addElement = document.getElementById('addLinkContainer');
+	addElement.parentNode.removeChild(addElement);
+	createAccountsAddElement(container);
 }
 
 
@@ -438,4 +499,30 @@ function updateFoafDateOfBirthElements(){
 	document.getElementById('foafDateOfBirth_container').childNodes[i];
 }
 
+/*------------------------------miscellaneous utils-------------------------------*/
 
+
+/*for uniquing an array*/
+Array.prototype.dedup = function () {
+  var newArray = new Array ();
+  var seen = new Object ();
+  for ( var i = 0; i < this.length; i++ ) {
+    if ( seen[ this[i] ] ) continue;
+    newArray.push( this[i] );
+    seen[ this[i] ] = 1;
+  }
+  return newArray;
+}
+
+/*generates a random string*/
+function createRandomString(varLength) {
+	var sourceArr = new Array("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z");
+	var randomKey;
+	var randomCode = "";
+
+	for (i=0; i<varLength; i++) {
+		randomKey = Math.floor(Math.random()*sourceArr.length);
+		randomCode = randomCode + sourceArr[randomKey];
+	}
+	return randomCode;
+}
