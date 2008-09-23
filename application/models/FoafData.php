@@ -21,6 +21,7 @@ class FoafData {
 	        $model = new NamedGraphMem($uri);
 	        $model->load($uri);
 	        $graphset->addNamedGraph($model);
+	        
 	        if (!($graphset->containsNamedGraph($uri))) {
 	        	print "Triples model not add to the modelfactory\n";
 	        }
@@ -53,6 +54,7 @@ class FoafData {
             $model->replace($oldUriRes,NULL,NULL,$newUriRes);
             $model->replace(NULL,NULL,$oldUriRes,$newUriRes);
             $this->primaryTopic = $newUri;
+            $this->randomStringToBnodeArray = array();
             
             if (!preg_match("/#me$/",$oldUri,$patterns)) {
                 $model->add(new Statement($newUriRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldUriRes));
@@ -103,6 +105,14 @@ class FoafData {
     
     public function setPrimaryTopic($primaryTopic) {
         $this->primaryTopic = $primaryTopic;
+    }
+    
+   	public function getRandomStringToBnodeArray() {
+        return $this->randomStringToBnodeArray;
+    }
+    
+    public function setRandomStringToBnodeArray($randomStringToBnodeArray) {
+        $this->randomStringToBnodeArray = $randomStringToBnodeArray;
     }
     
     public function setModel($model) {
