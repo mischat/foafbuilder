@@ -11,6 +11,7 @@ class FoafData {
     private $model;
     private $graphset;
     private $primaryTopic;
+    private $randomStringToBnodeArray;
     
     /*New from uri if uri present. if not just new.*/
     public function FoafData($uri = "") {
