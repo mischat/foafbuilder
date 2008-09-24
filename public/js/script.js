@@ -4,7 +4,7 @@ var globalFieldData;
 /*--------------------------permanent data functions---------------------------*/
 /*variable storing online account urls (e.g. www.skype.com) and keying them against their names (e.g. skype)*/
 
-//TODO possibly this should be a global array
+//TODO this should be a global array and integrate with QDOS
 function getAllOnlineAccounts(){
 	//TODO: need to increase this list.  See allAccountServiceurls file.
 	var oA = new Array();
@@ -135,6 +135,10 @@ function genericObjectsToDisplay(data){
 
 /*Render the birthday dropdown (assumes only one birthday)*/
 function renderBirthdayFields(data){
+
+	if(!data.birthdayFields || typeof(data.birthdayFields) == 'undefined'){
+		return;
+	}
 	
 	/*build the container*/
 	var name = data.birthdayFields.name;
@@ -149,6 +153,10 @@ function renderBirthdayFields(data){
 }
 
 function renderAccountFields(data){
+	
+	if(!data.foafHoldsAccountFields || typeof(data.foafHoldsAccountFields) == 'undefined'){
+		return;
+	}
 	
 	/*build the container*/
 	var name = data.foafHoldsAccountFields.name;
@@ -208,9 +216,7 @@ function renderSimpleFields(i, name, data){
 }
 
 /*populates the triples objects with stuff from the actual display (i.e. what the user has changed)*/
-//TODO: needs to cope with added and deleted triples and scary random stuff like combining different ways of describing a birthday
-//TODO: datatypes/languages
-
+//TODO: datatypes/language
 function displayToObjects(){  
 	
 	//TODO: we shouldn't have to put these numbers in
@@ -219,8 +225,15 @@ function displayToObjects(){
 	
 	simpleFieldsDisplayToObjects();
 	
-  	//TODO: sort this out.  This used to use the arrays that were defined in main.phtml but they aren't there anymore.
-  	/*loop through all the arrays (for foafName, foafHomepage etc) defined in the pageData object*/
+}
+
+function simpleFieldsDisplayToObjects(){
+	var containerElement = document.getElementById('foafHoldsAccount_container');
+  	
+  	//FIXME: do this if we actually have any simple fields left!!!
+  	
+  	//The code below used to use the arrays that were defined in main.phtml but they aren't there anymore.
+  	//loop through all the arrays (for foafName, foafHomepage etc) defined in the pageData object
 	/*
 	for(arrayName in pageData){
 		if(arrayName != "foafPrimaryTopic"){
@@ -235,12 +248,6 @@ function displayToObjects(){
 			}
 		}//end if
 	}//end for	*/
-}
-
-function simpleFieldsDisplayToObjects(){
-	var containerElement = document.getElementById('foafHoldsAccount_container');
-  	
-  	//FIXME: do this if we actually have any simple fields left!!!
 }
 
 function birthdayDisplayToObjects(){
@@ -326,15 +333,17 @@ function accountsDisplayToObjects(){
 
 /*--------------------------------------element generators---------------------------------------*/
 
+//FIXME: part of the old rendering for simple fields
 /*creates an element for a given field, denoted by name and populates it with the appropriate value*/
-function createElement(name,value,thisElementCount){
+
+/*function createElement(name,value,thisElementCount){
 	//TODO: put some sort of big switch statement
 
-	/*create the containing div and label, if it hasn't already been made*/
+	//create the containing div and label, if it hasn't already been made
 	//TODO: need a more sensible way to decide whether to render these.
 	if(name == 'bioBirthday' || name == 'foafBirthday' || name == 'foafDateOfBirth'){
-		/*We only want one birthday field, so create a container called foafDateOfBirth *
-		 * and act like that's what we're dealing with now.*/
+		//We only want one birthday field, so create a container called foafDateOfBirth
+		// and act like that's what we're dealing with now.
 		createFirstFieldContainer('foafDateOfBirth');
 		createFoafDateOfBirthElement(name, value, thisElementCount);
 		
@@ -347,7 +356,7 @@ function createElement(name,value,thisElementCount){
 		createGenericInputElement(name, value, thisElementCount);
 		
 	}			
-}
+}*/
 
 /*creates and appends a field container for the given name if it is not already there*/
 function createFieldContainer(name,label){
@@ -388,10 +397,7 @@ function createAccountsInputElement(name, value, element){
 	if(!element){
 		var element = document.getElementById(name);
 	}
-	/*to make sure the url is automatically generated as we enter this*/ 
-	/*if(name == 'foafAccountName'){
-		newElement.setAttribute('onchange', 'updateProfilePageUrl(this.parentNode);');
-	}*/
+
 	element.appendChild(newElement);
 	newElement.setAttribute('class','fieldInput');
 
@@ -402,7 +408,6 @@ function createAccountsInputElement(name, value, element){
 function createFoafAccountServiceHomepageInputElement(value,container){
 	selectElement = document.createElement("select");
 	
-
 	var allAccounts = getAllOnlineAccounts();
 	
 	selectElement[0] = new Option('Other','',false,false);
@@ -439,7 +444,6 @@ function createAccountsAddElement(container){
 	container.appendChild(addDiv);
 
 }
-
 
 function createHoldsAccountElement(attachElement, bnodeId){
 	
@@ -489,11 +493,11 @@ function createEmptyHoldsAccountElement(container){
 
 /*creates and appends a generic input element to the appropriate field container*/
 function createGenericInputElement(name, value, thisElementCount, contname){
-	newElement = document.createElement('input');
+	var newElement = document.createElement('input');
 	newElement.id = name+'_'+thisElementCount;
 	newElement.setAttribute('value',value);
 	
-	/*if there is a specific container we want to put it in*/
+	//if there is a specific container we want to put it in
 	if(contname){
 		name = contname;
 	}
@@ -507,7 +511,7 @@ function createGenericInputElement(name, value, thisElementCount, contname){
 
 /*creates and appends a generic hidden element and appends it to the appropriate field container*/
 function createGenericHiddenElement(name, value, thisElementCount, contname){
-	newElement = document.createElement('input');
+	var newElement = document.createElement('input');
 	newElement.id = name+'_'+thisElementCount;
 	newElement.setAttribute('value',value);
 	
@@ -523,8 +527,9 @@ function createGenericHiddenElement(name, value, thisElementCount, contname){
 	return newElement;
 }
 
-//TODO: think about being more strict about variable scoping
+//TODO: no longer used (part of old design) but may be handy when reimplementing foafDepiction stuff*/
 /*creates an element for foaf depiction*/
+/*
 function createFoafDepictionElement(name, value, thisElementCount){
 	//create imgElement
 	imgElement = document.createElement('img');
@@ -540,7 +545,7 @@ function createFoafDepictionElement(name, value, thisElementCount){
 	//appendElements as necessary
 	document.getElementById(name+'_container').appendChild(newElement);
 	document.getElementById(name+'_container').appendChild(imgElement);
-}
+}*/
 
 /*renders and attaches a date selector*/
 function createFoafDateOfBirthElement(container, day, month, year){
@@ -566,48 +571,8 @@ function createFoafDateOfBirthElement(container, day, month, year){
   		populatedropdown(yearDropDownElement,monthDropDownElement,dayDropDownElement,year,month,day);	
 }
 
-/*---------------------------------- functions to ensure hidden fields are up to date... TODO: poss to be done at save?-------------------------------*/
+/*---------------------------------- functions to ensure hidden fields are up to date-------------------------------*/
 
-/*ensures that all the hidden date of birth fields are up to date*/
-function updateFoafDateOfBirthElements(){
-	var i=0
-	
-	for(i=0; i < document.getElementById('foafDateOfBirth_container').childNodes.length; i++){
-
-		var element = document.getElementById('foafDateOfBirth_container').childNodes[i];
-		
-		//FIXME: ensure that this updates things in the right way i.e. only month and year for foaf:birthday
-		var dayValue = document.getElementById('dayDropdown').value;
-		if(dayValue.length==1){
-			dayValue = '0'+dayValue;
-		}
-
-		var monthValue =document.getElementById('monthDropdown').value;
-		if(monthValue.length==1){
-			monthValue = '0'+monthValue;
-		}
-		var yearValue = document.getElementById('yearDropdown').value;
-		
-		var value;
-
-		if(parseFloat(yearValue) == 0){
-			/*we only want to set foafBirthday if this is the case*/
-			if(element.id.substr(0,12) == 'foafBirthday'){
-				element.value = monthValue+'-'+dayValue;
-			} else {
-				/*TODO: deal with deleting elements*/
-				element.value = '';
-			}
-		} else {
-			if(element.id.substr(0,12) == 'foafBirthday'){
-				element.value = monthValue+'-'+dayValue;
-			} else {
-				element.value = yearValue+'-'+monthValue+'-'+dayValue;
-			}
-		}
-	}																																
-	document.getElementById('foafDateOfBirth_container').childNodes[i];
-}
 
 /*when an account dropdown is changed, this renders the appropriate hidden or showing fields 
 for the users profile page and/or the account provider box*/

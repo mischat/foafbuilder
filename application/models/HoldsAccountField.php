@@ -1,7 +1,6 @@
 <?php
 require_once 'Field.php';
 require_once 'helpers/Utils.php';
-/*FIXME: this field is currently not used*/
 
 /*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
 class HoldsAccountField extends Field{

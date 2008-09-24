@@ -1,6 +1,8 @@
 <?php
+/*FIXME: combine with the other geo fields in a similar way to BirthdayField. 
+ *we also need to create a based_near triple if they don't have one*/
 require_once 'Field.php';
-/*FIXME: we need to create a based_near triple if they don't have one*/
+
 /*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
 class GeoLongField extends Field{
 	

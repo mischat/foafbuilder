@@ -1,4 +1,5 @@
 <?php
+/*FIXME: combine with the other geo fields in a similar way to BirthdayField.*/
 require_once 'Field.php';
 /*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
 class GeoLatLongField extends Field{

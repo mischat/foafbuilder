@@ -19,8 +19,8 @@ class AjaxController extends Zend_Controller_Action
     	$this->loadFoaf();   
 		$this->fieldNamesObject = new FieldNames('theBasics',$this->foafData);  	
 		$this->view->results = array();
-		foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			array_push($this->view->results,$field->getData());	
+    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+			$this->view->results = array_merge($this->view->results,$field->getData());	
 		}
     }
     
@@ -30,8 +30,8 @@ class AjaxController extends Zend_Controller_Action
     	$this->loadFoaf();   
 		$this->fieldNamesObject = new FieldNames('contactDetails',$this->foafData);  	
 		$this->view->results = array();
-		foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			array_push($this->view->results,$field->getData());	
+    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+			$this->view->results = array_merge($this->view->results,$field->getData());	
 		}
     }
     
@@ -41,8 +41,8 @@ class AjaxController extends Zend_Controller_Action
     	$this->loadFoaf();   
 		$this->fieldNamesObject = new FieldNames('pictures',$this->foafData);  	
 		$this->view->results = array();
-		foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			array_push($this->view->results,$field->getData());	
+    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+			$this->view->results = array_merge($this->view->results,$field->getData());	
 		}
     }
     
@@ -63,8 +63,8 @@ class AjaxController extends Zend_Controller_Action
     	$this->loadFoaf();   
 		$this->fieldNamesObject = new FieldNames('friends',$this->foafData);  	
 		$this->view->results = array();
-		foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			array_push($this->view->results,$field->getData());	
+    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+			$this->view->results = array_merge($this->view->results,$field->getData());	
 		}
     }
     
@@ -74,8 +74,8 @@ class AjaxController extends Zend_Controller_Action
     	$this->loadFoaf();   
 		$this->fieldNamesObject = new FieldNames('blogs',$this->foafData);  	
 		$this->view->results = array();
-		foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			array_push($this->view->results,$field->getData());	
+    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+			$this->view->results = array_merge($this->view->results,$field->getData());	
 		}
     }
     
@@ -85,8 +85,8 @@ class AjaxController extends Zend_Controller_Action
     	$this->loadFoaf();   
 		$this->fieldNamesObject = new FieldNames('interests',$this->foafData);  	
 		$this->view->results = array();
-		foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			array_push($this->view->results,$field->getData());	
+    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+			$this->view->results = array_merge($this->view->results,$field->getData());	
 		}
     }
     
@@ -96,8 +96,8 @@ class AjaxController extends Zend_Controller_Action
     	$this->loadFoaf();   
 		$this->fieldNamesObject = new FieldNames('other',$this->foafData);  	
 		$this->view->results = array();
-		foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			array_push($this->view->results,$field->getData());	
+    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+			$this->view->results = array_merge($this->view->results,$field->getData());	
 		}
     }
     
