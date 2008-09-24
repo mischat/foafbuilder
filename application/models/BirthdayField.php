@@ -55,7 +55,7 @@ class BirthdayField extends Field{
 				$this->data['birthdayFields']['year']= $birthdayArray[0];
 			}
 		}	
-        
+		
         //TODO: perhaps it is better to keep all the display stuff in the javascript?
         $this->data['birthdayFields']['displayLabel'] = 'Birthday';
         $this->data['birthdayFields']['name'] = 'birthday';
@@ -72,41 +72,43 @@ class BirthdayField extends Field{
 	
 	/*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
 	public function saveToModel(&$foafData, $value){
-
+		
+		$valueArray = $this->objectToArray($value);
+		
 		/*find existing triples for foafBirthday and foafDateOfBirth*/
-		$foundModel1 = $foafData->getModel(NULL,"http://xmlns.com/foaf/0.1/birthday",NULL);
-		$foundModel2 = $foafData->getModel(NULL,"http://xmlns.com/foaf/0.1/dateOfBirth",NULL);
+		$foundModel1 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/birthday"),NULL);
+		$foundModel2 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/dateOfBirth"),NULL);
 		
 		/*remove any existing triples*/
 		foreach($foundModel1->triples as $triple){
-			$foafData->getModel->remove($triple);
+			$foafData->getModel()->remove($triple);
 		}
 		foreach($foundModel2->triples as $triple){
-			$foafData->getModel->remove($triple);
+			$foafData->getModel()->remove($triple);
 		}
 		
 		/*re-add them (if they exist)*/
-		if($value['month'] && $value['month'] != '' && $value['day'] && $value['day'] != ''){
+		if($valueArray['month'] && $valueArray['month'] != '' && $valueArray['day'] && $valueArray['day'] != ''){
 			/*add FoafBirthday element*/
-			$newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),"http://xmlns.com/foaf/0.1/birthday",$value['month']."-".$value['day']);
-			$foafData->add($newFoafBirthday);
+			$foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
+			$newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-".$valueArray['day']));
+			$foafData->getModel()->add($newFoafBirthday);
 			
-			if($value['year'] && $value['year'] != ''){
-				/*add foafDateOfBirth element*/
-				$newFoafDateOfBirth= new Statement(new Resource($foafData->getPrimaryTopic()),"http://xmlns.com/foaf/0.1/birthday",$value['month']."-".$value['day']."-".$value['year']);
-				$foafData->add($newFoafBirthday);
+			if($valueArray['year'] && $valueArray['year'] != ''){
 				
+				/*add foafDateOfBirth element*/
+				$dateLiteral = new Literal($valueArray['year']."-".$valueArray['month']."-".$valueArray['day']);
+				$foafDateOfBirthResource = new Resource("http://xmlns.com/foaf/0.1/dateOfBirth");
+				$newFoafDateOfBirth= new Statement(new Resource($foafData->getPrimaryTopic()),$foafDateOfBirthResource,$dateLiteral);
+				$foafData->getModel()->add($newFoafDateOfBirth);
+				echo("year: ".$valueArray['year']);
 				/*if bio style birthday exists already then edit it but if not, don't*/
-				$foafData->getModel();
-				if($this->bioBirthdayExists()){
-					$foafData->getModel();
-					$bioBirthdayExists = new Statement(NULL, new Resource(), new Resource());
-				}
+				$this->editBioBirthdayIfItExists($foafData,$valueArray['year'],$valueArray['month'],$valueArray['day']);
 			}
 		}
 		
-		
-		//FIXME: add save functionality here
+		$this->editBioBirthdayIfItExists($foafData,NULL,NULL,NULL);
+
 	}
 
 	private function isLongDateValid($date){
@@ -130,8 +132,45 @@ class BirthdayField extends Field{
 		}
 	}
 	
-	private function bioBirthdayExists(){
+	private function objectToArray($value){
 		
+		$ret = array();
+		
+		foreach($value as $key => $value){
+			$ret[$key] = $value;
+		}
+		
+		return $ret;
+	}
+	
+	private function editBioBirthdayIfItExists(&$foafData,$year,$month,$day){
+		
+		   $query = 'PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+		    PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+		    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+		    
+		    SELECT ?e ?bioBirthday WHERE{
+			    ?z foaf:primaryTopic ?primaryTopic
+				?primaryTopic bio:event ?e .
+	        	?e rdf:type bio:Birth .
+	        	?e bio:date ?bioBirthday .
+		    }';
+		   
+		   $results = $foafData->getModel()->sparqlQuery($query);
+		   if(isset($results[0]['?e']) && isset($results[0]['?bioBirthday'])){
+		   		//$eventBnode = new BlankNode($results[0]['?e']->uri);
+		   		/*remove the existing triple*/
+		   		$bioDateResource = new Resource("http://purl.org/vocab/bio/0.1/date");
+		   		$existingStatement = new Statement($results[0]['?e'], $bioDateResource, $results[0]['?bioBirthday']);
+		   		$foafData->getModel()->remove($existingStatement);
+		   		
+		   		/*create a new triple if the date has been passed in*/
+		   		if($day && $month && $year){
+		   			$dateLiteral = new Literal($year."-".$month."-".$day);
+		   			$newStatement = new Statement($results[0]['?e'], new Resource("http://purl.org/vocab/bio/0.1/birthday"), $dateLiteral);
+		   			$foafData->getModel()->add($newStatement);
+		   		}
+		   	}
 	}
 }
 ?>
