@@ -79,12 +79,12 @@ class FieldNames {
 			new SimpleField('foafHomepage', 'Homepages', 'http://xmlns.com/foaf/0.1/homepage',$this->foafData,'resource');
 		$this->allFieldNames['foafNick'] = 
 			new SimpleField('foafNick', 'Nicknames', 'http://xmlns.com/foaf/0.1/nick',$this->foafData,'literal');
-		$this->allFieldNames['foafDateOfBirth'] = 
-			new SimpleField('foafDateOfBirth', 'Birthday', 'http://xmlns.com/foaf/0.1/dateOfBirth',$this->foafData,'literal');
-		$this->allFieldNames['foafBirthday'] = 
-			new SimpleField('foafBirthday', 'Birthday', 'http://xmlns.com/foaf/0.1/birthday',$this->foafData,'literal');
-		$this->allFieldNames['foafBirthday'] = 
-			new SimpleField('foafBirthday', 'Birthday', 'http://xmlns.com/foaf/0.1/birthday',$this->foafData,'literal');
+		//$this->allFieldNames['foafDateOfBirth'] = 
+			//new SimpleField('foafDateOfBirth', 'Birthday', 'http://xmlns.com/foaf/0.1/dateOfBirth',$this->foafData,'literal');
+	//	$this->allFieldNames['foafBirthday'] = 
+		//	new SimpleField('foafBirthday', 'Birthday', 'http://xmlns.com/foaf/0.1/birthday',$this->foafData,'literal');
+		//$this->allFieldNames['foafBirthday'] = 
+			//new SimpleField('foafBirthday', 'Birthday', 'http://xmlns.com/foaf/0.1/birthday',$this->foafData,'literal');
 			
 		//$this->allFieldNames['bioBirthday'] = new BioBirthdayField();
 		//$this->allFieldNames['geoLatLong'] =  new GeoLatLongField();
@@ -108,8 +108,8 @@ class FieldNames {
 	}
 	
 	private function instantiateAccountsFields(){
-		$this->allFieldNames['foafHoldsAccount'] = 
-			new HoldsAccountField($this->foafData);
+		$this->allFieldNames['foafHoldsAccount'] = new HoldsAccountField($this->foafData);
+		$this->allFieldNames['birthday'] = new BirthdayField($this->foafData);
 	}
 	
 	private function instantiateFriendsFields(){

@@ -59,8 +59,8 @@ class HoldsAccountField extends Field{
 		
         
         //TODO: perhaps it is better to keep all the display stuff in the javascript?
-        $this->data['displayLabel'] = 'Accounts';
-        $this->data['name'] = 'foafHoldsAccount';
+        $this->data['foafHoldsAccountFields']['displayLabel'] = 'Accounts';
+        $this->data['foafHoldsAccountFields']['name'] = 'foafHoldsAccount';
         $this->name = 'foafHoldsAccount';
 		$this->label = 'Accounts';
 	}
@@ -71,7 +71,7 @@ class HoldsAccountField extends Field{
 	public function setPredicateUri($predicateUri){
 		$this->predicateUri = $predicateUri;
 	}
-	/*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
+	/*saves the values created by the editor in value... as encoded in json.*/
 	public function saveToModel(&$foafData, $value){
 
 		echo("SAVING ACCOUNTSFields");

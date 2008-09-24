@@ -118,69 +118,77 @@ function clearFoaf() {
 /*--------------------------------------inputs to objects---------------------------------------*/
 
 
-/*populates form fields etc from javascript objects (from json) and fills out the global arrays */ 
+/*populates form fields etc from javascript objects (from json) */ 
 function genericObjectsToDisplay(data){
-
+	
+	/*set the global variable which holds the data*/
 	globalFieldData = data;
 	  	
+	/*clear out the right hand pane*/
 	document.getElementById('personal');
-
-	//TODO: perhaps some fading here further down the line
   	document.getElementById('personal').innerHTML = '';	
-  	
-  	//TODO: perhaps don't need this loop
-	for(i=0 ; i < data.length; i++){	
-		var name = data[i].name;
-		var containerElement = createFieldContainer(name, data[i].displayLabel);
-		
-		/*loop through all the simple fields and render them*/	
-		if(data[i].fields){
-			
-			renderSimpleFields(i, name, data);
-
-		/*render an account field*/
-		} else if(data[i].foafHoldsAccountFields){
-		
-			renderAccountFields(i, data, containerElement);
-		}
-	}
+	
+	/*render the various fields*/
+	renderAccountFields(data);
+	renderBirthdayFields(data);
 }
 
-function renderAccountFields(i, data, containerElement){
-	//TODO: make this shiny i.e. use dropdowns and icons etc.
+/*Render the birthday dropdown (assumes only one birthday)*/
+function renderBirthdayFields(data){
 	
-	//createAccountsInputElement(name, '', k, holdsAccountElement);	
-	for(accountBnodeId in data[i].foafHoldsAccountFields){
+	/*build the container*/
+	var name = data.birthdayFields.name;
+	var label =	data.birthdayFields.displayLabel;
+	var containerElement = createFieldContainer(name, label);
+	
+	/*build the date selector dropdown*/
+	var day = data.birthdayFields['day'];
+	var month = data.birthdayFields['month'];
+	var year = data.birthdayFields['year'];	
+	createFoafDateOfBirthElement(containerElement, day, month, year);
+}
+
+function renderAccountFields(data){
+	
+	/*build the container*/
+	var name = data.foafHoldsAccountFields.name;
+	var label =	data.foafHoldsAccountFields.displayLabel;
+	var containerElement = createFieldContainer(name, label);
+	
+	/*fill it up with accounts*/
+	for(accountBnodeId in data.foafHoldsAccountFields){
+		if(accountBnodeId != "displayLabel" && accountBnodeId != "name"){
 		
-		/*create a container for this account. E.g. a Skype account represented by accountBnodeId=bNode3*/
-		var holdsAccountElement = createHoldsAccountElement(containerElement,accountBnodeId);
-		
-		/*create an element for the foafAccountServiceHomepage*/
-		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]){
-			createFoafAccountServiceHomepageInputElement(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
-		} else {
-			/*create an empty element*/
-			createFoafAccountServiceHomepageInputElement('', holdsAccountElement);	
-		}
-		/*create an element for the foafAccountName*/
-		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0]){
-			createAccountsInputElement('foafAccountName', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label, holdsAccountElement);	
-		} else {
-			/*create an empty element*/
-			createAccountsInputElement('foafAccountName', '', holdsAccountElement);	
-		}
-		/*create an element for the foafAccountProfilePage*/
-		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]){
-			createAccountsInputElement('foafAccountProfilePage', data[i].foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri, holdsAccountElement);	
-		} else {
-			/*create an empty element*/
-			createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
-		}
-		/*hide/show the profilePage url as appropriate*/	
-		if(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri){
-			toggleHiddenAccountInputElements(data[i].foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri,holdsAccountElement,'');
-		}
-	}
+			/*create a container for this account. E.g. a Skype account represented by accountBnodeId=bNode3*/
+			var holdsAccountElement = createHoldsAccountElement(containerElement,accountBnodeId);
+			
+			/*create an element for the foafAccountServiceHomepage*/
+			if(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]){
+				createFoafAccountServiceHomepageInputElement(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
+			} else {
+				/*create an empty element*/
+				createFoafAccountServiceHomepageInputElement('', holdsAccountElement);	
+			}
+			/*create an element for the foafAccountName*/
+			if(data.foafHoldsAccountFields[accountBnodeId].foafAccountName[0]){
+				createAccountsInputElement('foafAccountName', data.foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label, holdsAccountElement);	
+			} else {
+				/*create an empty element*/
+				createAccountsInputElement('foafAccountName', '', holdsAccountElement);	
+			}
+			/*create an element for the foafAccountProfilePage*/
+			if(data.foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]){
+				createAccountsInputElement('foafAccountProfilePage', data.foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri, holdsAccountElement);	
+			} else {
+				/*create an empty element*/
+				createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
+			}
+			/*hide/show the profilePage url as appropriate*/	
+			if(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri){
+				toggleHiddenAccountInputElements(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri,holdsAccountElement,'');
+			}
+		}//end if
+	}//end for
 	/*a link to add another account*/	
 	createAccountsAddElement(containerElement);
 }
@@ -205,6 +213,51 @@ function renderSimpleFields(i, name, data){
 
 function displayToObjects(){  
 	
+	//TODO: we shouldn't have to put these numbers in
+	accountsDisplayToObjects();
+	birthdayDisplayToObjects();
+	
+	simpleFieldsDisplayToObjects();
+	
+  	//TODO: sort this out.  This used to use the arrays that were defined in main.phtml but they aren't there anymore.
+  	/*loop through all the arrays (for foafName, foafHomepage etc) defined in the pageData object*/
+	/*
+	for(arrayName in pageData){
+		if(arrayName != "foafPrimaryTopic"){
+			//chop off the ArrayValue bit at the end.
+			var name = arrayName.substring(0,arrayName.length-10);
+			
+			for(i=0; document.getElementById(name+'_'+i); i++){
+				//TODO: what about validation.  Where's it to go?
+				if(document.getElementById(name+'_'+i) != ""){
+					pageData[arrayName][i] = document.getElementById(name+'_'+i).value;
+				}
+			}
+		}//end if
+	}//end for	*/
+}
+
+function simpleFieldsDisplayToObjects(){
+	var containerElement = document.getElementById('foafHoldsAccount_container');
+  	
+  	//FIXME: do this if we actually have any simple fields left!!!
+}
+
+function birthdayDisplayToObjects(){
+	
+	if(document.getElementById('yearDropdown').value){
+		globalFieldData.birthdayFields['year'] = document.getElementById('yearDropdown').value; 
+	} 
+	if(document.getElementById('monthDropdown').value){
+		globalFieldData.birthdayFields['month'] = document.getElementById('monthDropdown').value; 
+	}
+	if(document.getElementById('dayDropdown').value){
+		globalFieldData.birthdayFields['day'] = document.getElementById('dayDropdown').value; 
+	}
+
+}
+
+function accountsDisplayToObjects(){
 	/*first do accounts stuff*/	
 	/*TODO This will change when the display is improved + need a bit less hardcoding possibly*/
   	var containerElement = document.getElementById('foafHoldsAccount_container');
@@ -236,25 +289,25 @@ function displayToObjects(){
 	  				//do the right thing for the right element, and miss any elements we don't care about.
 	  				if (holdsAccountElement.childNodes[k].id == 'foafAccountName'){
 	  					/*create a new element if this account is new*/
-	  					if(!globalFieldData[0].foafHoldsAccountFields[bNodeId]){
-	  						globalFieldData[0].foafHoldsAccountFields[bNodeId] = new Object;
+	  					if(!globalFieldData.foafHoldsAccountFields[bNodeId]){
+	  						globalFieldData.foafHoldsAccountFields[bNodeId] = new Object;
 	  					}
-	  					if(globalFieldData[0].foafHoldsAccountFields[bNodeId]){
-	  						globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountName'] = [{label : holdsAccountElement.childNodes[k].value}];
+	  					if(globalFieldData.foafHoldsAccountFields[bNodeId]){
+	  						globalFieldData.foafHoldsAccountFields[bNodeId]['foafAccountName'] = [{label : holdsAccountElement.childNodes[k].value}];
 	  					}
 	  				} else if(holdsAccountElement.childNodes[k].id == 'foafAccountProfilePage'){
 	  					/*create a new element if this account is new*/
-	  					if(!globalFieldData[0].foafHoldsAccountFields[bNodeId]){
-	  						globalFieldData[0].foafHoldsAccountFields[bNodeId] = new Object;
+	  					if(!globalFieldData.foafHoldsAccountFields[bNodeId]){
+	  						globalFieldData.foafHoldsAccountFields[bNodeId] = new Object;
 	  					}
-	  					globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountProfilePage'] = [{uri : holdsAccountElement.childNodes[k].value}];
+	  					globalFieldData.foafHoldsAccountFields[bNodeId]['foafAccountProfilePage'] = [{uri : holdsAccountElement.childNodes[k].value}];
 	  				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountServiceHomepage'){		
 	  					/*create a new element if this account is new*/
-	  					if(!globalFieldData[0].foafHoldsAccountFields[bNodeId]){
-	  						globalFieldData[0].foafHoldsAccountFields[bNodeId] = new Object;
+	  					if(!globalFieldData.foafHoldsAccountFields[bNodeId]){
+	  						globalFieldData.foafHoldsAccountFields[bNodeId] = new Object;
 	  					}
-	  					if(globalFieldData[0].foafHoldsAccountFields[bNodeId]){
-	  						globalFieldData[0].foafHoldsAccountFields[bNodeId]['foafAccountServiceHomepage'] = [{uri : holdsAccountElement.childNodes[k].value}];				
+	  					if(globalFieldData.foafHoldsAccountFields[bNodeId]){
+	  						globalFieldData.foafHoldsAccountFields[bNodeId]['foafAccountServiceHomepage'] = [{uri : holdsAccountElement.childNodes[k].value}];				
 	  					}
 	  				} 	
 	  			} 
@@ -263,31 +316,12 @@ function displayToObjects(){
   	}
   	
   	/*remove all elements (accounts) from the globalFieldData object that have been removed from the dom tree*/
-  	for(key in globalFieldData[0].foafHoldsAccountFields){
+  	for(key in globalFieldData.foafHoldsAccountFields){
   		if(!doNotCleanArray[key]){
-  			delete globalFieldData[0].foafHoldsAccountFields[key];
+  			delete globalFieldData.foafHoldsAccountFields[key];
   		}
   	}
-  	
-  	//TODO: sort this out.  This used to use the arrays that were defined in main.phtml but they aren't there anymore.
-  	/*loop through all the arrays (for foafName, foafHomepage etc) defined in the pageData object*/
-	/*
-	for(arrayName in pageData){
-		if(arrayName != "foafPrimaryTopic"){
-			//chop off the ArrayValue bit at the end.
-			var name = arrayName.substring(0,arrayName.length-10);
-			
-			for(i=0; document.getElementById(name+'_'+i); i++){
-				//TODO: what about validation.  Where's it to go?
-				if(document.getElementById(name+'_'+i) != ""){
-					pageData[arrayName][i] = document.getElementById(name+'_'+i).value;
-				}
-			}
-		}//end if
-	}//end for
-	*/
 }
-
 /*------------------------------------------------------------------------------*/
 
 /*--------------------------------------element generators---------------------------------------*/
@@ -508,18 +542,14 @@ function createFoafDepictionElement(name, value, thisElementCount){
 	document.getElementById(name+'_container').appendChild(imgElement);
 }
 
-function createFoafDateOfBirthElement(name, value, thisElementCount){
+/*renders and attaches a date selector*/
+function createFoafDateOfBirthElement(container, day, month, year){
 	/*if we have rendered one of the alternative birthday things already then hide the other one*/
 	//TODO: need to add some onchange functionality to ensure this saves properly.
-	if(document.getElementById(name+'_container')){
-		var hiddenElement = createGenericHiddenElement(name, value, thisElementCount,'foafDateOfBirth');		
-
+	
   		var dayDropDownElement = document.createElement('select');
   		var monthDropDownElement = document.createElement('select');
   		var yearDropDownElement =document.createElement('select');
-		dayDropDownElement.setAttribute('onchange', 'updateFoafDateOfBirthElements()');
-		monthDropDownElement.setAttribute('onchange', 'updateFoafDateOfBirthElements()');
-		yearDropDownElement.setAttribute('onchange', 'updateFoafDateOfBirthElements()');
 			
   		dayDropDownElement.setAttribute('class','dateSelector');
   		dayDropDownElement.id = 'dayDropdown';
@@ -528,24 +558,12 @@ function createFoafDateOfBirthElement(name, value, thisElementCount){
   		yearDropDownElement.setAttribute('class','dateSelector');
   		yearDropDownElement.id = 'yearDropdown';
   		
-  		document.getElementById(name+'_container').appendChild(dayDropDownElement);
-  		document.getElementById(name+'_container').appendChild(monthDropDownElement);
-  		document.getElementById(name+'_container').appendChild(yearDropDownElement);
+  		container.appendChild(dayDropDownElement);
+  		container.appendChild(monthDropDownElement);
+  		container.appendChild(yearDropDownElement);
   		
-  		/*populate dropdowns with appropriate values*/
-  		var dateArray = value.split("-");
-
-  		if(dateArray.length == 2){
-  			populatedropdown(dayDropDownElement,monthDropDownElement,yearDropDownElement,dateArray[0],dateArray[1],null);
-		} else if(dateArray.length == 3){
-  			populatedropdown(dayDropDownElement,monthDropDownElement,yearDropDownElement,dateArray[0],dateArray[1],dateArray[2]);
-		} else {
-			//FIXME: need to have a cleverer way of dealing with this.
-  			alert("Date string invalid");
-		}
-	} else {
-		createGenericHiddenElement(name, value, thisElementCount,'foafDateOfBirth');
-	}
+  		/*put the appropriate dates in the dropdown*/
+  		populatedropdown(yearDropDownElement,monthDropDownElement,dayDropDownElement,year,month,day);	
 }
 
 /*---------------------------------- functions to ensure hidden fields are up to date... TODO: poss to be done at save?-------------------------------*/

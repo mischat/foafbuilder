@@ -53,7 +53,7 @@ class AjaxController extends Zend_Controller_Action
 		$this->fieldNamesObject = new FieldNames('accounts',$this->foafData);  	
 		$this->view->results = array();
 		foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			array_push($this->view->results,$field->getData());	
+			$this->view->results = array_merge($this->view->results,$field->getData());	
 		}
     }
     
@@ -215,7 +215,7 @@ class AjaxController extends Zend_Controller_Action
 		$allFieldNames = $fieldNames->getAllFieldNames();
 		
 		/*loop through all the rows in the sparql results style 'almost model'*/
-		foreach($almost_model[0] as $key => $value){
+		foreach($almost_model as $key => $value){
 					
 			/*get rid of 'fields at the end of the name'*/
 			if(isset($allFieldNames[substr($key,0,-6)])){
@@ -228,7 +228,7 @@ class AjaxController extends Zend_Controller_Action
 				$field->saveToModel($foafData, $value);
 				
 			} else {
-				echo("unrecognised triple:".$key."\n");	
+				echo("unrecognised fields:".$key."\n");	
 			}//end if
 		}//end foreach
 	}
