@@ -1,9 +1,6 @@
 <?php
-/*TODO: maybe the OO should go deeper than this and maybe this should be called something different e.g. querypieces.
-Perhaps all fieldNames should have there own class, which inherits from a fieldNames interface?  The interface could contain
-methods like getQueryBit, getName, saveToModel etc.*/
+//TODO: we shouldn't have to instantiate all of these in order to know which fields are on which 'page'
 require_once "SimpleField.php";
-require_once "BioBirthdayField.php";
 require_once "GeoLatLongField.php";
 require_once "GeoLatField.php";
 require_once "GeoLongField.php";
@@ -67,6 +64,7 @@ class FieldNames {
 	
 	/*instantiates arrays of fields for all the items on the basics page*/
 	private function instantiateTheBasicsFields(){
+		/*
 		$this->allFieldNames['foafTitle'] = 
 			new SimpleField('foafTitle', 'Title', "http://xmlns.com/foaf/0.1/title",$this->foafData,"literal");
 		$this->allFieldNames['foafGivenName'] = 
@@ -79,14 +77,9 @@ class FieldNames {
 			new SimpleField('foafHomepage', 'Homepages', 'http://xmlns.com/foaf/0.1/homepage',$this->foafData,'resource');
 		$this->allFieldNames['foafNick'] = 
 			new SimpleField('foafNick', 'Nicknames', 'http://xmlns.com/foaf/0.1/nick',$this->foafData,'literal');
-		//$this->allFieldNames['foafDateOfBirth'] = 
-			//new SimpleField('foafDateOfBirth', 'Birthday', 'http://xmlns.com/foaf/0.1/dateOfBirth',$this->foafData,'literal');
-	//	$this->allFieldNames['foafBirthday'] = 
-		//	new SimpleField('foafBirthday', 'Birthday', 'http://xmlns.com/foaf/0.1/birthday',$this->foafData,'literal');
-		//$this->allFieldNames['foafBirthday'] = 
-			//new SimpleField('foafBirthday', 'Birthday', 'http://xmlns.com/foaf/0.1/birthday',$this->foafData,'literal');
-			
-		//$this->allFieldNames['bioBirthday'] = new BioBirthdayField();
+		*/
+		
+		$this->allFieldNames['birthday'] = new BirthdayField($this->foafData);
 		//$this->allFieldNames['geoLatLong'] =  new GeoLatLongField();
 		//$this->allFieldNames['geoLat'] =  new GeoLatField();
 		//$this->allFieldNames['geoLong'] =  new GeoLongField();	
@@ -109,7 +102,6 @@ class FieldNames {
 	
 	private function instantiateAccountsFields(){
 		$this->allFieldNames['foafHoldsAccount'] = new HoldsAccountField($this->foafData);
-		$this->allFieldNames['birthday'] = new BirthdayField($this->foafData);
 	}
 	
 	private function instantiateFriendsFields(){
