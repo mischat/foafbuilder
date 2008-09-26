@@ -136,7 +136,7 @@ function genericObjectsToDisplay(data){
 /*Render the birthday dropdown (assumes only one birthday)*/
 function renderBirthdayFields(data){
 
-	if(!data.birthdayFields || typeof(data.birthdayFields) == 'undefined'){
+	if(!data || !data.birthdayFields || typeof(data.birthdayFields) == 'undefined'){
 		return;
 	}
 	
@@ -154,7 +154,8 @@ function renderBirthdayFields(data){
 
 function renderAccountFields(data){
 	
-	if(!data.foafHoldsAccountFields || typeof(data.foafHoldsAccountFields) == 'undefined'){
+	//if(!data.foafHoldsAccountFields || typeof(data.foafHoldsAccountFields) == 'undefined'){
+	if(!data || !data.foafHoldsAccountFields || typeof(data.foafHoldsAccountFields) == 'undefined'){
 		return;
 	}
 	
