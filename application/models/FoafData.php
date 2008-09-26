@@ -1,7 +1,5 @@
 <?php
-
 //require_once 'helpers/sparql.php';
-
 require_once 'RdfAPI.php';
 require_once 'dataset/DatasetMem.php';
 require_once 'sparql/SparqlParser.php';
@@ -14,30 +12,31 @@ class FoafData {
     private $randomStringToBnodeArray;
     
     /*New from uri if uri present. if not just new.*/
-    public function FoafData($uri = "") {
-        if($uri) {
-	        //TODO This name shouldnt be hardcoded.
-	        $graphset = ModelFactory::getDatasetMem('Dataset1');
-	        $model = new NamedGraphMem($uri);
-	        $model->load($uri);
-	        $graphset->addNamedGraph($model);
+    public function FoafData ($uri = "") {
+        if ($uri) {
+	    //TODO This name shouldnt be hardcoded.
+	    $graphset = ModelFactory::getDatasetMem('Dataset1');
+	    $model = new NamedGraphMem($uri);
+	    $model->load($uri);
+	    $graphset->addNamedGraph($model);
 	        
-	        if (!($graphset->containsNamedGraph($uri))) {
-	        	print "Triples model not add to the modelfactory\n";
-	        }
-	        /*
-                $result = $model->find(new Resource($uri),new Resource('http://xmlns.com/foaf/0.1/primaryTopic'),NULL);
-                $oldUri = "";
-                $it = $result->getStatementIterator();
-                while ($it->hasNext()) {
-                    $statement = $it->next();
-                    if ($it->getCurrentPosition() == 0) {
-                        $oldUri = (string) $statement->getLabelObject();
-                    }
-                } 
-			*/
+	    if (!($graphset->containsNamedGraph($uri))) {
+	        print "Triples model not add to the modelfactory\n";
+	    }
+
+	    /*
+            $result = $model->find(new Resource($uri),new Resource('http://xmlns.com/foaf/0.1/primaryTopic'),NULL);
+            $oldUri = "";
+            $it = $result->getStatementIterator();
+            while ($it->hasNext()) {
+                $statement = $it->next();
+                if ($it->getCurrentPosition() == 0) {
+                    $oldUri = (string) $statement->getLabelObject();
+                }
+            } 
+            */
 	        
-	        /*Could swap these two lines with commented out block above*/
+	    /*Could swap these two lines with commented out block above*/
             $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
             $result = $model->sparqlQuery($query);
 
@@ -60,26 +59,27 @@ class FoafData {
                 $model->add(new Statement($newUriRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldUriRes));
             }
           
-	    if($model!=null) { 
+	    if ($model!=null) { 
 	        $this->model = $model;
 	        $this->uri = $uri;
 	        $this->graphset = $graphset;
 	    }
-		$this->putInSession();
-       } else {
-        	//FIXME: sort this out so it isn't an echo
-        	echo("Something went wrong, there's no URI!");
+	    $this->putInSession();
+        } else {
+            //FIXME: sort this out so it isn't an echo
+            echo("Something went wrong, there's no URI!");
+            return 0;
         }
     }
     
-    public static function getFromSession(){
+    public static function getFromSession() {
     	//TODO: use auth session for particular users
         $defaultNamespace = new Zend_Session_Namespace('Garlik');
     	//XXX This probably ought to be changed for production
     	return $defaultNamespace->foafData;
     }
     
-    public function putInSession(){
+    public function putInSession() {
     	//TODO: use auth session for particular users
     	$defaultNamespace = new Zend_Session_Namespace('Garlik');
     	//XXX This probably ought to be changed for production
@@ -107,7 +107,7 @@ class FoafData {
         $this->primaryTopic = $primaryTopic;
     }
     
-   	public function getRandomStringToBnodeArray() {
+    public function getRandomStringToBnodeArray() {
         return $this->randomStringToBnodeArray;
     }
     
@@ -126,6 +126,5 @@ class FoafData {
     public function setGraphset($graphset) {
     	$this->graphset= $graphset;
     }
-
 }
 /* vi:set expandtab sts=4 sw=4: */

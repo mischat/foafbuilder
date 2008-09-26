@@ -100,19 +100,30 @@ class AjaxController extends Zend_Controller_Action {
     } 
     
     /*gets the foaf (either from the uri or from the session) as well as adding stuff to the view*/
+
     private function loadFoaf() {
+
     	require_once 'FoafData.php';
         require_once 'FieldNames.php';
         require_once 'Field.php';
-       
-        $uri = @$_POST['uri'];
-        if($uri && $uri != "") {
+/* 
+        if ($uri && $uri != "") {
             $this->foafData = new FoafData($uri);	
         } else {
             $this->foafData = FoafData::getFromSession();
         }
+*/
+        /* TODO Need to have a function which gets from the session first, 
+        and if not then loads form a uri! */
+        $this->foafData = FoafData::getFromSession();
+        /* This returns a null if nothing in session! */
+        if (!$this->foafData) {
+            //print "First time !\n";
+            $uri = @$_POST['uri'];
+            $this->foafData = new FoafData($uri);	
+        }
 			
-        if($this->foafData) {
+        if ($this->foafData) {
             /*push some stuff to the view TODO: do we need to push this to the view here 
             * since javascript is doing most of the rendering? */
             $this->view->model =   $this->foafData->getModel();	
@@ -127,7 +138,6 @@ class AjaxController extends Zend_Controller_Action {
     private function putResultsIntoView() {
     	if($this->foafData) {
             $results = $this->view->graphset->sparqlQuery($this->queryString.";");	
-	
             /*get rid of the ?s in the sparql results so they can be used with json*/
             $this->view->results = array();
             foreach($results as $row) {
@@ -140,7 +150,6 @@ class AjaxController extends Zend_Controller_Action {
             print "Error Instance of FoafData is null!\n";
 	    $this->view->isSuccess = 0;
         }     
-    	
     }
     
     /*builds a sparql query*/
@@ -169,7 +178,6 @@ class AjaxController extends Zend_Controller_Action {
         foreach($allFieldNamesArray as $fieldName => $field){
             $this->queryString .= " OPTIONAL { ".$field->getQueryBit()." . } .";	
         }
-
         print $this->queryString;
     }
 	
