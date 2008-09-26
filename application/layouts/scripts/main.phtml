@@ -1,56 +1,48 @@
 <?
 require_once 'FieldNames.php';
 require_once 'Field.php';
-  
-
 ?>
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Foaf Editor</title>
-        <link media="screen" type="text/css" rel="stylesheet" href="/style/style.css">
+        <link media="screen" type="text/css" rel="stylesheet" href="/style/style.css"/>
         <script type="text/javascript" src="/js/json.js"></script>
         <script type="text/javascript" src="/js/jquery-1.2.6.min.js"></script>
         <script type="text/javascript" src="/js/script.js"></script>
         <script type="text/javascript" src="/js/calendar.js"></script>
-        <script>
-       
-		</script>
     </head>
     <body>
         <div id="main_container">
         	<div id="header">
-            	<div id="qdos_logo">
-               		<a href="http://qdos.com/">  
-                    	<img border="0" alt="QDOS" src="/images/qdos_logo_beta.gif"/>
-                	</a>
-               	</div>
-                	<form action="find">
+            	     <div id="qdos_logo">
+               		<a href="http://qdos.com/"><img border="0" alt="QDOS" src="/images/qdos_logo_beta.gif"/></a>
+               	    </div>
+                    <form action="find">
                     	<h1 id="search_for_another">Search for another profile</h1>
                        	<input name="q" value="" id="search_box_top"/>
-                        <a href="javascript:document.forms[0].submit()"><img border="0" img id="find_button" src="/images/find.gif"/></a>
+                        <a href="javascript:document.forms[0].submit()"><img border="0" alt="Find" id="find_button" src="/images/find.gif"/></a>
                     </form>
                 </div>
-                 <div id="content">
+                <div id="content">
                  	<?php echo $this->layout()->content; ?>
-                 </div><!-- end content -->
+                </div><!-- end content -->
 
-				 <!-- footer -->
-				 <div id="footer">
-					<div id="foot_nav">
-						<ul>
-							<li><a href="http://qdos.com/terms" title="Terms &amp; Conditions" id="terms">Terms &amp; Conditions</a></li>
-							<li><a href="http://qdos.com/privacy" title="Privacy" id="privacy">Privacy</a></li>
-							<li><a href="http://qdos.com/faqs" title="Faqs" id="faqs">Faqs</a></li>
-							<li><a href="http://qdos.com/developers" title="Developers" id="developers">Developers</a></li>
-							<li><a href="http://qdos.com/apps" title="Applications" id="applications">Applications</a></li>
-						</ul>
-					</div>
-				</div><!-- /footer -->
+		 <!-- footer -->
+		 <div id="footer">
+		 	<div id="foot_nav">
+			    <ul>
+				<li><a href="http://qdos.com/terms" title="Terms &amp; Conditions" id="terms">Terms &amp; Conditions</a></li>
+				<li><a href="http://qdos.com/privacy" title="Privacy" id="privacy">Privacy</a></li>
+				<li><a href="http://qdos.com/faqs" title="Faqs" id="faqs">Faqs</a></li>
+				<li><a href="http://qdos.com/developers" title="Developers" id="developers">Developers</a></li>
+				<li><a href="http://qdos.com/apps" title="Applications" id="applications">Applications</a></li>
+			    </ul>
 			</div>
-	</body>
+		</div><!-- /footer -->
+	</div>
+    </body>
 </html>
 
            
