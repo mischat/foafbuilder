@@ -13,7 +13,10 @@ class AjaxController extends Zend_Controller_Action {
 	
     public function loadTheBasicsAction() {
     	/*build up a sparql query to get the values of all the fields we need*/
-    	if ($this->loadFoaf()) {   
+        $this->loadFoaf();
+    	//if ($this->loadFoaf()) {   
+    	if ($this->foafData->getPrimaryTopic()) {   
+            var_dump($this);
             $this->fieldNamesObject = new FieldNames('theBasics',$this->foafData);  	
             $this->view->results = array();
             foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {

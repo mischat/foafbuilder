@@ -67,7 +67,7 @@ class FoafData {
 	    $this->putInSession();
         } else {
             //FIXME: sort this out so it isn't an echo
-            echo("Something went wrong, there's no URI!");
+            //echo("Something went wrong, there's no URI!");
             return 0;
         }
     }

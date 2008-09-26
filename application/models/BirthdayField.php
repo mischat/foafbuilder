@@ -4,64 +4,68 @@ require_once 'helpers/Utils.php';
 /*FIXME: perhaps fields shouldn't do the whole sparql query thing in the constructor.*/
 
 /*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
-class BirthdayField extends Field{
+class BirthdayField extends Field {
 	
-	/*predicateUri is only appropriate for simple ones (one triple only)*/
-	public function BirthdayField($foafData){
+    /*predicateUri is only appropriate for simple ones (one triple only)*/
+    public function BirthdayField($foafData) {
+        /*TODO MISCHA dump test to check if empty */
+        if ($foafData->getPrimaryTopic()) {
+            $queryString = 
+                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                SELECT ?bioBirthday ?foafBirthday ?foafDateOfBirth
+                WHERE{
+                ?z foaf:primaryTopic <".$foafData->getPrimaryTopic().">
+                ?z foaf:primaryTopic ?primaryTopic
+                OPTIONAL{
+                ?primaryTopic foaf:birthday ?foafBirthday .
+                } .
+                OPTIONAL{
+                ?primaryTopic foaf:dateOfBirth ?foafDateOfBirth .
+                }
+                OPTIONAL{
+                ?primaryTopic bio:event ?e .
+                ?e rdf:type bio:Birth .
+                ?e bio:date ?bioBirthday .
+                } 
+                };";
 
-		$queryString = 
-		"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-         PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-         PREFIX bio: <http://purl.org/vocab/bio/0.1/>
-         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-         SELECT ?bioBirthday ?foafBirthday ?foafDateOfBirth
-         	 WHERE{
-         	 		?z foaf:primaryTopic <".$foafData->getPrimaryTopic().">
-         	 		?z foaf:primaryTopic ?primaryTopic
-				OPTIONAL{
-					?primaryTopic foaf:birthday ?foafBirthday .
-				} .
-				OPTIONAL{
-					?primaryTopic foaf:dateOfBirth ?foafDateOfBirth .
-				}
-				OPTIONAL{
-					?primaryTopic bio:event ?e .
-        			?e rdf:type bio:Birth .
-        			?e bio:date ?bioBirthday .
-				} 
-			};";
-         
-		$results = $foafData->getModel()->SparqlQuery($queryString);		
-		
-		$this->data['birthdayFields'] = array();
-		
-		/*mangle the results so that they can be easily rendered*/
-		foreach($results as $row){	
-			if(isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth'])){
-				$birthdayArray = split("-",$row['?foafDateOfBirth']->label);
-				$this->data['birthdayFields']['day']= $birthdayArray[2];
-				$this->data['birthdayFields']['month']= $birthdayArray[1];
-				$this->data['birthdayFields']['year']= $birthdayArray[0];
-			}
-			if(isset($row['?foafBirthday']) && $this->isShortDateValid($row['?foafBirthday'])){
-				$birthdayArray = split("-",$row['?foafBirthday']->label);
-				$this->data['birthdayFields']['day']= $birthdayArray[1];
-				$this->data['birthdayFields']['month']= $birthdayArray[0];
-			}
-			if(isset($row['?bioBirthday']) && $this->isLongDateValid($row['?bioBirthday'])){
-				$birthdayArray = split("-",$row['?bioBirthday']->label);
-				$this->data['birthdayFields']['day']= $birthdayArray[2];
-				$this->data['birthdayFields']['month']= $birthdayArray[1];
-				$this->data['birthdayFields']['year']= $birthdayArray[0];
-			}
-		}	
-		
-        //TODO: perhaps it is better to keep all the display stuff in the javascript?
-        $this->data['birthdayFields']['displayLabel'] = 'Birthday';
-        $this->data['birthdayFields']['name'] = 'birthday';
-        $this->name = 'birthday';
-		$this->label = 'Birthday';
-	}
+            $results = $foafData->getModel()->SparqlQuery($queryString);		
+
+            $this->data['birthdayFields'] = array();
+
+            /*mangle the results so that they can be easily rendered*/
+            foreach ($results as $row) {	
+                if(isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth'])) {
+                    $birthdayArray = split("-",$row['?foafDateOfBirth']->label);
+                    $this->data['birthdayFields']['day']= $birthdayArray[2];
+                    $this->data['birthdayFields']['month']= $birthdayArray[1];
+                    $this->data['birthdayFields']['year']= $birthdayArray[0];
+                }
+                if(isset($row['?foafBirthday']) && $this->isShortDateValid($row['?foafBirthday'])) {
+                    $birthdayArray = split("-",$row['?foafBirthday']->label);
+                    $this->data['birthdayFields']['day']= $birthdayArray[1];
+                    $this->data['birthdayFields']['month']= $birthdayArray[0];
+                }
+                if(isset($row['?bioBirthday']) && $this->isLongDateValid($row['?bioBirthday'])) {
+                    $birthdayArray = split("-",$row['?bioBirthday']->label);
+                    $this->data['birthdayFields']['day']= $birthdayArray[2];
+                    $this->data['birthdayFields']['month']= $birthdayArray[1];
+                    $this->data['birthdayFields']['year']= $birthdayArray[0];
+                }
+            }	
+
+            //TODO: perhaps it is better to keep all the display stuff in the javascript?
+            $this->data['birthdayFields']['displayLabel'] = 'Birthday';
+            $this->data['birthdayFields']['name'] = 'birthday';
+            $this->name = 'birthday';
+            $this->label = 'Birthday';
+        } else {
+            return 0;
+        }
+    }
 
 	public function getPredicateUri(){
 		return $this->predicateUri;
@@ -173,4 +177,4 @@ class BirthdayField extends Field{
 		   	}
 	}
 }
-?>
+/* vi:set expandtab sts=4 sw=4 */
