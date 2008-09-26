@@ -36,7 +36,8 @@ abstract class Field{
 	public function getData(){
 		return $this->data;
 	}
-	
+
+	//Function to be overwritten	
 	public function saveToModel(&$foafData, $value, $index){
 	
 	}

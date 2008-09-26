@@ -1,109 +1,106 @@
 <?php
-
 require_once 'Zend/Controller/Action.php';
 require_once("helpers/JSON.php");
 
-class AjaxController extends Zend_Controller_Action
-{
-    public function init() 
-    {
+class AjaxController extends Zend_Controller_Action {
+    public function init() {
         $this->view->baseUrl = $this->_request->getBaseUrl();
     }
+
     private $queryString;
-	private $fieldNamesObject; 
-	private $foafData;
+    private $fieldNamesObject; 
+    private $foafData;
 	
-    public function loadTheBasicsAction() 
-    {
+    public function loadTheBasicsAction() {
     	/*build up a sparql query to get the values of all the fields we need*/
-    	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('theBasics',$this->foafData);  	
-		$this->view->results = array();
-    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			$this->view->results = array_merge($this->view->results,$field->getData());	
-		}
+    	if ($this->loadFoaf()) {   
+            $this->fieldNamesObject = new FieldNames('theBasics',$this->foafData);  	
+            $this->view->results = array();
+            foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
+                $this->view->results = array_merge($this->view->results,$field->getData());	
+            }
+        } 
     }
     
-   public function loadContactDetailsAction() 
-    {
+    public function loadContactDetailsAction() {
     	/*build up a sparql query to get the values of all the fields we need*/
-    	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('contactDetails',$this->foafData);  	
-		$this->view->results = array();
-    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			$this->view->results = array_merge($this->view->results,$field->getData());	
-		}
+    	if ($this->loadFoaf()) {   
+            $this->fieldNamesObject = new FieldNames('contactDetails',$this->foafData);  	
+            $this->view->results = array();
+            foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+                $this->view->results = array_merge($this->view->results,$field->getData());	
+            }
+        }
     }
     
-   public function loadPicturesAction() 
-    {
-    	/*build up a sparql query to get the values of all the fields we need*/
-    	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('pictures',$this->foafData);  	
-		$this->view->results = array();
-    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			$this->view->results = array_merge($this->view->results,$field->getData());	
-		}
+    public function loadPicturesAction() {
+        /*build up a sparql query to get the values of all the fields we need*/
+        if ($this->loadFoaf()) {   
+            $this->fieldNamesObject = new FieldNames('pictures',$this->foafData);  	
+            $this->view->results = array();
+            foreach($this->fieldNamesObject->getAllFieldNames() as $field) {
+                $this->view->results = array_merge($this->view->results,$field->getData());	
+            }
+        }
     }
     
-   public function loadAccountsAction() 
-    {
+    public function loadAccountsAction() {
     	/*build up a sparql query to get the values of all the fields we need*/
-    	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('accounts',$this->foafData);  	
-		$this->view->results = array();
-		foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			$this->view->results = array_merge($this->view->results,$field->getData());	
-		}
+    	if ($this->loadFoaf()) {   
+            $this->fieldNamesObject = new FieldNames('accounts',$this->foafData);  	
+            $this->view->results = array();
+            foreach($this->fieldNamesObject->getAllFieldNames() as $field) {
+                $this->view->results = array_merge($this->view->results,$field->getData());	
+            }
+        } 
     }
     
-   public function loadFriendsAction() 
-    {
-    	/*build up a sparql query to get the values of all the fields we need*/
-    	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('friends',$this->foafData);  	
-		$this->view->results = array();
-    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			$this->view->results = array_merge($this->view->results,$field->getData());	
-		}
+    public function loadFriendsAction() {
+        /*build up a sparql query to get the values of all the fields we need*/
+        if($this->loadFoaf()) {
+            $this->fieldNamesObject = new FieldNames('friends',$this->foafData);  	
+            $this->view->results = array();
+            foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+                $this->view->results = array_merge($this->view->results,$field->getData());	
+            }
+        }
     }
     
-   	public function loadBlogsAction() 
-    {
-    	/*build up a sparql query to get the values of all the fields we need*/
-    	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('blogs',$this->foafData);  	
-		$this->view->results = array();
-    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			$this->view->results = array_merge($this->view->results,$field->getData());	
-		}
+    public function loadBlogsAction() {
+        /*build up a sparql query to get the values of all the fields we need*/
+        if($this->loadFoaf()) {   
+            $this->fieldNamesObject = new FieldNames('blogs',$this->foafData);  	
+            $this->view->results = array();
+            foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+                $this->view->results = array_merge($this->view->results,$field->getData());	
+            }
+        }
     }
     
-    public function loadInterestsAction() 
-    {
-    	/*build up a sparql query to get the values of all the fields we need*/
-    	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('interests',$this->foafData);  	
-		$this->view->results = array();
-    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			$this->view->results = array_merge($this->view->results,$field->getData());	
-		}
+    public function loadInterestsAction() {
+        /*build up a sparql query to get the values of all the fields we need*/
+        if($this->loadFoaf()) {   
+            $this->fieldNamesObject = new FieldNames('interests',$this->foafData);  	
+            $this->view->results = array();
+            foreach($this->fieldNamesObject->getAllFieldNames() as $field) {
+                $this->view->results = array_merge($this->view->results,$field->getData());	
+            }
+        }
     }
     
-    public function loadOtherAction() 
-    {
+    public function loadOtherAction() {
     	/*build up a sparql query to get the values of all the fields we need*/
-    	$this->loadFoaf();   
-		$this->fieldNamesObject = new FieldNames('other',$this->foafData);  	
-		$this->view->results = array();
-    	foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-			$this->view->results = array_merge($this->view->results,$field->getData());	
-		}
-    }
+    	if($this->loadFoaf()) {   
+            $this->fieldNamesObject = new FieldNames('other',$this->foafData);  	
+            $this->view->results = array();
+            foreach($this->fieldNamesObject->getAllFieldNames() as $field) {
+                $this->view->results = array_merge($this->view->results,$field->getData());	
+            }
+        }
+    } 
     
-    
-	/*gets the foaf (either from the uri or from the session) as well as adding stuff to the view*/
-    private function loadFoaf(){
+    /*gets the foaf (either from the uri or from the session) as well as adding stuff to the view*/
+    private function loadFoaf() {
     	require_once 'FoafData.php';
         require_once 'FieldNames.php';
         require_once 'Field.php';
@@ -112,21 +109,23 @@ class AjaxController extends Zend_Controller_Action
         if($uri && $uri != "") {
             $this->foafData = new FoafData($uri);	
         } else {
-			$this->foafData = FoafData::getFromSession();
-		}
+            $this->foafData = FoafData::getFromSession();
+        }
 			
         if($this->foafData) {
-        	/*push some stuff to the view TODO: do we need to push this to the view here 
-        	 * since javascript is doing most of the rendering? */
-             $this->view->model =   $this->foafData->getModel();	
-             $this->view->uri =   $this->foafData->getURI();	
-             $this->view->graphset =   $this->foafData->getGraphset();    
+            /*push some stuff to the view TODO: do we need to push this to the view here 
+            * since javascript is doing most of the rendering? */
+            $this->view->model =   $this->foafData->getModel();	
+            $this->view->uri =   $this->foafData->getURI();	
+            $this->view->graphset =   $this->foafData->getGraphset();    
+	    return 1;
+        } else {
+	    return 0;
         }
     }
     
-    private function putResultsIntoView(){
-		  
-    	if($this->foafData){
+    private function putResultsIntoView() {
+    	if($this->foafData) {
             $results = $this->view->graphset->sparqlQuery($this->queryString.";");	
 	
             /*get rid of the ?s in the sparql results so they can be used with json*/
@@ -136,43 +135,43 @@ class AjaxController extends Zend_Controller_Action
                 $keys = str_replace('?','',$keys);
                 array_push($this->view->results, array_combine($keys,$row));
             }
-           
             $this->foafData->setPrimaryTopic($results[0]['?primaryTopic']->uri);      	
         } else {
             print "Error Instance of FoafData is null!\n";
-	    	$this->view->isSuccess = 0;
+	    $this->view->isSuccess = 0;
         }     
     	
     }
     
-	/*builds a sparql query*/
-	private function buildSparqlQuery(){
-		require_once 'FieldNames.php';
-		$this->queryString = "
-        	PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-        	PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-        	PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+    /*builds a sparql query*/
+    private function buildSparqlQuery() {
+        require_once 'FieldNames.php';
+        $this->queryString = "
+            PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+            PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+            PREFIX bio: <http://purl.org/vocab/bio/0.1/>
             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                SELECT ?primaryTopic ";
-            
-       	/*Add ?foafName ?foafHomepage etc.*/
+            SELECT ?primaryTopic ";
+
+        /*Add ?foafName ?foafHomepage etc.*/
         $allFieldNamesArray = $this->fieldNamesObject->getAllFieldNames();
-        foreach($allFieldNamesArray as $fieldName => $field){
-        	$this->queryString .= "?".$fieldName." ";	
+        foreach($allFieldNamesArray as $fieldName => $field) {
+            $this->queryString .= "?".$fieldName." ";	
         }
-         
+
         $this->queryString .= "
-        	FROM NAMED <".$this->view->uri.">
-            	WHERE 	
-                { 
-                    ?z foaf:primaryTopic ?x .
-                    ?z foaf:primaryTopic ?primaryTopic .";
-            
+            FROM NAMED <".$this->view->uri.">
+            WHERE 	
+            { 
+            ?z foaf:primaryTopic ?x .
+            ?z foaf:primaryTopic ?primaryTopic .";
+
         foreach($allFieldNamesArray as $fieldName => $field){
-        	 $this->queryString .= " OPTIONAL { ".$field->getQueryBit()." . } .";	
+            $this->queryString .= " OPTIONAL { ".$field->getQueryBit()." . } .";	
         }
- 
-	}
+
+        print $this->queryString;
+    }
 	
 	public function saveFoafAction()
 	{
@@ -234,13 +233,14 @@ class AjaxController extends Zend_Controller_Action
 	}
 	
 	
-        //TODO really dirty	
-	public function clearFoafAction() {
-                if(@Zend_Session::destroy()) {
-                    echo("Session destroyed properly");
-                } else {
-                    echo("Session not destroyed properly");
-                }
+    //TODO really dirty	MISCHA not sure why this isnt working properly !
+    public function clearFoafAction() {
+        if(@Zend_Session::destroy()) {
+            echo("Session destroyed properly");
+        } else {
+            echo("Session not destroyed properly");
         }
+    }
 }
 	
+/* vi:set expandtab sts=4 sw=4: */
