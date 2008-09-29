@@ -82,14 +82,11 @@ function loadFoaf(name){
 
 /*saves all the foaf data*/
 function saveFoaf(name){
-	displayToObjects();
+	displayToObjects(name);
 	jsonstring = JSON.serialize(globalFieldData);
-	
 	//updateFoafDateOfBirthElements();
-	
 	//TODO use jquery event handler to deal with errors on this request
-  	$.post("/ajax/save-foaf", {model : jsonstring});
-  	
+  	$.post("/ajax/save-Foaf", {model : jsonstring});
 }
 
 /*Writes FOAF to screen*/
@@ -218,13 +215,26 @@ function renderSimpleFields(i, name, data){
 
 /*populates the triples objects with stuff from the actual display (i.e. what the user has changed)*/
 //TODO: datatypes/language
-function displayToObjects(){  
-	
+function displayToObjects(name){  
 	//TODO: we shouldn't have to put these numbers in
-	accountsDisplayToObjects();
-	birthdayDisplayToObjects();
+	switch(name){
+		case 'load-the-basics':
+			birthdayDisplayToObjects();
+			break;
+		case 'load-contact-details':
+			return null;
+			break;
+		case 'load-accounts':
+			accountsDisplayToObjects();
+			break;
+		default:
+			return null;
+			break;
+	}
+	//TODO MISCHA
+//	birthdayDisplayToObjects();
 	
-	simpleFieldsDisplayToObjects();
+//	simpleFieldsDisplayToObjects();
 	
 }
 
@@ -272,7 +282,6 @@ function accountsDisplayToObjects(){
   	
   	/*an array of keys that have not been removed from the dom tree*/
  	var doNotCleanArray = new Array();
- 	
  	
   	for(i=0; i < containerElement.childNodes.length; i++){
   		
