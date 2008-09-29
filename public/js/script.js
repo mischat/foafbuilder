@@ -400,6 +400,7 @@ function createFieldContainer(name,label){
 /*TODO: need one of these for each different type of account element*/
 function createAccountsInputElement(name, value, element){
 	newElement = document.createElement('input');
+	newElement.setAttribute('onchange','saveFoaf()');
 	newElement.id = name;
 	newElement.setAttribute('value',value);
 	
@@ -417,7 +418,7 @@ function createAccountsInputElement(name, value, element){
 /*renders a dropdown box with a list of possible accountServiceHomepages in it (e.g. skype, msn etc)*/
 function createFoafAccountServiceHomepageInputElement(value,container){
 	selectElement = document.createElement("select");
-	
+
 	var allAccounts = getAllOnlineAccounts();
 	
 	selectElement[0] = new Option('Other','',false,false);
@@ -435,7 +436,7 @@ function createFoafAccountServiceHomepageInputElement(value,container){
 	selectElement.value = value;
 	
 	/*show the hidden input elements if there is no option matching this id here*/
-	selectElement.setAttribute('onchange',"toggleHiddenAccountInputElements(this.value,this.parentNode, '')");
+	selectElement.setAttribute('onchange',"toggleHiddenAccountInputElements(this.value,this.parentNode, '');saveFoaf();");
 	
 	container.appendChild(selectElement);
 }
@@ -506,6 +507,8 @@ function createGenericInputElement(name, value, thisElementCount, contname){
 	var newElement = document.createElement('input');
 	newElement.id = name+'_'+thisElementCount;
 	newElement.setAttribute('value',value);
+	newElement.setAttribute('onchange','saveFoaf()');
+	
 	
 	//if there is a specific container we want to put it in
 	if(contname){
@@ -532,7 +535,7 @@ function createGenericHiddenElement(name, value, thisElementCount, contname){
 	
 	newElement.setAttribute('type','hidden');
 	document.getElementById(name+'_container').appendChild(newElement);
-//	newElement.setAttribute('class','fieldInput');
+	//newElement.setAttribute('class','fieldInput');
 	
 	return newElement;
 }
@@ -568,10 +571,13 @@ function createFoafDateOfBirthElement(container, day, month, year){
 			
   		dayDropDownElement.setAttribute('class','dateSelector');
   		dayDropDownElement.id = 'dayDropdown';
+  		dayDropDownElement.setAttribute('onchange','saveFoaf()');
   		monthDropDownElement.setAttribute('class','dateSelector');
   		monthDropDownElement.id = 'monthDropdown';
+  		monthDropDownElement.setAttribute('onchange','saveFoaf()');
   		yearDropDownElement.setAttribute('class','dateSelector');
   		yearDropDownElement.id = 'yearDropdown';
+  		yearDropDownElement.setAttribute('onchange','saveFoaf()');
   		
   		container.appendChild(dayDropDownElement);
   		container.appendChild(monthDropDownElement);
@@ -587,7 +593,7 @@ function createFoafDateOfBirthElement(container, day, month, year){
 /*when an account dropdown is changed, this renders the appropriate hidden or showing fields 
 for the users profile page and/or the account provider box*/
 function toggleHiddenAccountInputElements(selectedValue,container,prePopulateValue){
-
+	
 	var allArrayNames = getAllOnlineAccounts();
 	var allArrayNamesInverted = new Array();
 	
@@ -614,7 +620,6 @@ function toggleHiddenAccountInputElements(selectedValue,container,prePopulateVal
 			}
 		}
 	}
-	
 }
 
 /*generates the profilePAgeURl from the username*/
