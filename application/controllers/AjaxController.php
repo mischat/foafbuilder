@@ -16,7 +16,6 @@ class AjaxController extends Zend_Controller_Action {
         $this->loadFoaf();
     	//if ($this->loadFoaf()) {   
     	if ($this->foafData->getPrimaryTopic()) {   
-            var_dump($this);
             $this->fieldNamesObject = new FieldNames('theBasics',$this->foafData);  	
             $this->view->results = array();
             foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
@@ -178,71 +177,63 @@ class AjaxController extends Zend_Controller_Action {
             ?z foaf:primaryTopic ?x .
             ?z foaf:primaryTopic ?primaryTopic .";
 
-        foreach($allFieldNamesArray as $fieldName => $field){
+        foreach($allFieldNamesArray as $fieldName => $field) {
             $this->queryString .= " OPTIONAL { ".$field->getQueryBit()." . } .";	
         }
         print $this->queryString;
     }
 	
-	public function saveFoafAction()
-	{
-		$this->view->isSuccess = 0;
+    public function saveFoafAction() {
+        $this->view->isSuccess = 0;
+        require_once 'FoafData.php';
+        $changes_model = @$_POST['model'];
+        
+        if ($changes_model) {
+            $foafData = FoafData::getFromSession();	
+            if($foafData) {
+                $this->applyChangesToModel($foafData,$changes_model);	
+                $foafData->putInSession();
+                $this->view->isSuccess = 1;
+            } else {
+                echo("there aint anything in the session");
+            }
+        }
+    }
 	
-		require_once 'FoafData.php';
-		$changes_model = @$_POST['model'];
-		
-		if($changes_model){
-			$foafData = FoafData::getFromSession();	
-			if($foafData){
-				$this->applyChangesToModel($foafData,$changes_model);	
-				$foafData->putInSession();
-				$this->view->isSuccess = 1;
-			} else {
-				echo("there aint anything in the session");
-			}
-		}
-	}
-	
-	/*does the actual saving to the model*/
-	public function applyChangesToModel(&$foafData,&$changes_model)
-	{
-		require_once 'Field.php';
-		require_once 'SimpleField.php';
-		require_once 'FieldNames.php';
+    /*does the actual saving to the model*/
+    public function applyChangesToModel(&$foafData,&$changes_model) {
+        require_once 'Field.php';
+        require_once 'SimpleField.php';
+        require_once 'FieldNames.php';
 
-		//json representing stuff that is to be saved
-		$json = new Services_JSON();
-		$almost_model = $json->decode(stripslashes($changes_model));
-		$model = $foafData->getModel();
+        //json representing stuff that is to be saved
+        $json = new Services_JSON();
+        $almost_model = $json->decode(stripslashes($changes_model));
+        $model = $foafData->getModel();
 
-		/*
-		 * TODO Need to add language tags etc.
-		 */
-		
-		//get all the detail for each of the fields
-		//TODO: Just doing accounts right now.
-		$fieldNames = new FieldNames('accounts',$foafData);
-		$allFieldNames = $fieldNames->getAllFieldNames();
-		
-		/*loop through all the rows in the sparql results style 'almost model'*/
-		foreach($almost_model as $key => $value){
-					
-			/*get rid of 'fields at the end of the name'*/
-			if(isset($allFieldNames[substr($key,0,-6)])){
-				
-				echo("Saving fields of type: ".$key);
-				/*get some details about the fields we're dealing with*/
-				$field = $allFieldNames[substr($key,0,-6)];
-				
-				/*save them using the appropriate method*/
-				$field->saveToModel($foafData, $value);
-				
-			} else {
-				echo("unrecognised fields:".$key."\n");	
-			}//end if
-		}//end foreach
-	}
-	
+        /*
+        * TODO Need to add language tags etc.
+        */
+
+        //get all the detail for each of the fields
+        //TODO: Just doing accounts right now.
+        $fieldNames = new FieldNames('accounts',$foafData);
+        $allFieldNames = $fieldNames->getAllFieldNames();
+
+        /*loop through all the rows in the sparql results style 'almost model'*/
+        foreach($almost_model as $key => $value) {
+            /*get rid of 'fields at the end of the name'*/
+            if(isset($allFieldNames[substr($key,0,-6)])) {
+                echo("Saving fields of type: ".$key);
+                /*get some details about the fields we're dealing with*/
+                $field = $allFieldNames[substr($key,0,-6)];
+                /*save them using the appropriate method*/
+                $field->saveToModel($foafData, $value);
+            } else {
+                echo("unrecognised fields:".$key."\n");	
+            }//end if
+        }//end foreach
+    }
 	
     //TODO really dirty	MISCHA not sure why this isnt working properly !
     public function clearFoafAction() {

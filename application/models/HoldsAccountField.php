@@ -3,7 +3,7 @@ require_once 'Field.php';
 require_once 'helpers/Utils.php';
 
 /*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
-class HoldsAccountField extends Field{
+class HoldsAccountField extends Field {
 	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
 	public function HoldsAccountField($foafData) {
@@ -70,15 +70,14 @@ class HoldsAccountField extends Field{
 		}
 	}
 
-	public function getPredicateUri(){
+	public function getPredicateUri() {
 		return $this->predicateUri;
 	}
-	public function setPredicateUri($predicateUri){
+	public function setPredicateUri($predicateUri) {
 		$this->predicateUri = $predicateUri;
 	}
 	/*saves the values created by the editor in value... as encoded in json.*/
-	public function saveToModel(&$foafData, $value){
-
+	public function saveToModel(&$foafData, $value) {
 		echo("SAVING ACCOUNTSFields");
 		require_once 'SimpleField.php';
 		require_once 'FieldNames.php';
