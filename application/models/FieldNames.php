@@ -86,13 +86,14 @@ class FieldNames {
 	}
 	
 	private function instantiateContactDetailsFields(){
-		$this->allFieldNames['foafMbox'] = 
+		/*$this->allFieldNames['foafMbox'] = 
 			new SimpleField('foafMbox', 'Email', '?x foaf:mbox ?foafMbox', 'literal',false,"http://xmlns.com/foaf/0.1/mbox");
 		$this->allFieldNames['foafPhone'] = 
 			new SimpleField('foafPhone', 'Phone', '?x foaf:phone ?foafPhone', 'literal',false,'http://xmlns.com/foaf/0.1/phone');
 		$this->allFieldNames['foafMbox_sha1sum'] = 
 			new SimpleField('foafMbox_sha1sum', 'Email (sha1sum)', '?x foaf:mbox_sha1sum ?foafMbox_sha1sum', 'literal',false,'http://xmlns.com/foaf/0.1/mbox_sha1sum');
-		
+		*/
+		$this->allFieldNames['foafLocation'] = new LocationField($this->foafData);
 	}
 	
 	private function instantiatePicturesFields(){
