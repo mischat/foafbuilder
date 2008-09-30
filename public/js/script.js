@@ -1,6 +1,10 @@
 /*global variable for storing data*/
 var globalFieldData;
 
+/*google maps data*/
+var mapMarkers = new Array;
+var map;
+
 /*--------------------------permanent data functions---------------------------*/
 /*variable storing online account urls (e.g. www.skype.com) and keying them against their names (e.g. skype)*/
 
@@ -128,6 +132,93 @@ function genericObjectsToDisplay(data){
 	/*render the various fields*/
 	renderAccountFields(data);
 	renderBirthdayFields(data);
+	renderLocationFields(data);
+}
+
+/*Render the location map*/
+function renderLocationFields(data){
+
+	if(!data || !data.locationFields || typeof(data.locationFields) == 'undefined'){
+		return;
+	}
+	
+	/*build the container*/
+	var name = data.locationFields.name;
+	var label =	data.locationFields.displayLabel;
+	var containerElement = createFieldContainer(name, label);
+
+	/*display a map*/
+	map = createMapElement(containerElement);
+	
+	if(map){
+		for(key in data.locationFields){
+			if(key == 'basedNear'){
+				addBasedNearMarkers(data.locationFields['basedNear'],containerElement,map);		
+			}
+		}
+	}
+}
+
+function addBasedNearMarkers(basedNearArray, containerElement){
+
+	/*loop over each based_near instance*/
+	for(bNodeKey in basedNearArray){
+		/*create an element to hold each location*/
+		var locationDiv = createLocationElement(containerElement, bNodeKey);
+		
+		var latitude = basedNearArray[bNodeKey]['latitude'];
+		var longitude = basedNearArray[bNodeKey]['longitude'];
+		
+		/*display the latitude and longitude coords*/
+		var latitudeDiv = document.createElement('div');
+		var longitudeDiv = document.createElement('div');
+		latitudeDiv.id = 'latitude_'+locationDiv.id;
+		longitudeDiv.id = 'longitude_'+locationDiv.id;
+		locationDiv.appendChild(latitudeDiv);
+		locationDiv.appendChild(longitudeDiv);
+		latitudeDiv.appendChild(document.createTextNode('Latitude: '+latitude));
+		longitudeDiv.appendChild(document.createTextNode('Longitude: '+longitude));
+			
+		createSingleBasedNearMarker(latitude, longitude, locationDiv.id,map);	
+	  }
+
+
+}
+
+function createSingleBasedNearMarker(latitude, longitude, holderName, map){
+		
+		var point = new GLatLng(latitude,longitude);
+		var marker = new GMarker(point,{draggable: true,title:'Near me'});
+		map.addOverlay(marker);
+		mapMarkers[holderName] = marker;
+		
+	  	/*everytime the marker is dropped, save the foaf*/
+		GEvent.addListener(marker, "dragend", function(holderName) {
+		        saveFoaf();
+		      });	
+		
+		/*keep the latitude and longitude updated when the marker is dragged around*/
+	    GEvent.addListener(marker, 'drag', function(){
+			
+	    	var latElement = document.getElementById('latitude_' + holderName);
+	    	latElement.className='latitude';
+	    	var longElement = document.getElementById('longitude_' + holderName);
+	    	longElement.className='longitude';
+	    	
+	    	if(latElement.childNodes[0] && longElement.childNodes[0]){
+	    		latElement.removeChild(latElement.childNodes[0]);
+	    		longElement.removeChild(longElement.childNodes[0]);
+	    	}
+	    	
+	    	var latText = document.createTextNode("Latitude: " +marker.getLatLng().lat().toString().substr(0,8));
+	    	var longText = document.createTextNode("Longitude: " + marker.getLatLng().lng().toString().substr(0,8));
+	    	
+	    	latElement.appendChild(latText);
+	    	longElement.appendChild(longText);
+	    });
+	    
+	    //TODO: have some sort of sensible thing like this
+	    map.setCenter(point);	
 }
 
 /*Render the birthday dropdown (assumes only one birthday)*/
@@ -343,6 +434,23 @@ function accountsDisplayToObjects(){
 
 /*--------------------------------------element generators---------------------------------------*/
 
+/*creates and returns a google map*/
+function createMapElement(container){
+      if (GBrowserIsCompatible()) {
+      	var mapDiv = document.createElement('div');
+      	mapDiv.id = 'mapDiv'
+      	container.appendChild(mapDiv);
+        
+        var map = new GMap2(mapDiv);
+        map.setCenter(new GLatLng(37.4419, -122.1419), 13);
+        
+        var mapControl = new GSmallMapControl();
+		map.addControl(mapControl);
+		
+        return map;
+      }
+}
+
 //FIXME: part of the old rendering for simple fields
 /*creates an element for a given field, denoted by name and populates it with the appropriate value*/
 
@@ -454,6 +562,34 @@ function createAccountsAddElement(container){
 	addDiv.appendChild(addLink);
 	container.appendChild(addDiv);
 
+}
+/*creates an element to hold the information about a particular location*/
+function createLocationElement(attachElement, bnodeId){
+	
+	/*if new, create a random id*/
+	if(!bnodeId){
+		var bnodeId = createRandomString(50);
+	}
+	
+	/*create holdsAccount div and attach it to the element given*/
+	var locationDiv = document.createElement("div");
+	locationDiv.setAttribute('class','location');
+	locationDiv.id = bnodeId;
+	attachElement.appendChild(locationDiv);
+	
+	/*create remove link and attach it to the holds account div*/
+	var removeDiv = document.createElement("div");
+	removeDiv.id = "removeLinkContainer";
+	removeDiv.className = "removeLinkContainer";
+	var removeLink = document.createElement('a');
+	removeLink.appendChild(document.createTextNode("- Remove this location"));
+	removeLink.id="removeLink";
+	removeLink.className="removeLink";
+	removeLink.setAttribute("onclick" , "map.removeOverlay(mapMarkers[this.parentNode.parentNode.id]);this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);");
+	removeDiv.appendChild(removeLink);
+	locationDiv.appendChild(removeDiv);
+	
+	return locationDiv;
 }
 
 function createHoldsAccountElement(attachElement, bnodeId){

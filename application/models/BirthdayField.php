@@ -35,25 +35,27 @@ class BirthdayField extends Field {
             $results = $foafData->getModel()->SparqlQuery($queryString);		
 
             $this->data['birthdayFields'] = array();
-
+            $this->data['birthdayFields']['basedNear'] = array();
+            
             /*mangle the results so that they can be easily rendered*/
             foreach ($results as $row) {	
                 if (isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth'])) {
-                    $birthdayArray = split("-",$row['?foafDateOfBirth']->label);
-                    $this->data['birthdayFields']['day']= $birthdayArray[2];
-                    $this->data['birthdayFields']['month']= $birthdayArray[1];
-                    $this->data['birthdayFields']['year']= $birthdayArray[0];
+                    array_push();
+                	$birthdayArray = split("-",$row['?foafDateOfBirth']->label);
+                    $this->data['birthdayFields']['basedNear']['day']= $birthdayArray[2];
+                    $this->data['birthdayFields']['basedNear']['month']= $birthdayArray[1];
+                    $this->data['birthdayFields']['basedNear']['year']= $birthdayArray[0];
                 }
                 if (isset($row['?foafBirthday']) && $this->isShortDateValid($row['?foafBirthday'])) {
                     $birthdayArray = split("-",$row['?foafBirthday']->label);
-                    $this->data['birthdayFields']['day']= $birthdayArray[1];
-                    $this->data['birthdayFields']['month']= $birthdayArray[0];
+                    $this->data['birthdayFields']['basedNear']['day']= $birthdayArray[1];
+                    $this->data['birthdayFields']['basedNear']['month']= $birthdayArray[0];
                 }
                 if (isset($row['?bioBirthday']) && $this->isLongDateValid($row['?bioBirthday'])) {
                     $birthdayArray = split("-",$row['?bioBirthday']->label);
-                    $this->data['birthdayFields']['day']= $birthdayArray[2];
-                    $this->data['birthdayFields']['month']= $birthdayArray[1];
-                    $this->data['birthdayFields']['year']= $birthdayArray[0];
+                    $this->data['birthdayFields']['basedNear']['day']= $birthdayArray[2];
+                    $this->data['birthdayFields']['basedNear']['month']= $birthdayArray[1];
+                    $this->data['birthdayFields']['basedNear']['year']= $birthdayArray[0];
                 }
             }	
 
@@ -65,14 +67,6 @@ class BirthdayField extends Field {
         } else {
             return 0;
         }
-    }
-
-    public function getPredicateUri() {
-        return $this->predicateUri;
-    }
-
-    public function setPredicateUri($predicateUri) {
-        $this->predicateUri = $predicateUri;
     }
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
