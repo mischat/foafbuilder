@@ -302,7 +302,7 @@ width:100%;
 }
 .removeLinkContainer{
 	float:right;
-	padding-left:120px;
+	padding-left:110px;
 	margin-bottom:5px;
 	margin-top:5px;	
 }
@@ -360,9 +360,58 @@ width:100%;
 	font-family:Arial,Helvetica,sans-serif;
 	font-size:12px;	
 	border-bottom:1px solid #EEEEEE;
+	color: #999999;		
 	height:50px;
+}
+.address{
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:12px;	
+	border-bottom:1px solid #EEEEEE;
+	height:200px;
 	color: #999999;		
 }
-
-
-
+.airportCode{
+	float:right;
+	margin-top:-10px;	
+}
+.addressTitle{
+	font-weight:600;
+	font-size:14px;	
+	margin-bottom:12px;
+}
+.streetLabel{
+	margin-top:5px;	
+	float:left;
+	width:100px;
+	
+}
+.street2Label{
+	margin-top:5px;	
+	float:left;
+	width:100px;
+	
+}
+.street3Label{
+	margin-top:5px;	
+	float:left;
+	width:100px;
+	
+}
+.postalCodeLabel{
+	margin-top:5px;	
+	float:left;
+	width:100px;
+	
+}
+.cityLabel{
+	margin-top:5px;	
+	float:left;
+	width:100px;
+	
+}
+.countryLabel{
+	margin-top:5px;	
+	float:left;
+	width:100px;
+	
+}

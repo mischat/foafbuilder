@@ -14,7 +14,7 @@ class LocationField extends Field {
         	
             $queryString = $this->getQueryString($foafData->getPrimaryTopic());
             $results = $foafData->getModel()->SparqlQuery($queryString);		
-	
+
             if(!$results){
            		return 0;
             }
@@ -27,6 +27,7 @@ class LocationField extends Field {
             /*mangle the results so that they can be easily rendered*/
             foreach ($results as $row) {
             	$this->addBasedNearElements($row);
+            	$this->addNearestAirportElements($row);
             	$this->addAddressElements($row,'office');
             	$this->addAddressElements($row,'home');
             }	
@@ -93,10 +94,25 @@ class LocationField extends Field {
         }
     }
     
+    /*add nearest airport elements*/
+    private function addNearestAirportElements($row){
+    	$newArray = array();
+    	
+    	if (isset($row['?icaoCode']) && $row['?icaoCode'] && $row['?icaoCode']->label) {
+    		$newArray['icaoCode'] = $row['?icaoCode']->label;
+    	}    
+    	if (isset($row['?iataCode']) && $row['?iataCode'] && $row['?iataCode']->label) {
+            $newArray['iataCode'] = $row['?iataCode']->label;
+    	}
+    	if(!empty($newArray)){
+    		 $this->data['locationFields']['nearestAirport'] = $newArray;
+    	} 
+    }
+    
    	/*takes a row from a sparql resultset and puts any home/office (determined by prefix) address information into data*/
     private function addAddressElements($row,$prefix){
     	$newArray = array();
-        
+
     	if (isset($row['?'.$prefix.'GeoLatLong']) && $this->isLatLongValid($row['?'.$prefix.'GeoLatLong'])) {
   
         	$latLongArray = split(",",$row['?'.$prefix.'GeoLatLong']->label);
@@ -130,6 +146,9 @@ class LocationField extends Field {
    	 	if (isset($row['?'.$prefix.'StateOrProvince']) && $row['?'.$prefix.'StateOrProvince'] && $row['?'.$prefix.'StateOrProvince']->label) {
             $newArray[$prefix.'StateOrProvince'] = $row['?'.$prefix.'StateOrProvince']->label;
     	}    
+    	if (isset($row['?'.$prefix.'StateOrProvince']) && $row['?'.$prefix.'StateOrProvince'] && $row['?'.$prefix.'StateOrProvince']->label) {
+            $newArray[$prefix.'StateOrProvince'] = $row['?'.$prefix.'StateOrProvince']->label;
+    	}    
     	
     	if(!empty($newArray)){
     		 $this->data['locationFields'][$prefix.''][$row['?'.$prefix.'']->uri] = $newArray;
@@ -144,6 +163,9 @@ class LocationField extends Field {
                 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
                 PREFIX bio: <http://purl.org/vocab/bio/0.1/>
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX wn: <http://xmlns.com/wordnet/1.6/>
+                PREFIX air: <http://dig.csail.mit.edu/TAMI/2007/amord/air#>
+                
                 SELECT 
                 	?geoLat 
                 	?geoLong 
@@ -173,10 +195,23 @@ class LocationField extends Field {
                 	?officeStreet3
                 	?officePostalCode
                 	?officeStateOrProvince
+                	
+                	?icaeCode
+                	?iataCode
                 
                 WHERE{
 	                	?z foaf:primaryTopic <".$primaryTopic.">
 	                	?z foaf:primaryTopic ?primaryTopic
+	                OPTIONAL{
+	                	?primaryTopic contact:nearestAirport ?airport .
+	                	?airport rdf:type wn:Airport
+	                	OPTIONAL{
+	                		?airport air:icao ?icaeCode
+	                	}
+	                	OPTIONAL{
+	                		?airport air:iata ?iataCode
+	                	}
+    				}
 	                OPTIONAL{
 	                	?primaryTopic foaf:based_near ?location .
 	                	?location geo:lat_long ?geoLatLong .
@@ -197,10 +232,10 @@ class LocationField extends Field {
 	                			?address geo:lat_long ?homeGeoLatLong .
 	                		}
 	                		OPTIONAL{
-	                			?address geo:lat ?homeGeoLat.
+	                			?home geo:lat ?homeGeoLat.
 	                		}
 	                		OPTIONAL{
-	                			?address geo:long ?homeGeoLong .   
+	                			?home geo:long ?homeGeoLong .   
 	                		}
 	                		OPTIONAL{
 	                			?address contact:city ?homeCity .
@@ -235,10 +270,10 @@ class LocationField extends Field {
 	                			?address geo:lat_long ?officeGeoLatLong .
 	                		}
 	                		OPTIONAL{
-	                			?address geo:lat ?officeGeoLat.
+	                			?office geo:lat ?officeGeoLat.
 	                		}
 	                		OPTIONAL{
-	                			?address geo:long ?officeGeoLong .   
+	                			?office geo:long ?officeGeoLong .   
 	                		}
 	                		OPTIONAL{
 	                			?address contact:city ?officeCity .
