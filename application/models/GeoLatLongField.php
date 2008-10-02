@@ -29,6 +29,7 @@ class GeoLatLongField extends Field{
         			PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
         			PREFIX bio: <http://purl.org/vocab/bio/0.1/>
             		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            		PREFIX air: <http://dig.csail.mit.edu/TAMI/2007/amord/air#>
 					SELECT ?l ?x ?geoLatLong WHERE {?z foaf:primaryTopic ?x . ".$this->getQueryBit().".}";
 		
 		$results = $foafData->getModel()->sparqlQuery($query);

@@ -6,7 +6,10 @@
       xmlns:bio="http://purl.org/vocab/bio/0.1/"
       xmlns:foaf="http://xmlns.com/foaf/0.1/"
       xmlns:admin="http://webns.net/mvcb/"
-	  xmlns:contact="http://www.w3.org/2000/10/swap/pim/contact#">
+      xmlns:wn="http://xmlns.com/wordnet/1.6/"
+	  xmlns:contact="http://www.w3.org/2000/10/swap/pim/contact#"
+	  xmlns:air="http://dig.csail.mit.edu/TAMI/2007/amord/air#">
+	  
 	  
 <foaf:PersonalProfileDocument rdf:about="">
   <foaf:maker rdf:resource="#me"/>
@@ -26,12 +29,7 @@
     	</bio:Birth>
  	</bio:event>
 	<foaf:based_near geo:lat="51.47026" geo:long="0" geo:lat_long="51.46026,0"/>
-	<foaf:based_near geo:lat="51.48026" geo:long="0" geo:lat_long="51.47026,0"/>
-	<foaf:based_near geo:lat="51.49026" geo:long="0" geo:lat_long="51.48026,0"/>
-	<foaf:based_near geo:lat="51.45026" geo:long="0" geo:lat_long="51.49026,0"/>
-	<foaf:based_near geo:lat="51.43026" geo:long="0" geo:lat_long="51.41026,0"/>
-	<foaf:based_near geo:lat="51.42026" geo:long="0" geo:lat_long="51.47026,0"/>
-	
+	<foaf:based_near geo:lat="51.48026" geo:long="0" geo:lat_long="51.47026,0"/>	
 	<foaf:holdsAccount>
 <foaf:OnlineAccount>
 <foaf:accountServiceHomepage rdf:resource="http://del.icio.us"/>
@@ -99,6 +97,9 @@
 		<geo:lat>48.405</geo:lat>
 		<geo:long>2.701</geo:long>
 	</contact:office>
+	<contact:nearestAirport>
+		<wn:Airport air:icao="EGGD" air:iata="BRS"/>
+	</contact:nearestAirport>
 </foaf:Person>
 
 </rdf:RDF>

@@ -151,14 +151,219 @@ function renderLocationFields(data){
 	map = createMapElement(containerElement);
 	
 	if(map){
-		for(key in data.locationFields){
-			if(key == 'basedNear'){
-				addBasedNearMarkers(data.locationFields['basedNear'],containerElement,map);		
-			}
-		}
+		/*render the markers on the map and add divs containing the information below*/
+		addBasedNearMarkers(data.locationFields['basedNear'],containerElement,map);	
+		addNearestAirportMarker(data.locationFields['nearestAirport'],containerElement,map);
+		addAddressMarkers(data.locationFields['office'],data.locationFields['home'],containerElement,map);			
 	}
 }
 
+/*adds markers and divs for home and office addresses*/
+function addAddressMarkers(office,home,containerElement,map){
+	for(bNodeKey in office){
+		addSingleAddressMarker('Office Address',office[bNodeKey],bNodeKey,containerElement,'office');
+	}
+	for(bNodeKey in home){
+		addSingleAddressMarker('Home Address',home[bNodeKey],bNodeKey,containerElement,'home');
+	}
+	
+}
+
+/*adds one address marker*/
+function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
+	if(address['latitude'] && address['longitude']){
+	
+		var latitude = address['latitude'];
+		var longitude = address['longitude'];
+		
+		var point = new GLatLng(latitude, longitude);
+		var marker = new GMarker(point,{title: "nearestAirport"});	
+		
+    	mapMarkers[bNodeKey] = marker;
+		map.addOverlay(marker);
+		map.setCenter(point);
+		
+		createAddressDiv(title,address,bNodeKey,containerElement,latitude,longitude, prefix);
+		
+	} else {
+		alert("geocoding is necessary");
+		//TODO do some  geocoding stuff here
+	}
+
+}
+
+/*creates divs for addresses*/
+function createAddressDiv(title,address,bNodeKey,containerElement, latitude, longitude, prefix){
+
+	/*TODO: need to worry about how we pick all of this stuff up when we save and this method can easily be made shorter*/
+	var locationDiv = createLocationElement(containerElement, bNodeKey,'address');
+	
+	/*title: e.g. home address, office address etc*/
+	var addressTitleDiv = document.createElement('div');
+	addressTitleDiv.className = 'addressTitle';
+	addressTitleDiv.appendChild(document.createTextNode(title));
+	locationDiv.appendChild(addressTitleDiv);
+	
+	/*latitude and longitude*/
+	//TODO: geocoding to get these if necessary
+	var latitudeDiv = document.createElement('div');
+	var longitudeDiv = document.createElement('div');
+	latitudeDiv.appendChild(document.createTextNode('Latitude: '+latitude));
+	longitudeDiv.appendChild(document.createTextNode('Longitude: '+longitude));
+	locationDiv.appendChild(longitudeDiv);
+	locationDiv.appendChild(latitudeDiv);
+	
+	/*street 1*/
+	var streetLabelDiv = document.createElement('div');
+	streetLabelDiv.appendChild(document.createTextNode('Address line 1:'));
+	streetLabelDiv.className='streetLabel';
+	locationDiv.appendChild(streetLabelDiv);
+	var streetInputElement = document.createElement('input');
+	streetInputElement.className='street';
+	streetInputElement.id = 'street';
+	locationDiv.appendChild(streetInputElement);
+	//populate it
+	if(address[prefix+'Street']){
+		streetInputElement.value = address[prefix+'Street'];
+	}
+	
+	/*street 2*/
+	var street2LabelDiv = document.createElement('div');
+	street2LabelDiv.appendChild(document.createTextNode('Address line 2:'));
+	street2LabelDiv.className='street2Label';
+	locationDiv.appendChild(street2LabelDiv);
+	var street2InputElement = document.createElement('input');
+	street2InputElement.id = 'street2';
+	locationDiv.appendChild(street2InputElement);
+	//populate it
+	if(address[prefix+'Street2']){
+		street2InputElement.value = address[prefix+'Street2'];
+	}
+	
+	/*street 3*/
+	var street3LabelDiv = document.createElement('div');
+	street3LabelDiv.appendChild(document.createTextNode('Address line 3:'));
+	street3LabelDiv.className='street3Label';
+	locationDiv.appendChild(street3LabelDiv);
+	var street3InputElement = document.createElement('input');
+	street3InputElement.id = 'street3';
+	locationDiv.appendChild(street3InputElement);
+	//populate it
+	if(address[prefix+'Street3']){
+		street3InputElement.value = address[prefix+'Street3'];
+	}
+		
+	/*postalCode*/
+	var postalCodeLabelDiv = document.createElement('div');
+	postalCodeLabelDiv.appendChild(document.createTextNode('Postal Code:'));
+	postalCodeLabelDiv.className='postalCodeLabel';
+	locationDiv.appendChild(postalCodeLabelDiv);
+	var postalCodeInputElement = document.createElement('input');
+	postalCodeInputElement.id = 'postalCode';
+	locationDiv.appendChild(postalCodeInputElement);
+	//populate it
+	if(address[prefix+'PostalCode']){
+		postalCodeInputElement.value = address[prefix+'PostalCode'];
+	}
+	
+	/*city*/
+	var cityLabelDiv = document.createElement('div');
+	cityLabelDiv.appendChild(document.createTextNode('City:'));
+	cityLabelDiv.className='cityLabel';
+	locationDiv.appendChild(cityLabelDiv);
+	var cityInputElement = document.createElement('input');
+	cityInputElement.id = 'city';
+	locationDiv.appendChild(cityInputElement);
+	//populate it
+	if(address[prefix+'City']){
+		cityInputElement.value = address[prefix+'City'];
+	}
+	
+	/*country*/
+	/*TODO: possibly make this a dropdown*/
+	var countryLabelDiv = document.createElement('div');
+	countryLabelDiv.appendChild(document.createTextNode('Country:'));
+	countryLabelDiv.className='countryLabel';
+	locationDiv.appendChild(countryLabelDiv);
+	var countryInputElement = document.createElement('input');
+	countryInputElement.className='country';
+	countryInputElement.id = 'country';
+	locationDiv.appendChild(countryInputElement);
+	if(address[prefix+'Country']){
+		countryInputElement.value = address[prefix+'Country'];
+	}
+
+}
+
+
+/*add markers for all the contact:Nearest airports*/
+function addNearestAirportMarker(nearestAirport,containerElement,map){
+	
+	var geocoder = new GClientGeocoder();
+	
+	//TODO: possibly render both of these codes
+	if(nearestAirport['iataCode']){
+		geocoder.getLatLng(
+    	nearestAirport['iataCode'],
+    		function(point) {
+      			if (!point) {
+        			//TODO: possibly do something here, maybe do nothing
+      			} else {
+        			var marker = new GMarker(point,{title: "nearestAirport"});
+    				mapMarkers["nearestAirport"] = marker;
+        			map.addOverlay(marker);
+        			createAirportDiv(point.lat(),point.lng(),nearestAirport['iataCode'],containerElement);
+        			
+        			//TODO:need to have something that decides sensibly where to centre the map
+      				map.setCenter(point, 13);
+      			}			
+   			}
+   		);
+	} 
+	else if(nearestAirport['icaoCode']){
+		geocoder.getLatLng(
+    	nearestAirport['icaoCode'],
+    		function(point) {
+      			if (!point) {	
+      				//TODO: possibly do something here, maybe do nothing
+      			} else {
+        			var marker = new GMarker(point,{title: "My Nearest Airport"});
+        			mapMarkers["nearestAirport"] = marker;
+        			map.addOverlay(marker);
+        			createAirportDiv(point.lat(),point.lng(),nearestAirport['icaoCode'],containerElement);
+        			
+      				map.setCenter(point, 13);
+      			}			
+   			}
+   		);
+	}
+}
+
+/*FIXME TODO XXX Make sure to continue from here*/
+
+function createAirportDiv(latitude,longitude,code,containerElement){
+	var locationDiv = createLocationElement(containerElement, "nearestAirport");
+	
+	/*display the latitude and longitude coords and the codes for the airport*/
+	var latitudeDiv = document.createElement('div');
+	var longitudeDiv = document.createElement('div');
+	var airportNameDiv = document.createElement('input');
+	airportNameDiv.value = code;
+	airportNameDiv.className = 'airportCode';
+	
+	/*TODO: Need to make airport name lookupperable both ways so that people can edit it... it's not easily editable at the moment
+	 * and so that the name and address of teh airport can be shown.*/	
+	//latitudeDiv.id = 'latitude_'+locationDiv.id;
+	//longitudeDiv.id = 'longitude_'+locationDiv.id;
+	locationDiv.appendChild(latitudeDiv);
+	locationDiv.appendChild(longitudeDiv);
+	locationDiv.appendChild(airportNameDiv);
+	latitudeDiv.appendChild(document.createTextNode('Latitude: '+latitude));
+	longitudeDiv.appendChild(document.createTextNode('Longitude: '+longitude));
+}
+
+
+/*add markers for all the foaf:based_near elements*/
 function addBasedNearMarkers(basedNearArray, containerElement){
 
 	/*loop over each based_near instance*/
@@ -256,7 +461,7 @@ function renderAccountFields(data){
 	for(accountBnodeId in data.foafHoldsAccountFields){
 		if(accountBnodeId != "displayLabel" && accountBnodeId != "name"){
 		
-			/*create a container for this account. E.g. a Skype account represented by accountBnodeId=bNode3*/
+	 		/*create a container for this account. E.g. a Skype account represented by accountBnodeId=bNode3*/
 			var holdsAccountElement = createHoldsAccountElement(containerElement,accountBnodeId);
 			
 			/*create an element for the foafAccountServiceHomepage*/
@@ -307,13 +512,12 @@ function renderSimpleFields(i, name, data){
 /*populates the triples objects with stuff from the actual display (i.e. what the user has changed)*/
 //TODO: datatypes/language
 function displayToObjects(name){  
-	//TODO: we shouldn't have to put these numbers in
 	switch(name){
 		case 'load-the-basics':
 			birthdayDisplayToObjects();
 			break;
 		case 'load-contact-details':
-			return null;
+			locationDisplayToObjects();
 			break;
 		case 'load-accounts':
 			accountsDisplayToObjects();
@@ -366,10 +570,66 @@ function birthdayDisplayToObjects(){
 
 }
 
+function locationDisplayToObjects(){
+	/*TODO: possibly keep addresses, based nears and airports in different places*/
+  	var containerElement = document.getElementById('location_container');
+  	
+  	/*an array of keys that have not been removed from the dom tree*/
+ 	var doNotCleanArray = new Array();
+ 	
+  	for(i=0; i < containerElement.childNodes.length; i++){
+  		var locationElement = containerElement.childNodes[i];
+  		
+  		if(locationElement.id != 'mapDiv'){
+  			if(locationElement.className == 'location' && locationElement.id == 'nearestAirport'){
+  				//TODO: process nearest airport stuff here.  Possibly make the nearestAirport/basedNear/Address distinction more clear and consistent
+  			} else if(locationElement.className == 'location'){
+  				//TODO: process based_near stuff here
+  				basedNearDisplayToObjects(locationElement);
+  			} else if(locationElement.className == 'address'){
+  				/*process location stuff*/
+  				//TODO: could do with a bit less hardcoding here
+  				addressDisplayToObjects(locationElement,'home');
+  				addressDisplayToObjects(locationElement,'office');
+  			}
+  		}
+  	}
+}
+
+/*copies values from display for an address of type prefix (e.g. office, home) into the globalFieldData object*/
+function addressDisplayToObjects(locationElement,prefix){
+		if(globalFieldData.locationFields[prefix][locationElement.id]){
+					for(j=0; j < locationElement.childNodes.length; j++){
+						if(locationElement.childNodes[j].id == 'street'){
+							globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street'] = locationElement.childNodes[j].value;
+						} 
+						if(locationElement.childNodes[j].id == 'street2'){
+							globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street2'] = locationElement.childNodes[j].value;
+						} 
+						if(locationElement.childNodes[j].id == 'street3'){
+							globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street3'] = locationElement.childNodes[j].value;
+						} 
+						if(locationElement.childNodes[j].id == 'city'){
+							globalFieldData.locationFields[prefix][locationElement.id][prefix+'City'] = locationElement.childNodes[j].value;
+						}
+						if(locationElement.childNodes[j].id == 'country'){
+							globalFieldData.locationFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
+						}
+						if(locationElement.childNodes[j].id == 'postalCode'){
+							globalFieldData.locationFields[prefix][locationElement.id][prefix+'PostalCode'] = locationElement.childNodes[j].value;
+						}  
+					}
+  				}
+}	
+
 function accountsDisplayToObjects(){
-	/*first do accounts stuff*/	
+
 	/*TODO This will change when the display is improved + need a bit less hardcoding possibly*/
   	var containerElement = document.getElementById('foafHoldsAccount_container');
+  	
+  	if(!containerElement){
+  		return;
+  	}
   	
   	/*an array of keys that have not been removed from the dom tree*/
  	var doNotCleanArray = new Array();
@@ -564,17 +824,21 @@ function createAccountsAddElement(container){
 
 }
 /*creates an element to hold the information about a particular location*/
-function createLocationElement(attachElement, bnodeId){
+function createLocationElement(attachElement, bnodeId,optionalClassName){
 	
 	/*if new, create a random id*/
 	if(!bnodeId){
 		var bnodeId = createRandomString(50);
 	}
+	if(!optionalClassName){
+		var optionalClassName = 'location';
+	}
 	
 	/*create holdsAccount div and attach it to the element given*/
 	var locationDiv = document.createElement("div");
-	locationDiv.setAttribute('class','location');
+	locationDiv.setAttribute('class',optionalClassName);
 	locationDiv.id = bnodeId;
+	locationDiv.setAttribute("onclick","map.panTo(mapMarkers['"+bnodeId+"'].getLatLng())");
 	attachElement.appendChild(locationDiv);
 	
 	/*create remove link and attach it to the holds account div*/
