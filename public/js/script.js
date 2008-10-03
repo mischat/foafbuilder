@@ -299,12 +299,25 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 /*add markers for all the contact:Nearest airports*/
 function addNearestAirportMarker(nearestAirport,containerElement,map){
 	
+	if(!nearestAirport || typeof(nearestAirport) == 'undefined'){
+		return;
+	}
+	
 	var geocoder = new GClientGeocoder();
+	var icaoCode = null;
+	var iataCode = null;
+	
+	if(nearestAirport['icaoCode']){
+		icaoCode = nearestAirport['icaoCode'];		
+	} 
+	if(nearestAirport['iataCode']){
+		iataCode = nearestAirport['iataCode'];
+	}
 	
 	//TODO: possibly render both of these codes
-	if(nearestAirport['iataCode']){
+	if(iataCode){
 		geocoder.getLatLng(
-    	nearestAirport['iataCode'],
+    	iataCode,
     		function(point) {
       			if (!point) {
         			//TODO: possibly do something here, maybe do nothing
@@ -312,7 +325,8 @@ function addNearestAirportMarker(nearestAirport,containerElement,map){
         			var marker = new GMarker(point,{title: "nearestAirport"});
     				mapMarkers["nearestAirport"] = marker;
         			map.addOverlay(marker);
-        			createAirportDiv(point.lat(),point.lng(),nearestAirport['iataCode'],containerElement);
+        			
+        			createAirportDiv(point.lat(),point.lng(),iataCode,icaoCode,containerElement);
         			
         			//TODO:need to have something that decides sensibly where to centre the map
       				map.setCenter(point, 13);
@@ -320,9 +334,9 @@ function addNearestAirportMarker(nearestAirport,containerElement,map){
    			}
    		);
 	} 
-	else if(nearestAirport['icaoCode']){
+	else if(icaoCode){
 		geocoder.getLatLng(
-    	nearestAirport['icaoCode'],
+    	icaoCode,
     		function(point) {
       			if (!point) {	
       				//TODO: possibly do something here, maybe do nothing
@@ -330,7 +344,7 @@ function addNearestAirportMarker(nearestAirport,containerElement,map){
         			var marker = new GMarker(point,{title: "My Nearest Airport"});
         			mapMarkers["nearestAirport"] = marker;
         			map.addOverlay(marker);
-        			createAirportDiv(point.lat(),point.lng(),nearestAirport['icaoCode'],containerElement);
+        			createAirportDiv(point.lat(),point.lng(),iataCode,icaoCode,containerElement);
         			
       				map.setCenter(point, 13);
       			}			
@@ -339,27 +353,54 @@ function addNearestAirportMarker(nearestAirport,containerElement,map){
 	}
 }
 
-/*FIXME TODO XXX Make sure to continue from here*/
-
-function createAirportDiv(latitude,longitude,code,containerElement){
+function createAirportDiv(latitude,longitude,iataCode,icaoCode,containerElement){
 	var locationDiv = createLocationElement(containerElement, "nearestAirport");
 	
 	/*display the latitude and longitude coords and the codes for the airport*/
 	var latitudeDiv = document.createElement('div');
+	latitudeDiv.appendChild(document.createTextNode('Latitude: '+latitude));
+	latitudeDiv.className = 'latitude';
+	locationDiv.appendChild(latitudeDiv);
+		
 	var longitudeDiv = document.createElement('div');
-	var airportNameDiv = document.createElement('input');
-	airportNameDiv.value = code;
-	airportNameDiv.className = 'airportCode';
+	longitudeDiv.appendChild(document.createTextNode('Longitude: '+longitude));
+	longitudeDiv.className = 'longitude';
+	locationDiv.appendChild(longitudeDiv);
 	
+	/*actually display the airport code(s)*/
+	//TODO: add some sort of geocoding to redraw the pin when one of these is changed
 	/*TODO: Need to make airport name lookupperable both ways so that people can edit it... it's not easily editable at the moment
 	 * and so that the name and address of teh airport can be shown.*/	
-	//latitudeDiv.id = 'latitude_'+locationDiv.id;
-	//longitudeDiv.id = 'longitude_'+locationDiv.id;
-	locationDiv.appendChild(latitudeDiv);
-	locationDiv.appendChild(longitudeDiv);
-	locationDiv.appendChild(airportNameDiv);
-	latitudeDiv.appendChild(document.createTextNode('Latitude: '+latitude));
-	longitudeDiv.appendChild(document.createTextNode('Longitude: '+longitude));
+	if(icaoCode){
+		//label
+		var icaoLabelElement = document.createElement('div');
+		icaoLabelElement.appendChild(document.createTextNode('ICAO Code: '));
+		icaoLabelElement.className = 'icaoLabel';
+				
+		//input element
+		var icaoInputElement = document.createElement('input');
+		icaoInputElement.value = icaoCode;
+		icaoInputElement.className = 'icaoCode'
+		
+		//attach them
+		locationDiv.appendChild(icaoLabelElement);
+		locationDiv.appendChild(icaoInputElement);
+	}
+	if(iataCode){
+		//label
+		var iataLabelElement = document.createElement('div');
+		iataLabelElement.appendChild(document.createTextNode('IATA Code: '));
+		iataLabelElement.className = 'iataLabel';
+		
+		//input element
+		var iataInputElement = document.createElement('input');
+		iataInputElement.value = iataCode;
+		iataInputElement.className = 'iataCode';
+		
+		//attach them
+		locationDiv.appendChild(iataLabelElement);
+		locationDiv.appendChild(iataInputElement);
+	}
 }
 
 
@@ -378,7 +419,9 @@ function addBasedNearMarkers(basedNearArray, containerElement){
 		var latitudeDiv = document.createElement('div');
 		var longitudeDiv = document.createElement('div');
 		latitudeDiv.id = 'latitude_'+locationDiv.id;
+		latitudeDiv.className='latitude';
 		longitudeDiv.id = 'longitude_'+locationDiv.id;
+		longitudeDiv.className='longitude';
 		locationDiv.appendChild(latitudeDiv);
 		locationDiv.appendChild(longitudeDiv);
 		latitudeDiv.appendChild(document.createTextNode('Latitude: '+latitude));
@@ -406,9 +449,7 @@ function createSingleBasedNearMarker(latitude, longitude, holderName, map){
 	    GEvent.addListener(marker, 'drag', function(){
 			
 	    	var latElement = document.getElementById('latitude_' + holderName);
-	    	latElement.className='latitude';
 	    	var longElement = document.getElementById('longitude_' + holderName);
-	    	longElement.className='longitude';
 	    	
 	    	if(latElement.childNodes[0] && longElement.childNodes[0]){
 	    		latElement.removeChild(latElement.childNodes[0]);
@@ -485,6 +526,7 @@ function renderAccountFields(data){
 				/*create an empty element*/
 				createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
 			}
+			
 			/*hide/show the profilePage url as appropriate*/	
 			if(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri){
 				toggleHiddenAccountInputElements(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri,holdsAccountElement,'');
@@ -581,12 +623,16 @@ function locationDisplayToObjects(){
   		var locationElement = containerElement.childNodes[i];
   		
   		if(locationElement.id != 'mapDiv'){
-  			if(locationElement.className == 'location' && locationElement.id == 'nearestAirport'){
+ 
+  			if(locationElement.className == 'location' 
+  				&& locationElement.id == 'nearestAirport'){
   				//TODO: process nearest airport stuff here.  Possibly make the nearestAirport/basedNear/Address distinction more clear and consistent
-  			} else if(locationElement.className == 'location'){
-  				//TODO: process based_near stuff here
+  				nearestAirportDisplayToObjects(locationElement);
+  			} 
+  			else if(locationElement.className == 'location'){
   				basedNearDisplayToObjects(locationElement);
-  			} else if(locationElement.className == 'address'){
+  			} 
+  			else if(locationElement.className == 'address'){
   				/*process location stuff*/
   				//TODO: could do with a bit less hardcoding here
   				addressDisplayToObjects(locationElement,'home');
@@ -594,6 +640,42 @@ function locationDisplayToObjects(){
   			}
   		}
   	}
+}
+
+/*put nearestAirport data into the globalFieldData objects*/
+function nearestAirportDisplayToObjects(locationElement){
+	/*loop through the elements to make sure we save the right ones*/
+	for(j=0; j < locationElement.childNodes.length; j++){
+	
+		if((locationElement.childNodes[j].className == 'latitude' || locationElement.childNodes[j].className == 'longitude')
+			&& locationElement.childNodes[j].childNodes[0] && locationElement.childNodes[j].childNodes[0].nodeValue){
+			
+				var coordArray = locationElement.childNodes[j].childNodes[0].nodeValue.split(' ');
+				
+				if(typeof(coordArray[1]) != 'undefined' && coordArray[1]){
+					globalFieldData.locationFields['nearestAirport'][locationElement.childNodes[j].className] = coordArray[1];
+				}
+				
+		} else if(locationElement.childNodes[j].className == 'iataCode' || locationElement.childNodes[j].className == 'icaoCode'){
+				globalFieldData.locationFields['nearestAirport'][locationElement.childNodes[j].className] = locationElement.childNodes[j].value;	
+		}
+	}
+}
+
+/*put basedNear data into the globalFieldData objects*/
+function basedNearDisplayToObjects(locationElement){
+
+	/*loop through the elements to make sure we save the right ones*/
+	for(j=0; j < locationElement.childNodes.length; j++){
+		if((locationElement.childNodes[j].className == 'latitude' || locationElement.childNodes[j].className == 'longitude')
+			&& locationElement.childNodes[j].childNodes[0] && locationElement.childNodes[j].childNodes[0].nodeValue){
+				var coordArray = locationElement.childNodes[j].childNodes[0].nodeValue.split(' ');
+
+				if(typeof(coordArray[1]) != 'undefined' && coordArray[1]){
+					globalFieldData.locationFields['basedNear'][locationElement.id][locationElement.childNodes[j].className] = coordArray[1];
+				}
+		} 
+	}
 }
 
 /*copies values from display for an address of type prefix (e.g. office, home) into the globalFieldData object*/
