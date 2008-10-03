@@ -303,4 +303,3 @@ class LocationField extends Field {
     }
 
 }
-/* vi:set expandtab sts=4 sw=4: */
