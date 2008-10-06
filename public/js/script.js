@@ -1,5 +1,6 @@
 /*global variable for storing data*/
 var globalFieldData;
+var currentPage;//the page the user is on e.g. load-contact-details etc.
 
 /*google maps data*/
 var mapMarkers = new Array;
@@ -67,7 +68,10 @@ function getUrlFromOnlineAccounts(username,type){
 function loadFoaf(name){
 
 	url = document.getElementById('foafUri').value;
-
+	
+	/*so we can track which page the person is on*/
+	currentPage = name;
+	
   	//TODO use jquery event handler to deal with errors on requests
   	//TODO perhaps this is bad.  There certainly should be less hardcoding here.
   	$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);}, "json");
@@ -85,10 +89,10 @@ function loadFoaf(name){
 }
 
 /*saves all the foaf data*/
-function saveFoaf(name){
-	displayToObjects(name);
+function saveFoaf(){
+	displayToObjects(currentPage);
 	jsonstring = JSON.serialize(globalFieldData);
-	//updateFoafDateOfBirthElements();
+
 	//TODO use jquery event handler to deal with errors on this request
   	$.post("/ajax/save-Foaf", {model : jsonstring});
 }
@@ -483,6 +487,7 @@ function renderBirthdayFields(data){
 	var day = data.birthdayFields['day'];
 	var month = data.birthdayFields['month'];
 	var year = data.birthdayFields['year'];	
+
 	createFoafDateOfBirthElement(containerElement, day, month, year);
 }
 

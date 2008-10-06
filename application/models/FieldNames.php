@@ -93,12 +93,14 @@ class FieldNames {
 		$this->allFieldNames['foafMbox_sha1sum'] = 
 			new SimpleField('foafMbox_sha1sum', 'Email (sha1sum)', '?x foaf:mbox_sha1sum ?foafMbox_sha1sum', 'literal',false,'http://xmlns.com/foaf/0.1/mbox_sha1sum');
 		*/
-		$this->allFieldNames['foafLocation'] = new LocationField($this->foafData);
+		$this->allFieldNames['location'] = new LocationField($this->foafData);
 	}
 	
 	private function instantiatePicturesFields(){
+		/*
 		$this->allFieldNames['foafDepiction'] = 
 			new SimpleField('foafDepiction','Image', '?x foaf:depiction ?foafDepiction', 'resource',false,"http://xmlns.com/foaf/0.1/depiction");
+		*/
 	}
 	
 	private function instantiateAccountsFields(){

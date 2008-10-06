@@ -6,7 +6,7 @@
 <table cellspacing="10">
 	<tr>
 		<td>
-			<form action = "javascript:loadFoaf('load-the-basics');">
+			<form action = "javascript:loadFoaf(currentPage);">
 				<input type = 'text' id= 'foafUri' name = 'foafUri'/>
 				<input type = 'submit' value = 'Load'/>
 			</form>
@@ -19,7 +19,7 @@
 		</td>
 		<td>
 			<? //FIXME: sort this out so that it saves whichever page you're on ?>
-			<form action = "javascript:saveFoaf('load-contact-details');">
+			<form action = "javascript:saveFoaf();">
 				<input type = 'submit' value = 'Save'/>
 			</form>
 		</td>
