@@ -116,7 +116,7 @@ class AjaxController extends Zend_Controller_Action {
         }
 */
         /* TODO Need to have a function which gets from the session first, 
-        and if not then loads form a uri! */
+        and if not then loads from a uri! */
         $this->foafData = FoafData::getFromSession();
         /* This returns a null if nothing in session! */
         if (!$this->foafData) {
@@ -216,8 +216,7 @@ class AjaxController extends Zend_Controller_Action {
         */
 
         //get all the detail for each of the fields
-        //TODO: Just doing accounts right now.
-        $fieldNames = new FieldNames('accounts',$foafData);
+        $fieldNames = new FieldNames('all',$foafData);
         $allFieldNames = $fieldNames->getAllFieldNames();
 
         /*loop through all the rows in the sparql results style 'almost model'*/
