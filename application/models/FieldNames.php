@@ -64,7 +64,7 @@ class FieldNames {
 	
 	/*instantiates arrays of fields for all the items on the basics page*/
 	private function instantiateTheBasicsFields(){
-		/*
+		$this->allFieldNames['birthday'] = new BirthdayField($this->foafData);
 		$this->allFieldNames['foafTitle'] = 
 			new SimpleField('foafTitle', 'Title', "http://xmlns.com/foaf/0.1/title",$this->foafData,"literal");
 		$this->allFieldNames['foafGivenName'] = 
@@ -74,12 +74,10 @@ class FieldNames {
 		$this->allFieldNames['foafName'] = 
 			new SimpleField('foafName', 'Real Name', 'http://xmlns.com/foaf/0.1/name',$this->foafData,'literal');
 		$this->allFieldNames['foafHomepage'] = 
-			new SimpleField('foafHomepage', 'Homepages', 'http://xmlns.com/foaf/0.1/homepage',$this->foafData,'resource');
+			new SimpleField('foafHomepage', 'Homepage', 'http://xmlns.com/foaf/0.1/homepage',$this->foafData,'resource');
 		$this->allFieldNames['foafNick'] = 
-			new SimpleField('foafNick', 'Nicknames', 'http://xmlns.com/foaf/0.1/nick',$this->foafData,'literal');
-		*/
+			new SimpleField('foafNick', 'Nickname', 'http://xmlns.com/foaf/0.1/nick',$this->foafData,'literal');
 		
-		$this->allFieldNames['birthday'] = new BirthdayField($this->foafData);
 		//$this->allFieldNames['geoLatLong'] =  new GeoLatLongField();
 		//$this->allFieldNames['geoLat'] =  new GeoLatField();
 		//$this->allFieldNames['geoLong'] =  new GeoLongField();	

@@ -135,8 +135,10 @@ function genericObjectsToDisplay(data){
 	
 	/*render the various fields*/
 	renderAccountFields(data);
+	renderSimpleFields(data);
 	renderBirthdayFields(data);
 	renderLocationFields(data);
+
 }
 
 /*Render the location map*/
@@ -543,17 +545,31 @@ function renderAccountFields(data){
 }
 
 /*renders the appropriate simple fields for the index i in the json data, data with the name name*/
-function renderSimpleFields(i, name, data){
-	for(k=0 ; k < data[i].fields.length; k++){
-		if(data[i].fields[k][name].label){
-			createGenericInputElement(name, data[i].fields[k][name].label, k);
-		} else if(data[i].fields[k][name].uri){
-			createGenericInputElement(name, data[i].fields[k][name].uri, k);
-		} 
+function renderSimpleFields(data){
+	if(!data || !data.birthdayFields || typeof(data.birthdayFields) == 'undefined'){
+		return;
 	}
-	if(data[i].fields.length == 0){
-		createGenericInputElement(name, "", k);
-	}
+	
+	for(element in data){
+		if(element == 'fields'){
+			for(fieldType in data[element]){
+				var containerElement = createFieldContainer(data[element][fieldType]['name'], data[element][fieldType]['displayLabel']);
+				i=0;
+				
+				if(data[element][fieldType]['values'].length != 0){
+					for(item in data[element][fieldType]['values']){
+						createGenericInputElement(data[element][fieldType]['name'], data[element][fieldType]['values'][item], i);	
+						i++;	
+					}	
+				} else {
+					//create an empty field
+					createGenericInputElement(data[element][fieldType]['name'], '', 0);	
+				}
+				/*create an add link*/
+				createGenericAddElement(containerElement,data[element][fieldType]['name'],data[element][fieldType]['displayLabel']);
+			}
+		}
+	}	
 }
 
 /*populates the triples objects with stuff from the actual display (i.e. what the user has changed)*/
@@ -562,6 +578,7 @@ function displayToObjects(name){
 	switch(name){
 		case 'load-the-basics':
 			birthdayDisplayToObjects();
+			simpleFieldsDisplayToObjects();
 			break;
 		case 'load-contact-details':
 			locationDisplayToObjects();
@@ -587,20 +604,30 @@ function simpleFieldsDisplayToObjects(){
   	
   	//The code below used to use the arrays that were defined in main.phtml but they aren't there anymore.
   	//loop through all the arrays (for foafName, foafHomepage etc) defined in the pageData object
-	/*
-	for(arrayName in pageData){
-		if(arrayName != "foafPrimaryTopic"){
-			//chop off the ArrayValue bit at the end.
-			var name = arrayName.substring(0,arrayName.length-10);
+	
+	if(typeof(globalFieldData.fields) != 'undefined' && globalFieldData.fields){
+		for(simpleField in globalFieldData.fields){
+			var containerElement = document.getElementById(simpleField + "_container");
 			
-			for(i=0; document.getElementById(name+'_'+i); i++){
-				//TODO: what about validation.  Where's it to go?
-				if(document.getElementById(name+'_'+i) != ""){
-					pageData[arrayName][i] = document.getElementById(name+'_'+i).value;
+			if(containerElement){
+				/*remove all existing elements in globalFieldData*/
+				if(globalFieldData.fields[simpleField].values){
+					 globalFieldData.fields[simpleField].values = new Array();
 				}
-			}
-		}//end if
-	}//end for	*/
+				
+				/*add the elements that are present in the display again*/
+				for(i=0 ; i <containerElement.childNodes.length ; i++){
+					var element = containerElement.childNodes[i];
+					if(element.className == 'fieldInput' && element.value != null){
+						globalFieldData.fields[simpleField].values.push(element.value);	
+					}
+				}
+			} 
+		}
+	}
+	
+	
+	
 }
 
 function birthdayDisplayToObjects(){
@@ -910,6 +937,66 @@ function createAccountsAddElement(container){
 	container.appendChild(addDiv);
 
 }
+
+function createGenericAddElement(container,name,displayLabel){
+
+	/*create add link and attach it to the container*/
+	var addDiv = document.createElement("div");
+	addDiv.id = name+"_addLinkContainer";
+	addDiv.className = "addLinkContainer";
+	var addLink = document.createElement('a');
+	addLink.appendChild(document.createTextNode("+Add another "+displayLabel));
+	addLink.className="addLink";
+	addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id);");
+	addDiv.appendChild(addLink);
+	container.appendChild(addDiv);
+
+}
+//TODO: can we get rid of thisElementCount?
+function createGenericInputElementAboveAddLink(name,thisElementCount,containerId,addElementId){
+	
+	/*remove the add element*/
+	var addElement = document.getElementById(addElementId);
+	addElement.parentNode.removeChild(addElement);
+	
+	/*append a child node*/
+	createGenericInputElement(name,'',thisElementCount,containerId);
+	
+	/*re add the add element*/
+	document.getElementById(containerId).appendChild(addElement);
+}
+
+/*creates a remove link with the removeId being the input element to be removed*/
+function createGenericInputElementRemoveLink(removeId,containerId){
+	
+	/*create remove link and attach it to the container div*/
+	var containerDiv = document.getElementById(containerId);
+	if(containerDiv){
+		var removeDiv = document.createElement("div");
+		removeDiv.id = removeId+"removeLinkContainer";
+		removeDiv.className = "removeLinkContainer";
+		var removeLink = document.createElement('a');
+		removeLink.appendChild(document.createTextNode("- Remove"));
+		removeLink.id="_removeLink";
+		removeLink.className="removeLink";
+		removeLink.setAttribute("onclick" , "removeGenericInputElement('"+removeId+"','"+removeDiv.id+"')");
+		removeDiv.appendChild(removeLink);
+		containerDiv.appendChild(removeDiv);
+	}
+}
+
+/*removes the input element with the given id as well as its corresponding remove element*/
+function removeGenericInputElement(inputIdForRemoval, removeDivId){
+	/*Get the ids*/
+	var inputElement = document.getElementById(inputIdForRemoval);
+	var removeElement = document.getElementById(removeDivId);
+	
+	/*remove them*/
+	inputElement.parentNode.removeChild(inputElement);
+	removeElement.parentNode.removeChild(removeElement);
+
+}
+
 /*creates an element to hold the information about a particular location*/
 function createLocationElement(attachElement, bnodeId,optionalClassName){
 	
@@ -928,7 +1015,7 @@ function createLocationElement(attachElement, bnodeId,optionalClassName){
 	locationDiv.setAttribute("onclick","map.panTo(mapMarkers['"+bnodeId+"'].getLatLng())");
 	attachElement.appendChild(locationDiv);
 	
-	/*create remove link and attach it to the holds account div*/
+	/*create remove link and attach it to the location div*/
 	var removeDiv = document.createElement("div");
 	removeDiv.id = "removeLinkContainer";
 	removeDiv.className = "removeLinkContainer";
@@ -996,14 +1083,16 @@ function createGenericInputElement(name, value, thisElementCount, contname){
 	newElement.setAttribute('value',value);
 	newElement.setAttribute('onchange','saveFoaf()');
 	
+	//if the contname does not choose a  specific container we want to put it in
+	if(!contname){
+		contname = name+'_container';
+	} 
+
+	createGenericInputElementRemoveLink(newElement.id,contname);
 	
-	//if there is a specific container we want to put it in
-	if(contname){
-		name = contname;
-	}
-	
-	document.getElementById(name+'_container').appendChild(newElement);
+	document.getElementById(contname).appendChild(newElement);
 	newElement.setAttribute('class','fieldInput');
+	
 	
 	return newElement;
 }

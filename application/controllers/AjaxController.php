@@ -19,10 +19,15 @@ class AjaxController extends Zend_Controller_Action {
             $this->fieldNamesObject = new FieldNames('theBasics',$this->foafData);  	
             $this->view->results = array();
             foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
-                $this->view->results = array_merge($this->view->results,$field->getData());	
+            	
+            	//need to cope with multiple fields of the same type
+            	//TODO: if appropriate do this for all of the other actions.
+            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
+          
             }
         } 
     }
+
     
     public function loadContactDetailsAction() {
     	/*build up a sparql query to get the values of all the fields we need*/
@@ -223,12 +228,25 @@ class AjaxController extends Zend_Controller_Action {
         foreach($almost_model as $key => $value) {
             /*get rid of 'fields at the end of the name'*/
             if(isset($allFieldNames[substr($key,0,-6)])) {
-                echo("Saving fields of type: ".$key);
                 /*get some details about the fields we're dealing with*/
                 $field = $allFieldNames[substr($key,0,-6)];
                 /*save them using the appropriate method*/
                 $field->saveToModel($foafData, $value);
-            } else {
+                
+            } else if($key == 'fields'){
+            	//we need to look inside the simplefield array to do the right kind of save
+            	//XXX: is the level of abstraction right here? 
+            	foreach($value as $fieldName => $fieldValue){
+            		 if(isset($allFieldNames[$fieldName])) {
+            		 	/*get some details about the fields we're dealing with*/
+               	 		$field = $allFieldNames[$fieldName];
+          
+						/*save them using the appropriate method*/
+               			$field->saveToModel($foafData, $value);
+               		
+            		 }            	 
+            	}
+            }else{
                 echo("unrecognised fields:".$key."\n");	
             }//end if
         }//end foreach

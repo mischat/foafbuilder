@@ -306,6 +306,9 @@ width:100%;
 	margin-bottom:5px;
 	margin-top:5px;	
 }
+.holdsAccount .removeLinkContainer{
+	padding-left:140px;	
+}
 #foafAccountName{
 	width:140px;
 	float:left;
