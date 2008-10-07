@@ -16,16 +16,27 @@ class SimpleField extends Field{
 		$this->data['fields'] = array();
 		
 		/*mangle the results so that they can be easily rendered*/
+		
+		$this->data['fields'][$name] = array();
+		$this->data['fields'][$name]['values'] = array();
+		
 		if(isset($results[0])){
-			foreach($results as $row) {
-	           	$keys = array_keys($row);
-	        	$keys = str_replace('?','',$keys);
-	        	array_push($this->data['fields'], array_combine($keys,$row));
+			foreach($results as $row){
+				foreach($row as $key => $value){	
+					$key = str_replace('?','',$key);
+					
+					if(property_exists($value,'label')){
+				       	array_push($this->data['fields'][$name]['values'],$value->label);
+				    } else if(property_exists($value,'uri')){
+				       	array_push($this->data['fields'][$name]['values'],$value->uri);
+				    }
+				     
+				}
 	    	}
 		}
-        
-        $this->data['displayLabel'] = $label;
-        $this->data['name'] = $name;
+       	$this->data['fields'][$name]['displayLabel'] = $label;
+		$this->data['fields'][$name]['name'] = $name;
+		
         $this->name = $name;
 		$this->label = $label;
 		$this->type = $type;
@@ -37,28 +48,29 @@ class SimpleField extends Field{
 
 		require_once 'SimpleField.php';
 		require_once 'FieldNames.php';
-	
-		$predicate_resource = new Resource($this->predicateUri);
-		/*TODO: these literal/resource values shouldn't really be hardcoded*/
-		if($this->type == 'literal'){
-			$value_res_or_literal = new Literal($value);
-		} else if($this->type == 'resource'){
-			$value_res_or_literal = new Resource($value);
-		} 
 		
-		//TODO: need to get the primary topic in here somehow instead of doing .#me poss from session?
+		$predicate_resource = new Resource($this->predicateUri);
 		$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
-		$new_statement = new Statement($primary_topic_resource,$predicate_resource,$value_res_or_literal);	
-					
-		/* Look for values with the appropriate predicate/object */
-		$found_model = $foafData->getModel()->find($primary_topic_resource,$predicate_resource, NULL);
-					
-		/* Remove a matching triple (if there) and add the new one whilst remembering that there can
-		 * be more than one e.g. foafName and we only want to remove the one at the appropriate index.*/ 
-		if(isset($found_model->triples[0])){
-				$foafData->getModel()->remove($found_model->triples[0]);
+		
+		//find existing triples
+		$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
+		
+		//remove existing triples
+		foreach($foundModel->triples as $triple){
+			$foafData->getModel()->remove($triple);
 		}
-		$foafData->getModel()->add($new_statement);
+		
+		//add new triples
+		$valueArray = get_object_vars($value);
+		foreach($valueArray[$this->name]->values as $thisValue){
+			if($this->type == 'literal'){
+				$value_res_or_literal = new Literal($thisValue);
+			} else if($this->type == 'resource'){
+				$value_res_or_literal = new Resource($thisValue);
+			} 		
+			$new_statement = new Statement($primary_topic_resource,$predicate_resource,$value_res_or_literal);	
+			$foafData->getModel()->add($new_statement);
+		}
 	}
 	
 

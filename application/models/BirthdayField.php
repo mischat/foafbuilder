@@ -70,7 +70,7 @@ class BirthdayField extends Field {
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
     public function saveToModel(&$foafData, $value) {
-        print "THis is the value $value\n";
+
         $valueArray = $this->objectToArray($value);
 
         /*find existing triples for foafBirthday and foafDateOfBirth*/
@@ -79,12 +79,10 @@ class BirthdayField extends Field {
 
         /*remove any existing triples*/
         foreach($foundModel1->triples as $triple) {
-            print "ANYTHING HERE !\n";
             $foafData->getModel()->remove($triple);
         }
 
         foreach($foundModel2->triples as $triple) {
-            print "ANYTHING HERE !\n";
             $foafData->getModel()->remove($triple);
         }
 
@@ -101,7 +99,6 @@ class BirthdayField extends Field {
                 $foafDateOfBirthResource = new Resource("http://xmlns.com/foaf/0.1/dateOfBirth");
                 $newFoafDateOfBirth= new Statement(new Resource($foafData->getPrimaryTopic()),$foafDateOfBirthResource,$dateLiteral);
                 $foafData->getModel()->add($newFoafDateOfBirth);
-                echo("year: ".$valueArray['year']);
                 /*if bio style birthday exists already then edit it but if not, don't*/
                 $this->editBioBirthdayIfItExists($foafData,$valueArray['year'],$valueArray['month'],$valueArray['day']);
             }
