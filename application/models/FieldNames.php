@@ -95,10 +95,8 @@ class FieldNames {
 	}
 	
 	private function instantiatePicturesFields(){
-		/*
-		$this->allFieldNames['foafDepiction'] = 
-			new SimpleField('foafDepiction','Image', '?x foaf:depiction ?foafDepiction', 'resource',false,"http://xmlns.com/foaf/0.1/depiction");
-		*/
+		$this->allFieldNames['foafDepiction'] = new DepictionField($this->foafData);
+		$this->allFieldNames['foafImg'] = new ImgField($this->foafData);
 	}
 	
 	private function instantiateAccountsFields(){

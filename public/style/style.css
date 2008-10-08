@@ -366,7 +366,14 @@ width:100%;
 	color: #999999;		
 	height:50px;
 }
-.address{
+.homeAddress{
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:12px;	
+	border-bottom:1px solid #EEEEEE;
+	height:200px;
+	color: #999999;		
+}
+.officeAddress{
 	font-family:Arial,Helvetica,sans-serif;
 	font-size:12px;	
 	border-bottom:1px solid #EEEEEE;

@@ -100,7 +100,7 @@ function saveFoaf(){
 /*Writes FOAF to screen*/
 function writeFoaf() {
         //$.post("/writer/write-Foaf", { }, function(data){alert(data.name);console.log(data.time);},"json");
-	url = document.getElementById('writeUri').value;
+		url = document.getElementById('writeUri').value;
         $.post("/writer/write-Foaf", {uri: url }, function(){},null);
 }
 
@@ -138,7 +138,72 @@ function genericObjectsToDisplay(data){
 	renderSimpleFields(data);
 	renderBirthdayFields(data);
 	renderLocationFields(data);
+	renderDepictionFields(data);
+	renderImgFields(data);
+}
 
+/*Render the image fields*/
+function renderImgFields(data){
+	if(!data || !data.imgFields || typeof(data.imgFields) == 'undefined'){
+		return;
+	}
+	
+	/*build the container*/
+	var name = data.imgFields.name;
+	var label = data.imgFields.displayLabel;
+	var containerElement = createFieldContainer(name, label);
+
+	/*render each individual image element*/	
+	for(image in data.imgFields['images']){
+		renderDepictionElement(data.imgFields['images'][image],image,containerElement);
+	}
+}
+
+/*Render the image fields*/
+function renderDepictionFields(data){
+	if(!data || !data.depictionFields || typeof(data.depictionFields) == 'undefined'){
+		return;
+	}
+	
+	/*build the container*/
+	var name = data.depictionFields.name;
+	var label = data.depictionFields.displayLabel;
+	var containerElement = createFieldContainer(name, label);
+
+	/*render each individual image element*/	
+	for(image in data.depictionFields['images']){
+		renderImgElement(data.depictionFields['images'][image],image,containerElement);
+	}
+}
+
+/*renders a main image element*/
+function renderImgElement(image,count,containerElement){
+
+	/*create the image element*/
+	var imageElement = document.createElement('img');
+	imageElement.setAttribute('src',image['uri']);
+	imageElement.setAttribute('title',image['title']);
+	imageElement.id = 'foafImg_'+count;
+	imageElement.className = 'image';
+	
+	renderRemoveElement();
+	
+	/*tack the image element onto the container*/
+	containerElement.appendChild(imageElement);
+}
+
+/*rnders a depiction element*/
+function renderDepictionElement(image,count,containerElement){
+
+	/*create the image element*/
+	var imageElement = document.createElement('img');
+	imageElement.setAttribute('src',image['uri']);
+	imageElement.setAttribute('title',image['title']);
+	imageElement.id = 'foafDepiction'+count;
+	imageElement.className = 'image';
+	
+	/*tack the image element onto the container*/
+	containerElement.appendChild(imageElement);
 }
 
 /*Render the location map*/
@@ -202,7 +267,7 @@ function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
 function createAddressDiv(title,address,bNodeKey,containerElement, latitude, longitude, prefix){
 
 	/*TODO: need to worry about how we pick all of this stuff up when we save and this method can easily be made shorter*/
-	var locationDiv = createLocationElement(containerElement, bNodeKey,'address');
+	var locationDiv = createLocationElement(containerElement, bNodeKey, prefix+'Address');
 	
 	/*title: e.g. home address, office address etc*/
 	var addressTitleDiv = document.createElement('div');
@@ -218,6 +283,8 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	longitudeDiv.appendChild(document.createTextNode('Longitude: '+longitude));
 	locationDiv.appendChild(longitudeDiv);
 	locationDiv.appendChild(latitudeDiv);
+	latitudeDiv.className = 'latitude';
+	longitudeDiv.className = 'longitude';
 	
 	/*street 1*/
 	var streetLabelDiv = document.createElement('div');
@@ -599,11 +666,7 @@ function displayToObjects(name){
 
 function simpleFieldsDisplayToObjects(){
 	var containerElement = document.getElementById('foafHoldsAccount_container');
-  	
-  	//FIXME: do this if we actually have any simple fields left!!!
-  	
-  	//The code below used to use the arrays that were defined in main.phtml but they aren't there anymore.
-  	//loop through all the arrays (for foafName, foafHomepage etc) defined in the pageData object
+  
 	
 	if(typeof(globalFieldData.fields) != 'undefined' && globalFieldData.fields){
 		for(simpleField in globalFieldData.fields){
@@ -647,16 +710,17 @@ function birthdayDisplayToObjects(){
 function locationDisplayToObjects(){
 	/*TODO: possibly keep addresses, based nears and airports in different places*/
   	var containerElement = document.getElementById('location_container');
-  	
-  	/*an array of keys that have not been removed from the dom tree*/
- 	var doNotCleanArray = new Array();
+ 	
+ 	//clear out the existing 'home' and 'office' properties
+	globalFieldData.locationFields['home'] = new Object();
+	globalFieldData.locationFields['office'] = new Object();
  	
   	for(i=0; i < containerElement.childNodes.length; i++){
   		var locationElement = containerElement.childNodes[i];
-  		
+	
   		if(locationElement.id != 'mapDiv'){
- 
-  			if(locationElement.className == 'location' 
+ 	
+  		    if(locationElement.className == 'location' 
   				&& locationElement.id == 'nearestAirport'){
   				//TODO: process nearest airport stuff here.  Possibly make the nearestAirport/basedNear/Address distinction more clear and consistent
   				nearestAirportDisplayToObjects(locationElement);
@@ -664,10 +728,10 @@ function locationDisplayToObjects(){
   			else if(locationElement.className == 'location'){
   				basedNearDisplayToObjects(locationElement);
   			} 
-  			else if(locationElement.className == 'address'){
-  				/*process location stuff*/
-  				//TODO: could do with a bit less hardcoding here
+  			else if(locationElement.className == 'homeAddress'){
   				addressDisplayToObjects(locationElement,'home');
+  			}
+  			else if(locationElement.className == 'officeAddress'){
   				addressDisplayToObjects(locationElement,'office');
   			}
   		}
@@ -712,28 +776,44 @@ function basedNearDisplayToObjects(locationElement){
 
 /*copies values from display for an address of type prefix (e.g. office, home) into the globalFieldData object*/
 function addressDisplayToObjects(locationElement,prefix){
-		if(globalFieldData.locationFields[prefix][locationElement.id]){
-					for(j=0; j < locationElement.childNodes.length; j++){
-						if(locationElement.childNodes[j].id == 'street'){
-							globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street'] = locationElement.childNodes[j].value;
-						} 
-						if(locationElement.childNodes[j].id == 'street2'){
-							globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street2'] = locationElement.childNodes[j].value;
-						} 
-						if(locationElement.childNodes[j].id == 'street3'){
-							globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street3'] = locationElement.childNodes[j].value;
-						} 
-						if(locationElement.childNodes[j].id == 'city'){
-							globalFieldData.locationFields[prefix][locationElement.id][prefix+'City'] = locationElement.childNodes[j].value;
-						}
-						if(locationElement.childNodes[j].id == 'country'){
-							globalFieldData.locationFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
-						}
-						if(locationElement.childNodes[j].id == 'postalCode'){
-							globalFieldData.locationFields[prefix][locationElement.id][prefix+'PostalCode'] = locationElement.childNodes[j].value;
-						}  
-					}
-  				}
+
+	alert(prefix+"  "+locationElement.id);
+	//create a new array for this particular address
+	globalFieldData.locationFields[prefix][locationElement.id] = new Object();
+		
+	for(j=0; j < locationElement.childNodes.length; j++){
+		
+			/*address*/
+			if(locationElement.childNodes[j].id == 'street'){
+				globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street'] = locationElement.childNodes[j].value;
+			} 
+			if(locationElement.childNodes[j].id == 'street2'){
+				globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street2'] = locationElement.childNodes[j].value;
+			} 
+			if(locationElement.childNodes[j].id == 'street3'){
+				globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street3'] = locationElement.childNodes[j].value;
+			} 
+			if(locationElement.childNodes[j].id == 'city'){
+				globalFieldData.locationFields[prefix][locationElement.id][prefix+'City'] = locationElement.childNodes[j].value;
+			}
+			if(locationElement.childNodes[j].id == 'country'){
+				globalFieldData.locationFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
+			}
+			if(locationElement.childNodes[j].id == 'postalCode'){
+				globalFieldData.locationFields[prefix][locationElement.id][prefix+'PostalCode'] = locationElement.childNodes[j].value;
+			} 
+			
+			/*latitude and longitude*/
+			if((locationElement.childNodes[j].className == 'latitude' || locationElement.childNodes[j].className == 'longitude')
+			&& locationElement.childNodes[j].childNodes[0] && locationElement.childNodes[j].childNodes[0].nodeValue){
+			
+				var coordArray = locationElement.childNodes[j].childNodes[0].nodeValue.split(' ');
+
+				if(typeof(coordArray[1]) != 'undefined' && coordArray[1]){
+					globalFieldData.locationFields[prefix][locationElement.id][locationElement.childNodes[j].className] = coordArray[1];
+				}
+			}
+		} 
 }	
 
 function accountsDisplayToObjects(){

@@ -135,7 +135,7 @@ class LocationField extends Field {
 		$doNotCleanArray = array();
 		
 		foreach($address as $bNodeName => $value){
-			
+
 			$this->removeExistingAddressTriples(&$foafData,$bNodeName,$type);
 			
 	 		/*check whether we've already created this bnode or not*/
@@ -168,7 +168,7 @@ class LocationField extends Field {
 		}	
 		if($type == 'home'){
 			$this->cleanHomeAddressTriples(&$foafData,&$doNotCleanArray,$type);
-		} else {
+		} else {			
 			$this->cleanOfficeAddressTriples(&$foafData,&$doNotCleanArray,$type);
 		}
 		/*so that we can keep track*/
@@ -194,29 +194,35 @@ class LocationField extends Field {
     }
     
     private function cleanOfficeAddressTriples($foafData,$doNotCleanArray){	
-    	/*clean out all home/office addresses that we haven't edited*/
+    	
+		/*clean out all home/office addresses that we haven't edited*/
 		$allOffices = $foafData->getModel()->find(new Resource($foafData->getPrimaryTopic()), new Resource('http://www.w3.org/2000/10/swap/pim/contact#office'), NULL);
+		
 		foreach($allOffices->triples as $triple){
 			if(!$doNotCleanArray[$triple->obj->uri]){
+				$this->removeExistingAddressTriples(&$foafData,$triple->obj->uri,'office');
 				$foafData->getModel()->remove($triple);
 			}
 		}
     }
     private function cleanHomeAddressTriples($foafData,$doNotCleanArray){
+		
 		/*clean out all home/office addresses that we haven't edited*/
     	$allHomes = $foafData->getModel()->find(new Resource($foafData->getPrimaryTopic()), new Resource('http://www.w3.org/2000/10/swap/pim/contact#home'), NULL);
-		foreach($allHomes->triples as $triple){
+		
+    	foreach($allHomes->triples as $triple){
 			if(!$doNotCleanArray[$triple->obj->uri]){
+				$this->removeExistingAddressTriples(&$foafData,$triple->obj->uri,'home');
 				$foafData->getModel()->remove($triple);
 			}
 		}
     }
 	
     private function addNewAddressTriples($foafData,$homeBnode,$value,$doNotCleanArray,$type){
- 	
+    	
     	$addressBnode = Utils::GenerateUniqueBnode($foafData->getModel());
 		$addressStatement = new Statement($homeBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#address'),$addressBnode);
-		$homeLocationStatement = new Statement($homeBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#'.$type),new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#ContactLocation"));
+		$homeLocationStatement = new Statement($homeBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#ContactLocation"));
 			
 		
 		$foafData->getModel()->add($addressStatement);
@@ -228,7 +234,6 @@ class LocationField extends Field {
 		} else {
 			$this->addHomeAddressTriples($value,&$foafData,$addressBnode);
 		}
-
 			
 		if(property_exists($value,'latitude') && $value->latitude && property_exists($value,'latitude') && $value->latitude){
 			$longStatement = new Statement($homeBnode,new Resource('http://www.w3.org/2003/01/geo/wgs84_pos#long'),new Literal($value->longitude));
@@ -309,7 +314,7 @@ class LocationField extends Field {
     }
     
     private function removeExistingAddressTriples($foafData,$bNodeName){
-    		
+    		//XXX FIXME : it is to do with bnodes replacing other ones that have been removed
 			/*find the triples associated with this address*/		
 			$foundStuffToRemove = array();
 			array_push($foundStuffToRemove,$foafData->getModel()->find(new BlankNode($bNodeName), new Resource('http://www.w3.org/2000/10/swap/pim/contact#address'),NULL));		
