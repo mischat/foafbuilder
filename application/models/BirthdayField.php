@@ -108,7 +108,9 @@ class BirthdayField extends Field {
 
     private function isLongDateValid($date) {
         //FIXME: something should go here to make sure the string makes sense.
-        if ($date == null || $date == '') {
+        //TODO MISCHA make this parse date into a format we understand
+        //if ($date == null || $date == '') {
+        if ($date == null) {
             return false;
         } else {
             return true;
