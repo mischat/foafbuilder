@@ -2208,6 +2208,9 @@ function & generateModel($base,$rdfBaseURI = false, $model = false) {
 	// $base is URL or filename
 	$this->model = $model?$model:new MemModel($base);
 
+
+	echo ("MISCHA, the value for base = $base\n");
+
 	$input = fopen($base,'r') or die("RDF Parser: Could not open File: $base. Stopped parsing.");
 	$this->rdf_parser_create( NULL );
 	$this->rdf_set_base($base);
