@@ -35,9 +35,9 @@ class WriterController extends Zend_Controller_Action
 
             $this->view->model->setBaseUri(NULL);
             $result = $this->view->model->find(NULL, NULL, NULL);
-            //echo($result->writeRdfToString());
+            echo($result->writeRdfToString());
             //FIXME: change this back
-            echo($result->writeAsHtmlTable());
+            //echo($result->writeAsHtmlTable());
         } else {
             echo("Nothing to Write, Session is empty");
         }
