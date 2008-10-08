@@ -117,26 +117,22 @@ class Model extends Object
                     include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_GRDDL);
                     $parser = new GRDDLParser();
             }else{
-                // Import Package Syntax
-		echo ("Mischa: this is the filename $filename\n");
-		
+                // TODO MISCHA Import Package Syntax
 		$resp = $this->check_start_of_file($filename);		
 
-		print $resp;
-
-		if ($resp) {
-
-			echo ("Mischa: YAY\n");
-		
-		} else {
-			
-			echo ("Mischa: Booo\n");
-	
+		switch ($resp) {
+			case 'n3':
+				include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_N3);
+				$parser = new N3Parser();
+				break;
+			case 'rdfxml':
+				include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_RDF);
+				$parser = new RdfParser();
+				break;
+			default:
+				include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_RDF);
+		 		$parser = new RdfParser();
 		}
-
-
-                include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_RDF);
-                $parser = new RdfParser();
             }
         };
 
@@ -158,20 +154,23 @@ class Model extends Object
 	* @access	public
 	*/
 	function check_start_of_file($filename) {
-		//TODO MISCHA 
-
 	        $input = fopen($filename,'r') or die("RDF Parser: Could not open File: $filename. Stopped parsing.");
 		$text = fread($input, 1024);
 		fclose($input); 
-		
-		echo ("LAME\n".$text."LAME\n");
 
+		if (preg_match('/^<\?xml/',$text)) {
+			return "rdfxml";
+		} elseif (preg_match('/<(R|r)(D|d)(F|f):(R|r)(D|d)(F|f)/',$text)){
+			return "rdfxml";
+		} elseif (preg_match('/@prefix/',$text)){
+			return "n3";
+		} elseif (preg_match('/# @base/',$text)){
+			return "n3";
+		//TODO MISCHA 
+		} 
 
 		return 0;
 	}
-
-
-
 
 	/**
 	 * This method takes a string conatining data and adds the parsed data to this model.

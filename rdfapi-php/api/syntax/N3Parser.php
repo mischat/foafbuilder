@@ -392,7 +392,8 @@ function str2unicode_nfc($str=""){
     $pre=array_slice($list, 0, $start);
     $post=array_slice($list, $end);
 
-    return array(array_slice($list, $start,$end-$start),$this->array_concat($pre,$post));
+    //MISCHA
+    return array(array_slice($list, (int) $start,(int)$end-(int)$start),$this->array_concat($pre,$post));
   }
 
 
