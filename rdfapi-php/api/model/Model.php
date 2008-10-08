@@ -89,7 +89,7 @@ class Model extends Object
     */
     function load($filename, $type = NULL, $stream=false)
     {
-        if ((isset($type)) && ($type =='n3') OR ($type =='nt')) {
+        if ((isset($type)) && (($type =='n3') OR ($type =='nt') OR ($type == 'ttl'))) {
             // Import Package Syntax
             include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_N3);
             $parser = new N3Parser();
@@ -109,7 +109,7 @@ class Model extends Object
             // create a parser according to the suffix of the filename
             // if there is no suffix assume the file to be XML/RDF
             preg_match("/\.([a-zA-Z0-9_]+)$/", $filename, $suffix);
-            if (isset($suffix[1]) && (strtolower($suffix[1]) == 'n3' OR strtolower($suffix[1]) == 'nt')){
+            if (isset($suffix[1]) && (strtolower($suffix[1]) == 'n3' OR strtolower($suffix[1]) == 'nt' OR strtolower($suffix[1]) == 'ttl') ){
                 // Import Package Syntax
                 include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_N3);
                 $parser = new N3Parser();
