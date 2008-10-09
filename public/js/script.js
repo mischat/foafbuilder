@@ -155,8 +155,11 @@ function renderImgFields(data){
 
 	/*render each individual image element*/	
 	for(image in data.imgFields['images']){
-		renderDepictionElement(data.imgFields['images'][image],image,containerElement);
+		renderImgElement(data.imgFields['images'][image],image,containerElement);
 	}
+	
+	/*render the image menu i.e. upload new, link to an image*/
+	renderImageMenu('foafImg', containerElement);
 }
 
 /*Render the image fields*/
@@ -172,29 +175,40 @@ function renderDepictionFields(data){
 
 	/*render each individual image element*/	
 	for(image in data.depictionFields['images']){
-		renderImgElement(data.depictionFields['images'][image],image,containerElement);
+		renderDepictionElement(data.depictionFields['images'][image],image,containerElement);
 	}
+	
+	/*render the image menu i.e. upload new, link to an image*/
+	renderImageMenu('foafDepiction', containerElement);
 }
 
 /*renders a main image element*/
 function renderImgElement(image,count,containerElement){
-
+	
 	/*create the image element*/
 	var imageElement = document.createElement('img');
 	imageElement.setAttribute('src',image['uri']);
 	imageElement.setAttribute('title',image['title']);
 	imageElement.id = 'foafImg_'+count;
 	imageElement.className = 'image';
-	
-	renderRemoveElement();
-	
+
+	//FIXME: this function is badly named!
+	/*create (and append) the remove link*/
+	createGenericInputElementRemoveLink(imageElement.id, containerElement.id,true);
+		
 	/*tack the image element onto the container*/
 	containerElement.appendChild(imageElement);
+	
+	return imageElement;
 }
 
-/*rnders a depiction element*/
+/*renders a depiction element*/
 function renderDepictionElement(image,count,containerElement){
-
+	
+	//FIXME: stop hardcoding the name in here
+	/*create the image element*/
+	var imageElement = document.createElement(imageElement, containerElement.id);
+	
 	/*create the image element*/
 	var imageElement = document.createElement('img');
 	imageElement.setAttribute('src',image['uri']);
@@ -202,9 +216,109 @@ function renderDepictionElement(image,count,containerElement){
 	imageElement.id = 'foafDepiction'+count;
 	imageElement.className = 'image';
 	
+	//FIXME: this function is badly named!
+	/*create (and append) the remove link*/
+	createGenericInputElementRemoveLink(imageElement.id, containerElement.id,true);
+		
 	/*tack the image element onto the container*/
 	containerElement.appendChild(imageElement);
 }
+
+function renderImageMenu(name,containerElement){
+
+	/*create a div to hold this stuff*/
+	var menuDiv = document.createElement('div');
+	menuDiv.id = 'menuDiv_'+name;
+	menuDiv.className = 'menuDiv';
+	containerElement.appendChild(menuDiv);
+	
+	/*create a form to do the nifty file upload stuff*/
+	var menuForm = document.createElement('form');
+	menuDiv.appendChild(menuForm);
+	menuForm.id = 'menuForm_'+name;
+	menuForm.setAttribute('onsubmit',"return AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_"+name+"})")
+	
+	/*create a form to do the link to image stuff*/
+	var menuFormLink = document.createElement('form');
+	menuDiv.appendChild(menuFormLink);
+	menuFormLink.id = 'menuForm_'+name;	
+	
+	/*create and append upload label*/
+	var uploadLabel = document.createElement('div');
+	uploadLabel.appendChild(document.createTextNode('Upload new'));
+	uploadLabel.className = 'uploadLabel';
+	menuForm.appendChild(uploadLabel);
+	menuForm.setAttribute('method','post');
+	menuForm.setAttribute('action','file/upload-image');
+	menuForm.setAttribute('enctype','multipart/form-data');
+	
+	/*create and append upload input field*/
+	var uploadElement = document.createElement('input');
+	uploadElement.className = 'uploadElement';
+	uploadElement.id = 'uploadElement_'+name;
+	uploadElement.name = 'uploadedImage';
+	uploadElement.setAttribute('type','file');
+	menuForm.appendChild(uploadElement);
+	
+	/*create and append link to image label*/
+	var linkToImageLabel = document.createElement('div');
+	linkToImageLabel.appendChild(document.createTextNode('Link to image'));
+	linkToImageLabel.className = 'linkToImageLabel';
+	menuFormLink.appendChild(linkToImageLabel);
+	
+	/*create and append link to image field*/
+	var linkToImageInput = document.createElement('input');
+	linkToImageInput.className = 'linkToImage';
+	linkToImageInput.name = 'linkToImage_'+name;
+	linkToImageInput.id = 'linkToImage_'+name;
+	linkToImageInput.setAttribute('onchange','previewImage("'+containerElement.id+'","'+name+'",this.value);');
+	menuFormLink.appendChild(linkToImageInput);
+	
+	/*create a submit button and append it*/
+	var submitElement = document.createElement('input');
+	submitElement.className = 'submitElement';
+	submitElement.id = 'submitElement_'+name;
+	submitElement.className = 'imageSubmitButton';
+	submitElement.setAttribute('type','submit');
+	submitElement.setAttribute('value','Add');
+	menuForm.appendChild(submitElement);
+	
+	var submitElementLink = document.createElement('input');
+	submitElementLink.className = 'linkSubmitElement';
+	submitElementLink.id = 'linkSubmitElement_'+name;
+	submitElementLink.className = 'linkImageSubmitButton';
+	submitElementLink.setAttribute('type','button');
+	submitElementLink.setAttribute('value','Add');
+	menuFormLink.appendChild(submitElementLink);
+	
+}
+
+/*preview an image that has been uploaded or entered as a url and save the page*/
+function previewImage(containerElementId,name,source,file){
+	var image = new Array();
+	
+	//XXX need to worry about browser compatibility here
+	//if file is set then we're uploading, hence the file:// prefix
+	if(file){
+		image['uri'] = 'file://'+source;
+	} else {
+		image['uri'] = source;
+	}
+	/*remove the menu div*/	
+	var menuDiv = document.getElementById('menuDiv_'+name);
+	menuDiv.parentNode.removeChild(menuDiv);
+	var containerElement = document.getElementById(containerElementId);
+	
+	/*render the new image element*/
+	renderImgElement(image,containerElement.childNodes.length,document.getElementById(containerElementId));
+	
+	/*reattach the menu div underneath the existing menu*/
+	containerElement.appendChild(menuDiv);
+	
+	/*save the page as is prudent*/
+	saveFoaf();	
+}
+
 
 /*Render the location map*/
 function renderLocationFields(data){
@@ -905,31 +1019,6 @@ function createMapElement(container){
       }
 }
 
-//FIXME: part of the old rendering for simple fields
-/*creates an element for a given field, denoted by name and populates it with the appropriate value*/
-
-/*function createElement(name,value,thisElementCount){
-	//TODO: put some sort of big switch statement
-
-	//create the containing div and label, if it hasn't already been made
-	//TODO: need a more sensible way to decide whether to render these.
-	if(name == 'bioBirthday' || name == 'foafBirthday' || name == 'foafDateOfBirth'){
-		//We only want one birthday field, so create a container called foafDateOfBirth
-		// and act like that's what we're dealing with now.
-		createFirstFieldContainer('foafDateOfBirth');
-		createFoafDateOfBirthElement(name, value, thisElementCount);
-		
-	} else if(name=='foafDepiction'){
-		createFirstFieldContainer(name);
-		createFoafDepictionElement(name, value, thisElementCount);
-		
-	} else {
-		createFirstFieldContainer(name);
-		createGenericInputElement(name, value, thisElementCount);
-		
-	}			
-}*/
-
 /*creates and appends a field container for the given name if it is not already there*/
 function createFieldContainer(name,label){
 	//if(!document.getElementById(name+'_container')){
@@ -1047,7 +1136,7 @@ function createGenericInputElementAboveAddLink(name,thisElementCount,containerId
 }
 
 /*creates a remove link with the removeId being the input element to be removed*/
-function createGenericInputElementRemoveLink(removeId,containerId){
+function createGenericInputElementRemoveLink(removeId,containerId,isImage){
 	
 	/*create remove link and attach it to the container div*/
 	var containerDiv = document.getElementById(containerId);
@@ -1059,17 +1148,26 @@ function createGenericInputElementRemoveLink(removeId,containerId){
 		removeLink.appendChild(document.createTextNode("- Remove"));
 		removeLink.id="_removeLink";
 		removeLink.className="removeLink";
-		removeLink.setAttribute("onclick" , "removeGenericInputElement('"+removeId+"','"+removeDiv.id+"')");
+		if(!isImage){
+			removeLink.setAttribute("onclick" , "removeGenericInputElement('"+removeId+"','"+removeDiv.id+"')");
+		} else {
+			removeLink.setAttribute("onclick" , "removeGenericInputElement('"+removeId+"','"+removeDiv.id+"','true')");
+		}
 		removeDiv.appendChild(removeLink);
 		containerDiv.appendChild(removeDiv);
 	}
 }
 
 /*removes the input element with the given id as well as its corresponding remove element*/
-function removeGenericInputElement(inputIdForRemoval, removeDivId){
+//TODO: this is badly named
+function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
 	/*Get the ids*/
 	var inputElement = document.getElementById(inputIdForRemoval);
 	var removeElement = document.getElementById(removeDivId);
+	if(isImage){
+		var source = inputElement.src;
+		$.post("/file/remove-image", {filename: source}, function(){},null);
+	}
 	
 	/*remove them*/
 	inputElement.parentNode.removeChild(inputElement);
@@ -1195,26 +1293,6 @@ function createGenericHiddenElement(name, value, thisElementCount, contname){
 	
 	return newElement;
 }
-
-//TODO: no longer used (part of old design) but may be handy when reimplementing foafDepiction stuff*/
-/*creates an element for foaf depiction*/
-/*
-function createFoafDepictionElement(name, value, thisElementCount){
-	//create imgElement
-	imgElement = document.createElement('img');
-	imgElement.setAttribute('class','fieldImage');
-	imgElement.src = value;
-
-	//create input Element
-	newElement = document.createElement('input');
-	newElement.id = name+'_'+thisElementCount;
-	newElement.setAttribute('value',value);
-	newElement.setAttribute('class','fieldInput');
-
-	//appendElements as necessary
-	document.getElementById(name+'_container').appendChild(newElement);
-	document.getElementById(name+'_container').appendChild(imgElement);
-}*/
 
 /*renders and attaches a date selector*/
 function createFoafDateOfBirthElement(container, day, month, year){
