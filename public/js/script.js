@@ -137,6 +137,7 @@ function genericObjectsToDisplay(data){
 	renderAccountFields(data);
 	renderSimpleFields(data);
 	renderBirthdayFields(data);
+	renderPhoneFields(data);
 	renderLocationFields(data);
 	renderDepictionFields(data);
 	renderImgFields(data);
@@ -188,7 +189,12 @@ function renderImgElement(image,count,containerElement){
 	/*create the image element*/
 	var imageElement = document.createElement('img');
 	imageElement.setAttribute('src',image['uri']);
-	imageElement.setAttribute('title',image['title']);
+	if(typeof(image['title']) != 'undefined' && image['title']){
+		imageElement.setAttribute('title',image['title']);
+	}
+	if(typeof(image['description']) != 'undefined' && image['description']){
+		imageElement.setAttribute('alt',image['description']);
+	}
 	imageElement.id = 'foafImg_'+count;
 	imageElement.className = 'image';
 
@@ -211,7 +217,12 @@ function renderDepictionElement(image,count,containerElement){
 	/*create the image element*/
 	var imageElement = document.createElement('img');
 	imageElement.setAttribute('src',image['uri']);
-	imageElement.setAttribute('title',image['title']);
+	if(typeof(image['title']) != 'undefined' && image['title']){
+		imageElement.setAttribute('title',image['title']);
+	}
+	if(typeof(image['description']) != 'undefined' && image['description']){
+		imageElement.setAttribute('alt',image['description']);
+	}
 	imageElement.id = 'foafDepiction'+count;
 	imageElement.className = 'image';
 	
@@ -726,7 +737,7 @@ function renderAccountFields(data){
 
 /*renders the appropriate simple fields for the index i in the json data, data with the name name*/
 function renderSimpleFields(data){
-	if(!data || !data.birthdayFields || typeof(data.birthdayFields) == 'undefined'){
+	if(!data || !data.fields || typeof(data.fields) == 'undefined'){
 		return;
 	}
 	
@@ -734,7 +745,7 @@ function renderSimpleFields(data){
 		if(element == 'fields'){
 			for(fieldType in data[element]){
 				var containerElement = createFieldContainer(data[element][fieldType]['name'], data[element][fieldType]['displayLabel']);
-				i=0;
+				var i=0;
 				
 				if(data[element][fieldType]['values'].length != 0){
 					for(item in data[element][fieldType]['values']){
@@ -752,6 +763,31 @@ function renderSimpleFields(data){
 	}	
 }
 
+/*renders the appropriate simple fields for the index i in the json data, data with the name name*/
+function renderPhoneFields(data){
+	if(!data || !data.foafPhoneFields || typeof(data.foafPhoneFields) == 'undefined'){
+		return;
+	}
+	
+	/*build the container*/
+	var name = data.foafPhoneFields.name;
+	var label = data.foafPhoneFields.displayLabel;
+	var containerElement = createFieldContainer(name, label);
+
+	/*render each individual phone element*/	
+	var i =0;
+	if(typeof(data.foafPhoneFields.values) != 'undefined' && data.foafPhoneFields.values){
+		for(phoneNumber in data.foafPhoneFields.values){
+			createGenericInputElement(name, data.foafPhoneFields[phoneNumber], i);	
+			i++;
+		}
+	}
+	
+	/*create an add link*/
+	createGenericAddElement(containerElement,name,label);
+
+}
+
 /*populates the triples objects with stuff from the actual display (i.e. what the user has changed)*/
 //TODO: datatypes/language
 function displayToObjects(name){  
@@ -762,6 +798,7 @@ function displayToObjects(name){
 			break;
 		case 'load-contact-details':
 			locationDisplayToObjects();
+			simpleFieldsDisplayToObjects();
 			break;
 		case 'load-accounts':
 			accountsDisplayToObjects();
