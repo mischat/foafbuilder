@@ -36,33 +36,36 @@ class BirthdayField extends Field {
 
             $this->data['birthdayFields'] = array();
             $this->data['birthdayFields'] = array();
-            
-            /*mangle the results so that they can be easily rendered*/
-            foreach ($results as $row) {	
-                if (isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth'])) {
-                	$birthdayArray = split("-",$row['?foafDateOfBirth']->label);
-                    $this->data['birthdayFields']['day']= $birthdayArray[2];
-                    $this->data['birthdayFields']['month']= $birthdayArray[1];
-                    $this->data['birthdayFields']['year']= $birthdayArray[0];
-                }
-                if (isset($row['?foafBirthday']) && $this->isShortDateValid($row['?foafBirthday'])) {
-                    $birthdayArray = split("-",$row['?foafBirthday']->label);
-                    $this->data['birthdayFields']['day']= $birthdayArray[1];
-                    $this->data['birthdayFields']['month']= $birthdayArray[0];
-                }
-                if (isset($row['?bioBirthday']) && $this->isLongDateValid($row['?bioBirthday'])) {
-                    $birthdayArray = split("-",$row['?bioBirthday']->label);
-                    $this->data['birthdayFields']['day']= $birthdayArray[2];
-                    $this->data['birthdayFields']['month']= $birthdayArray[1];
-                    $this->data['birthdayFields']['year']= $birthdayArray[0];
-                }
-            }	
 
-            //TODO: perhaps it is better to keep all the display stuff in the javascript?
-            $this->data['birthdayFields']['displayLabel'] = 'Birthday';
-            $this->data['birthdayFields']['name'] = 'birthday';
-            $this->name = 'birthday';
-            $this->label = 'Birthday';
+//            //Check if results is not empty
+              if (!(empty($results))) {
+                /*mangle the results so that they can be easily rendered*/
+                foreach ($results as $row) {	
+                    if (isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth'])) {
+                            $birthdayArray = split("-",$row['?foafDateOfBirth']->label);
+                        $this->data['birthdayFields']['day']= $birthdayArray[2];
+                        $this->data['birthdayFields']['month']= $birthdayArray[1];
+                        $this->data['birthdayFields']['year']= $birthdayArray[0];
+                    }
+                    if (isset($row['?foafBirthday']) && $this->isShortDateValid($row['?foafBirthday'])) {
+                        $birthdayArray = split("-",$row['?foafBirthday']->label);
+                        $this->data['birthdayFields']['day']= $birthdayArray[1];
+                        $this->data['birthdayFields']['month']= $birthdayArray[0];
+                    }
+                    if (isset($row['?bioBirthday']) && $this->isLongDateValid($row['?bioBirthday'])) {
+                        $birthdayArray = split("-",$row['?bioBirthday']->label);
+                        $this->data['birthdayFields']['day']= $birthdayArray[2];
+                        $this->data['birthdayFields']['month']= $birthdayArray[1];
+                        $this->data['birthdayFields']['year']= $birthdayArray[0];
+                    }
+                }	
+            }
+                //TODO: perhaps it is better to keep all the display stuff in the javascript?
+                $this->data['birthdayFields']['displayLabel'] = 'Birthday';
+                $this->data['birthdayFields']['name'] = 'birthday';
+                $this->name = 'birthday';
+                $this->label = 'Birthday';
+
         } else {
             return 0;
         }

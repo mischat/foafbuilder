@@ -73,6 +73,7 @@ class GRDDLParser extends Object{
 	* @access private
 	*/
 	function _getStyles(){
+
 		$link=$this->domdoc->getElementsByTagName('link');
 		$i=0;
 		while($link->item($i)!=''){
@@ -88,7 +89,10 @@ class GRDDLParser extends Object{
 				}
 			}
 			$i++;
-		}
+		} 
+		//TODO MISCHA Injected all of the xsl files which RAPTOR uses when trying to grddl DanC's homepage
+		$this->stylelink[]="http://purl.org/NET/erdf/extract-rdf.xsl";
+		$this->stylelink[]="http://www.w3.org/2006/vcard/hcard2rdf.xsl";
 	}
 	
 	/*
@@ -106,6 +110,7 @@ class GRDDLParser extends Object{
 		include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_RDF);
 		$pars=new RdfParser();
 		foreach($this->stylelink as $key => $value){
+			error_log("[foaf_editor] XSL 4 grddl'ing $value");
 			$xsl = new DomDocument;
 			$xsl->load($value);
 			$proc->importStyleSheet($xsl);

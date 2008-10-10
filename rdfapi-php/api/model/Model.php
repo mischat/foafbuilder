@@ -109,6 +109,7 @@ class Model extends Object
             // create a parser according to the suffix of the filename
             // if there is no suffix assume the file to be XML/RDF
             preg_match("/\.([a-zA-Z0-9_]+)$/", $filename, $suffix);
+
             if (isset($suffix[1]) && (strtolower($suffix[1]) == 'n3' OR strtolower($suffix[1]) == 'nt' OR strtolower($suffix[1]) == 'ttl') ){
                 // Import Package Syntax
                 include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_N3);
@@ -119,6 +120,7 @@ class Model extends Object
             }else{
                 // TODO MISCHA Import Package Syntax
 		$resp = $this->check_start_of_file($filename);		
+		error_log("[foaf_editor] File type guess: $resp");
 
 		switch ($resp) {
 			case 'n3':
@@ -128,6 +130,10 @@ class Model extends Object
 			case 'rdfxml':
 				include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_RDF);
 				$parser = new RdfParser();
+				break;
+			case 'grddl':
+				include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_GRDDL);
+				$parser = new GRDDLParser();
 				break;
 			default:
 				include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_RDF);
@@ -166,6 +172,8 @@ class Model extends Object
 			return "n3";
 		} elseif (preg_match('/# @base/',$text)){
 			return "n3";
+		} elseif (preg_match('/<link\s*rel="transformation"/',$text)){
+			return "grddl";
 		//TODO MISCHA 
 		} 
 
