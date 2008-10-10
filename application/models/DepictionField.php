@@ -33,8 +33,8 @@ class DepictionField extends Field {
 
             $results = $foafData->getModel()->SparqlQuery($queryString);		
 
-            $this->data['depictionFields'] = array();
-            $this->data['depictionFields']['images'] = array();
+            $this->data['foafDepictionFields'] = array();
+            $this->data['foafDepictionFields']['images'] = array();
             
             /*mangle the results so that they can be easily rendered*/
             foreach ($results as $row) {	
@@ -48,15 +48,15 @@ class DepictionField extends Field {
                 	if(isset($row['?dcDescription']) && $row['?dcDescription'] && $row['?dcDescription']->label){
                 		$thisImage['description'] = $row['?dcDescription']->label;
                 	}
-                	array_push($this->data['depictionFields']['images'],$thisImage);
+                	array_push($this->data['foafDepictionFields']['images'],$thisImage);
                 }
             }	
                    
             //TODO: perhaps it is better to keep all the display stuff in the javascript?
-            $this->data['depictionFields']['displayLabel'] = 'Images';
-            $this->data['depictionFields']['name'] = 'foafDepiction';
-            $this->name = 'birthday';
-            $this->label = 'Birthday';
+            $this->data['foafDepictionFields']['displayLabel'] = 'Images';
+            $this->data['foafDepictionFields']['name'] = 'foafDepiction';
+            $this->name = 'foafDepiction';
+            $this->label = 'Images';
         } else {
             return 0;
         }
@@ -64,8 +64,52 @@ class DepictionField extends Field {
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
     public function saveToModel(&$foafData, $value) {
-		echo("SAVING DEPICTION IMAGES");
-    }
+		var_dump($value);
+		
+		if(!property_exists($value,'images') || !$value->images || !isset($value->images[0])){
+			return;
+		}
+		
+		/*array to keep any images that we should not remove in*/
+		$doNotCleanArray = array();
+		
+		foreach($value->images as $image){
+			
+			/*check if the image already exists in the model*/
+			$foundModel = $foafData->getModel()->find(new Resource($foafData->getPrimaryTopic()), new Resource('http://xmlns.com/foaf/0.1/depiction'),new Resource($image->uri));
+			
+			if($foundModel && property_exists($foundModel, 'triples') && isset($foundModel->triples[0])){
+				/*depiction triple already exists in model*/
+				foreach($foundModel->triples as $triple){
+					
+					/*find titles and remove them*/
+					$foundTitles = $foafData->getModel()->find($triple->obj,'http://purl.org/dc/elements/1.1/title',NULL);
+					if($foundTitles && property_exists($foundTitles, 'triples') && isset($foundTitles->triples[0])){
+						foreach($foundTitles->triples as $title){
+							$foafData->remove($title);
+						}
+					}
+					
+					/*find descriptions and remove them*/
+					$foundDescriptions = $foafData->getModel()->find($triple->obj,'http://purl.org/dc/elements/1.1/description',NULL);
+					if($foundDescriptions && property_exists($foundDescriptions, 'triples') && isset($foundDescriptions->triples[0])){
+						foreach($foundDescriptions->triples as $description){
+							$foafData->remove($description);
+						}
+					}
+				}
+			} else {
+				/*depiction triple doesn't already exist in model so we need to create another one and add it*/	
+				$depictionTriple = new Statement(new Resource($foafData->getPrimaryTopic()), new Resource('http://xmlns.com/foaf/0.1/depiction'),new Resource($image->uri));
+				$foaf->getModel()->add($depictionTriple);
+			}
+			
+			//so that we don't clean out the images that we want to keep
+			array_push($doNotCleanArray,$image->uri);
+		}
+		
+		
+	}
 
     private function isImageUrlValid($url) {
         //FIXME: something should go here to make sure the string makes sense.

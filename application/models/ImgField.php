@@ -33,21 +33,21 @@ class ImgField extends Field {
 
             $results = $foafData->getModel()->SparqlQuery($queryString);		
 
-            $this->data['imgFields'] = array();
-            $this->data['imgFields']['images'] = array();
+            $this->data['foafImgFields'] = array();
+            $this->data['foafImgFields']['images'] = array();
             
             /*mangle the results so that they can be easily rendered*/
             foreach ($results as $row) {	
                 if (isset($row['?foafImg']) && $this->isImageUrlValid($row['?foafImg'])) {
                 	$thisImage = array();
                 	$thisImage['uri'] = $row['?foafImg']->uri;
-                	array_push($this->data['imgFields']['images'],$thisImage);
+                	array_push($this->data['foafImgFields']['images'],$thisImage);
                 }
             }	
                    
             //TODO: perhaps it is better to keep all the display stuff in the javascript?
-            $this->data['imgFields']['displayLabel'] = 'Secondary Images';
-            $this->data['imgFields']['name'] = 'foafImg';
+            $this->data['foafImgFields']['displayLabel'] = 'Secondary Images';
+            $this->data['foafImgFields']['name'] = 'foafImg';
             $this->name = 'foafImg';
             $this->label = 'Secondary Images';
         } else {

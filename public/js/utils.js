@@ -11,7 +11,7 @@ function startCallback() {
 }
 /*this callback is currently only used for the image upload*/
 function uploadCallback_foafDepiction(response) {
-	if(response){
+	if(response && response != '0'){
 		previewImage('foafDepiction_container','foafDepiction',response);
 		
 	} else {
