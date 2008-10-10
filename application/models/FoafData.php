@@ -40,11 +40,14 @@ class FoafData {
             $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
             $result = $model->sparqlQuery($query);
 
+            //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
             //TODO must make sure that we handle having a non "#me" foaf:Person URI
-            $oldUri = $result[0]['?prim']->uri;
-
-            if (!$oldUri) {
-                echo ("No primarytopic set in foaf file!");
+            if (isset($result[0]['?prim'])) {
+                $oldUri = $result[0]['?prim']->uri;
+                error_log("[foaf_editor] PrimaryTopic: $oldUri");
+            } else {
+                //TODO MISCHA should do some error reporting here
+                error_log("[foaf_editor] Error no primaryTopic");
             }
 
             $oldUriRes = new Resource($oldUri);
@@ -68,6 +71,7 @@ class FoafData {
         } else {
             //FIXME: sort this out so it isn't an echo
             //echo("Something went wrong, there's no URI!");
+            error_log("Something very lame\n");
             return 0;
         }
     }
