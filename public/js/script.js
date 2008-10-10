@@ -144,18 +144,18 @@ function genericObjectsToDisplay(data){
 
 /*Render the image fields*/
 function renderImgFields(data){
-	if(!data || !data.imgFields || typeof(data.imgFields) == 'undefined'){
+	if(!data || !data.foafImgFields || typeof(data.foafImgFields) == 'undefined'){
 		return;
 	}
 	
 	/*build the container*/
-	var name = data.imgFields.name;
-	var label = data.imgFields.displayLabel;
+	var name = data.foafImgFields.name;
+	var label = data.foafImgFields.displayLabel;
 	var containerElement = createFieldContainer(name, label);
 
 	/*render each individual image element*/	
-	for(image in data.imgFields['images']){
-		renderImgElement(data.imgFields['images'][image],image,containerElement);
+	for(image in data.foafImgFields['images']){
+		renderImgElement(data.foafImgFields['images'][image],image,containerElement);
 	}
 	
 	/*render the image menu i.e. upload new, link to an image*/
@@ -767,6 +767,10 @@ function displayToObjects(name){
 		case 'load-accounts':
 			accountsDisplayToObjects();
 			break;
+		case 'load-pictures':
+			depictionDisplayToObjects();
+			//imgDisplayToObjects();
+			break;
 		default:
 			return null;
 			break;
@@ -778,9 +782,46 @@ function displayToObjects(name){
 	
 }
 
+function depictionDisplayToObjects(){
+	//TODO: make sure we don't lose existing things like the description etc in this process.
+	var containerElement = document.getElementById('foafDepiction_container');
+	
+	if(containerElement && typeof(globalFieldData.foafDepictionFields != 'undefined') && globalFieldData.foafDepictionFields){
+		if(typeof(globalFieldData.foafDepictionFields.images) != 'undefined' &&
+			globalFieldData.foafDepictionFields.images){
+		
+			/*remove all existing images in globalFieldData*/		
+			globalFieldData.foafDepictionFields.images = new Array();
+			
+			/*add the elements that are present in the display again*/
+			for(i=0 ; i <containerElement.childNodes.length ; i++){
+				
+				var element = containerElement.childNodes[i];
+					
+				/*take the various attributes of the image tag and add them to the globalFieldData object*/
+				if(element.className == 'image'){	
+				
+					var thisImageArray = new Object();
+										
+					if(typeof(element.src) != 'undefined' && element.src){
+						thisImageArray.uri = element.src;
+					}
+					if(typeof(element.title) != 'undefined' && element.title){
+						thisImageArray.title= element.title;
+					}
+					//TODO: need to actually set alt when the image is rendered
+					if(typeof(element.alt) != 'undefinied' && element.alt){
+						thisImageArray.description = element.alt;
+					}
+					globalFieldData.foafDepictionFields.images.push(thisImageArray);
+				}//end if
+			}//end for	
+		}//end if	
+	}//end if
+}
+
 function simpleFieldsDisplayToObjects(){
 	var containerElement = document.getElementById('foafHoldsAccount_container');
-  
 	
 	if(typeof(globalFieldData.fields) != 'undefined' && globalFieldData.fields){
 		for(simpleField in globalFieldData.fields){
@@ -801,10 +842,7 @@ function simpleFieldsDisplayToObjects(){
 				}
 			} 
 		}
-	}
-	
-	
-	
+	}	
 }
 
 function birthdayDisplayToObjects(){
@@ -891,7 +929,6 @@ function basedNearDisplayToObjects(locationElement){
 /*copies values from display for an address of type prefix (e.g. office, home) into the globalFieldData object*/
 function addressDisplayToObjects(locationElement,prefix){
 
-	alert(prefix+"  "+locationElement.id);
 	//create a new array for this particular address
 	globalFieldData.locationFields[prefix][locationElement.id] = new Object();
 		

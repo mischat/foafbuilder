@@ -15,16 +15,49 @@ class FileController extends Zend_Controller_Action {
     	 * We absolutely must have some validation here and we ought to store paths etc in some sensible place.
     	 * which will depend on the oauth server.
     	 */
-		
+    	$this->view->isSuccess = 0;
+		$maximumSizeInBytes = 500000;
         $foafData = FoafData::getFromSession();	
-        
+        $allowedMimeTypesArray = array('jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif', 'png' => 'image/png');
+        		
     	if($foafData){
     	   $dirname = "/projects/foafeditor-dev/public/images/".substr($foafData->getPrimaryTopic(),-32);
-       
+
+    	   /*create a new directory for this person if necessary*/
     	   if(!file_exists($dirname)){
     	   		mkdir($dirname);			
     	   } 
-    	   $new_filename = sha1(microtime()."_".rand(0,99999)).".gif";
+    	
+    	   /*check that the uploaded file has a name*/
+    	   if(!isset($_FILES['uploadedImage']['name']) || !$_FILES['uploadedImage']['name']){
+    	   		return;
+    	   }
+    	    
+    	   /*check that there wasn't an error uploading the file*/
+    	   if($_FILES["uploadedImage"]["error"]){
+    	   		return;
+    	   }
+    	   
+    	   /*check that the file doesn't exceed the maximum size*/
+    	   if($_FILES["uploadedImage"]["size"] > $maximumSizeInBytes){
+    	   		return;   	
+    	   }
+    	   
+    	   /*check that a mime type is set*/
+    	   if(!$_FILES["uploadedImage"]["type"]){
+    	   		return;
+    	   }
+    	   
+    	   $existingFilename = $_FILES['uploadedImage']['name'];
+    	   $fileExtension = substr($existingFilename, strrpos($existingFilename, '.') + 1);
+    	   
+    	   /*check that the file has an allowed mimetype*/
+    	   if (!$fileExtension || !isset($allowedMimeTypesArray[$fileExtension]) 
+    	   		|| $allowedMimeTypesArray[$fileExtension] != $_FILES["uploadedImage"]["type"]){
+    	   		return;
+    	   }
+    	   
+    	   $new_filename = sha1(microtime()."_".rand(0,99999)).".gif";   
     	   $new_name = $dirname."/".$new_filename;
     	   $url = "/images/".substr($foafData->getPrimaryTopic(),-32)."/".$new_filename;
     	   
