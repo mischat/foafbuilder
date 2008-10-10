@@ -164,18 +164,18 @@ function renderImgFields(data){
 
 /*Render the image fields*/
 function renderDepictionFields(data){
-	if(!data || !data.depictionFields || typeof(data.depictionFields) == 'undefined'){
+	if(!data || !data.foafDepictionFields || typeof(data.foafDepictionFields) == 'undefined'){
 		return;
 	}
 	
 	/*build the container*/
-	var name = data.depictionFields.name;
-	var label = data.depictionFields.displayLabel;
+	var name = data.foafDepictionFields.name;
+	var label = data.foafDepictionFields.displayLabel;
 	var containerElement = createFieldContainer(name, label);
 
 	/*render each individual image element*/	
-	for(image in data.depictionFields['images']){
-		renderDepictionElement(data.depictionFields['images'][image],image,containerElement);
+	for(image in data.foafDepictionFields['images']){
+		renderDepictionElement(data.foafDepictionFields['images'][image],image,containerElement);
 	}
 	
 	/*render the image menu i.e. upload new, link to an image*/
@@ -205,7 +205,6 @@ function renderImgElement(image,count,containerElement){
 /*renders a depiction element*/
 function renderDepictionElement(image,count,containerElement){
 	
-	//FIXME: stop hardcoding the name in here
 	/*create the image element*/
 	var imageElement = document.createElement(imageElement, containerElement.id);
 	
@@ -769,7 +768,7 @@ function displayToObjects(name){
 			break;
 		case 'load-pictures':
 			depictionDisplayToObjects();
-			//imgDisplayToObjects();
+			imgDisplayToObjects();
 			break;
 		default:
 			return null;
@@ -782,13 +781,12 @@ function displayToObjects(name){
 	
 }
 
+/*this is more or less identical to imgDisplayToObjects which is possibly not a good thing*/
 function depictionDisplayToObjects(){
-	//TODO: make sure we don't lose existing things like the description etc in this process.
 	var containerElement = document.getElementById('foafDepiction_container');
 	
 	if(containerElement && typeof(globalFieldData.foafDepictionFields != 'undefined') && globalFieldData.foafDepictionFields){
-		if(typeof(globalFieldData.foafDepictionFields.images) != 'undefined' &&
-			globalFieldData.foafDepictionFields.images){
+		if(typeof(globalFieldData.foafDepictionFields.images) != 'undefined'){
 		
 			/*remove all existing images in globalFieldData*/		
 			globalFieldData.foafDepictionFields.images = new Array();
@@ -814,6 +812,41 @@ function depictionDisplayToObjects(){
 						thisImageArray.description = element.alt;
 					}
 					globalFieldData.foafDepictionFields.images.push(thisImageArray);
+				}//end if
+			}//end for	
+		}//end if	
+	}//end if
+}
+
+function imgDisplayToObjects(){
+	var containerElement = document.getElementById('foafImg_container');
+	
+	if(containerElement && typeof(globalFieldData.foafImgFields != 'undefined') && globalFieldData.foafImgFields){
+		if(typeof(globalFieldData.foafImgFields.images) != 'undefined'){
+		
+			/*remove all existing images in globalFieldData*/		
+			globalFieldData.foafImgFields.images = new Array();
+			
+			/*add the elements that are present in the display again*/
+			for(i=0 ; i <containerElement.childNodes.length ; i++){
+				
+				var element = containerElement.childNodes[i];
+					
+				/*take the various attributes of the image tag and add them to the globalFieldData object*/
+				if(element.className == 'image'){	
+					var thisImageArray = new Object();
+										
+					if(typeof(element.src) != 'undefined' && element.src){
+						thisImageArray.uri = element.src;
+					}
+					if(typeof(element.title) != 'undefined' && element.title){
+						thisImageArray.title= element.title;
+					}
+					//TODO: need to actually set alt when the image is rendered
+					if(typeof(element.alt) != 'undefinied' && element.alt){
+						thisImageArray.description = element.alt;
+					}
+					globalFieldData.foafImgFields.images.push(thisImageArray);
 				}//end if
 			}//end for	
 		}//end if	
@@ -1203,7 +1236,7 @@ function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
 	var removeElement = document.getElementById(removeDivId);
 	if(isImage){
 		var source = inputElement.src;
-		$.post("/file/remove-image", {filename: source}, function(){},null);
+		$.post("/file/remove-image", {filename: source}, function(){saveFoaf();},null);
 	}
 	
 	/*remove them*/

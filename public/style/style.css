@@ -435,3 +435,23 @@ width:100%;
 	margin-top:5px;
 	width:100px;	
 }
+/*pictures*/
+.uploadLabel{
+	font-size: 12px;
+	font-family:Arial,Helvetica,sans-serif;
+	color:#999999;
+}
+.linkToImageLabel{
+	font-size: 12px;
+	font-family:Arial,Helvetica,sans-serif;
+	color:#999999;
+}
+.image{
+	width:200px;
+	height:175px;
+	margin-bottom:10px;	
+	border:2px solid #999999;
+}
+.menuDiv{
+	margin-top:20px;
+}

@@ -37,20 +37,22 @@ class DepictionField extends Field {
             $this->data['foafDepictionFields']['images'] = array();
             
             /*mangle the results so that they can be easily rendered*/
-            foreach ($results as $row) {	
-             	if (isset($row['?foafDepiction']) && $this->isImageUrlValid($row['?foafDepiction'])) {
-                	$thisImage = array();
-                	$thisImage['uri'] = $row['?foafDepiction']->uri;
-                	
-                	if(isset($row['?dcTitle']) && $row['?dcTitle'] && $row['?dcTitle']->label){
-                		$thisImage['title'] = $row['?dcTitle']->label;
-                	} 
-                	if(isset($row['?dcDescription']) && $row['?dcDescription'] && $row['?dcDescription']->label){
-                		$thisImage['description'] = $row['?dcDescription']->label;
-                	}
-                	array_push($this->data['foafDepictionFields']['images'],$thisImage);
-                }
-            }	
+            if($results && isset($results[0]) && isset($results[0]) && $results[0]){
+	            foreach ($results as $row) {	
+	             	if (isset($row['?foafDepiction']) && $this->isImageUrlValid($row['?foafDepiction'])) {
+	                	$thisImage = array();
+	                	$thisImage['uri'] = $row['?foafDepiction']->uri;
+	                	
+	                	if(isset($row['?dcTitle']) && $row['?dcTitle'] && $row['?dcTitle']->label){
+	                		$thisImage['title'] = $row['?dcTitle']->label;
+	                	} 
+	                	if(isset($row['?dcDescription']) && $row['?dcDescription'] && $row['?dcDescription']->label){
+	                		$thisImage['description'] = $row['?dcDescription']->label;
+	                	}
+	                	array_push($this->data['foafDepictionFields']['images'],$thisImage);
+	                }
+	            }	
+            }
                    
             //TODO: perhaps it is better to keep all the display stuff in the javascript?
             $this->data['foafDepictionFields']['displayLabel'] = 'Images';
@@ -64,51 +66,79 @@ class DepictionField extends Field {
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
     public function saveToModel(&$foafData, $value) {
-		var_dump($value);
 		
-		if(!property_exists($value,'images') || !$value->images || !isset($value->images[0])){
+		if(!property_exists($value,'images')){
 			return;
 		}
 		
 		/*array to keep any images that we should not remove in*/
 		$doNotCleanArray = array();
 		
-		foreach($value->images as $image){
-			
-			/*check if the image already exists in the model*/
-			$foundModel = $foafData->getModel()->find(new Resource($foafData->getPrimaryTopic()), new Resource('http://xmlns.com/foaf/0.1/depiction'),new Resource($image->uri));
-			
-			if($foundModel && property_exists($foundModel, 'triples') && isset($foundModel->triples[0])){
-				/*depiction triple already exists in model*/
-				foreach($foundModel->triples as $triple){
-					
-					/*find titles and remove them*/
-					$foundTitles = $foafData->getModel()->find($triple->obj,'http://purl.org/dc/elements/1.1/title',NULL);
-					if($foundTitles && property_exists($foundTitles, 'triples') && isset($foundTitles->triples[0])){
-						foreach($foundTitles->triples as $title){
-							$foafData->remove($title);
+		if(isset($value->images[0])){
+			foreach($value->images as $image){
+				
+				/*check if the image already exists in the model*/
+				$foundModel = $foafData->getModel()->find(new Resource($foafData->getPrimaryTopic()), new Resource('http://xmlns.com/foaf/0.1/depiction'),new Resource($image->uri));
+				
+				if($foundModel && property_exists($foundModel, 'triples') && isset($foundModel->triples[0])){
+					/*depiction triple already exists in model*/
+					foreach($foundModel->triples as $triple){
+	
+						/*find titles and remove them*/
+						$foundTitles = $foafData->getModel()->find($triple->obj,new Resource('http://purl.org/dc/elements/1.1/title'),NULL);
+						if($foundTitles && property_exists($foundTitles, 'triples') && isset($foundTitles->triples[0])){
+							foreach($foundTitles->triples as $title){
+								$foafData->getModel()->remove($title);
+							}
+						}
+	
+						/*find descriptions and remove them*/
+						$foundDescriptions = $foafData->getModel()->find($triple->obj,new Resource('http://purl.org/dc/elements/1.1/description'),NULL);
+						if($foundDescriptions && property_exists($foundDescriptions, 'triples') && isset($foundDescriptions->triples[0])){
+							foreach($foundDescriptions->triples as $description){
+								$foafData->getModel()->remove($description);
+							}
 						}
 					}
-					
-					/*find descriptions and remove them*/
-					$foundDescriptions = $foafData->getModel()->find($triple->obj,'http://purl.org/dc/elements/1.1/description',NULL);
-					if($foundDescriptions && property_exists($foundDescriptions, 'triples') && isset($foundDescriptions->triples[0])){
-						foreach($foundDescriptions->triples as $description){
-							$foafData->remove($description);
-						}
-					}
+				} else {
+					/*depiction triple doesn't already exist in model so we need to create another one and add it*/	
+					$depictionTriple = new Statement(new Resource($foafData->getPrimaryTopic()), new Resource('http://xmlns.com/foaf/0.1/depiction'),new Resource($image->uri));
+					$foafData->getModel()->add($depictionTriple);
 				}
-			} else {
-				/*depiction triple doesn't already exist in model so we need to create another one and add it*/	
-				$depictionTriple = new Statement(new Resource($foafData->getPrimaryTopic()), new Resource('http://xmlns.com/foaf/0.1/depiction'),new Resource($image->uri));
-				$foaf->getModel()->add($depictionTriple);
-			}
 			
-			//so that we don't clean out the images that we want to keep
-			array_push($doNotCleanArray,$image->uri);
+			
+				//so that we don't clean out the images that we want to keep
+				$doNotCleanArray[$image->uri] = $image->uri;
+			}//endfor
+		}//endif
+		
+		$this->cleanTriples(&$foafData,$doNotCleanArray);
+	}
+	
+	private function cleanTriples(&$foafData,$doNotCleanArray){
+		/*clean any triples that we haven't edited*/
+		$allImages = $foafData->getModel()->find(new Resource($foafData->getPrimaryTopic()),new Resource('http://xmlns.com/foaf/0.1/depiction'),NULL);
+			
+		if(property_exists($allImages,'triples') && $allImages->triples && isset($allImages->triples[0])){
+			foreach($allImages->triples as $toCleanTriple){
+				
+				/*check that each triple isn't in the array that we earmarked for keeping*/
+				if(property_exists($toCleanTriple->obj,'uri') && !isset($doNotCleanArray[$toCleanTriple->obj->uri])){
+				
+					/*We need to delete all the triples (e.g. title, description) associated with this image*/
+					$foundToRemove = $foafData->getModel()->find(new Resource($toCleanTriple->obj->uri),NULL,NULL);
+					if(property_exists($foundToRemove,'triples') && $foundToRemove->triples && isset($foundToRemove->triples[0]) && $foundToRemove->triples[0]){
+					
+						foreach($foundToRemove->triples as $tripleToRemove){		
+							$foafData->getModel()->remove($tripleToRemove);
+						}
+					
+					}
+					/*remove this triple*/
+					$foafData->getModel()->remove(new Statement(new Resource($foafData->getPrimaryTopic()), new Resource('http://xmlns.com/foaf/0.1/depiction'), new Resource($toCleanTriple->obj->uri)));
+				}
+			}
 		}
-		
-		
 	}
 
     private function isImageUrlValid($url) {
