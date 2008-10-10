@@ -21,7 +21,8 @@ class FileController extends Zend_Controller_Action {
         $allowedMimeTypesArray = array('jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif', 'png' => 'image/png');
         		
     	if($foafData){
-    	   $dirname = "/projects/foafeditor-dev/public/images/".substr($foafData->getPrimaryTopic(),-32);
+    		
+    	   $dirname = $_SERVER['DOCUMENT_ROOT']."/images/".substr($foafData->getPrimaryTopic(),-32);
 
     	   /*create a new directory for this person if necessary*/
     	   if(!file_exists($dirname)){
@@ -91,7 +92,7 @@ class FileController extends Zend_Controller_Action {
     	   
     	   //do some mangling to get the filename
     	   $filename_array = explode('/',$filename);
-    	   $dirname = "/projects/foafeditor-dev/public/images/".substr($foafData->getPrimaryTopic(),-32);
+    	   $dirname = $_SERVER['DOCUMENT_ROOT']."/images/".substr($foafData->getPrimaryTopic(),-32);
     	
        	   $filePath = $dirname."/".$filename_array[count($filename_array)-1];
        	   
