@@ -29,22 +29,18 @@ class PhoneField extends Field {
             $this->data['foafPhoneFields']['values'] = array();
 
              //Check if results are not empty
-              if (!(empty($results))) {
+               if (!(empty($results))) {
                 /*mangle the results so that they can be easily rendered*/
-                foreach ($results as $row) {	
-                    if (isset($row['?foafPhone']) && $this->isPhoneNumberValid($row['?foafPhone']->label)) {
-                        array_push($this->data['foafPhoneFields']['values'],$this->onLoadManglePhoneNumber($row['?foafPhone']->label));
-                    }
-                }	
-
-                $this->data['foafPhoneFields']['displayLabel'] = 'Phone';
-                $this->data['foafPhoneFields']['name'] = 'foafPhone';
-                $this->name = 'foafPhone';
-                $this->label = 'Phones';
-
-	        } else {
-	            return 0;
-	        }
+                	foreach ($results as $row) {	
+                    	if (isset($row['?foafPhone']) && $this->isPhoneNumberValid($row['?foafPhone']->label)) {
+                        	array_push($this->data['foafPhoneFields']['values'],$this->onLoadManglePhoneNumber($row['?foafPhone']->label));
+                    	}
+                	}	
+               } 
+               $this->data['foafPhoneFields']['displayLabel'] = 'Phone';
+               $this->data['foafPhoneFields']['name'] = 'foafPhone';
+               $this->name = 'foafPhone';
+               $this->label = 'Phones';     
         }
     }
 	
@@ -65,10 +61,9 @@ class PhoneField extends Field {
 			}
 			
 			//add new triples
-			$valueArray = get_object_vars($value);
-			foreach($valueArray[$this->name]->values as $thisValue){
-				
-				$mangledValue = onSaveManglePhoneNumber($thisValue);
+			$valueArray = $value->values;
+			foreach($valueArray as $thisValue){
+				$mangledValue = $this->onSaveManglePhoneNumber($thisValue);
 				
 				$literalValue = new Literal($mangledValue);
 		

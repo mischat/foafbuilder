@@ -825,7 +825,8 @@ function displayToObjects(name){
 			break;
 		case 'load-contact-details':
 			locationDisplayToObjects();
-			simpleFieldsDisplayToObjects();
+			mboxDisplayToObjects();
+			phoneDisplayToObjects();
 			break;
 		case 'load-accounts':
 			accountsDisplayToObjects();
@@ -918,7 +919,6 @@ function imgDisplayToObjects(){
 }
 
 function simpleFieldsDisplayToObjects(){
-	var containerElement = document.getElementById('foafHoldsAccount_container');
 	
 	if(typeof(globalFieldData.fields) != 'undefined' && globalFieldData.fields){
 		for(simpleField in globalFieldData.fields){
@@ -941,6 +941,53 @@ function simpleFieldsDisplayToObjects(){
 		}
 	}	
 }
+
+function mboxDisplayToObjects(){
+	var containerElement = document.getElementById('foafMbox_container');
+	
+	if(containerElement && typeof(globalFieldData.foafMboxFields != 'undefined') && globalFieldData.foafMboxFields){
+		if(typeof(globalFieldData.foafMboxFields.values) != 'undefined'){
+			
+			/*remove the existing values*/
+			globalFieldData.foafMboxFields.values = new Array();
+			
+			/*add the elements that are present in the display again*/
+			for(i=0 ; i <containerElement.childNodes.length ; i++){
+				
+				var element = containerElement.childNodes[i];
+					
+				/*take the various attributes of the image tag and add them to the globalFieldData object*/
+				if(element.className == 'fieldInput'){	
+					globalFieldData.foafMboxFields.values.push(element.value);
+				}//end if
+			}//end for	
+		}//end if	
+	}//end if	
+}
+
+function phoneDisplayToObjects(){
+	var containerElement = document.getElementById('foafPhone_container');
+	
+	if(containerElement && typeof(globalFieldData.foafPhoneFields != 'undefined') && globalFieldData.foafPhoneFields){
+		if(typeof(globalFieldData.foafPhoneFields.values) != 'undefined'){
+			
+			/*remove the existing values*/
+			globalFieldData.foafPhoneFields.values = new Array();
+			
+			/*add the elements that are present in the display again*/
+			for(i=0 ; i <containerElement.childNodes.length ; i++){
+				
+				var element = containerElement.childNodes[i];
+					
+				/*take the various attributes of the image tag and add them to the globalFieldData object*/
+				if(element.className == 'fieldInput'){	
+					globalFieldData.foafPhoneFields.values.push(element.value);
+				}//end if
+			}//end for	
+		}//end if	
+	}//end if	
+}
+
 
 function birthdayDisplayToObjects(){
 	
