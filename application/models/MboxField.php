@@ -32,8 +32,12 @@ class MboxField extends Field {
 	        if (!(empty($results))) {
 	        /*mangle the results so that they can be easily rendered*/
 	            foreach ($results as $row) {	
-	                if (isset($row['?foafMbox']) && $this->isEmailAddressValid($row['?foafMbox']->label)) {
-	                   array_push($this->data['foafMboxFields']['values'],$this->onLoadMangleEmailAddress($row['?foafMbox']->label));
+	                if (isset($row['?foafMbox'])) {
+	                	if(property_exists($row['?foafMbox'],'label') && $this->isEmailAddressValid($row['?foafMbox']->label)){
+	                   		array_push($this->data['foafMboxFields']['values'],$this->onLoadMangleEmailAddress($row['?foafMbox']->label));
+	                	} else if(property_exists($row['?foafMbox'],'uri') && $this->isEmailAddressValid($row['?foafMbox']->uri)){
+	                		array_push($this->data['foafMboxFields']['values'],$this->onLoadMangleEmailAddress($row['?foafMbox']->uri));	
+	                	}
 	                }
 	             }
 	         }	
