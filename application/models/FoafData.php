@@ -48,6 +48,7 @@ class FoafData {
             } else {
                 //TODO MISCHA should do some error reporting here
                 error_log("[foaf_editor] Error no primaryTopic");
+                return null;
             }
 
             $oldUriRes = new Resource($oldUri);

@@ -73,8 +73,12 @@ class FieldNames {
 			new SimpleField('foafFamilyName', 'Family Name', 'http://xmlns.com/foaf/0.1/family_name',$this->foafData,'literal');
 		$this->allFieldNames['foafName'] = 
 			new SimpleField('foafName', 'Real Name', 'http://xmlns.com/foaf/0.1/name',$this->foafData,'literal');
+		/*
 		$this->allFieldNames['foafHomepage'] = 
 			new SimpleField('foafHomepage', 'Homepage', 'http://xmlns.com/foaf/0.1/homepage',$this->foafData,'resource');
+		*/
+		$this->allFieldNames['foafHomepage'] = 
+			new HomepageField('foafHomepage', 'Homepage', 'http://xmlns.com/foaf/0.1/homepage',$this->foafData,'resource');
 		$this->allFieldNames['foafNick'] = 
 			new SimpleField('foafNick', 'Nickname', 'http://xmlns.com/foaf/0.1/nick',$this->foafData,'literal');
 		
