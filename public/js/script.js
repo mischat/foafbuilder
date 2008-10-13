@@ -138,6 +138,7 @@ function genericObjectsToDisplay(data){
 	renderSimpleFields(data);
 	renderBirthdayFields(data);
 	renderPhoneFields(data);
+	renderMboxFields(data);
 	renderLocationFields(data);
 	renderDepictionFields(data);
 	renderImgFields(data);
@@ -763,7 +764,7 @@ function renderSimpleFields(data){
 	}	
 }
 
-/*renders the appropriate simple fields for the index i in the json data, data with the name name*/
+/*renders the appropriate phone fields*/
 function renderPhoneFields(data){
 	if(!data || !data.foafPhoneFields || typeof(data.foafPhoneFields) == 'undefined'){
 		return;
@@ -778,7 +779,7 @@ function renderPhoneFields(data){
 	var i =0;
 	if(typeof(data.foafPhoneFields.values) != 'undefined' && data.foafPhoneFields.values){
 		for(phoneNumber in data.foafPhoneFields.values){
-			createGenericInputElement(name, data.foafPhoneFields[phoneNumber], i);	
+			createGenericInputElement(name, data.foafPhoneFields.values[phoneNumber], i);	
 			i++;
 		}
 	}
@@ -787,6 +788,32 @@ function renderPhoneFields(data){
 	createGenericAddElement(containerElement,name,label);
 
 }
+
+/*renders the appropriate phone fields*/
+function renderMboxFields(data){
+	if(!data || !data.foafMboxFields || typeof(data.foafMboxFields) == 'undefined'){
+		return;
+	}
+	
+	/*build the container*/
+	var name = data.foafMboxFields.name;
+	var label = data.foafMboxFields.displayLabel;
+	var containerElement = createFieldContainer(name, label);
+
+	/*render each individual phone element*/	
+	var i =0;
+	if(typeof(data.foafMboxFields.values) != 'undefined' && data.foafMboxFields.values){
+		for(mbox in data.foafMboxFields.values){
+			createGenericInputElement(name, data.foafMboxFields.values[mbox], i);	
+			i++;
+		}
+	}
+	
+	/*create an add link*/
+	createGenericAddElement(containerElement,name,label);
+
+}
+
 
 /*populates the triples objects with stuff from the actual display (i.e. what the user has changed)*/
 //TODO: datatypes/language
