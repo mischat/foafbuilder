@@ -143,7 +143,7 @@ class DepictionField extends Field {
 
     private function isImageUrlValid($url) {
         //FIXME: something should go here to make sure the string makes sense.
-        if ($url == null || $url == '') {
+        if (!property_exists($url,'uri') || $url->uri == null || $url->uri == '') {
             return false;
         } else {
             return true;
