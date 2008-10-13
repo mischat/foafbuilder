@@ -29,22 +29,21 @@ class MboxField extends Field {
             $this->data['foafMboxFields']['values'] = array();
 
              //Check if results are not empty
-              if (!(empty($results))) {
-                /*mangle the results so that they can be easily rendered*/
-                foreach ($results as $row) {	
-                    if (isset($row['?foafMbox']) && $this->isEmailAddressValid($row['?foafMbox']->label)) {
-                        array_push($this->data['foafMboxFields']['values'],$this->onLoadMangleEmailAddress($row['?foafMbox']->label));
-                    }
-                }	
+	        if (!(empty($results))) {
+	        /*mangle the results so that they can be easily rendered*/
+	            foreach ($results as $row) {	
+	                if (isset($row['?foafMbox']) && $this->isEmailAddressValid($row['?foafMbox']->label)) {
+	                   array_push($this->data['foafMboxFields']['values'],$this->onLoadMangleEmailAddress($row['?foafMbox']->label));
+	                }
+	             }
+	         }	
 
-                $this->data['foafMboxFields']['displayLabel'] = 'Email';
-                $this->data['foafMboxFields']['name'] = 'foafMbox';
-                $this->name = 'foafMbox';
-                $this->label = 'Email';
+            $this->data['foafMboxFields']['displayLabel'] = 'Email';
+            $this->data['foafMboxFields']['name'] = 'foafMbox';
+            $this->name = 'foafMbox';
+            $this->label = 'Email';
 
-	        } else {
-	            return 0;
-	        }
+	    
         }
     }
 	
@@ -65,10 +64,9 @@ class MboxField extends Field {
 			}
 			
 			//add new triples
-			$valueArray = get_object_vars($value);
-			foreach($valueArray[$this->name]->values as $thisValue){
-				
-				$mangledValue = onSaveMangleEmailAddress($thisValue);
+			$valueArray = $value->values;
+			foreach($valueArray as $thisValue){
+				$mangledValue = $this->onSaveMangleEmailAddress($thisValue);
 				
 				$literalValue = new Literal($mangledValue);
 		
@@ -85,7 +83,7 @@ class MboxField extends Field {
 	}
 	
     /*mangles the email address  for saving purposes*/
-	private function onSaveEmailAddress($value){
+	private function onSaveMangleEmailAddress($value){
 		//TODO: more mangling will at some point probably be required here
 		$ret = $value;
 		
