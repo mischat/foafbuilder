@@ -10,6 +10,7 @@ class BirthdayField extends Field {
     public function BirthdayField($foafData) {
         /*TODO MISCHA dump test to check if empty */
         if ($foafData->getPrimaryTopic()) {
+            /* Old Sparql ...
             $queryString = 
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
@@ -31,21 +32,56 @@ class BirthdayField extends Field {
                 ?e bio:date ?bioBirthday .
                 } 
                 };";
-
+            */
+            $queryString = 
+                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                SELECT ?bioBirthday ?foafBirthday ?foafDateOfBirth
+                WHERE{
+                    OPTIONAL{
+                        <".$foafData->getPrimaryTopic()."> foaf:birthday ?foafBirthday
+                    } .
+                    OPTIONAL{
+                        <".$foafData->getPrimaryTopic()."> foaf:dateOfBirth ?foafDateOfBirth
+                    } .
+                    OPTIONAL{
+                        <".$foafData->getPrimaryTopic()."> bio:event ?e .
+                        ?e rdf:type bio:Birth .
+                        ?e bio:date ?bioBirthday
+                    } 
+                };";
             $results = $foafData->getModel()->SparqlQuery($queryString);		
 
             $this->data['birthdayFields'] = array();
             $this->data['birthdayFields'] = array();
 
-             //Check if results is not empty
+              /*Check results !empty */
               if (!(empty($results))) {
                 /*mangle the results so that they can be easily rendered*/
                 foreach ($results as $row) {	
                     if (isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth'])) {
-                            $birthdayArray = split("-",$row['?foafDateOfBirth']->label);
-                        $this->data['birthdayFields']['day']= $birthdayArray[2];
-                        $this->data['birthdayFields']['month']= $birthdayArray[1];
-                        $this->data['birthdayFields']['year']= $birthdayArray[0];
+                        $birthdayArray = split("-",$row['?foafDateOfBirth']->label);
+                        /*If the birthdayArray is nice and easy to parse!*/
+                        if (count($birthdayArray == 3)) {
+                            error_log('[foaf_editor] Guessing foafDateOfBirth');
+                            $this->data['birthdayFields']['day']= $birthdayArray[2];
+                            $this->data['birthdayFields']['month']= $birthdayArray[1];
+                            $this->data['birthdayFields']['year']= $birthdayArray[0];
+                        } else {
+                        /*Then try and guess it using the magic strtotime*/
+                            error_log('[foaf_editor] having to guessing foafDateOfBirth');
+                            $guessed = strtotime($row['?foafDateOfBirth']->label);
+                            if ($guessed) {
+                                error_log("[foaf_editor] Guessed the date");
+                                echo("The returned value is \n");
+                                echo ($guessed);
+                                echo("\nDone\n");
+                            } else {
+                                error_log("[foaf_editor] Couldnt guess the date");
+                            }
+                        }
                     }
                     if (isset($row['?foafBirthday']) && $this->isShortDateValid($row['?foafBirthday'])) {
                         $birthdayArray = split("-",$row['?foafBirthday']->label);
@@ -65,7 +101,6 @@ class BirthdayField extends Field {
                 $this->data['birthdayFields']['name'] = 'birthday';
                 $this->name = 'birthday';
                 $this->label = 'Birthday';
-
         } else {
             return 0;
         }
@@ -138,6 +173,7 @@ class BirthdayField extends Field {
     }
 
     private function editBioBirthdayIfItExists(&$foafData,$year,$month,$day){
+        /*TODO MISCHA optimise*/
 
         $query = 'PREFIX foaf: <http://xmlns.com/foaf/0.1/>
             PREFIX bio: <http://purl.org/vocab/bio/0.1/>
