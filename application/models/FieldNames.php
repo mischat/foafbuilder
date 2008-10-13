@@ -92,7 +92,8 @@ class FieldNames {
 			new SimpleField('foafMbox_sha1sum', 'Email (sha1sum)', '?x foaf:mbox_sha1sum ?foafMbox_sha1sum', 'literal',false,'http://xmlns.com/foaf/0.1/mbox_sha1sum');
 		*/
 		//$this->allFieldNames['email'] = new EmailField($this->foafData);
-		$this->allFieldNames['phone'] = new PhoneField($this->foafData);
+		$this->allFieldNames['foafPhone'] = new PhoneField($this->foafData);
+		$this->allFieldNames['foafMbox'] = new MboxField($this->foafData);
 		$this->allFieldNames['location'] = new LocationField($this->foafData);
 	}
 	
