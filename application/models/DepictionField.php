@@ -112,7 +112,7 @@ class DepictionField extends Field {
 			}//endfor
 		}//endif
 		
-		$this->cleanTriples(&$foafData,$doNotCleanArray);
+		$this->cleanTriples($foafData,$doNotCleanArray);
 	}
 	
 	private function cleanTriples(&$foafData,$doNotCleanArray){

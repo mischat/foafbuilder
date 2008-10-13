@@ -113,7 +113,7 @@ class ImgField extends Field {
 			}//endfor
 		}//endif
 		
-		$this->cleanTriples(&$foafData,$doNotCleanArray);
+		$this->cleanTriples($foafData,$doNotCleanArray);
     }
     
 	
