@@ -37,7 +37,7 @@ class BirthdayField extends Field {
             $this->data['birthdayFields'] = array();
             $this->data['birthdayFields'] = array();
 
-//            //Check if results is not empty
+             //Check if results is not empty
               if (!(empty($results))) {
                 /*mangle the results so that they can be easily rendered*/
                 foreach ($results as $row) {	
