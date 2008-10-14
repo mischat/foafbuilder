@@ -1,0 +1,93 @@
+<?php
+require_once 'Field.php';
+require_once 'helpers/Utils.php';
+/*FIXME: perhaps fields shouldn't do the whole sparql query thing in the constructor.*/
+
+/*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
+class HomepageField extends Field {
+	
+    /*predicateUri is only appropriate for simple ones (one triple only)*/
+    public function HomepageField($foafData) {
+        /*TODO MISCHA dump test to check if empty */
+        if ($foafData->getPrimaryTopic()) {
+            $queryString = 
+                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                SELECT ?foafHomepage
+                WHERE{
+			<".$foafData->getPrimaryTopic()."> foaf:homepage ?foafHomepage                  
+                };";
+
+            $results = $foafData->getModel()->SparqlQuery($queryString);		
+	
+            $this->data['foafHomepageFields'] = array();
+            $this->data['foafHomepageFields']['values'] = array();
+
+             //Check if results are not empty
+              if (!(empty($results))) {
+                /*mangle the results so that they can be easily rendered*/
+                foreach ($results as $row) {	
+                    if (isset($row['?foafHomepage']) && $this->isHomepageValid($row['?foafHomepage']->uri)) {
+                        array_push($this->data['foafHomepageFields']['values'],$row['?foafHomepage']->uri);
+                    }
+                }	
+
+                $this->data['foafHomepageFields']['displayLabel'] = 'Homepage';
+                $this->data['foafHomepageFields']['name'] = 'foafHomepage';
+                $this->name = 'foafHomepageFields';
+                $this->label = 'Homepages';
+                
+	        } else {
+	            return 0;
+	        }
+        }
+    }
+	
+    /*saves the values created by the editor in value... as encoded in json. */
+    public function saveToModel(&$foafData, $value) {
+
+			require_once 'FieldNames.php';
+			
+			$predicate_resource = new Resource('http://xmlns.com/foaf/0.1/homepage');
+			$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
+			
+			//find existing triples
+			$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
+			
+			//remove existing triples
+			foreach($foundModel->triples as $triple){
+                                //echo("KKKKKKKKKKKKKKKKKKKKKKKK\n".var_dump($triple)."\n");
+				$foafData->getModel()->remove($triple);
+			}
+			
+			//add new triples
+			$valueArray = get_object_vars($value);
+
+			foreach($valueArray['values'] as $thisValue){
+				if ($this->isHomepageValid($thisValue)) {
+                                    $new_statement = new Statement($primary_topic_resource,$predicate_resource,new Resource($thisValue));	
+				    $foafData->getModel()->add($new_statement);
+                                } else {
+                                    error_log("[foaf_editor] Homepage saved is not a valid URL");
+                                }
+			}
+    }
+
+
+    /* Check if the HomepageValid */
+    private function isHomepageValid($value) {
+        //if(preg_match('/^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)+\.(?:jpg|gif|png)$/',$value)){
+        //if(preg_match('/^https?:\/\//',$value)) {
+        if(preg_match('/^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)+/',$value)){
+		error_log('[foaf_editor] homepage is valid');
+        	return true;
+        } else {
+		error_log('[foaf_editor] homepage is not-valid');
+        	return false;
+        }
+    }
+
+}
+/* vi:set expandtab sts=4 sw=4: */

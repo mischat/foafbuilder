@@ -137,6 +137,7 @@ function genericObjectsToDisplay(data){
 	renderAccountFields(data);
 	renderSimpleFields(data);
 	renderBirthdayFields(data);
+	renderHomepageFields(data);
 	renderPhoneFields(data);
 	renderMboxFields(data);
 	renderLocationFields(data);
@@ -684,6 +685,37 @@ function renderBirthdayFields(data){
 
 	createFoafDateOfBirthElement(containerElement, day, month, year);
 }
+
+/*Render the HomepageField*/
+function renderHomepageFields(data){
+
+	if(!data || !data.foafHomepageFields || typeof(data.foafHomepageFields) == 'undefined'){
+		return;
+	}
+	
+	/*build the container*/
+	var name = data.foafHomepageFields.name;
+	var label =	data.foafHomepageFields.displayLabel;
+	var containerElement = createFieldContainer(name, label);
+	
+	/*Get the values for the date*/
+//	var values = data.foafHomepageFields['values'];
+
+	/*render each individual phone element*/	
+	var i =0;
+	if(typeof(data.foafHomepageFields.values) != 'undefined' && data.foafHomepageFields.values){
+		for(phoneNumber in data.foafHomepageFields.values){
+			createGenericInputElement(name, data.foafHomepageFields.values[phoneNumber], i);	
+			i++;
+		}
+	}
+
+	createGenericAddElement(containerElement,name,label);
+	/*create an add link*/
+	//createGenericAddElement(containerElement,name,label);
+
+}
+
 
 function renderAccountFields(data){
 	

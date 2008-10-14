@@ -111,37 +111,42 @@ class BirthdayField extends Field {
 
         $valueArray = $this->objectToArray($value);
 
-        /*find existing triples for foafBirthday and foafDateOfBirth*/
-        $foundModel1 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/birthday"),NULL);
-        $foundModel2 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/dateOfBirth"),NULL);
+        /*Test to see if we have any dateOfBirth info*/
+        if (isset($valueArray['month']) || isset($valueArray['day']) || isset($valueArray['year'])) {
+            /*find existing triples for foafBirthday and foafDateOfBirth*/
+            $foundModel1 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/birthday"),NULL);
+            $foundModel2 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/dateOfBirth"),NULL);
 
-        /*remove any existing triples*/
-        foreach($foundModel1->triples as $triple) {
-            $foafData->getModel()->remove($triple);
-        }
-
-        foreach($foundModel2->triples as $triple) {
-            $foafData->getModel()->remove($triple);
-        }
-
-        /*re-add them (if they exist)*/
-        if ($valueArray['month'] && $valueArray['month'] != '' && $valueArray['day'] && $valueArray['day'] != '') {
-            /*add FoafBirthday element*/
-            $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
-            $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-".$valueArray['day']));
-            $foafData->getModel()->add($newFoafBirthday);
-
-            if($valueArray['year'] && $valueArray['year'] != '') {
-                /*add foafDateOfBirth element*/
-                $dateLiteral = new Literal($valueArray['year']."-".$valueArray['month']."-".$valueArray['day']);
-                $foafDateOfBirthResource = new Resource("http://xmlns.com/foaf/0.1/dateOfBirth");
-                $newFoafDateOfBirth= new Statement(new Resource($foafData->getPrimaryTopic()),$foafDateOfBirthResource,$dateLiteral);
-                $foafData->getModel()->add($newFoafDateOfBirth);
-                /*if bio style birthday exists already then edit it but if not, don't*/
-                $this->editBioBirthdayIfItExists($foafData,$valueArray['year'],$valueArray['month'],$valueArray['day']);
+            /*remove any existing triples*/
+            foreach($foundModel1->triples as $triple) {
+                $foafData->getModel()->remove($triple);
             }
+
+            foreach($foundModel2->triples as $triple) {
+                $foafData->getModel()->remove($triple);
+            }
+
+            /*re-add them (if they exist)*/
+            if ($valueArray['month'] && $valueArray['month'] != '' && $valueArray['day'] && $valueArray['day'] != '') {
+                /*add FoafBirthday element*/
+                $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
+                $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-".$valueArray['day']));
+                $foafData->getModel()->add($newFoafBirthday);
+
+                if($valueArray['year'] && $valueArray['year'] != '') {
+                    /*add foafDateOfBirth element*/
+                    $dateLiteral = new Literal($valueArray['year']."-".$valueArray['month']."-".$valueArray['day']);
+                    $foafDateOfBirthResource = new Resource("http://xmlns.com/foaf/0.1/dateOfBirth");
+                    $newFoafDateOfBirth= new Statement(new Resource($foafData->getPrimaryTopic()),$foafDateOfBirthResource,$dateLiteral);
+                    $foafData->getModel()->add($newFoafDateOfBirth);
+                    /*if bio style birthday exists already then edit it but if not, don't*/
+                    $this->editBioBirthdayIfItExists($foafData,$valueArray['year'],$valueArray['month'],$valueArray['day']);
+                }
+            }
+            $this->editBioBirthdayIfItExists($foafData,NULL,NULL,NULL);
+        } else {
+            error_log('[foaf_editor] There is no birthday to process');
         }
-        $this->editBioBirthdayIfItExists($foafData,NULL,NULL,NULL);
     }
 
     private function isLongDateValid($date) {
