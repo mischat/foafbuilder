@@ -77,8 +77,9 @@ class FieldNames {
 		$this->allFieldNames['foafHomepage'] = 
 			new SimpleField('foafHomepage', 'Homepage', 'http://xmlns.com/foaf/0.1/homepage',$this->foafData,'resource');
 		*/
-		$this->allFieldNames['foafHomepage'] = 
-			new HomepageField('foafHomepage', 'Homepage', 'http://xmlns.com/foaf/0.1/homepage',$this->foafData,'resource');
+
+		$this->allFieldNames['foafHomepage'] =  new HomepageField($this->foafData);
+
 		$this->allFieldNames['foafNick'] = 
 			new SimpleField('foafNick', 'Nickname', 'http://xmlns.com/foaf/0.1/nick',$this->foafData,'literal');
 		

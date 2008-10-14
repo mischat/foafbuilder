@@ -19,18 +19,16 @@ class ImgField extends Field {
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 SELECT ?foafImg ?dcTitle ?dcDescription
                 WHERE{
-	                ?z foaf:primaryTopic <".$foafData->getPrimaryTopic().">
-	                ?z foaf:primaryTopic ?primaryTopic
-		            
-	                ?primaryTopic foaf:img ?foafImg .
-	                	
+	                <".$foafData->getPrimaryTopic()."> foaf:img ?foafImg .
 		            OPTIONAL{
 		            	?foafImg dc:title ?dcTitle .
-		            }
+		            } .
 		            OPTIONAL{
 		                ?foafImg dc:description ?dcDescription .
 		            }	
                 };";
+	             //   ?z foaf:primaryTopic <".$foafData->getPrimaryTopic()."> .
+	             //   ?z foaf:primaryTopic ?primaryTopic .
 
             $results = $foafData->getModel()->SparqlQuery($queryString);		
 
@@ -146,6 +144,8 @@ class ImgField extends Field {
     private function isImageUrlValid($url) {
         //FIXME: something should go here to make sure the string makes sense.
         if (!property_exists($url,'uri') || $url->uri == null || $url->uri == '') {
+        //TODO MISCHA ... add in the image filter thing
+        //if(preg_match('/^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)+\.(?:jpg|JPG|GIF|gif|PNG|png|JPEG|jpeg)$/',$value)){
             return false;
         } else {
             return true;
