@@ -112,7 +112,7 @@ class FieldNames {
 	}
 	
 	private function instantiateFriendsFields(){
-		
+		$this->allFieldNames['foafKnows'] = new KnowsField($this->foafData);
 	}
 	
 	private function instantiateBlogsFields(){

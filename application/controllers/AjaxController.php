@@ -21,7 +21,6 @@ class AjaxController extends Zend_Controller_Action {
             foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
             	
             	//need to cope with multiple fields of the same type
-            	//TODO: if appropriate do this for all of the other actions.
             	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
           
             }
@@ -34,10 +33,13 @@ class AjaxController extends Zend_Controller_Action {
     	if ($this->loadFoaf()) {   
             $this->fieldNamesObject = new FieldNames('contactDetails',$this->foafData);  	
             $this->view->results = array();
-            foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-                $this->view->results = array_merge($this->view->results,$field->getData());	
+            foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
+            	
+            	//need to cope with multiple fields of the same type
+            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
+          
             }
-        }
+        } 
     }
     
     public function loadPicturesAction() {
@@ -45,10 +47,13 @@ class AjaxController extends Zend_Controller_Action {
         if ($this->loadFoaf()) {   
             $this->fieldNamesObject = new FieldNames('pictures',$this->foafData);  	
             $this->view->results = array();
-            foreach($this->fieldNamesObject->getAllFieldNames() as $field) {
-                $this->view->results = array_merge($this->view->results,$field->getData());	
+           foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
+            	
+            	//need to cope with multiple fields of the same type
+            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
+          
             }
-        }
+        } 
     }
     
     public function loadAccountsAction() {
@@ -56,8 +61,11 @@ class AjaxController extends Zend_Controller_Action {
     	if ($this->loadFoaf()) {   
             $this->fieldNamesObject = new FieldNames('accounts',$this->foafData);  	
             $this->view->results = array();
-            foreach($this->fieldNamesObject->getAllFieldNames() as $field) {
-                $this->view->results = array_merge($this->view->results,$field->getData());	
+            foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
+            	
+            	//need to cope with multiple fields of the same type
+            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
+          
             }
         } 
     }
@@ -67,10 +75,13 @@ class AjaxController extends Zend_Controller_Action {
         if($this->loadFoaf()) {
             $this->fieldNamesObject = new FieldNames('friends',$this->foafData);  	
             $this->view->results = array();
-            foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-                $this->view->results = array_merge($this->view->results,$field->getData());	
+            
+            foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
+            	//need to cope with multiple fields of the same type
+            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
+          
             }
-        }
+        } 
     }
     
     public function loadBlogsAction() {
@@ -78,10 +89,13 @@ class AjaxController extends Zend_Controller_Action {
         if($this->loadFoaf()) {   
             $this->fieldNamesObject = new FieldNames('blogs',$this->foafData);  	
             $this->view->results = array();
-            foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-                $this->view->results = array_merge($this->view->results,$field->getData());	
+           	foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
+            	
+            	//need to cope with multiple fields of the same type
+            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
+          
             }
-        }
+        } 
     }
     
     public function loadInterestsAction() {
@@ -89,10 +103,13 @@ class AjaxController extends Zend_Controller_Action {
         if($this->loadFoaf()) {   
             $this->fieldNamesObject = new FieldNames('interests',$this->foafData);  	
             $this->view->results = array();
-            foreach($this->fieldNamesObject->getAllFieldNames() as $field) {
-                $this->view->results = array_merge($this->view->results,$field->getData());	
+           foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
+            	
+            	//need to cope with multiple fields of the same type
+            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
+          
             }
-        }
+        } 
     }
     
     public function loadOtherAction() {
@@ -100,10 +117,13 @@ class AjaxController extends Zend_Controller_Action {
     	if($this->loadFoaf()) {   
             $this->fieldNamesObject = new FieldNames('other',$this->foafData);  	
             $this->view->results = array();
-            foreach($this->fieldNamesObject->getAllFieldNames() as $field) {
-                $this->view->results = array_merge($this->view->results,$field->getData());	
+           foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
+            	
+            	//need to cope with multiple fields of the same type
+            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
+          
             }
-        }
+        } 
     } 
     
     /*gets the foaf (either from the uri or from the session) as well as adding stuff to the view*/
