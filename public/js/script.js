@@ -143,7 +143,71 @@ function genericObjectsToDisplay(data){
 	renderLocationFields(data);
 	renderDepictionFields(data);
 	renderImgFields(data);
+	renderKnowsFields(data);
 }
+
+/*render the various relationships of the user*/
+function renderKnowsFields(data){
+	if(!data || !data.foafKnowsFields || typeof(data.foafKnowsFields) == 'undefined'){
+		return;
+	}
+	renderMutualFriends(data.foafKnowsFields);
+	renderKnowsUserFields(data.foafKnowsFields);//like incoming friend requests
+	renderUserKnowsFields(data.foafKnowsFields);//like outgoing friend requests
+	//TODO: could we add a timestamp to show people that have recently accepted friend requests etc.
+	
+}
+
+function renderMutualFriends(foafKnowsFields){
+	if(!foafKnowsFields || !foafKnowsFields.mutualFriends || typeof(foafKnowsFields.mutualFriends) == 'undefined'){
+		return;
+	}
+	/*build the container*/
+	var containerElement = createFieldContainer('mutualFriends', 'Friends');
+	
+	for(friend in foafKnowsFields.mutualFriends){
+		
+		var friendDiv = createFriendElement('mutualFriend',foafKnowsFields.mutualFriends[friend],containerElement.childNodes.length,containerElement);
+		
+		createRemoveFriendsLink(friendDiv.id,friendDiv.id,true);
+		
+		//TODO: there should be an 'i don't know this person which removes the person and puts them in the 'they know you' place
+	}
+	
+}
+
+function renderUserKnowsFields(foafKnowsFields){
+	if(!foafKnowsFields || !foafKnowsFields.userKnows|| typeof(foafKnowsFields.userKnows) == 'undefined'){
+		return;
+	}
+	/*build the container*/
+	var containerElement = createFieldContainer('userKnows', 'User knows');
+	
+	for(friend in foafKnowsFields.userKnows){
+		
+		var friendDiv = createFriendElement('userKnows',foafKnowsFields.userKnows[friend],containerElement.childNodes.length,containerElement);
+
+		createRemoveFriendsLink(friendDiv.id,friendDiv.id,false);
+	}	
+	
+}
+
+function renderKnowsUserFields(foafKnowsFields){
+	if(!foafKnowsFields || !foafKnowsFields.knowsUser || typeof(foafKnowsFields.knowsUser) == 'undefined'){
+		return;
+	}
+	/*build the container*/
+	var containerElement = createFieldContainer('knowsUser', 'Knows user');
+
+	for(friend in foafKnowsFields.knowsUser){
+		
+		var friendDiv = createFriendElement('knowsUser',foafKnowsFields.knowsUser[friend],containerElement.childNodes.length,containerElement);
+		//TODO: there should be an ignore link (I don't know this person) but not sure how this would be implemented in rdf
+		createMakeMutualFriendLink(friendDiv);
+	}
+	
+}
+
 
 /*Render the image fields*/
 function renderImgFields(data){
@@ -867,6 +931,9 @@ function displayToObjects(name){
 			depictionDisplayToObjects();
 			imgDisplayToObjects();
 			break;
+		case 'load-friends':
+			knowsDisplayToObjects();
+			break;
 		default:
 			return null;
 			break;
@@ -876,6 +943,26 @@ function displayToObjects(name){
 	
 //	simpleFieldsDisplayToObjects();
 	
+}
+
+/*this is more or less identical to imgDisplayToObjects which is possibly not a good thing*/
+function knowsDisplayToObjects(){
+	var mutualFriendsContainer = document.getElementById('mutualFriends_container')
+	var userKnowsContainer = document.getElementById('userKnows_container');
+	
+	if(mutualFriendsContainer && typeof(mutualFriendsContainer)!='undefined' && mutualFriendsContainer.childNodes 
+		&& typeof(mutualFriendsContainer.childNodes[0])!='undefined'){
+		
+		//TODO
+		alert("Saving mutual friends... implement this Luke!");
+	}
+	
+	if(userKnowsContainer && typeof(userKnowsContainer)!='undefined' && userKnowsContainer.childNodes 
+		&& typeof(userKnowsContainer])!='undefined'){
+		
+		//TODO
+		alert("Saving user knows... implement this Luke!");
+	}
 }
 
 /*this is more or less identical to imgDisplayToObjects which is possibly not a good thing*/
@@ -1371,6 +1458,134 @@ function createGenericInputElementRemoveLink(removeId,containerId,isImage){
 	}
 }
 
+/*creates a remove link with the removeId being the input element to be removed*/
+function createRemoveFriendsLink(removeId,containerId,isMutual){
+	
+	/*create remove link and attach it to the container div*/
+	var containerDiv = document.getElementById(containerId);
+	if(containerDiv){
+		var removeDiv = document.createElement("div");
+		removeDiv.id = removeId+"removeLinkContainer";
+		removeDiv.className = "friendRemoveLinkContainer";
+		var removeLink = document.createElement('a');
+		removeLink.appendChild(document.createTextNode("- Remove"));
+		removeLink.id="_removeLink";
+		removeLink.className="removeLink";
+
+		if(isMutual){
+			removeLink.setAttribute("onclick" , "removeMutualFriendElement('"+removeId+"','"+removeDiv.id+"');");
+		} else {
+			removeLink.setAttribute("onclick" , "removeGenericInputElement('"+removeId+"','"+removeDiv.id+"');");
+		}
+		
+		removeDiv.appendChild(removeLink);
+		containerDiv.appendChild(removeDiv);
+	}
+}
+
+/*creates and attaches a link that allows a user to convert people who have said they know them into mutual friends*/
+function createMakeMutualFriendLink(friendDiv){
+	
+	if(friendDiv && friendDiv.id){
+		var makeFriendDiv = document.createElement("div");
+		//TODO: should rename this class etc a bit more sensibly
+		makeFriendDiv.className = "friendRemoveLinkContainer";
+		
+		var makeFriendLink = document.createElement('a');
+		makeFriendLink.appendChild(document.createTextNode("-Confirm"));
+		makeFriendLink.className="removeLink";
+
+		makeFriendLink.setAttribute("onclick" , "makeMutualFriend('"+friendDiv.id+"');");
+		
+		makeFriendDiv.appendChild(makeFriendLink);
+		friendDiv.appendChild(makeFriendDiv);
+	}
+}
+
+/*gets an array with img, name and ifp from a friend div*/
+function getFriendInfoFromElement(friendDivId){
+
+	/*getTheExisting friend div, extract the information and add it to the knows you list*/
+	///XXX perhaps should have done this by moving stuff around in globalFieldData and then doing displayToObjects or objectsToDisplay
+	var friendDiv = document.getElementById(friendDivId);
+	var img = null;
+	var ifp = null;
+	var name = null;
+	
+	for(childNode in friendDiv.childNodes){
+		if(friendDiv.childNodes[childNode].className == 'friendImage' && typeof(friendDiv.childNodes[childNode].src) !='undefined'){
+			img = friendDiv.childNodes[childNode].src;
+		}
+		if(friendDiv.childNodes[childNode].className == 'friendName'){
+			for(grandChildNode in friendDiv.childNodes[childNode].childNodes){
+
+				if(friendDiv.childNodes[childNode].childNodes[grandChildNode].tagName=='A' 
+					&& typeof(friendDiv.childNodes[childNode].childNodes[grandChildNode].childNodes[0]) !='undefined'
+					&& typeof(friendDiv.childNodes[childNode].childNodes[grandChildNode].childNodes[0].nodeValue) !='undefined'){
+					
+					name = friendDiv.childNodes[childNode].childNodes[grandChildNode].childNodes[0].nodeValue;
+					
+					if(typeof(friendDiv.childNodes[childNode].childNodes[grandChildNode].href) != 'undefined'){
+						ifp = friendDiv.childNodes[childNode].childNodes[grandChildNode].href;
+					}
+				}
+			}
+		}
+	}
+	
+	/*create an array with the information about the friend in it*/
+	var friend=new Array();
+	if(ifp){
+		friend['ifps'] = new Array();
+		friend['ifps'][0] = ifp;
+	} 
+	if(name){
+		friend['name'] = name;
+	}
+	if(img){
+		friend['img'] = img;
+	}
+	
+	return friend;
+	
+}
+
+/*remove the mutual friend whose div is given by the id removeId*/
+function removeMutualFriendElement(removeId,removeDivId){
+	var friend = getFriendInfoFromElement(removeId);
+	
+	/*the container that we want to stick it in*/
+	var containerElement = document.getElementById('knowsUser_container');
+	
+	/*create the new element*/
+	if(containerElement){
+		var friendDiv = createFriendElement('knowsUser',friend,containerElement.childNodes.length,containerElement);
+		createMakeMutualFriendLink(friendDiv);
+	}
+	
+	/*remove the old one*/
+	removeGenericInputElement(removeId,removeDivId);
+	
+}
+
+/*converts a user that knows you to one that you know*/
+function makeMutualFriend(friendDivId){
+
+	var friend = getFriendInfoFromElement(friendDivId);
+	
+	/*the container that we want to stick it in*/
+	var containerElement = document.getElementById('mutualFriends_container');
+
+	/*create the new element*/
+	if(containerElement){
+		var friendDiv = createFriendElement('mutualFriend',friend,containerElement.childNodes.length,containerElement);
+		createRemoveFriendsLink(friendDiv.id,friendDiv.id,true);
+	}
+
+	/*remove the old one*/
+	removeGenericInputElement(friendDivId,'id');
+}
+
 /*removes the input element with the given id as well as its corresponding remove element*/
 //TODO: this is badly named
 function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
@@ -1382,9 +1597,8 @@ function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
 		$.post("/file/remove-image", {filename: source}, function(){saveFoaf();},null);
 	}
 	
-	/*remove them*/
+	/*remove the old element*/
 	inputElement.parentNode.removeChild(inputElement);
-	removeElement.parentNode.removeChild(removeElement);
 
 }
 
@@ -1488,6 +1702,59 @@ function createGenericInputElement(name, value, thisElementCount, contname){
 	return newElement;
 }
 
+/*creates a field with a friends image (if available) and name which links to foaf.qdos.com*/
+function createFriendElement(idName,friend,thisElementCount,container){
+
+	var ifp = null;
+	var img = null;
+	var name = null;
+	
+	if(friend.ifps && typeof(friend.ifps[0]) != 'undefined'){
+		ifp = friend.ifps[0];
+	}
+	if(typeof(friend.img) != 'undefined' && friend.img){
+		img = friend.img;
+	} else{
+		//set as a default img.  TODO: sort this out
+		img = 'http://foaf.qdos.com/images/icn-no-photo-sml.gif';
+	}
+	if(typeof(friend.name)!='undefined' && friend.name){
+		name = friend.name;
+	}
+	
+	//add a div to contain everything
+	var friendDiv = document.createElement('div');
+	friendDiv.className = 'friend';
+	friendDiv.id = idName+"_"+thisElementCount;
+	container.appendChild(friendDiv);
+	
+	//add an image
+	var imageElement = document.createElement('img');
+	imageElement.src = img;
+	imageElement.className = 'friendImage';
+	friendDiv.appendChild(imageElement);
+	
+	//add the name with a link to foaf.qdos.com
+	if(name && !ifp){
+		var nameDiv = document.createElement('div');
+		nameDiv.className = 'friendName';
+		nameDiv.appendChild(document.createTextNode(name));
+		friendDiv.appendChild(nameDiv);
+	} else if(name && ifp){
+		
+		var nameDiv = document.createElement('div');
+		nameDiv.className = 'friendName';
+		
+		var nameLink = document.createElement('a');
+		nameLink.appendChild(document.createTextNode(name));
+		nameLink.href = 'http://foaf.qdos.com/find/?q='+ifp;
+		
+		nameDiv.appendChild(nameLink);
+		friendDiv.appendChild(nameDiv);
+	}
+	return friendDiv;
+
+}
 
 /*creates and appends a generic hidden element and appends it to the appropriate field container*/
 function createGenericHiddenElement(name, value, thisElementCount, contname){

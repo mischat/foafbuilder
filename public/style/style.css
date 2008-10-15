@@ -199,7 +199,8 @@ width:100%;
 	border-right: 1px solid #eeeeee;
 	border-bottom: 1px solid #eeeeee;
 	border-top: 1px solid #eeeeee;
-	height:1000px;
+	height:auto;
+	padding-bottom:20px;
 }
 .fieldLabelContainer{
 	font-family:Arial,Helvetica,sans-serif;
@@ -215,6 +216,7 @@ width:100%;
 	position:relative;
 	left:140px;
 	width:330px;
+	padding-top:25px;
 	/*to counteract the size of the fieldLabelContainer*/
 	/*top:-20px;*/
 	
@@ -225,6 +227,7 @@ width:100%;
 	border-bottom: 1px solid #dddddd;
 	margin-left:20px;
 	margin-right:20px;
+	height:auto;
 }
 .fieldImage{
 	margin-top:10px;
@@ -454,4 +457,24 @@ width:100%;
 }
 .menuDiv{
 	margin-top:20px;
+}
+.friendImage{
+	width:58px;
+	height:58px;
+	float:left;
+}
+.friendName{
+	width:130px;
+	float:right;
+	margin-top:30px;
+}
+.friend{
+	display:block;
+	width:200px;
+	height:58px;
+	border-bottom:1px solid #999999;
+}
+.friendRemoveLinkContainer{
+	float:right;
+	margin-top:-45px;
 }
