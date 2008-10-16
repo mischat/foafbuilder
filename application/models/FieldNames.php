@@ -116,11 +116,13 @@ class FieldNames {
 	}
 	
 	private function instantiateBlogsFields(){
-		
+		$this->allFieldNames['foafWeblog'] = 
+			new SimpleField('foafWeblog', 'Blogs', "http://xmlns.com/foaf/0.1/weblog",$this->foafData,"resource");
 	}
 	
 	private function instantiateInterestsFields(){
-		
+		$this->allFieldNames['foafInterest'] = 
+			new SimpleField('foafInterest', 'Interests', "http://xmlns.com/foaf/0.1/interest",$this->foafData,"resource");
 	}
 	
 	private function instantiateOtherFields(){
