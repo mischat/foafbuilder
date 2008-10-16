@@ -34,8 +34,8 @@ class HoldsAccountField extends Field {
 				
 			$this->data['foafHoldsAccountFields'] = array();
 			
-
-			if (!empty($result)) {
+			if (!empty($results)) {
+				error_log("[foaf_editor] Have found some accounts to render");
 				/*mangle the results so that they can be easily rendered*/
 				foreach($results as $row){	
 					/*key them on the account*/
@@ -68,6 +68,7 @@ class HoldsAccountField extends Field {
 				$this->label = 'Accounts';
 				return 1;
 			} else {
+				error_log("[foaf_editor] There are no accounts to render");
 				return 0;
 			}
 		} else {
