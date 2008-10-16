@@ -25,62 +25,89 @@ class HomepageField extends Field {
             $this->data['foafHomepageFields'] = array();
             $this->data['foafHomepageFields']['values'] = array();
 
-             //Check if results are not empty
-              if (!(empty($results))) {
+            //Check if results are not empty
+            if (!(empty($results))) {
                 /*mangle the results so that they can be easily rendered*/
                 foreach ($results as $row) {	
-                    if (isset($row['?foafHomepage']) && $this->isHomepageValid($row['?foafHomepage']->uri)) {
+                    //TODO MISCHA ... checking if this is a literal foaf:homepage which starts with http :)
+                    if (isset($row['?foafHomepage']->uri) && $this->isHomepageValid($row['?foafHomepage']->uri)) {
                         array_push($this->data['foafHomepageFields']['values'],$row['?foafHomepage']->uri);
+                        /*Over here to put in the homepage title*/
+                        $title = $this->getHomepageTitle($row['?foafHomepage']->uri);
+                        if ($title) {
+                            error_log("[foaf_editor] Homepage title returned");
+                            $new_statement = new Statement(new Resource($row['?foafHomepage']->uri),new Resource("http://purl.org/dc/elements/1.1/title"),new Literal($title));
+                            $foafData->getModel()->addWithoutDuplicates($new_statement);
+                        } 
+                    } else if (isset($row['?foafHomepage']->label) && $this->isHomepageValid($row['?foafHomepage']->label)) {
+                        if (preg_match('/^https?:\/\//',$row['?foafHomepage']->label)) {
+                            array_push($this->data['foafHomepageFields']['values'],$row['?foafHomepage']->label);
+                            /*Over here to put in the homepage title*/
+                            $title = $this->getHomepageTitle($row['?foafHomepage']->label);
+                            if ($title) {
+                                error_log("[foaf_editor] Homepage title returned");
+                                $new_statement = new Statement(new Resource($row['foafHomepage']->label),new Resource("http://purl.org/dc/elements/1.1/title"),new Literal($title));
+                                $foafData->getModel()->addWithoutDuplicates($new_statement);
+                            } 
+                            //TODO MISCHA ... mangle the name to put something in here!
+                        }
                     }
                 }	
-
                 $this->data['foafHomepageFields']['displayLabel'] = 'Homepage';
                 $this->data['foafHomepageFields']['name'] = 'foafHomepage';
                 $this->name = 'foafHomepageFields';
                 $this->label = 'Homepages';
-                
-	        } else {
-	            return 0;
-	        }
+                return 1;
+	    } else {
+	        return 0;
+	    }
         }
     }
 	
     /*saves the values created by the editor in value... as encoded in json. */
     public function saveToModel(&$foafData, $value) {
 
-			require_once 'FieldNames.php';
-			
-			$predicate_resource = new Resource('http://xmlns.com/foaf/0.1/homepage');
-			$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
-			
-			//find existing triples
-			$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
-			
-			//remove existing triples
-			foreach($foundModel->triples as $triple){
-                                //echo("KKKKKKKKKKKKKKKKKKKKKKKK\n".var_dump($triple)."\n");
-				$foafData->getModel()->remove($triple);
-			}
-			
-			//add new triples
-			$valueArray = get_object_vars($value);
+            require_once 'FieldNames.php';
+            
+            $predicate_resource = new Resource('http://xmlns.com/foaf/0.1/homepage');
+            $primary_topic_resource = new Resource($foafData->getPrimaryTopic());
+            
+            //find existing triples
+            $foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
+            
+            //remove existing triples
+            foreach($foundModel->triples as $triple){
+                    //echo("KKKKKKKKKKKKKKKKKKKKKKKK\n".var_dump($triple)."\n");
+                    $foafData->getModel()->remove($triple);
+            }
+            
+            //add new triples
+            $valueArray = get_object_vars($value);
 
-			foreach($valueArray['values'] as $thisValue){
-				if ($this->isHomepageValid($thisValue)) {
-                                    $new_statement = new Statement($primary_topic_resource,$predicate_resource,new Resource($thisValue));	
-				    $foafData->getModel()->add($new_statement);
-                                } else {
-                                    error_log("[foaf_editor] Homepage saved is not a valid URL");
-                                }
-			}
+            foreach($valueArray['values'] as $thisValue){
+                    if ($this->isHomepageValid($thisValue)) {
+                        $new_statement = new Statement($primary_topic_resource,$predicate_resource,new Resource($thisValue));	
+                        $foafData->getModel()->addWithoutDuplicates($new_statement);
+                        /*Try and get the Hompage title from the HTML*/
+                        $title = $this->getHomepageTitle($thisValue);
+                        if ($title) {
+                            error_log("[foaf_editor] Homepage title returned");
+                            $new_statement = new Statement(new Resource($thisValue),new Resource("http://purl.org/dc/elements/1.1/title"),new Literal($title));
+                            $foafData->getModel()->addWithoutDuplicates($new_statement);
+                        } 
+                        //TODO MISCHA ... mangle the name to put something in here!
+                    } else {
+                        error_log("[foaf_editor] Homepage not added");
+                    }
+            }
     }
 
 
     /* Check if the HomepageValid */
     private function isHomepageValid($value) {
-        //if(preg_match('/^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)+\.(?:jpg|gif|png)$/',$value)){
+        //if(preg_match('/^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)*/',$value)){
         //if(preg_match('/^https?:\/\//',$value)) {
-        if(preg_match('/^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)+/',$value)){
+        if (preg_match('/^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)*/',$value)) {
 		error_log('[foaf_editor] homepage is valid');
         	return true;
         } else {
@@ -89,5 +116,17 @@ class HomepageField extends Field {
         }
     }
 
+    /* This function needs to be hacked to work properly, needs to grab the html and need to try to extract*/
+    function getHomepageTitle($url) {
+            $input = fopen($url,'r') or die("Failed trying to parse HTML of the user homepage!");
+            $text = fread($input, 1024);
+            fclose($input); 
+            if (preg_match('/<title>([^<]*?)<\/title>/',$text,$matches)) {
+                    error_log('[foaf_editor] Grabbed the users title');
+                    return $matches[1];
+            } 
+
+            return 0;
+    }
 }
 /* vi:set expandtab sts=4 sw=4: */

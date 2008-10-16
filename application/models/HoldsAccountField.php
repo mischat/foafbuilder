@@ -17,7 +17,7 @@ class HoldsAccountField extends Field {
 			 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 			 SELECT  ?a ?foafAccountProfilePage ?foafAccountServiceHomepage ?foafAccountName
 			 WHERE{
-				<".$foafData->getPrimaryTopic()."> foaf:holdsAccount ?a . 
+					<".$foafData->getPrimaryTopic()."> foaf:holdsAccount ?a . 
 					?a rdf:type foaf:OnlineAccount 
 					OPTIONAL{
 						?a foaf:accountProfilePage ?foafAccountProfilePage .
@@ -34,36 +34,42 @@ class HoldsAccountField extends Field {
 				
 			$this->data['foafHoldsAccountFields'] = array();
 			
-			/*mangle the results so that they can be easily rendered*/
-			foreach($results as $row){	
-				/*key them on the account*/
-				if(!isset($this->data['foafHoldsAccountFields'][$row['?a']->uri])){
-					$this->data['foafHoldsAccountFields'][$row['?a']->uri] = array();
+
+			if (!empty($result)) {
+				/*mangle the results so that they can be easily rendered*/
+				foreach($results as $row){	
+					/*key them on the account*/
+					if(!isset($this->data['foafHoldsAccountFields'][$row['?a']->uri])){
+						$this->data['foafHoldsAccountFields'][$row['?a']->uri] = array();
+					}
+					
+					/*create an array for each of the properties we care about*/
+					if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'])){
+						 $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'] = array();
+					}
+					if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'])){
+						 $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'] = array();
+					}
+					if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'])){
+						 $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'] = array();
+					}
+					
+					/*fill the array we've created*/
+					array_push( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'], $row['?foafAccountProfilePage']);
+					array_push( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'], $row['?foafAccountServiceHomepage']);
+					array_push( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'], $row['?foafAccountName']);
 				}
 				
-				/*create an array for each of the properties we care about*/
-				if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'])){
-					 $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'] = array();
-				}
-				if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'])){
-					 $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'] = array();
-				}
-				if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'])){
-					 $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'] = array();
-				}
-				
-				/*fill the array we've created*/
-				array_push( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'], $row['?foafAccountProfilePage']);
-				array_push( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'], $row['?foafAccountServiceHomepage']);
-				array_push( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'], $row['?foafAccountName']);
-			}
 			
-		
-			//TODO: perhaps it is better to keep all the display stuff in the javascript?
-			$this->data['foafHoldsAccountFields']['displayLabel'] = 'Accounts';
-			$this->data['foafHoldsAccountFields']['name'] = 'foafHoldsAccount';
-			$this->name = 'foafHoldsAccount';
-			$this->label = 'Accounts';
+				//TODO: perhaps it is better to keep all the display stuff in the javascript?
+				$this->data['foafHoldsAccountFields']['displayLabel'] = 'Accounts';
+				$this->data['foafHoldsAccountFields']['name'] = 'foafHoldsAccount';
+				$this->name = 'foafHoldsAccount';
+				$this->label = 'Accounts';
+				return 1;
+			} else {
+				return 0;
+			}
 		} else {
 			//TODO MISCHA
 			return 0;

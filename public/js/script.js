@@ -759,11 +759,11 @@ function renderHomepageFields(data){
 	
 	/*build the container*/
 	var name = data.foafHomepageFields.name;
-	var label =	data.foafHomepageFields.displayLabel;
+	var label = data.foafHomepageFields.displayLabel;
 	var containerElement = createFieldContainer(name, label);
 	
 	/*Get the values for the date*/
-//	var values = data.foafHomepageFields['values'];
+	//var values = data.foafHomepageFields['values'];
 
 	/*render each individual phone element*/	
 	var i =0;
@@ -774,12 +774,10 @@ function renderHomepageFields(data){
 		}
 	}
 
-	createGenericAddElement(containerElement,name,label);
 	/*create an add link*/
-	//createGenericAddElement(containerElement,name,label);
+	createGenericAddElement(containerElement,name,label);
 
 }
-
 
 function renderAccountFields(data){
 	
@@ -918,6 +916,7 @@ function displayToObjects(name){
 		case 'load-the-basics':
 			birthdayDisplayToObjects();
 			simpleFieldsDisplayToObjects();
+			homepageFieldsDisplayToObjects();
 			break;
 		case 'load-contact-details':
 			locationDisplayToObjects();
@@ -938,11 +937,10 @@ function displayToObjects(name){
 			return null;
 			break;
 	}
+	
 	//TODO MISCHA
-//	birthdayDisplayToObjects();
-	
-//	simpleFieldsDisplayToObjects();
-	
+	//birthdayDisplayToObjects();
+	//simpleFieldsDisplayToObjects();
 }
 
 /*this is more or less identical to imgDisplayToObjects which is possibly not a good thing*/
@@ -1049,6 +1047,29 @@ function simpleFieldsDisplayToObjects(){
 			} 
 		}
 	}	
+}
+
+//TODO MISCHA
+function homepageFieldsDisplayToObjects() {
+	var containerElement = document.getElementById('foafHomepage_container');	
+
+	if(containerElement && typeof(globalFieldData.foafHomepageFields != 'undefined') && globalFieldData.foafHomepageFields) {
+		if(typeof(globalFieldData.foafHomepageFields.values) != 'undefined'){
+			
+			/*remove the existing values*/
+			globalFieldData.foafHomepageFields.values = new Array();
+			
+			/*add the elements that are present in the display again*/
+			for(i=0 ; i <containerElement.childNodes.length ; i++){
+				
+				var element = containerElement.childNodes[i];
+					
+				if(element.className == 'fieldInput'){	
+					globalFieldData.foafHomepageFields.values.push(element.value);
+				}//end if
+			}//end for	
+		}//end if	
+	}
 }
 
 function mboxDisplayToObjects(){
