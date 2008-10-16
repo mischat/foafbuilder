@@ -1589,6 +1589,7 @@ function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
 	
 	/*remove the old element*/
 	inputElement.parentNode.removeChild(inputElement);
+	removeElement.parentNode.removeChild(removeElement);
 
 }
 
