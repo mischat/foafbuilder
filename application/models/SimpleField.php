@@ -12,6 +12,7 @@ class SimpleField extends Field{
 		
 		$queryString = "SELECT ?".$name." WHERE {<".$foafData->getPrimaryTopic()."> <".$predicateUri."> ?".$name." }";
 		$results = $foafData->getModel()->SparqlQuery($queryString);		
+		
 		$this->data = array();
 		$this->data['fields'] = array();
 		
