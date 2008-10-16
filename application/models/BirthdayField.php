@@ -41,8 +41,12 @@ class BirthdayField extends Field {
                 /*mangle the results so that they can be easily rendered*/
 
                 foreach ($results as $row) {	
+                error_log("[foaf_editor] Checking a birthday");
                     //if (isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth'])) {
-                    if (isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth']->label)) {
+                    //if (isset($row['?foafDateOfBirth']->label) && $this->isLongDateValid($row['?foafDateOfBirth']->label)) {
+                    if (isset($row['?foafDateOfBirth']->label) && $this->isLongDateValid($row['?foafDateOfBirth']->label)) {
+                    //if ($this->isLongDateValid($row['?foafDateOfBirth']->label)) {
+            error_log("***********************************");
                         $birthdayArray = split("-",$row['?foafDateOfBirth']->label);
                         if (empty($birthdayArray)) {
                             $birthdayArray = split("/",$row['?foafDateOfBirth']->label);
@@ -56,7 +60,8 @@ class BirthdayField extends Field {
                             $this->data['birthdayFields']['month']= $birthdayArray[1];
                             $this->data['birthdayFields']['year']= $birthdayArray[0];
                         } 
-                    } else if (isset($row['?foafBirthday']) && $this->isShortDateValid($row['?foafBirthday']->label)) {
+                    } else if (isset($row['?foafBirthday']->label) && $this->isShortDateValid($row['?foafBirthday']->label)) {
+            error_log("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU");
                         $birthdayArray = split("-",$row['?foafBirthday']->label);
                         if (empty($birthdayArray)) {
                             $birthdayArray = split("/",$row['?foafDateOfBirth']->label);
@@ -74,7 +79,8 @@ class BirthdayField extends Field {
                         } else {
                             $this->data['birthdayFields']['month']= $birthdayArray[0];
                         }
-                    } else if (isset($row['?bioBirthday']) && $this->isLongDateValid($row['?bioBirthday']->label)) {
+                    } else if (isset($row['?bioBirthday']->label) && $this->isLongDateValid($row['?bioBirthday']->label)) {
+            error_log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
                         $birthdayArray = split("-",$row['?bioBirthday']->label);
                         $this->data['birthdayFields']['day']= $birthdayArray[2];
                         $this->data['birthdayFields']['month']= $birthdayArray[1];
@@ -102,8 +108,10 @@ class BirthdayField extends Field {
             $foundModel1 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/birthday"),NULL);
             $foundModel2 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/dateOfBirth"),NULL);
 
+            var_dump($foundModel1);
             if (!$foundModel1->isEmpty()) {
                 error_log('[foaf_editor] So here we have foaf:birthday');
+error_log('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO');
                 foreach($foundModel1->triples as $triple) {
                     $foafData->getModel()->remove($triple);
                 }
@@ -111,7 +119,22 @@ class BirthdayField extends Field {
                 //if (!$valueArray['year'] || $valueArray['year'] == '') {
                 error_log('[foaf_editor] Added foaf:birthday triple');
                 $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
-                $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-".$valueArray['day']));
+                if (!isset($valueArray['month'])) {
+                    $month = "00"; 
+                } else if (strlen($valueArray['month']) == 1) {
+                    $month = "0".$valueArray['month'];
+                } else {
+                    $month = $valueArray['month'];
+                }
+                if (!isset($valueArray['day'])) {
+                    $day = "00"; 
+                } else if (strlen($valueArray['day']) == 1) {
+                    $day = "0".$valueArray['day'];
+                } else {
+                    $day = $valueArray['day'];
+                }
+                //$newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-".$valueArray['day']));
+                $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($month."-".$day));
                 $foafData->getModel()->add($newFoafBirthday);
                // }
             } 
@@ -120,25 +143,30 @@ class BirthdayField extends Field {
                 foreach($foundModel2->triples as $triple) {
                     $foafData->getModel()->remove($triple);
                 }
-                $dateLiteral = new Literal($valueArray['year']."-".$valueArray['month']."-".$valueArray['day']);
-                $foafDateOfBirthResource = new Resource("http://xmlns.com/foaf/0.1/dateOfBirth");
-                $newFoafDateOfBirth= new Statement(new Resource($foafData->getPrimaryTopic()),$foafDateOfBirthResource,$dateLiteral);
-                $foafData->getModel()->add($newFoafDateOfBirth);
+                if (isset($valueArray['month']) && $valueArray['month'] != '' && isset($valueArray['day']) && $valueArray['day'] != '' && isset($valueArray['year']) && $valueArray['year'] != '') {
+                    $dateLiteral = new Literal($valueArray['year']."-".$valueArray['month']."-".$valueArray['day']);
+                    $foafDateOfBirthResource = new Resource("http://xmlns.com/foaf/0.1/dateOfBirth");
+                    $newFoafDateOfBirth= new Statement(new Resource($foafData->getPrimaryTopic()),$foafDateOfBirthResource,$dateLiteral);
+                    $foafData->getModel()->add($newFoafDateOfBirth);
+                }
             } 
             // < 3 fields 
             /*Adds in the correct triples without duplicates*/
-            if ($valueArray['month'] && $valueArray['month'] != '' && $valueArray['day'] && $valueArray['day'] != '' && $valueArray['year'] == '') {
+            var_dump($valueArray);
+            if (isset($valueArray['month']) && $valueArray['month'] != '' && isset($valueArray['day']) && $valueArray['day'] != '' && !isset($valueArray['year'])) {
                     /*foaf:birthday*/
                     error_log('[foaf_editor] Added foaf:birthday triple');
                     $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
                     $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-".$valueArray['day']));
                     $foafData->getModel()->addWithoutDuplicates($newFoafBirthday);
-            } else if ($valueArray['month'] && $valueArray['month'] != '' && $valueArray['day'] == '' && $valueArray['year'] == '') {
+            //} else if (isset($valueArray['month']) && $valueArray['month'] != '' && $valueArray['day'] == '' && $valueArray['year'] == '') {
+            } else if (isset($valueArray['month']) && $valueArray['month'] != '' && !isset($valueArray['day'])  && !isset($valueArray['year'])) {
                     error_log('[foaf_editor] Added foaf:birthday triple');
                     $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
                     $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-00"));
                     $foafData->getModel()->addWithoutDuplicates($newFoafBirthday);
-            } else if ($valueArray['day'] && $valueArray['day'] != '' && $valueArray['month'] == '' && $valueArray['year'] == '') {
+            //} else if ($valueArray['day'] && $valueArray['day'] != '' && $valueArray['month'] == '' && $valueArray['year'] == '') {
+            } else if (isset($valueArray['day']) && $valueArray['day'] != '' && !isset($valueArray['month']) && !isset($valueArray['year'])) {
                     error_log('[foaf_editor] Added foaf:birthday triple');
                     $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
                     $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal("00-".$valueArray['month']));
@@ -173,6 +201,7 @@ class BirthdayField extends Field {
     private function isLongDateValid($date) {
         //TODO MISCHA make this parse date into a format we understand
         //if (!($date == null) && !($date == '')) {
+error_log("SOMETHIGNTHOGKGHDKDKHGKHDHG");
         if (preg_match('/(\d{4}?)[-|:|\/](\d{2}?)[-|:|\/](\d{2}?)/',$date,$matches)) {
             if (((int) $matches[2] <= 12) && ((int) $matches[2] > 0)) {
                 if (((int) $matches[3] <= 31) && ((int) $matches[3] > 0)) {
@@ -226,6 +255,7 @@ class BirthdayField extends Field {
         /*If it does exist*/
         if (isset($results[0]['?e']) && isset($results[0]['?bioBirthday'])) { 
             //$eventBnode = new BlankNode($results[0]['?e']->uri);
+            error_log("THIS SHOULD HAPPEN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             /*remove the existing triple*/
             $bioDateResource = new Resource("http://purl.org/vocab/bio/0.1/date");
             $existingStatement = new Statement($results[0]['?e'], $bioDateResource, $results[0]['?bioBirthday']);
@@ -244,7 +274,7 @@ class BirthdayField extends Field {
                 error_log("[foaf_editor] Here is where we have to set a correct 3 pronged date");
                 $dateLiteral = new Literal($year."-".$month."-".$day);
                 $new_bnode = new BlankNode($foafData->getModel());
-                $add_statement = new Statement(new Resource($foafData->getPrimaryTopic()), new Resource("http://purl.org/vocab/bio0.1/event"),$new_bnode);
+                $add_statement = new Statement(new Resource($foafData->getPrimaryTopic()), new Resource("http://purl.org/vocab/bio/0.1/event"),$new_bnode);
                 $foafData->getModel()->add($add_statement);
                 $add_statement = new Statement($new_bnode, new Resource("http://purl.org/vocab/bio/0.1/date"),$dateLiteral);
                 $foafData->getModel()->add($add_statement);
