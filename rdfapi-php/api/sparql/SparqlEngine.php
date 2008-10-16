@@ -413,8 +413,6 @@ Class SparqlEngine extends Object{
         return $res;
 
         if(!$res)
-	//TODO MISCHA this is the hack to fix the optional returns
-	//return $finalRes;
         return array();
 
         // find joint variables and new variables to be added to $finalRes
@@ -596,7 +594,6 @@ Class SparqlEngine extends Object{
     */
     protected function selectVars($table,$vars){
         //XXX
-	//TODO MISCHA ... this is very hacked
         if($vars[0]->variable=='*') {
                 $vars = $this->query->getAllVars();
         }
