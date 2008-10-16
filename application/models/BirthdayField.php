@@ -135,7 +135,7 @@ error_log('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO');
                 }
                 //$newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-".$valueArray['day']));
                 $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($month."-".$day));
-                $foafData->getModel()->add($newFoafBirthday);
+                $foafData->getModel()->addWithoutDuplicates($newFoafBirthday);
                // }
             } 
             if (!$foundModel2->isEmpty()) {
@@ -147,33 +147,55 @@ error_log('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO');
                     $dateLiteral = new Literal($valueArray['year']."-".$valueArray['month']."-".$valueArray['day']);
                     $foafDateOfBirthResource = new Resource("http://xmlns.com/foaf/0.1/dateOfBirth");
                     $newFoafDateOfBirth= new Statement(new Resource($foafData->getPrimaryTopic()),$foafDateOfBirthResource,$dateLiteral);
-                    $foafData->getModel()->add($newFoafDateOfBirth);
+                    $foafData->getModel()->addWithoutDuplicates($newFoafDateOfBirth);
                 }
             } 
             // < 3 fields 
             /*Adds in the correct triples without duplicates*/
-            var_dump($valueArray);
+//            var_dump($valueArray);
             if (isset($valueArray['month']) && $valueArray['month'] != '' && isset($valueArray['day']) && $valueArray['day'] != '' && !isset($valueArray['year'])) {
                     /*foaf:birthday*/
                     error_log('[foaf_editor] Added foaf:birthday triple');
                     $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
-                    $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-".$valueArray['day']));
+                    if (strlen($valueArray['month']) == 1) {
+                        $month = "0".$valueArray['month'];
+                    } else {
+                        $month = $valueArray['month'];
+                    }
+                    if (strlen($valueArray['day']) == 1) {
+                        $day = "0".$valueArray['day'];
+                    } else {
+                        $day = $valueArray['day'];
+                    }
+                    //$newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-".$valueArray['day']));
+                    $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($month."-".$day));
                     $foafData->getModel()->addWithoutDuplicates($newFoafBirthday);
             //} else if (isset($valueArray['month']) && $valueArray['month'] != '' && $valueArray['day'] == '' && $valueArray['year'] == '') {
             } else if (isset($valueArray['month']) && $valueArray['month'] != '' && !isset($valueArray['day'])  && !isset($valueArray['year'])) {
                     error_log('[foaf_editor] Added foaf:birthday triple');
                     $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
-                    $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-00"));
+                    if (strlen($valueArray['month']) == 1) {
+                        $month = "0".$valueArray['month'];
+                    } else {
+                        $month = $valueArray['month'];
+                    }
+                    $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($month."-00"));
                     $foafData->getModel()->addWithoutDuplicates($newFoafBirthday);
             //} else if ($valueArray['day'] && $valueArray['day'] != '' && $valueArray['month'] == '' && $valueArray['year'] == '') {
             } else if (isset($valueArray['day']) && $valueArray['day'] != '' && !isset($valueArray['month']) && !isset($valueArray['year'])) {
                     error_log('[foaf_editor] Added foaf:birthday triple');
                     $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
-                    $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal("00-".$valueArray['month']));
+                    if (strlen($valueArray['day']) == 1) {
+                        $day = "0".$valueArray['day'];
+                    } else {
+                        $day = $valueArray['day'];
+                    }
+                    $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal("00-".$day));
                     $foafData->getModel()->addWithoutDuplicates($newFoafBirthday);
             } 
-            $this->editBioBirthdayIfItExists($foafData,$valueArray['year'],$valueArray['month'],$valueArray['day']);
-
+            if (isset($valueArray['day']) && $valueArray['day'] != '' && isset($valueArray['month']) && $valueArray['month'] != '' && isset($valueArray['year']) && $valueArray['year'] != '') {
+                $this->editBioBirthdayIfItExists($foafData,$valueArray['year'],$valueArray['month'],$valueArray['day']);
+            }
             /*re-add them (if they exist)
             if ($valueArray['month'] && $valueArray['month'] != '' && $valueArray['day'] && $valueArray['day'] != '') {
                 /*add FoafBirthday element
