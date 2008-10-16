@@ -950,19 +950,9 @@ function knowsDisplayToObjects(){
 	var mutualFriendsContainer = document.getElementById('mutualFriends_container')
 	var userKnowsContainer = document.getElementById('userKnows_container');
 	
-	if(mutualFriendsContainer && typeof(mutualFriendsContainer)!='undefined' && mutualFriendsContainer.childNodes 
-		&& typeof(mutualFriendsContainer.childNodes[0])!='undefined'){
-		
-		//TODO
-		alert("Saving mutual friends... implement this Luke!");
-	}
+	//TODO
+	alert("Saving friends... need to implement this Luke");
 	
-	if(userKnowsContainer && typeof(userKnowsContainer)!='undefined' && userKnowsContainer.childNodes 
-		&& typeof(userKnowsContainer])!='undefined'){
-		
-		//TODO
-		alert("Saving user knows... implement this Luke!");
-	}
 }
 
 /*this is more or less identical to imgDisplayToObjects which is possibly not a good thing*/
