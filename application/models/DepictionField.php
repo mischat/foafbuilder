@@ -144,6 +144,8 @@ class DepictionField extends Field {
     private function isImageUrlValid($url) {
         //FIXME: something should go here to make sure the string makes sense.
         if (!property_exists($url,'uri') || $url->uri == null || $url->uri == '') {
+        //TODO MISCHA ... add in the image filter thing
+        //if(preg_match('/^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)+\.(?:jpg|JPG|GIF|gif|PNG|png|JPEG|jpeg)$/',$value)){
             return false;
         } else {
             return true;
