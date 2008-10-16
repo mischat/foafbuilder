@@ -42,7 +42,7 @@ class BirthdayField extends Field {
 
                 foreach ($results as $row) {	
                     //if (isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth'])) {
-                    if (isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth'])) {
+                    if (isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth']->label)) {
                         $birthdayArray = split("-",$row['?foafDateOfBirth']->label);
                         if (empty($birthdayArray)) {
                             $birthdayArray = split("/",$row['?foafDateOfBirth']->label);
@@ -56,7 +56,7 @@ class BirthdayField extends Field {
                             $this->data['birthdayFields']['month']= $birthdayArray[1];
                             $this->data['birthdayFields']['year']= $birthdayArray[0];
                         } 
-                    } else if (isset($row['?foafBirthday']) && $this->isShortDateValid($row['?foafBirthday'])) {
+                    } else if (isset($row['?foafBirthday']) && $this->isShortDateValid($row['?foafBirthday']->label)) {
                         $birthdayArray = split("-",$row['?foafBirthday']->label);
                         if (empty($birthdayArray)) {
                             $birthdayArray = split("/",$row['?foafDateOfBirth']->label);
@@ -74,7 +74,7 @@ class BirthdayField extends Field {
                         } else {
                             $this->data['birthdayFields']['month']= $birthdayArray[0];
                         }
-                    } else if (isset($row['?bioBirthday']) && $this->isLongDateValid($row['?bioBirthday'])) {
+                    } else if (isset($row['?bioBirthday']) && $this->isLongDateValid($row['?bioBirthday']->label)) {
                         $birthdayArray = split("-",$row['?bioBirthday']->label);
                         $this->data['birthdayFields']['day']= $birthdayArray[2];
                         $this->data['birthdayFields']['month']= $birthdayArray[1];
