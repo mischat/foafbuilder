@@ -13,6 +13,7 @@ class LocationField extends Field {
         if ($foafData->getPrimaryTopic()) {
         	
             $queryString = $this->getQueryString($foafData->getPrimaryTopic());
+		
             $results = $foafData->getModel()->SparqlQuery($queryString);		
 
             //var_dump($results);
@@ -186,9 +187,9 @@ class LocationField extends Field {
         }
     }
 
-    private function isCoordValid($date) {
+    private function isCoordValid($coord) {
     //FIXME: something should go here to make sure the string makes sense.
-    if ($date == null || $date == '') {
+    if (!$coord) {
             return false;
         } else {
             return true;

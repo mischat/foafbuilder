@@ -28,12 +28,15 @@ class PhoneField extends Field {
             $this->data['foafPhoneFields'] = array();
             $this->data['foafPhoneFields']['values'] = array();
 
-             //Check if results are not empty
+               //Check if results are not empty
                if (!(empty($results))) {
                 /*mangle the results so that they can be easily rendered*/
                 	foreach ($results as $row) {	
-                    	if (isset($row['?foafPhone']) && $this->isPhoneNumberValid($row['?foafPhone']->label)) {
+                    	if (isset($row['?foafPhone']) && property_exists($row['?foafPhone'],'label') && $this->isPhoneNumberValid($row['?foafPhone']->label)) {
                         	array_push($this->data['foafPhoneFields']['values'],$this->onLoadManglePhoneNumber($row['?foafPhone']->label));
+                    	}
+                		if (isset($row['?foafPhone']) && property_exists($row['?foafPhone'],'uri') && $this->isPhoneNumberValid($row['?foafPhone']->uri)) {
+                        	array_push($this->data['foafPhoneFields']['values'],$this->onLoadManglePhoneNumber($row['?foafPhone']->uri));
                     	}
                 	}	
                } 
