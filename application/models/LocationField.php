@@ -15,31 +15,30 @@ class LocationField extends Field {
             $queryString = $this->getQueryString($foafData->getPrimaryTopic());
             $results = $foafData->getModel()->SparqlQuery($queryString);		
 
-            if(!$results){
-           		return 0;
-            }
-
-            $this->data['locationFields'] = array();
+          	$this->data['locationFields'] = array();
+	        $this->data['locationFields']['nearestAirport'] = array();
 			$this->data['locationFields']['basedNear'] = array();
 			$this->data['locationFields']['office'] = array();
 			$this->data['locationFields']['home'] = array();
-			
-            /*mangle the results so that they can be easily rendered*/
-            foreach ($results as $row) {
-            	$this->addBasedNearElements($row);
-            	$this->addNearestAirportElements($row);
-            	$this->addAddressElements($row,'office');
-            	$this->addAddressElements($row,'home');
-            }	
+				
+            if($results && !empty($results)){
+            	
+	            /*mangle the results so that they can be easily rendered*/
+	            foreach ($results as $row) {
+	       
+	            	$this->addBasedNearElements($row);
+	            	$this->addNearestAirportElements($row);
+	            	$this->addAddressElements($row,'office');
+	            	$this->addAddressElements($row,'home');
+	            }	
             
-            //TODO: perhaps it is better to keep all the display stuff in the javascript?
+        	}
+
             $this->data['locationFields']['displayLabel'] = 'Location';
             $this->data['locationFields']['name'] = 'location';
             $this->name = 'location';
             $this->label = 'Location';
-        } else {
-            return 0;
-        }
+    	}
     }
 
 	
@@ -375,7 +374,13 @@ class LocationField extends Field {
     /*add nearest airport elements*/
     private function addNearestAirportElements($row){
     	$newArray = array();
-    	
+
+        if (isset($row['?icaoCodeAlt']) && $row['?icaoCodeAlt'] && $row['?icaoCodeAlt']->label) {
+    		$newArray['icaoCode'] = $row['?icaoCodeAlt']->label;
+    	}    
+    	if (isset($row['?iataCodeAlt']) && $row['?iataCodeAlt'] && $row['?iataCodeAlt']->label) {
+            $newArray['iataCode'] = $row['?iataCodeAlt']->label;
+    	}
     	if (isset($row['?icaoCode']) && $row['?icaoCode'] && $row['?icaoCode']->label) {
     		$newArray['icaoCode'] = $row['?icaoCode']->label;
     	}    
@@ -443,7 +448,7 @@ class LocationField extends Field {
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 PREFIX wn: <http://xmlns.com/wordnet/1.6/>
                 PREFIX air: <http://dig.csail.mit.edu/TAMI/2007/amord/air#>
-                
+             	PREFIX airalt: <http://www.megginson.com/exp/ns/airports#>
                 SELECT 
                 	?geoLat 
                 	?geoLong 
@@ -474,8 +479,10 @@ class LocationField extends Field {
                 	?officePostalCode
                 	?officeStateOrProvince
                 	
-                	?icaeCode
+                	?icaoCode
                 	?iataCode
+                	?icaoCodeAlt
+                	?iataCodeAlt
                 
                 WHERE{
 	                	?z foaf:primaryTopic <".$primaryTopic.">
@@ -484,10 +491,16 @@ class LocationField extends Field {
 	                	?primaryTopic contact:nearestAirport ?airport .
 	                	?airport rdf:type wn:Airport
 	                	OPTIONAL{
-	                		?airport air:icao ?icaeCode
+	                		?airport air:icao ?icaoCode
 	                	}
 	                	OPTIONAL{
 	                		?airport air:iata ?iataCode
+	                	}
+	                	OPTIONAL{
+	                		?airport airalt:icao ?icaoCodeAlt
+	                	}
+	                	OPTIONAL{
+	                		?airport airalt:iata ?iataCodeAlt
 	                	}
     				}
 	                OPTIONAL{
