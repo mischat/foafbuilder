@@ -118,14 +118,16 @@ class HomepageField extends Field {
 
     /* This function needs to be hacked to work properly, needs to grab the html and need to try to extract*/
     function getHomepageTitle($url) {
-            $input = fopen($url,'r') or die("Failed trying to parse HTML of the user homepage!");
-            $text = fread($input, 1024);
-            fclose($input); 
-            if (preg_match('/<title>([^<]*?)<\/title>/',$text,$matches)) {
-                    error_log('[foaf_editor] Grabbed the users title');
-                    return $matches[1];
-            } 
-
+            ini_set('default_socket_timeout', 2);  
+            $input = @fopen($url, 'r');
+            if ($input != false) { 
+                $text = fread($input, 1024);
+                fclose($input); 
+                if (preg_match('/<title>([^<]*?)<\/title>/',$text,$matches)) {
+                        error_log('[foaf_editor] Grabbed the users title');
+                        return $matches[1];
+                } 
+            }
             return 0;
     }
 }
