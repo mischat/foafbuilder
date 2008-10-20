@@ -101,7 +101,7 @@ function saveFoaf(){
 function writeFoaf() {
         //$.post("/writer/write-Foaf", { }, function(data){alert(data.name);console.log(data.time);},"json");
 		url = document.getElementById('writeUri').value;
-        $.post("/writer/write-Foaf", {uri: url }, function(){},null);
+        $.post("/writer/write-foafn3", {uri: url }, function(data){renderOther(data);},null);
 }
 
 /*Clears FOAF model from session*/
@@ -144,7 +144,46 @@ function genericObjectsToDisplay(data){
 	renderDepictionFields(data);
 	renderImgFields(data);
 	renderKnowsFields(data);
+	
 }
+//renders the geek view
+function renderOther(data){
+	if(!data || typeof(data) == 'undefined'){
+		return;
+	}
+	document.getElementById('personal').innerHTML = '';	
+	
+	/*build the container*/
+	var name = 'other';
+	var label = 'Geek View';
+	var containerElement = createFieldContainer(name, label);
+	
+	/*build another container*/
+	var rdfContainerDiv = document.createElement('div');
+	rdfContainerDiv.id='rdfContainer';
+	containerElement.appendChild(rdfContainerDiv);
+	
+	/*build a form*/
+	var rdfForm = document.createElement('form');
+	rdfForm.setAttribute('action','javascript:writeFoaf()');//TODO: need to have a good name for this
+	rdfForm.id = 'otherForm';
+	rdfContainerDiv.appendChild(rdfForm);
+	
+	/*build a textarea*/
+	var rdfTextArea = document.createElement('input');
+	rdfTextArea.setAttribute('type','textarea');
+	rdfTextArea.id = ('otherTextArea');
+	rdfTextArea.value = data;
+	rdfTextArea.className = ('otherTextArea');
+	rdfForm.appendChild(rdfTextArea);
+	
+	/*add a submit button*/
+	var rdfButton = document.createElement('input');
+	rdfButton.value = 'save';
+	rdfButton.setAttribute('type','submit');
+	rdfForm.appendChild(rdfButton);
+}
+
 
 /*render the various relationships of the user*/
 function renderKnowsFields(data){
@@ -933,6 +972,9 @@ function displayToObjects(name){
 		case 'load-friends':
 			knowsDisplayToObjects();
 			break;
+		case 'load-other':
+			otherDisplayToObjects();
+			break;
 		default:
 			return null;
 			break;
@@ -941,6 +983,11 @@ function displayToObjects(name){
 	//TODO MISCHA
 	//birthdayDisplayToObjects();
 	//simpleFieldsDisplayToObjects();
+}
+
+function otherDisplayToObjects(){
+	//TODO: do this
+	alert("Saving rdf text... do this!!!");
 }
 
 /*this is more or less identical to imgDisplayToObjects which is possibly not a good thing*/
