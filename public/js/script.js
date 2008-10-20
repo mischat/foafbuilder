@@ -101,7 +101,7 @@ function saveFoaf(){
 function writeFoaf() {
         //$.post("/writer/write-Foaf", { }, function(data){alert(data.name);console.log(data.time);},"json");
 		url = document.getElementById('writeUri').value;
-        $.post("/writer/write-foafn3", {uri: url }, function(data){renderOther(data);},null);
+        $.post("/writer/write-foaf", {uri: url }, function(data){renderOther(data);},null);
 }
 
 /*Clears FOAF model from session*/
@@ -170,12 +170,14 @@ function renderOther(data){
 	rdfContainerDiv.appendChild(rdfForm);
 	
 	/*build a textarea*/
-	var rdfTextArea = document.createElement('input');
-	rdfTextArea.setAttribute('type','textarea');
+	var rdfTextArea = document.createElement('textarea');
 	rdfTextArea.id = ('otherTextArea');
-	rdfTextArea.value = data;
+	rdfTextArea.setAttribute('cols','1000');
+	rdfTextArea.setAttribute('rows','50000'); 
 	rdfTextArea.className = ('otherTextArea');
 	rdfForm.appendChild(rdfTextArea);
+	
+	rdfTextArea.appendChild(document.createTextNode(data));
 	
 	/*add a submit button*/
 	var rdfButton = document.createElement('input');
