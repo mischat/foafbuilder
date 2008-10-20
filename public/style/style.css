@@ -480,8 +480,10 @@ width:100%;
 }
 /*geek view stuff*/
 .otherTextArea{
-font-size:10px;
-height:400px;
-margin-left:-120px;
-width:440px;	
+	font-size:10px;
+	height:400px;
+	margin-left:-120px;
+	width:440px;	
+}
+.otherButton{
 }

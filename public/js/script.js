@@ -74,8 +74,11 @@ function loadFoaf(name){
 	
   	//TODO use jquery event handler to deal with errors on requests
   	//TODO perhaps this is bad.  There certainly should be less hardcoding here.
-  	$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);}, "json");
-  	
+  	if(name != 'load-other'){
+  		$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);}, "json");
+  	} else {
+  		renderOther();
+  	}
   	document.getElementById('load-contact-details').style.backgroundImage = 'url(/images/pink_background.gif)';
   	document.getElementById('load-the-basics').style.backgroundImage = 'url(/images/pink_background.gif)';
   	document.getElementById('load-pictures').style.backgroundImage = 'url(/images/pink_background.gif)';
@@ -97,11 +100,12 @@ function saveFoaf(){
   	$.post("/ajax/save-Foaf", {model : jsonstring});
 }
 
+
 /*Writes FOAF to screen*/
-function writeFoaf() {
+function renderOther() {
         //$.post("/writer/write-Foaf", { }, function(data){alert(data.name);console.log(data.time);},"json");
 		url = document.getElementById('writeUri').value;
-        $.post("/writer/write-foaf", {uri: url }, function(data){renderOther(data);},null);
+        $.post("/writer/write-foafn3", {uri: url }, function(data){drawOtherTextarea(data);},null);
 }
 
 /*Clears FOAF model from session*/
@@ -147,7 +151,7 @@ function genericObjectsToDisplay(data){
 	
 }
 //renders the geek view
-function renderOther(data){
+function drawOtherTextarea(data){
 	if(!data || typeof(data) == 'undefined'){
 		return;
 	}
@@ -165,7 +169,7 @@ function renderOther(data){
 	
 	/*build a form*/
 	var rdfForm = document.createElement('form');
-	rdfForm.setAttribute('action','javascript:writeFoaf()');//TODO: need to have a good name for this
+	rdfForm.setAttribute('action','javascript:saveFoaf()');//TODO: need to have a good name for this
 	rdfForm.id = 'otherForm';
 	rdfContainerDiv.appendChild(rdfForm);
 	
@@ -176,13 +180,14 @@ function renderOther(data){
 	rdfTextArea.setAttribute('rows','50000'); 
 	rdfTextArea.className = ('otherTextArea');
 	rdfForm.appendChild(rdfTextArea);
-	
 	rdfTextArea.appendChild(document.createTextNode(data));
 	
 	/*add a submit button*/
 	var rdfButton = document.createElement('input');
 	rdfButton.value = 'save';
 	rdfButton.setAttribute('type','submit');
+	rdfButton.id = 'otherButton';
+	rdfButton.className = 'otherButton';
 	rdfForm.appendChild(rdfButton);
 }
 
