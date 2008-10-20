@@ -71,8 +71,8 @@ class WriterController extends Zend_Controller_Action
 
             $this->view->model->setBaseUri(NULL);
             $result = $this->view->model->find(NULL, NULL, NULL);
-            //echo($result->writeRdfToString('n3'));
-            echo($result->writeAsHTML('n3'));
+            echo($result->writeRdfToString('nt'));
+            //echo($result->writeAsHTML('n3'));
             //FIXME: change this back
             //echo($result->writeAsHtmlTable());
         } else {
