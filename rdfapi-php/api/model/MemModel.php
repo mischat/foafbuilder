@@ -272,12 +272,35 @@ class MemModel extends Model {
 	*
 	* @access	public
 	*/
-	function writeAsHtml() {
+	function writeAsHtml($type='rdf') {
+		/*
 		require_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_RDF);
 		$ser = new RdfSerializer();
 		$rdf =& $ser->serialize($this);
 		$rdf = htmlspecialchars($rdf, ENT_QUOTES);
 		$rdf = str_replace(' ', '&nbsp;', $rdf);
+		$rdf = nl2br($rdf);
+		echo $rdf;
+		*/
+		if ($type=='rdf') {
+			// Import Package Syntax
+			include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_RDF);
+			$ser=new RdfSerializer();
+		}elseif ($type=='nt') {
+			// Import Package Syntax
+			include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_N3);
+			$ser=new NTripleSerializer();
+		}elseif ($type=='n3') {
+			// Import Package Syntax
+			include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_N3);
+			$ser=new N3Serializer();
+		}else {
+			print ('Serializer type not properly defined. Use the strings "rdf","n3" or "nt".');
+			return false;
+		};
+		$rdf =& $ser->serialize($this);
+		//$rdf = htmlspecialchars($rdf, ENT_QUOTES);
+		//$rdf = str_replace(' ', '&nbsp;', $rdf);
 		$rdf = nl2br($rdf);
 		echo $rdf;
 	}
@@ -300,10 +323,32 @@ class MemModel extends Model {
 	* @access	public
 	* @return	string
 	*/
-	function writeRdfToString() {
+	function writeRdfToString($type ='rdf') {
 		// Import Package Syntax
+		/*
 		include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_RDF);
 		$ser = new RdfSerializer();
+		$rdf =& $ser->serialize($this);
+		return $rdf;
+		*/
+		// get suffix and create a corresponding serializer
+		if ($type=='rdf') {
+			// Import Package Syntax
+			include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_RDF);
+			$ser=new RdfSerializer();
+		}elseif ($type=='nt') {
+			// Import Package Syntax
+			include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_N3);
+			$ser=new NTripleSerializer();
+		}elseif ($type=='n3') {
+			// Import Package Syntax
+			include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_N3);
+			$ser=new N3Serializer();
+		}else {
+			print ('Serializer type not properly defined. Use the strings "rdf","n3" or "nt".');
+			return false;
+		};
+
 		$rdf =& $ser->serialize($this);
 		return $rdf;
 	}
