@@ -178,9 +178,9 @@ class LocationField extends Field {
 		$foafData->setRandomStringToBnodeArray($randomStringToBnodeArray);
     }
 
-    private function isLatLongValid($date) {
+    private function isLatLongValid($coord) {
         //FIXME: something should go here to make sure the string makes sense.
-        if ($date == null || $date == '') {
+        if (!$coord) {
             return false;
         } else {
             return true;

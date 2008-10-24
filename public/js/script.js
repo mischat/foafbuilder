@@ -395,7 +395,6 @@ function renderBasedNearFields(data){
 	var label =	data.basedNearFields.displayLabel;
 	var containerElement = createFieldContainer(name, label);
 	
-	
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
 		addBasedNearMarkers(data.basedNearFields['basedNear'],containerElement,map);		
