@@ -435,7 +435,7 @@ Class SparqlEngine extends Object{
             foreach($res as $n =>$r){
                 $join = false;
                 foreach($jointVars as $j_varname){
-                    if($r[$j_varname]==$fRes[$j_varname]){
+		    if($r[$j_varname] && $r[$j_varname] == $fRes[$j_varname]){
                         $join = true;
                         //break;
                     }else{
