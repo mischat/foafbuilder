@@ -2,6 +2,23 @@
 var globalFieldData;
 var currentPage;//the page the user is on e.g. load-contact-details etc.
 
+/*information for geocoding callback*/
+var bnodeToGeoCode;	
+var prefixToGeoCode;
+var containerElementToGeoCode;
+var addressToGeoCode;
+var titleToGeoCode;	
+
+/*for use by the displayToObjects function*/
+var bnodeToGeoCodeDO;	
+var prefixToGeoCodeDO;
+
+/*contains address details for geocoding*/
+var addressDetailsToGeoCode = new Array();
+
+/*so we can wait for a geocode request to finish*/
+var geoCodeRequestFinished = false;
+
 /*google maps data*/
 var mapMarkers = new Array;
 var map;
@@ -467,43 +484,118 @@ function renderLocationFields(data){
 
 /*adds markers and divs for home and office addresses*/
 function addAddressMarkers(office,home,containerElement,map){
+	
+	var i=0;
 	for(bNodeKey in office){
+		i++;
 		addSingleAddressMarker('Office Address',office[bNodeKey],bNodeKey,containerElement,'office');
 	}
+	if(i==0){
+		addSingleAddressMarker('Office Address',createRandomString(50),containerElement,'office');
+	}
+	
+	var j=0;	
 	for(bNodeKey in home){
+		j++;
 		addSingleAddressMarker('Home Address',home[bNodeKey],bNodeKey,containerElement,'home');
 	}
+	if(j==0){
+		addSingleAddressMarker('Home Address',createRandomString(50),containerElement,'home');
+	}
+	
+	
 	
 }
 
 /*adds one address marker*/
 function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
-	if(address['latitude'] && address['longitude']){
+	var latitude = address['latitude'];
+	var longitude = address['longitude'];
 	
-		var latitude = address['latitude'];
-		var longitude = address['longitude'];
+	//i.e. a new blank address
+	if(address.length == '50'){
+		//TODO: change these values back
+		latitude ='40';
+		longitude='34';
+		alert("new empty address");
+	}
+	
+	/*there is an address there but the latitude and longitude isn't set*/
+	if(!latitude && !longitude){
+		//alert("do geocode"+prefix);
+		var addressArray = getProperties(address);
 		
+		/*array to pass to the geocoder's callback function*/
+		theseDetails = new Array();
+		theseDetails['bnode'] = bNodeKey;	
+		theseDetails['prefix'] = prefix;
+		theseDetails['container'] = containerElement;
+		theseDetails['address'] = address;
+		theseDetails['title'] = title;		
+		addressDetailsToGeoCode.push(theseDetails);
+
+		/*do the actual geoCoding*/
+		var geocoder = new GClientGeocoder();
+		geocoder.getLatLng(addressArray,geoCodeAddress);
+   		
+	} else{
+	
 		var point = new GLatLng(latitude, longitude);
-		var marker = new GMarker(point,{title: "nearestAirport"});	
-		
-    	mapMarkers[bNodeKey] = marker;
+		var marker = new GMarker(point,{title: prefix});	
+				
+		mapMarkers[bNodeKey] = marker;
 		map.addOverlay(marker);
 		map.setCenter(point);
 		
 		createAddressDiv(title,address,bNodeKey,containerElement,latitude,longitude, prefix);
-		
-	} else {
-		alert("geocoding is necessary");
-		//TODO do some  geocoding stuff here
 	}
+}
 
+/*turns a point into an address*/
+function geoCodeAddress(point){
+	  /*so we use the right variables for each request*/
+	  if(typeof(geoCodeAddress.count) == 'undefined'){
+	  	geoCodeAddress.count = 0;
+	  } else{
+	  	geoCodeAddress.count++;
+	  }
+	  
+      if (!point) {
+      	alert("no point");
+      	//TODO: possibly do something here, maybe do nothing
+      } else {
+      	
+      	//alert(geoCodeAddress.count);
+      	  
+      	/*get some variables according to the count*/
+		var title = addressDetailsToGeoCode[geoCodeAddress.count]['title'];
+		var address = addressDetailsToGeoCode[geoCodeAddress.count]['address'];
+		var bnode = addressDetailsToGeoCode[geoCodeAddress.count]['bnode'];
+		var container = addressDetailsToGeoCode[geoCodeAddress.count]['container'];
+		var prefix = addressDetailsToGeoCode[geoCodeAddress.count]['prefix'];
+		
+		//alert(title);
+		
+		/*the geocoded coords*/
+        latitude = point.lat();
+        longitude = point.lng();
+
+		/*put the marker in the right place*/
+      	var marker = new GMarker(point,{title: prefix});	
+      	
+      	/*so we can access the markers in the future*/
+		mapMarkers[bnode] = marker;
+		map.addOverlay(marker);
+		map.setCenter(point);	
+		createAddressDiv(title,address,bnode,container,latitude,longitude, prefix);
+	}			
 }
 
 /*creates divs for addresses*/
 function createAddressDiv(title,address,bNodeKey,containerElement, latitude, longitude, prefix){
 
 	/*TODO: need to worry about how we pick all of this stuff up when we save and this method can easily be made shorter*/
-	var locationDiv = createLocationElement(containerElement, bNodeKey, prefix+'Address');
+	var locationDiv = createLocationElement(containerElement, bNodeKey, prefix+'Address',true);
 	
 	/*title: e.g. home address, office address etc*/
 	var addressTitleDiv = document.createElement('div');
@@ -519,8 +611,10 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	longitudeDiv.appendChild(document.createTextNode('Longitude: '+longitude));
 	locationDiv.appendChild(longitudeDiv);
 	locationDiv.appendChild(latitudeDiv);
-	latitudeDiv.className = 'latitude';
-	longitudeDiv.className = 'longitude';
+	latitudeDiv.id = 'latitude_'+bNodeKey;
+	longitudeDiv.id = 'longitude_'+bNodeKey;
+	latitudeDiv.className='latitude';
+	longitudeDiv.className='longitude';
 	
 	/*street 1*/
 	var streetLabelDiv = document.createElement('div');
@@ -603,7 +697,6 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	}
 
 }
-
 
 /*add markers for all the contact:Nearest airports*/
 function addNearestAirportMarker(nearestAirport,containerElement,map){
@@ -715,12 +808,19 @@ function createAirportDiv(latitude,longitude,iataCode,icaoCode,containerElement)
 
 /*add markers for all the foaf:based_near elements*/
 function addBasedNearMarkers(basedNearArray, containerElement){
-
+	
 	/*loop over each based_near instance*/
 	for(bNodeKey in basedNearArray){
 		/*create an element to hold each location*/
 		var locationDiv = createLocationElement(containerElement, bNodeKey);
 		
+		/*title: e.g. home address, office address etc*/
+		var basedNearTitleDiv = document.createElement('div');
+		var title = 'Based Near';
+		basedNearTitleDiv.className = 'addressTitle';
+		basedNearTitleDiv.appendChild(document.createTextNode(title));
+		locationDiv.appendChild(basedNearTitleDiv);
+	
 		var latitude = basedNearArray[bNodeKey]['latitude'];
 		var longitude = basedNearArray[bNodeKey]['longitude'];
 		
@@ -756,24 +856,29 @@ function createSingleBasedNearMarker(latitude, longitude, holderName, map){
 		
 		/*keep the latitude and longitude updated when the marker is dragged around*/
 	    GEvent.addListener(marker, 'drag', function(){
-			
-	    	var latElement = document.getElementById('latitude_' + holderName);
-	    	var longElement = document.getElementById('longitude_' + holderName);
+			updateLatLongText(holderName,marker);
 	    	
-	    	if(latElement.childNodes[0] && longElement.childNodes[0]){
-	    		latElement.removeChild(latElement.childNodes[0]);
-	    		longElement.removeChild(longElement.childNodes[0]);
-	    	}
-	    	
-	    	var latText = document.createTextNode("Latitude: " +marker.getLatLng().lat().toString().substr(0,8));
-	    	var longText = document.createTextNode("Longitude: " + marker.getLatLng().lng().toString().substr(0,8));
-	    	
-	    	latElement.appendChild(latText);
-	    	longElement.appendChild(longText);
 	    });
 	    
 	    //TODO: have some sort of sensible thing like this
 	    map.setCenter(point);	
+}
+
+/*updates the lat long text, for example, when a marker is dragged*/
+function updateLatLongText(holderName,marker){
+	var latElement = document.getElementById('latitude_' + holderName);
+	var longElement = document.getElementById('longitude_' + holderName);
+	    	
+	if(latElement.childNodes[0] && longElement.childNodes[0]){
+		latElement.removeChild(latElement.childNodes[0]);
+	   	longElement.removeChild(longElement.childNodes[0]);
+	}
+	    	
+	var latText = document.createTextNode("Latitude: " +marker.getLatLng().lat().toString().substr(0,8));
+	    	var longText = document.createTextNode("Longitude: " + marker.getLatLng().lng().toString().substr(0,8));
+	    	
+	latElement.appendChild(latText);
+	longElement.appendChild(longText);
 }
 
 /*Render the birthday dropdown (assumes only one birthday)*/
@@ -1256,7 +1361,7 @@ function basedNearDisplayToObjects(locationElement){
 
 /*copies values from display for an address of type prefix (e.g. office, home) into the globalFieldData object*/
 function addressDisplayToObjects(locationElement,prefix){
-
+   	
 	//create a new array for this particular address
 	globalFieldData.locationFields[prefix][locationElement.id] = new Object();
 		
@@ -1280,19 +1385,39 @@ function addressDisplayToObjects(locationElement,prefix){
 			}
 			if(locationElement.childNodes[j].id == 'postalCode'){
 				globalFieldData.locationFields[prefix][locationElement.id][prefix+'PostalCode'] = locationElement.childNodes[j].value;
-			} 
-			
-			/*latitude and longitude*/
-			if((locationElement.childNodes[j].className == 'latitude' || locationElement.childNodes[j].className == 'longitude')
-			&& locationElement.childNodes[j].childNodes[0] && locationElement.childNodes[j].childNodes[0].nodeValue){
-			
-				var coordArray = locationElement.childNodes[j].childNodes[0].nodeValue.split(' ');
-
-				if(typeof(coordArray[1]) != 'undefined' && coordArray[1]){
-					globalFieldData.locationFields[prefix][locationElement.id][locationElement.childNodes[j].className] = coordArray[1];
-				}
 			}
-		} 
+	}
+	
+	//addressMoveMarkers(bnodeToGeoCode,prefixToGeoCode,containerElementToGeoCode,titleToGeoCode);
+	//TODO: do geocoding here
+			
+	/*Convert the address to latitude and longitude and then update the latitude and longitude text*/
+		var addressArray = getProperties(globalFieldData.locationFields[prefix][locationElement.id]);//get some properties
+		
+		//some variables for the callback function
+		bnodeToGeoCodeDO = locationElement.id;	
+		prefixToGeoCodeDO = prefix;
+		var geocoder = new GClientGeocoder();
+	
+		geocoder.getLatLng(
+	   	addressArray,
+	    function(point) {
+	    	if (!point) {
+	        	//TODO: possibly do something here, maybe do nothing
+	      	} else {
+	      		//move the point and the centre of the map
+	      		mapMarkers[bnodeToGeoCodeDO].setLatLng(point);
+	      		//map.panTo(point);
+	      		
+	      		//update the display to show the new latitude and longitude
+				updateLatLongText(bnodeToGeoCodeDO,mapMarkers[bnodeToGeoCodeDO]);
+				
+				//set the global data with the appropriate stuff
+				globalFieldData.locationFields[prefixToGeoCodeDO][bnodeToGeoCodeDO]['latitude'] = point.lat();
+				globalFieldData.locationFields[prefixToGeoCodeDO][bnodeToGeoCodeDO]['longitude'] = point.lng();
+	      	}			
+	   	} );
+
 }	
 
 function accountsDisplayToObjects(){
@@ -1481,7 +1606,9 @@ function createGenericAddElement(container,name,displayLabel){
 	var addLink = document.createElement('a');
 	addLink.appendChild(document.createTextNode("+Add another "+displayLabel));
 	addLink.className="addLink";
+	
 	addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id);");
+
 	addDiv.appendChild(addLink);
 	container.appendChild(addDiv);
 
@@ -1669,7 +1796,7 @@ function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
 }
 
 /*creates an element to hold the information about a particular location*/
-function createLocationElement(attachElement, bnodeId,optionalClassName){
+function createLocationElement(attachElement, bnodeId,optionalClassName,softRemove){
 	
 	/*if new, create a random id*/
 	if(!bnodeId){
@@ -1691,10 +1818,15 @@ function createLocationElement(attachElement, bnodeId,optionalClassName){
 	removeDiv.id = "removeLinkContainer";
 	removeDiv.className = "removeLinkContainer";
 	var removeLink = document.createElement('a');
-	removeLink.appendChild(document.createTextNode("- Remove this location"));
+
+	if(!softRemove){
+		removeLink.appendChild(document.createTextNode("- Remove this location"));
+		removeLink.setAttribute("onclick" , "map.removeOverlay(mapMarkers[this.parentNode.parentNode.id]);this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);");
+	} else {
+		//XXX don't allow them to remove this.
+	}
 	removeLink.id="removeLink";
 	removeLink.className="removeLink";
-	removeLink.setAttribute("onclick" , "map.removeOverlay(mapMarkers[this.parentNode.parentNode.id]);this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);");
 	removeDiv.appendChild(removeLink);
 	locationDiv.appendChild(removeDiv);
 	
