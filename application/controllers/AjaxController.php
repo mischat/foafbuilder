@@ -36,8 +36,9 @@ class AjaxController extends Zend_Controller_Action {
             foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
             	
             	//need to cope with multiple fields of the same type
-            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
-          
+            	if($field->getData()){
+            		$this->view->results = array_merge_recursive($this->view->results,$field->getData());
+            	}
             }
         } 
     }

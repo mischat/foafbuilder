@@ -312,6 +312,7 @@ class LocationField extends Field {
 		    }
     }
     
+    /*if the flag is 0, preserve existing triples, if not, delete them all (for the case where the address has been removed*/
     private function removeExistingAddressTriples(&$foafData,$bNodeName){
     		//XXX FIXME : it is to do with bnodes replacing other ones that have been removed
 			/*find the triples associated with this address*/		
@@ -320,20 +321,27 @@ class LocationField extends Field {
 			
 			foreach($foundStuffToRemove[0]->triples as $addressTriple){					
 				$addressBnode = $addressTriple->obj;
-				array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#city'), NULL));
-				array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#country'), NULL));
-				array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#street'), NULL));
-				array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#street2'), NULL));
-				array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#street3'), NULL));
-				array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#stateOrProvince'), NULL));
-				array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#postalCode'), NULL));
+					//we used to try to only delete stuff that we were going to replace in the address
+					/*array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#city'), NULL));
+					array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#country'), NULL));
+					array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#street'), NULL));
+					array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#street2'), NULL));
+					array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#street3'), NULL));
+					array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#stateOrProvince'), NULL));
+					array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#postalCode'), NULL));*/
+					
+					//just remove everything under this address XXX perhaps we should try to preserve things here if we can?
+					array_push($foundStuffToRemove,$foafData->getModel()->find($addressBnode, NULL, NULL));
 			}			
 			
+			
+			// try to only delete stuff that we were going to replace
 			array_push($foundStuffToRemove,$foafData->getModel()->find(new BlankNode($bNodeName), new Resource('http://www.w3.org/2000/10/swap/pim/contact#address'),NULL));		
 			array_push($foundStuffToRemove,$foafData->getModel()->find(new BlankNode($bNodeName), new Resource('http://www.w3.org/2003/01/geo/wgs84_pos#lat_long'), NULL));	
 			array_push($foundStuffToRemove,$foafData->getModel()->find(new BlankNode($bNodeName), new Resource('http://www.w3.org/2003/01/geo/wgs84_pos#lat'), NULL));	
 			array_push($foundStuffToRemove,$foafData->getModel()->find(new BlankNode($bNodeName), new Resource('http://www.w3.org/2003/01/geo/wgs84_pos#long'), NULL));	
-			
+						
+		
 			/*remove triples associated with this address*/
 			foreach($foundStuffToRemove as $found_model){
 				if(isset($found_model->triples[0])){
@@ -394,47 +402,81 @@ class LocationField extends Field {
     
    	/*takes a row from a sparql resultset and puts any home/office (determined by prefix) address information into data*/
     private function addAddressElements($row,$prefix){
+		
+    	if(!isset($row['?'.$prefix]) || !$row['?'.$prefix]){
+    		return;
+    	}
+    	
     	$newArray = array();
-
+    
     	if (isset($row['?'.$prefix.'GeoLatLong']) && $this->isLatLongValid($row['?'.$prefix.'GeoLatLong'])) {
-  
+  			
+    		//echo("\n"."1".$prefix."\n");
+    		
         	$latLongArray = split(",",$row['?'.$prefix.'GeoLatLong']->label);
             $newArray['latitude']= $latLongArray[1];
             $newArray['longitude']= $latLongArray[0];    	
         }
         if (isset($row['?'.$prefix.'GeoLat']) && $this->isCoordValid($row['?'.$prefix.'GeoLat']) &&
         	isset($row['?'.$prefix.'GeoLong']) && $this->isCoordValid($row['?'.$prefix.'GeoLong'])) {
+        		
+        	//echo("\n"."2".$prefix."\n");
             
         	$newArray['latitude'] = $row['?'.$prefix.'GeoLat']->label;
             $newArray['longitude'] = $row['?'.$prefix.'GeoLong']->label;
         }
     	if (isset($row['?'.$prefix.'City']) && $row['?'.$prefix.'City'] && $row['?'.$prefix.'City']->label) {
             $newArray[$prefix.'City'] = $row['?'.$prefix.'City']->label;
+            
+            //echo("\n"."3".$prefix."\n");
     	}
     	if (isset($row['?'.$prefix.'Country']) && $row['?'.$prefix.'Country'] && $row['?'.$prefix.'Country']->label) {
             $newArray[$prefix.'Country'] = $row['?'.$prefix.'Country']->label;
+            
+            //echo("\n"."4".$prefix."\n");
     	}
     	if (isset($row['?'.$prefix.'Street']) && $row['?'.$prefix.'Street'] && $row['?'.$prefix.'Street']->label) {
             $newArray[$prefix.'Street'] = $row['?'.$prefix.'Street']->label;
+            
+            //echo("'n"."5".$prefix."\n");
     	}
     	if (isset($row['?'.$prefix.'Street2']) && $row['?'.$prefix.'Street2'] && $row['?'.$prefix.'Street2']->label) {
             $newArray[$prefix.'Street2'] = $row['?'.$prefix.'Street2']->label;
+            
+            //echo("\n"."6".$prefix."\n");
     	}
     	if (isset($row['?'.$prefix.'Street3']) && $row['?'.$prefix.'Street3'] && $row['?'.$prefix.'Street3']->label) {
             $newArray[$prefix.'Street3'] = $row['?'.$prefix.'Street3']->label;
+            
+            //echo("\n"."7".$prefix."\n");
     	}
     	if (isset($row['?'.$prefix.'PostalCode']) && $row['?'.$prefix.'PostalCode'] && $row['?'.$prefix.'PostalCode']->label) {
             $newArray[$prefix.'PostalCode'] = $row['?'.$prefix.'PostalCode']->label;
+            
+            //echo("\n"."8".$prefix."\n");
     	}
    	 	if (isset($row['?'.$prefix.'StateOrProvince']) && $row['?'.$prefix.'StateOrProvince'] && $row['?'.$prefix.'StateOrProvince']->label) {
             $newArray[$prefix.'StateOrProvince'] = $row['?'.$prefix.'StateOrProvince']->label;
+            
+            //echo("\n"."9".$prefix."\n");
     	}    
     	if (isset($row['?'.$prefix.'StateOrProvince']) && $row['?'.$prefix.'StateOrProvince'] && $row['?'.$prefix.'StateOrProvince']->label) {
             $newArray[$prefix.'StateOrProvince'] = $row['?'.$prefix.'StateOrProvince']->label;
+            
+            //echo("\n"."10".$prefix."\n");
     	}    
     	
     	if(!empty($newArray)){
-    		 $this->data['locationFields'][$prefix.''][$row['?'.$prefix.'']->uri] = $newArray;
+    		 //var_dump($newArray);
+    		 //var_dump($this->data['locationFields']);
+    		 //var_dump($this->data['locationFields'][$prefix.'']);
+    		 //var_dump($this->data['locationFields'][$prefix.''][$row['?'.$prefix.'']->uri]);
+
+    		 //echo("\n"."11".$prefix."\n");
+    		 
+    		 //echo('?'.$prefix.'dsadsa');
+    		 //var_dump($row['?'.$prefix.'']);
+    		 $this->data['locationFields'][$prefix.''][$row['?'.$prefix.'']->uri] = $newArray;    	
     	}
     }
     

@@ -4,6 +4,24 @@
 *  http://www.webtoolkit.info/
 *
 **/
+/*converts an object to array*/
+function getProperties(obj) {
+  var i, v;
+  var count = 0;
+  var props = [];
+  if (typeof(obj) === 'object') {
+    for (i in obj) {
+      v = obj[i];
+      if (v !== undefined && typeof(v) !== 'function') {
+        props[count] = v;
+        count++;
+      }
+    }
+  }
+  return props;
+}
+
+
 /*this callback is currently only used for the image upload*/
 function startCallback() {
 	// make something useful before submit (onStart)
