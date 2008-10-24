@@ -2,13 +2,6 @@
 var globalFieldData;
 var currentPage;//the page the user is on e.g. load-contact-details etc.
 
-/*information for geocoding callback*/
-var bnodeToGeoCode;	
-var prefixToGeoCode;
-var containerElementToGeoCode;
-var addressToGeoCode;
-var titleToGeoCode;	
-
 /*for use by the displayToObjects function*/
 var bnodeToGeoCodeDO;	
 var prefixToGeoCodeDO;
@@ -536,7 +529,7 @@ function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
 
 		/*do the actual geoCoding*/
 		var geocoder = new GClientGeocoder();
-		geocoder.getLatLng(addressArray,geoCodeAddress);
+		geocoder.getLatLng(addressArray,geoCodeNewAddress);
    		
 	} else{
 	
@@ -552,12 +545,12 @@ function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
 }
 
 /*turns a point into an address*/
-function geoCodeAddress(point){
+function geoCodeNewAddress(point){
 	  /*so we use the right variables for each request*/
-	  if(typeof(geoCodeAddress.count) == 'undefined'){
-	  	geoCodeAddress.count = 0;
+	  if(typeof(geoCodeNewAddress.count) == 'undefined'){
+	  	geoCodeNewAddress.count = 0;
 	  } else{
-	  	geoCodeAddress.count++;
+	  	geoCodeNewAddress.count++;
 	  }
 	  
       if (!point) {
@@ -565,14 +558,13 @@ function geoCodeAddress(point){
       	//TODO: possibly do something here, maybe do nothing
       } else {
       	
-      	//alert(geoCodeAddress.count);
-      	  
+  
       	/*get some variables according to the count*/
-		var title = addressDetailsToGeoCode[geoCodeAddress.count]['title'];
-		var address = addressDetailsToGeoCode[geoCodeAddress.count]['address'];
-		var bnode = addressDetailsToGeoCode[geoCodeAddress.count]['bnode'];
-		var container = addressDetailsToGeoCode[geoCodeAddress.count]['container'];
-		var prefix = addressDetailsToGeoCode[geoCodeAddress.count]['prefix'];
+		var title = addressDetailsToGeoCode[geoCodeNewAddress.count]['title'];
+		var address = addressDetailsToGeoCode[geoCodeNewAddress.count]['address'];
+		var bnode = addressDetailsToGeoCode[geoCodeNewAddress.count]['bnode'];
+		var container = addressDetailsToGeoCode[geoCodeNewAddress.count]['container'];
+		var prefix = addressDetailsToGeoCode[geoCodeNewAddress.count]['prefix'];
 		
 		//alert(title);
 		
@@ -624,6 +616,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	var streetInputElement = document.createElement('input');
 	streetInputElement.className='street';
 	streetInputElement.id = 'street';
+	streetInputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
 	locationDiv.appendChild(streetInputElement);
 	//populate it
 	if(address[prefix+'Street']){
@@ -637,7 +630,9 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	locationDiv.appendChild(street2LabelDiv);
 	var street2InputElement = document.createElement('input');
 	street2InputElement.id = 'street2';
+	street2InputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
 	locationDiv.appendChild(street2InputElement);
+	
 	//populate it
 	if(address[prefix+'Street2']){
 		street2InputElement.value = address[prefix+'Street2'];
@@ -650,6 +645,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	locationDiv.appendChild(street3LabelDiv);
 	var street3InputElement = document.createElement('input');
 	street3InputElement.id = 'street3';
+	street3InputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
 	locationDiv.appendChild(street3InputElement);
 	//populate it
 	if(address[prefix+'Street3']){
@@ -663,6 +659,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	locationDiv.appendChild(postalCodeLabelDiv);
 	var postalCodeInputElement = document.createElement('input');
 	postalCodeInputElement.id = 'postalCode';
+	postalCodeInputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
 	locationDiv.appendChild(postalCodeInputElement);
 	//populate it
 	if(address[prefix+'PostalCode']){
@@ -676,6 +673,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	locationDiv.appendChild(cityLabelDiv);
 	var cityInputElement = document.createElement('input');
 	cityInputElement.id = 'city';
+	cityInputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
 	locationDiv.appendChild(cityInputElement);
 	//populate it
 	if(address[prefix+'City']){
@@ -691,6 +689,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	var countryInputElement = document.createElement('input');
 	countryInputElement.className='country';
 	countryInputElement.id = 'country';
+	countryInputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
 	locationDiv.appendChild(countryInputElement);
 	if(address[prefix+'Country']){
 		countryInputElement.value = address[prefix+'Country'];
@@ -816,7 +815,7 @@ function addBasedNearMarkers(basedNearArray, containerElement){
 		
 		/*title: e.g. home address, office address etc*/
 		var basedNearTitleDiv = document.createElement('div');
-		var title = 'Based Near';
+		var title = 'I\'m Based Near...';
 		basedNearTitleDiv.className = 'addressTitle';
 		basedNearTitleDiv.appendChild(document.createTextNode(title));
 		locationDiv.appendChild(basedNearTitleDiv);
@@ -1364,38 +1363,52 @@ function addressDisplayToObjects(locationElement,prefix){
    	
 	//create a new array for this particular address
 	globalFieldData.locationFields[prefix][locationElement.id] = new Object();
-		
+	var isAddress = false;
+	
 	for(j=0; j < locationElement.childNodes.length; j++){
 		
 			/*address*/
 			if(locationElement.childNodes[j].id == 'street'){
-				globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street'] = locationElement.childNodes[j].value;
+					isAddress=true;
+					globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street'] = locationElement.childNodes[j].value;
 			} 
 			if(locationElement.childNodes[j].id == 'street2'){
-				globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street2'] = locationElement.childNodes[j].value;
+					isAddress=true;
+					globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street2'] = locationElement.childNodes[j].value;
 			} 
 			if(locationElement.childNodes[j].id == 'street3'){
-				globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street3'] = locationElement.childNodes[j].value;
+					isAddress=true;
+					globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street3'] = locationElement.childNodes[j].value;
 			} 
 			if(locationElement.childNodes[j].id == 'city'){
-				globalFieldData.locationFields[prefix][locationElement.id][prefix+'City'] = locationElement.childNodes[j].value;
+					isAddress=true;
+					globalFieldData.locationFields[prefix][locationElement.id][prefix+'City'] = locationElement.childNodes[j].value;
 			}
 			if(locationElement.childNodes[j].id == 'country'){
-				globalFieldData.locationFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
+					isAddress=true;
+					globalFieldData.locationFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
 			}
 			if(locationElement.childNodes[j].id == 'postalCode'){
-				globalFieldData.locationFields[prefix][locationElement.id][prefix+'PostalCode'] = locationElement.childNodes[j].value;
+					isAddress=true;
+					globalFieldData.locationFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
 			}
+			
+		}
+		
+		if(isAddress){
+			//do the geo coding
+			geoCodeExistingAddress(locationElement.id,prefix);
+		}
+		
 	}
 	
-	//addressMoveMarkers(bnodeToGeoCode,prefixToGeoCode,containerElementToGeoCode,titleToGeoCode);
-	//TODO: do geocoding here
-			
-	/*Convert the address to latitude and longitude and then update the latitude and longitude text*/
-		var addressArray = getProperties(globalFieldData.locationFields[prefix][locationElement.id]);//get some properties
-		
+/*geocodes the address and updates the latitude/longitude fields and sets the appropriate element in the globalFieldData object*/
+function geoCodeExistingAddress(bNodeKey,prefix){
+
+		var addressArray = getProperties(globalFieldData.locationFields[prefix][bNodeKey]);//get the address
+
 		//some variables for the callback function
-		bnodeToGeoCodeDO = locationElement.id;	
+		bnodeToGeoCodeDO = bNodeKey;	
 		prefixToGeoCodeDO = prefix;
 		var geocoder = new GClientGeocoder();
 	
@@ -1407,7 +1420,7 @@ function addressDisplayToObjects(locationElement,prefix){
 	      	} else {
 	      		//move the point and the centre of the map
 	      		mapMarkers[bnodeToGeoCodeDO].setLatLng(point);
-	      		//map.panTo(point);
+	      		map.panTo(point);
 	      		
 	      		//update the display to show the new latitude and longitude
 				updateLatLongText(bnodeToGeoCodeDO,mapMarkers[bnodeToGeoCodeDO]);
@@ -1417,8 +1430,8 @@ function addressDisplayToObjects(locationElement,prefix){
 				globalFieldData.locationFields[prefixToGeoCodeDO][bnodeToGeoCodeDO]['longitude'] = point.lng();
 	      	}			
 	   	} );
+}
 
-}	
 
 function accountsDisplayToObjects(){
 
