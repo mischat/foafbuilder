@@ -367,7 +367,7 @@ width:100%;
 	font-size:12px;	
 	border-bottom:1px solid #EEEEEE;
 	color: #999999;		
-	height:50px;
+	height:auto;
 }
 .homeAddress{
 	font-family:Arial,Helvetica,sans-serif;

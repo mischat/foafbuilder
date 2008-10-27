@@ -6,8 +6,11 @@ var currentPage;//the page the user is on e.g. load-contact-details etc.
 var bnodeToGeoCodeDO;	
 var prefixToGeoCodeDO;
 
-/*contains address details for geocoding*/
+/*contains address details for geocoding so that the callback function can access them*/
 var addressDetailsToGeoCode = new Array();
+
+/*contains based near details for reverse geocoding so that the callback function can access them*/
+var basedNearDetailsToGeoCode = new Array();
 
 /*so we can wait for a geocode request to finish*/
 var geoCodeRequestFinished = false;
@@ -566,7 +569,6 @@ function geoCodeNewAddress(point){
 		var container = addressDetailsToGeoCode[geoCodeNewAddress.count]['container'];
 		var prefix = addressDetailsToGeoCode[geoCodeNewAddress.count]['prefix'];
 		
-		//alert(title);
 		
 		/*the geocoded coords*/
         latitude = point.lat();
@@ -842,16 +844,30 @@ function addBasedNearMarkers(basedNearArray, containerElement){
 }
 
 function createSingleBasedNearMarker(latitude, longitude, holderName, map){
+
+		var geocoder = new GClientGeocoder()
+		geocoder.getLocations(new GLatLng(latitude,longitude), updateBasedNearAddress)
 		
 		var point = new GLatLng(latitude,longitude);
 		var marker = new GMarker(point,{draggable: true,title:'Near me'});
 		map.addOverlay(marker);
-		mapMarkers[holderName] = marker;
+		mapMarkers[holderName] = marker
 		
-	  	/*everytime the marker is dropped, save the foaf*/
-		GEvent.addListener(marker, "dragend", function(holderName) {
-		        saveFoaf();
-		      });	
+	  	/*every time the marker is dropped, save the foaf and rerverse geocode to get the placename*/
+	  	//set some variables
+	  	var theseDetails = new Array();
+	  	theseDetails['containerId'] = holderName;
+	  	basedNearDetailsToGeoCode.push(theseDetails);
+	  	
+		GEvent.addListener(marker, "dragend", function(marker) {
+				/*save the foaf*/
+		    	saveFoaf();
+		    	var theseDetails = new Array();
+	  			theseDetails['containerId'] = holderName;
+		       	basedNearDetailsToGeoCode.push(theseDetails);
+		        geocoder.getLocations(this.getLatLng(), updateBasedNearAddress)
+		      });
+		      		
 		
 		/*keep the latitude and longitude updated when the marker is dragged around*/
 	    GEvent.addListener(marker, 'drag', function(){
@@ -861,6 +877,32 @@ function createSingleBasedNearMarker(latitude, longitude, holderName, map){
 	    
 	    //TODO: have some sort of sensible thing like this
 	    map.setCenter(point);	
+}
+
+/*callback function for reverse geocode which puts the address information in the based near box*/
+function updateBasedNearAddress(placemark){
+	
+	  /*so we use the right variables for each request*/
+	if(typeof(updateBasedNearAddress.count) == 'undefined'){
+	  	updateBasedNearAddress.count = 0;
+	} else{
+		updateBasedNearAddress.count++;
+	}
+	//alert(basedNearDetailsToGeoCode[updateBasedNearAddress.count]['containerId']);
+	
+	var elem = document.createElement('div');
+	elem.className= 'basedNearAddress';
+	elem.appendChild(document.createTextNode(placemark.Placemark[0].address));
+	var container = document.getElementById(basedNearDetailsToGeoCode[updateBasedNearAddress.count]['containerId']);
+	
+	//remove existing address
+	for(nodeName in container.childNodes){
+		if(container.childNodes[nodeName] && container.childNodes[nodeName].className == 'basedNearAddress'){
+			container.removeChild(container.childNodes[nodeName]);
+		}
+	}
+	container.appendChild(elem);
+	//alert(placemark.Placemark[0].address);
 }
 
 /*updates the lat long text, for example, when a marker is dragged*/
@@ -1420,7 +1462,6 @@ function geoCodeExistingAddress(bNodeKey,prefix){
 	      	} else {
 	      		//move the point and the centre of the map
 	      		mapMarkers[bnodeToGeoCodeDO].setLatLng(point);
-	      		map.panTo(point);
 	      		
 	      		//update the display to show the new latitude and longitude
 				updateLatLongText(bnodeToGeoCodeDO,mapMarkers[bnodeToGeoCodeDO]);
