@@ -487,7 +487,8 @@ function addAddressMarkers(office,home,containerElement,map){
 		addSingleAddressMarker('Office Address',office[bNodeKey],bNodeKey,containerElement,'office');
 	}
 	if(i==0){
-		addSingleAddressMarker('Office Address',createRandomString(50),containerElement,'office');
+		var bNodeKeyPlacemark = createRandomString(50);
+		addSingleAddressMarker('Office Address',bNodeKeyPlacemark,bNodeKeyPlacemark,containerElement,'office');
 	}
 	
 	var j=0;	
@@ -496,7 +497,8 @@ function addAddressMarkers(office,home,containerElement,map){
 		addSingleAddressMarker('Home Address',home[bNodeKey],bNodeKey,containerElement,'home');
 	}
 	if(j==0){
-		addSingleAddressMarker('Home Address',createRandomString(50),containerElement,'home');
+		var bNodeKeyPlacemark = createRandomString(50);
+		addSingleAddressMarker('Home Address',bNodeKeyPlacemark,bNodeKeyPlacemark,containerElement,'home');
 	}
 	
 	
@@ -509,10 +511,10 @@ function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
 	var longitude = address['longitude'];
 	
 	//i.e. a new blank address
-	if(address.length == '50'){
-		//TODO: change these values back
-		latitude ='40';
-		longitude='34';
+	if(bNodeKey.length == '50'){
+		//TODO: change these values to those of the garlik address
+		latitude = '40';
+		longitude = '34';
 		alert("new empty address");
 	}
 	
@@ -535,7 +537,6 @@ function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
 		geocoder.getLatLng(addressArray,geoCodeNewAddress);
    		
 	} else{
-	
 		var point = new GLatLng(latitude, longitude);
 		var marker = new GMarker(point,{title: prefix});	
 				
@@ -1421,6 +1422,10 @@ function addressDisplayToObjects(locationElement,prefix){
 			if(locationElement.childNodes[j].id == 'street3'){
 					isAddress=true;
 					globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street3'] = locationElement.childNodes[j].value;
+			} 
+			if(locationElement.childNodes[j].id == 'postalCode'){
+					isAddress=true;
+					globalFieldData.locationFields[prefix][locationElement.id][prefix+'PostalCode'] = locationElement.childNodes[j].value;
 			} 
 			if(locationElement.childNodes[j].id == 'city'){
 					isAddress=true;
