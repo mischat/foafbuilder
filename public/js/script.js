@@ -1656,7 +1656,7 @@ function createAccountsAddElement(container){
 
 }
 
-function createGenericAddElement(container,name,displayLabel){
+function createGenericAddElement(container,name,displayLabel,onClick){
 
 	/*create add link and attach it to the container*/
 	var addDiv = document.createElement("div");
@@ -1666,8 +1666,12 @@ function createGenericAddElement(container,name,displayLabel){
 	addLink.appendChild(document.createTextNode("+Add another "+displayLabel));
 	addLink.className="addLink";
 	
-	addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id);");
-
+	if(!onClick){
+		addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id);");
+	} else {
+		//TODO: add an option to set the onclick attribute from an argument
+		alert("calling an incomplet function");
+	}
 	addDiv.appendChild(addLink);
 	container.appendChild(addDiv);
 
