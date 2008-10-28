@@ -485,3 +485,11 @@ width:100%;
 }
 .otherButton{
 }
+
+/*location stuff*/
+#mapDiv{
+	float:left;
+	margin-left:auto;
+	margin-right:auto;	
+}
+

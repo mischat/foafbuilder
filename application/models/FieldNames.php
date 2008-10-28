@@ -99,7 +99,9 @@ class FieldNames {
 		//$this->allFieldNames['email'] = new EmailField($this->foafData);
 		$this->allFieldNames['foafPhone'] = new PhoneField($this->foafData);
 		$this->allFieldNames['foafMbox'] = new MboxField($this->foafData);
-		$this->allFieldNames['location'] = new LocationField($this->foafData);
+		$this->allFieldNames['nearestAirport'] = new NearestAirportField($this->foafData);
+		$this->allFieldNames['address'] = new AddressField($this->foafData);
+		$this->allFieldNames['basedNear'] = new BasedNearField($this->foafData);
 	}
 	
 	private function instantiatePicturesFields(){
