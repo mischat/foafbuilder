@@ -9,6 +9,9 @@ var prefixToGeoCodeDO;
 /*contains address details for geocoding so that the callback function can access them*/
 var addressDetailsToGeoCode = new Array();
 
+/*contains details for geocoding an existing address*/
+var existingAddressDetailsToGeoCode = new Array();
+
 /*contains based near details for reverse geocoding so that the callback function can access them*/
 var basedNearDetailsToGeoCode = new Array();
 
@@ -16,7 +19,7 @@ var basedNearDetailsToGeoCode = new Array();
 var geoCodeRequestFinished = false;
 
 /*google maps data*/
-var mapMarkers = new Array;
+var mapMarkers = new Array();
 var map;
 
 /*--------------------------permanent data functions---------------------------*/
@@ -157,7 +160,9 @@ function genericObjectsToDisplay(data){
 	renderHomepageFields(data);
 	renderPhoneFields(data);
 	renderMboxFields(data);
-	renderLocationFields(data);
+	renderAddressFields(data);
+	renderBasedNearFields(data);
+	renderNearestAirportFields(data);
 	renderDepictionFields(data);
 	renderImgFields(data);
 	renderKnowsFields(data);
@@ -456,25 +461,69 @@ function previewImage(containerElementId,name,source,file){
 
 
 /*Render the location map*/
-function renderLocationFields(data){
+function renderAddressFields(data){
 
-	if(!data || !data.locationFields || typeof(data.locationFields) == 'undefined'){
+	if(!data || !data.addressFields || typeof(data.addressFields) == 'undefined'){
 		return;
 	}
 	
 	/*build the container*/
-	var name = data.locationFields.name;
-	var label =	data.locationFields.displayLabel;
+	var name = data.addressFields.name;
+	var label =	data.addressFields.displayLabel;
 	var containerElement = createFieldContainer(name, label);
 
-	/*display a map*/
-	map = createMapElement(containerElement);
+	/*display a map if there isn't one already*/
+	if(!document.getElementById('mapDiv')){
+		map = createMapElement(containerElement);
+	}
 	
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
-		addBasedNearMarkers(data.locationFields['basedNear'],containerElement,map);	
-		addNearestAirportMarker(data.locationFields['nearestAirport'],containerElement,map);
-		addAddressMarkers(data.locationFields['office'],data.locationFields['home'],containerElement,map);			
+		addAddressMarkers(data.addressFields['office'],data.addressFields['home'],containerElement,map);			
+	}
+}
+
+/*Render the location map*/
+function renderNearestAirportFields(data){
+	if(!data || !data.nearestAirportFields || typeof(data.nearestAirportFields) == 'undefined'){
+		return;
+	}
+	
+	/*build the container*/
+	var name = data.nearestAirportFields.name;
+	var label =	data.nearestAirportFields.displayLabel;
+	var containerElement = createFieldContainer(name, label);
+
+	/*display a map if there isn't one already*/
+	if(!document.getElementById('mapDiv')){
+		map = createMapElement(containerElement);
+	}
+	
+	if(map){
+		/*render the markers on the map and add divs containing the information below*/
+		addNearestAirportMarker(data.nearestAirportFields['nearestAirport'],containerElement,map);			
+	}
+}
+
+/*Render the location map*/
+function renderBasedNearFields(data){
+	if(!data || !data.basedNearFields || typeof(data.basedNearFields) == 'undefined'){
+		return;
+	}
+	
+	/*build the container*/
+	var name = data.basedNearFields.name;
+	var label =	data.basedNearFields.displayLabel;
+	var containerElement = createFieldContainer(name, label);
+
+	/*display a map if there isn't one already*/
+	if(!document.getElementById('mapDiv')){
+		map = createMapElement(containerElement);
+	}
+	
+	if(map){
+		/*render the markers on the map and add divs containing the information below*/
+		addBasedNearMarkers(data.basedNearFields['basedNear'],containerElement,map);			
 	}
 }
 
@@ -539,13 +588,17 @@ function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
 	} else{
 		var point = new GLatLng(latitude, longitude);
 		var marker = new GMarker(point,{title: prefix});	
-				
+		
+		alert('Added marker (no geocode needed): ' +bNodeKey);
 		mapMarkers[bNodeKey] = marker;
+	
 		map.addOverlay(marker);
 		map.setCenter(point);
 		
 		createAddressDiv(title,address,bNodeKey,containerElement,latitude,longitude, prefix);
 	}
+	
+
 }
 
 /*turns a point into an address*/
@@ -579,6 +632,7 @@ function geoCodeNewAddress(point){
       	var marker = new GMarker(point,{title: prefix});	
       	
       	/*so we can access the markers in the future*/
+      	alert("Setting New Marker from Geocoding: "+bnode);
 		mapMarkers[bnode] = marker;
 		map.addOverlay(marker);
 		map.setCenter(point);	
@@ -619,7 +673,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	var streetInputElement = document.createElement('input');
 	streetInputElement.className='street';
 	streetInputElement.id = 'street';
-	streetInputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
+	streetInputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
 	locationDiv.appendChild(streetInputElement);
 	//populate it
 	if(address[prefix+'Street']){
@@ -633,7 +687,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	locationDiv.appendChild(street2LabelDiv);
 	var street2InputElement = document.createElement('input');
 	street2InputElement.id = 'street2';
-	street2InputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
+	street2InputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
 	locationDiv.appendChild(street2InputElement);
 	
 	//populate it
@@ -648,7 +702,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	locationDiv.appendChild(street3LabelDiv);
 	var street3InputElement = document.createElement('input');
 	street3InputElement.id = 'street3';
-	street3InputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
+	street3InputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
 	locationDiv.appendChild(street3InputElement);
 	//populate it
 	if(address[prefix+'Street3']){
@@ -662,7 +716,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	locationDiv.appendChild(postalCodeLabelDiv);
 	var postalCodeInputElement = document.createElement('input');
 	postalCodeInputElement.id = 'postalCode';
-	postalCodeInputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
+	postalCodeInputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
 	locationDiv.appendChild(postalCodeInputElement);
 	//populate it
 	if(address[prefix+'PostalCode']){
@@ -676,7 +730,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	locationDiv.appendChild(cityLabelDiv);
 	var cityInputElement = document.createElement('input');
 	cityInputElement.id = 'city';
-	cityInputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
+	cityInputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
 	locationDiv.appendChild(cityInputElement);
 	//populate it
 	if(address[prefix+'City']){
@@ -692,7 +746,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 	var countryInputElement = document.createElement('input');
 	countryInputElement.className='country';
 	countryInputElement.id = 'country';
-	countryInputElement.setAttribute('onChange',"addressDisplayToObjects(document.getElementById('"+bNodeKey+"'),'"+prefix+"')");
+	countryInputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
 	locationDiv.appendChild(countryInputElement);
 	if(address[prefix+'Country']){
 		countryInputElement.value = address[prefix+'Country'];
@@ -917,7 +971,7 @@ function updateLatLongText(holderName,marker){
 	}
 	    	
 	var latText = document.createTextNode("Latitude: " +marker.getLatLng().lat().toString().substr(0,8));
-	    	var longText = document.createTextNode("Longitude: " + marker.getLatLng().lng().toString().substr(0,8));
+	var longText = document.createTextNode("Longitude: " + marker.getLatLng().lng().toString().substr(0,8));
 	    	
 	latElement.appendChild(latText);
 	longElement.appendChild(longText);
@@ -1112,7 +1166,9 @@ function displayToObjects(name){
 			homepageFieldsDisplayToObjects();
 			break;
 		case 'load-contact-details':
-			locationDisplayToObjects();
+			addressDisplayToObjects();
+			nearestAirportDisplayToObjects();
+			basedNearDisplayToObjects();
 			mboxDisplayToObjects();
 			phoneDisplayToObjects();
 			break;
@@ -1334,151 +1390,189 @@ function birthdayDisplayToObjects(){
 
 }
 
-function locationDisplayToObjects(){
-	/*TODO: possibly keep addresses, based nears and airports in different places*/
-  	var containerElement = document.getElementById('location_container');
- 	
- 	//clear out the existing 'home' and 'office' properties
-	globalFieldData.locationFields['home'] = new Object();
-	globalFieldData.locationFields['office'] = new Object();
- 	
-  	for(i=0; i < containerElement.childNodes.length; i++){
-  		var locationElement = containerElement.childNodes[i];
-	
-  		if(locationElement.id != 'mapDiv'){
- 	
-  		    if(locationElement.className == 'location' 
-  				&& locationElement.id == 'nearestAirport'){
-  				//TODO: process nearest airport stuff here.  Possibly make the nearestAirport/basedNear/Address distinction more clear and consistent
-  				nearestAirportDisplayToObjects(locationElement);
-  			} 
-  			else if(locationElement.className == 'location'){
-  				basedNearDisplayToObjects(locationElement);
-  			} 
-  			else if(locationElement.className == 'homeAddress'){
-  				addressDisplayToObjects(locationElement,'home');
-  			}
-  			else if(locationElement.className == 'officeAddress'){
-  				addressDisplayToObjects(locationElement,'office');
-  			}
-  		}
-  	}
-}
-
 /*put nearestAirport data into the globalFieldData objects*/
-function nearestAirportDisplayToObjects(locationElement){
-	/*loop through the elements to make sure we save the right ones*/
-	for(j=0; j < locationElement.childNodes.length; j++){
+function nearestAirportDisplayToObjects(){
+
+	var containerElement = document.getElementById('nearestAirport_container');
 	
-		if((locationElement.childNodes[j].className == 'latitude' || locationElement.childNodes[j].className == 'longitude')
-			&& locationElement.childNodes[j].childNodes[0] && locationElement.childNodes[j].childNodes[0].nodeValue){
+	for(i=0; i < containerElement.childNodes.length; i++){
+	
+		var locationElement = containerElement.childNodes[i];
+		
+		if(locationElement.id != 'mapDiv'){
+			/*loop through the elements to make sure we save the right ones*/
+			for(j=0; j < locationElement.childNodes.length; j++){
 			
-				var coordArray = locationElement.childNodes[j].childNodes[0].nodeValue.split(' ');
-				
-				if(typeof(coordArray[1]) != 'undefined' && coordArray[1]){
-					globalFieldData.locationFields['nearestAirport'][locationElement.childNodes[j].className] = coordArray[1];
+				if((locationElement.childNodes[j].className == 'latitude' || locationElement.childNodes[j].className == 'longitude')
+					&& locationElement.childNodes[j].childNodes[0] && locationElement.childNodes[j].childNodes[0].nodeValue){
+					
+						var coordArray = locationElement.childNodes[j].childNodes[0].nodeValue.split(' ');
+						
+						if(typeof(coordArray[1]) != 'undefined' && coordArray[1]){
+							globalFieldData.nearestAirportFields['nearestAirport'][locationElement.childNodes[j].className] = coordArray[1];
+						}
+						
+				} else if(locationElement.childNodes[j].className == 'iataCode' || locationElement.childNodes[j].className == 'icaoCode'){
+						globalFieldData.nearestAirportFields['nearestAirport'][locationElement.childNodes[j].className] = locationElement.childNodes[j].value;	
 				}
-				
-		} else if(locationElement.childNodes[j].className == 'iataCode' || locationElement.childNodes[j].className == 'icaoCode'){
-				globalFieldData.locationFields['nearestAirport'][locationElement.childNodes[j].className] = locationElement.childNodes[j].value;	
+			}
 		}
 	}
 }
 
 /*put basedNear data into the globalFieldData objects*/
 function basedNearDisplayToObjects(locationElement){
-
-	/*loop through the elements to make sure we save the right ones*/
-	for(j=0; j < locationElement.childNodes.length; j++){
-		if((locationElement.childNodes[j].className == 'latitude' || locationElement.childNodes[j].className == 'longitude')
-			&& locationElement.childNodes[j].childNodes[0] && locationElement.childNodes[j].childNodes[0].nodeValue){
-				var coordArray = locationElement.childNodes[j].childNodes[0].nodeValue.split(' ');
-
-				if(typeof(coordArray[1]) != 'undefined' && coordArray[1]){
-					globalFieldData.locationFields['basedNear'][locationElement.id][locationElement.childNodes[j].className] = coordArray[1];
-				}
-		} 
+	var containerElement = document.getElementById('basedNear_container');
+	
+	for(i=0; i < containerElement.childNodes.length; i++){
+	
+		var locationElement = containerElement.childNodes[i];
+		
+		if(locationElement.id != 'mapDiv'){
+			/*loop through the elements to make sure we save the right ones*/
+			for(j=0; j < locationElement.childNodes.length; j++){
+				if((locationElement.childNodes[j].className == 'latitude' || locationElement.childNodes[j].className == 'longitude')
+					&& locationElement.childNodes[j].childNodes[0] && locationElement.childNodes[j].childNodes[0].nodeValue){
+						var coordArray = locationElement.childNodes[j].childNodes[0].nodeValue.split(' ');
+		
+						if(typeof(coordArray[1]) != 'undefined' && coordArray[1]){
+							globalFieldData.basedNearFields['basedNear'][locationElement.id][locationElement.childNodes[j].className] = coordArray[1];
+						}
+				} 
+			}
+		}
 	}
 }
 
-/*copies values from display for an address of type prefix (e.g. office, home) into the globalFieldData object*/
-function addressDisplayToObjects(locationElement,prefix){
+/*bNodeToPanTo is the bnode the map should pan to, if any*/
+function addressDisplayToObjects(){
+	placeAddressDisplayToObjects('home');
+	placeAddressDisplayToObjects('office');
+}
+
+/*copies values from display for an address of type prefix (e.g. office, home) into the globalFieldData object
+bNodeToPanTo specifies the bnode that the map should pan to, if any.*/
+function placeAddressDisplayToObjects(prefix,bNodeToPanTo){
    	
-	//create a new array for this particular address
-	globalFieldData.locationFields[prefix][locationElement.id] = new Object();
-	var isAddress = false;
+   	//clear out the existing 'home' and 'office' properties
+	globalFieldData.addressFields[prefix] = new Object();
 	
-	for(j=0; j < locationElement.childNodes.length; j++){
+   	var containerElement = document.getElementById('address_container');
+	
+	for(i=0; i < containerElement.childNodes.length; i++){
+	
+		var locationElement = containerElement.childNodes[i];
 		
-			/*address*/
-			if(locationElement.childNodes[j].id == 'street'){
-					isAddress=true;
-					globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street'] = locationElement.childNodes[j].value;
-			} 
-			if(locationElement.childNodes[j].id == 'street2'){
-					isAddress=true;
-					globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street2'] = locationElement.childNodes[j].value;
-			} 
-			if(locationElement.childNodes[j].id == 'street3'){
-					isAddress=true;
-					globalFieldData.locationFields[prefix][locationElement.id][prefix+'Street3'] = locationElement.childNodes[j].value;
-			} 
-			if(locationElement.childNodes[j].id == 'postalCode'){
-					isAddress=true;
-					globalFieldData.locationFields[prefix][locationElement.id][prefix+'PostalCode'] = locationElement.childNodes[j].value;
-			} 
-			if(locationElement.childNodes[j].id == 'city'){
-					isAddress=true;
-					globalFieldData.locationFields[prefix][locationElement.id][prefix+'City'] = locationElement.childNodes[j].value;
-			}
-			if(locationElement.childNodes[j].id == 'country'){
-					isAddress=true;
-					globalFieldData.locationFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
-			}
-			if(locationElement.childNodes[j].id == 'postalCode'){
-					isAddress=true;
-					globalFieldData.locationFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
-			}
+		if(locationElement.id != 'mapDiv' && locationElement.className == prefix+'Address'){
+			//create a new array for this particular address
+			globalFieldData.addressFields[prefix][locationElement.id] = new Object();
+			var isAddress = false;
 			
-		}
-		
-		if(isAddress){
-			//do the geo coding
-			geoCodeExistingAddress(locationElement.id,prefix);
-		}
+			for(j=0; j < locationElement.childNodes.length; j++){
+				
+					/*address*/
+					if(locationElement.childNodes[j].id == 'street'){
+							isAddress=true;
+							globalFieldData.addressFields[prefix][locationElement.id][prefix+'Street'] = locationElement.childNodes[j].value;
+					} 
+					if(locationElement.childNodes[j].id == 'street2'){
+							isAddress=true;
+							globalFieldData.addressFields[prefix][locationElement.id][prefix+'Street2'] = locationElement.childNodes[j].value;
+					} 
+					if(locationElement.childNodes[j].id == 'street3'){
+							isAddress=true;
+							globalFieldData.addressFields[prefix][locationElement.id][prefix+'Street3'] = locationElement.childNodes[j].value;
+					} 
+					if(locationElement.childNodes[j].id == 'postalCode'){
+							isAddress=true;
+							globalFieldData.addressFields[prefix][locationElement.id][prefix+'PostalCode'] = locationElement.childNodes[j].value;
+					} 
+					if(locationElement.childNodes[j].id == 'city'){
+							isAddress=true;
+							globalFieldData.addressFields[prefix][locationElement.id][prefix+'City'] = locationElement.childNodes[j].value;
+					}
+					if(locationElement.childNodes[j].id == 'country'){
+							isAddress=true;
+							globalFieldData.addressFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
+					}
+					if(locationElement.childNodes[j].id == 'postalCode'){
+							isAddress=true;
+							globalFieldData.addressFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
+					}
+					
+				}
+				
+				if(isAddress){
+					var doPan = false;
+					//only pan the map if a bnode has been passed in to pan it
+					if(typeof(bNodeToPanTo) != 'undefined' && locationElement.id==bNodeToPanTo){
+						//alert("topanto: "+bNodeToPanTo);
+						doPan = true
+					}
+					//do the geo coding to get lat and long
+					geoCodeExistingAddress(locationElement.id,prefix,doPan);
+				}
+			}
 		
 	}
+}
 	
 /*geocodes the address and updates the latitude/longitude fields and sets the appropriate element in the globalFieldData object*/
-function geoCodeExistingAddress(bNodeKey,prefix){
+function geoCodeExistingAddress(bNodeKey,prefix,doPan){
 
-		var addressArray = getProperties(globalFieldData.locationFields[prefix][bNodeKey]);//get the address
-
+		/*display the map*/
+	   	var mapDiv = document.getElementById('mapDiv');
+	   	if(mapDiv && typeof(mapDiv) != 'undefined'){
+	   		mapDiv.style.display = 'inline';
+	   		mapDiv.style.position = 'absolute';
+	   		mapDiv.style.left = (parseFloat(findPosX(document.getElementById('address_container')))-400)+'px'; 
+	   		mapDiv.style.top = findPosY(document.getElementById('address_container'))+'px';
+	   	}
+	   
+		var addressArray = getProperties(globalFieldData.addressFields[prefix][bNodeKey]);//get the address
+		
 		//some variables for the callback function
-		bnodeToGeoCodeDO = bNodeKey;	
-		prefixToGeoCodeDO = prefix;
+		var theseDetails = new Array();
+		theseDetails['bnode'] = bNodeKey;	
+		theseDetails['prefix'] = prefix;
+		theseDetails['doPan'] = doPan;//whether to pan or not
+		existingAddressDetailsToGeoCode.push(theseDetails);
+		
+		/*do the geocoding*/
 		var geocoder = new GClientGeocoder();
-	
-		geocoder.getLatLng(
-	   	addressArray,
-	    function(point) {
+		geocoder.getLatLng(addressArray,displayToObjectsGeoCode);
+	 
+}
+
+function displayToObjectsGeoCode(point) {
 	    	if (!point) {
 	        	//TODO: possibly do something here, maybe do nothing
 	      	} else {
+	      	
+	      		/*so we use the right variables for each request*/
+	  			if(typeof(displayToObjectsGeoCode.count) == 'undefined'){
+	  				displayToObjectsGeoCode.count = 0;
+	  			} else{
+	  				displayToObjectsGeoCode.count++;
+	  			}
 	      		//move the point and the centre of the map
-	      		mapMarkers[bnodeToGeoCodeDO].setLatLng(point);
-	      		
+	      		//TODO: this should be done in the same way as the other geocode.
+	      		mapMarkers[existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode']].setLatLng(point);
+			
 	      		//update the display to show the new latitude and longitude
-				updateLatLongText(bnodeToGeoCodeDO,mapMarkers[bnodeToGeoCodeDO]);
-				
+				updateLatLongText(existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode'],mapMarkers[existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode']]);
+
 				//set the global data with the appropriate stuff
-				globalFieldData.locationFields[prefixToGeoCodeDO][bnodeToGeoCodeDO]['latitude'] = point.lat();
-				globalFieldData.locationFields[prefixToGeoCodeDO][bnodeToGeoCodeDO]['longitude'] = point.lng();
+				globalFieldData.addressFields[existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['prefix']][existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode']]['latitude'] = point.lat();
+				globalFieldData.addressFields[existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['prefix']][existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode']]['longitude'] = point.lng();
+				
+				if(existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['doPan']){
+					map.panTo(point);
+					//alert(existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode']);
+	      		}
 	      	}			
-	   	} );
 }
-
-
+	   	
 function accountsDisplayToObjects(){
 
 	/*TODO This will change when the display is improved + need a bit less hardcoding possibly*/
@@ -1556,7 +1650,7 @@ function createMapElement(container){
       if (GBrowserIsCompatible()) {
       	var mapDiv = document.createElement('div');
       	mapDiv.id = 'mapDiv'
-      	container.appendChild(mapDiv);
+      	document.body.appendChild(mapDiv);
         
         var map = new GMap2(mapDiv);
         map.setCenter(new GLatLng(37.4419, -122.1419), 13);
@@ -1670,7 +1764,7 @@ function createGenericAddElement(container,name,displayLabel,onClick){
 		addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id);");
 	} else {
 		//TODO: add an option to set the onclick attribute from an argument
-		alert("calling an incomplet function");
+		alert("calling an incomplete function");
 	}
 	addDiv.appendChild(addLink);
 	container.appendChild(addDiv);
