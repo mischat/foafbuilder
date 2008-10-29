@@ -502,7 +502,7 @@ function renderBasedNearFields(data){
 	
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
-		addBasedNearMarkers(data.basedNearFields['basedNear'],containerElement,map);			
+		addBasedNearMarkers(data.basedNearFields['basedNear'],containerElement,map);		
 	}
 }
 
@@ -838,7 +838,16 @@ function createAirportDiv(latitude,longitude,iataCode,icaoCode,containerElement)
 function addBasedNearMarkers(basedNearArray, containerElement){
 	
 	/*loop over each based_near instance*/
-	for(bNodeKey in basedNearArray){
+	for(bNodeKey in basedNearArray){			
+		createSingleBasedNearMarker(containerElement.id, bNodeKey, basedNearArray[bNodeKey]);	
+	}
+	createBasedNearAddElement(containerElement);
+	  
+}
+
+function createSingleBasedNearMarker(containerElementId, bNodeKey, basedNearValue){
+		
+		var containerElement = document.getElementById(containerElementId);
 		/*create an element to hold each location*/
 		var locationDiv = createLocationElement(containerElement, bNodeKey);
 		
@@ -849,8 +858,8 @@ function addBasedNearMarkers(basedNearArray, containerElement){
 		basedNearTitleDiv.appendChild(document.createTextNode(title));
 		locationDiv.appendChild(basedNearTitleDiv);
 	
-		var latitude = basedNearArray[bNodeKey]['latitude'];
-		var longitude = basedNearArray[bNodeKey]['longitude'];
+		var latitude = basedNearValue['latitude'];
+		var longitude = basedNearValue['longitude'];
 		
 		/*display the latitude and longitude coords*/
 		var latitudeDiv = document.createElement('div');
@@ -863,15 +872,9 @@ function addBasedNearMarkers(basedNearArray, containerElement){
 		locationDiv.appendChild(longitudeDiv);
 		latitudeDiv.appendChild(document.createTextNode('Latitude: '+latitude));
 		longitudeDiv.appendChild(document.createTextNode('Longitude: '+longitude));
-			
-		createSingleBasedNearMarker(latitude, longitude, locationDiv.id,map);	
-	  }
-
-
-}
-
-function createSingleBasedNearMarker(latitude, longitude, holderName, map){
-
+		
+		var holderName = locationDiv.id;
+		
 		var geocoder = new GClientGeocoder()
 		geocoder.getLocations(new GLatLng(latitude,longitude), updateBasedNearAddress)
 		
@@ -928,6 +931,7 @@ function updateBasedNearAddress(placemark){
 		}
 	}
 	container.appendChild(elem);
+
 }
 
 /*updates the lat long text, for example, when a marker is dragged*/
@@ -1738,6 +1742,45 @@ function createFoafAccountServiceHomepageInputElement(value,container){
 	container.appendChild(selectElement);
 }
 
+function createBasedNearAddElement(container){
+	//TODO: continue from here
+	/*create add link and attach it to the container*/
+	var addDiv = document.createElement("div");
+	addDiv.id = "basedNearAddLinkContainer";
+	addDiv.className = "addLinkContainer";
+	var addLink = document.createElement('a');
+	addLink.appendChild(document.createTextNode("+Add a point I'm based near"));
+	addLink.className="addLink";
+	addLink.setAttribute("onclick" , "createBasedNearElementAboveAddLink('"+container.id+"',this.parentNode.id)");
+	addDiv.appendChild(addLink);
+	container.appendChild(addDiv);
+}
+
+/*creates a based near element and ensures that it appears below the add link container*/ 
+function createBasedNearElementAboveAddLink(containerId, addLinkContainerId){
+
+	//remove the add link
+	var addLinkContainer = document.getElementById(addLinkContainerId);
+	var container = addLinkContainer.parentNode;
+	container.removeChild(addLinkContainer);
+	
+	//create a big random string as we don't actually know what the bnode for this one is and put the details in the globalFieldData object
+	var bNodeKey = createRandomString(50);
+	var thisBasedNear = new Object()
+	thisBasedNear.latitude = '50';
+	thisBasedNear.longitude = '10';
+	globalFieldData.basedNearFields.basedNear[bNodeKey] = thisBasedNear;
+	
+	//create a new based near marker and div
+	createSingleBasedNearMarker(containerId,bNodeKey,thisBasedNear);
+	
+	//re-add the add link
+	container.appendChild(addLinkContainer);
+	
+	//display the map and map to this point
+	displayMap(bNodeKey);
+}
+
 function createAccountsAddElement(container){
 
 	/*create add link and attach it to the container*/
@@ -1745,7 +1788,7 @@ function createAccountsAddElement(container){
 	addDiv.id = "addLinkContainer";
 	addDiv.className = "addLinkContainer";
 	var addLink = document.createElement('a');
-	addLink.appendChild(document.createTextNode("+Add another Account"));
+	addLink.appendChild(document.createTextNode("+Add an Account"));
 	addLink.className="addLink";
 	addLink.setAttribute("onclick" , "createEmptyHoldsAccountElement(this.parentNode.parentNode,null)");
 	addDiv.appendChild(addLink);
@@ -1753,7 +1796,7 @@ function createAccountsAddElement(container){
 
 }
 
-function createGenericAddElement(container,name,displayLabel,onClick){
+function createGenericAddElement(container,name,displayLabel){
 
 	/*create add link and attach it to the container*/
 	var addDiv = document.createElement("div");
@@ -1763,12 +1806,8 @@ function createGenericAddElement(container,name,displayLabel,onClick){
 	addLink.appendChild(document.createTextNode("+Add another "+displayLabel));
 	addLink.className="addLink";
 	
-	if(!onClick){
-		addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id);");
-	} else {
-		//TODO: add an option to set the onclick attribute from an argument
-		alert("calling an incomplete function");
-	}
+	addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id);");
+	
 	addDiv.appendChild(addLink);
 	container.appendChild(addDiv);
 
