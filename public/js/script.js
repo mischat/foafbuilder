@@ -2,10 +2,6 @@
 var globalFieldData;
 var currentPage;//the page the user is on e.g. load-contact-details etc.
 
-/*for use by the displayToObjects function*/
-var bnodeToGeoCodeDO;	
-var prefixToGeoCodeDO;
-
 /*contains address details for geocoding so that the callback function can access them*/
 var addressDetailsToGeoCode = new Array();
 
@@ -14,9 +10,6 @@ var existingAddressDetailsToGeoCode = new Array();
 
 /*contains based near details for reverse geocoding so that the callback function can access them*/
 var basedNearDetailsToGeoCode = new Array();
-
-/*so we can wait for a geocode request to finish*/
-var geoCodeRequestFinished = false;
 
 /*google maps data*/
 var mapMarkers = new Array();
@@ -119,14 +112,12 @@ function saveFoaf(){
 
 /*Writes FOAF to screen*/
 function renderOther() {
-        //$.post("/writer/write-Foaf", { }, function(data){alert(data.name);console.log(data.time);},"json");
 		url = document.getElementById('writeUri').value;
         $.post("/writer/write-foafn3", {uri: url }, function(data){drawOtherTextarea(data);},null);
 }
 
 /*Clears FOAF model from session*/
 function clearFoaf() {
-        //$.post("/ajax/clear-Foaf", { }, function(data){alert(data.name);console.log(data.time);},"json");
         $.post("/ajax/clear-Foaf", { }, function(){},null);
         
         /*empty all the text inputs*/
@@ -148,7 +139,10 @@ function genericObjectsToDisplay(data){
 	
 	/*set the global variable which holds the data*/
 	globalFieldData = data;
-	  	
+	
+	/*do some map stuff*/
+	createMapElement();
+	
 	/*clear out the right hand pane*/
 	document.getElementById('personal');
   	document.getElementById('personal').innerHTML = '';	
@@ -471,11 +465,6 @@ function renderAddressFields(data){
 	var name = data.addressFields.name;
 	var label =	data.addressFields.displayLabel;
 	var containerElement = createFieldContainer(name, label);
-
-	/*display a map if there isn't one already*/
-	if(!document.getElementById('mapDiv')){
-		map = createMapElement(containerElement);
-	}
 	
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
@@ -494,11 +483,6 @@ function renderNearestAirportFields(data){
 	var label =	data.nearestAirportFields.displayLabel;
 	var containerElement = createFieldContainer(name, label);
 
-	/*display a map if there isn't one already*/
-	if(!document.getElementById('mapDiv')){
-		map = createMapElement(containerElement);
-	}
-	
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
 		addNearestAirportMarker(data.nearestAirportFields['nearestAirport'],containerElement,map);			
@@ -515,11 +499,6 @@ function renderBasedNearFields(data){
 	var name = data.basedNearFields.name;
 	var label =	data.basedNearFields.displayLabel;
 	var containerElement = createFieldContainer(name, label);
-
-	/*display a map if there isn't one already*/
-	if(!document.getElementById('mapDiv')){
-		map = createMapElement(containerElement);
-	}
 	
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
@@ -564,12 +543,10 @@ function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
 		//TODO: change these values to those of the garlik address
 		latitude = '40';
 		longitude = '34';
-		alert("new empty address");
 	}
 	
 	/*there is an address there but the latitude and longitude isn't set*/
 	if(!latitude && !longitude){
-		//alert("do geocode"+prefix);
 		var addressArray = getProperties(address);
 		
 		/*array to pass to the geocoder's callback function*/
@@ -589,7 +566,6 @@ function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
 		var point = new GLatLng(latitude, longitude);
 		var marker = new GMarker(point,{title: prefix});	
 		
-		alert('Added marker (no geocode needed): ' +bNodeKey);
 		mapMarkers[bNodeKey] = marker;
 	
 		map.addOverlay(marker);
@@ -603,26 +579,23 @@ function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
 
 /*turns a point into an address*/
 function geoCodeNewAddress(point){
-	  /*so we use the right variables for each request*/
-	  if(typeof(geoCodeNewAddress.count) == 'undefined'){
-	  	geoCodeNewAddress.count = 0;
-	  } else{
-	  	geoCodeNewAddress.count++;
-	  }
-	  
-      if (!point) {
-      	alert("no point");
-      	//TODO: possibly do something here, maybe do nothing
-      } else {
-      	
+  /*so we use the right variables for each request*/
+  if(typeof(geoCodeNewAddress.count) == 'undefined'){
+  	geoCodeNewAddress.count = 0;
+  } else{
+  	geoCodeNewAddress.count++;
+  }
   
+     if (!point) {
+     	//TODO: possibly do something here, maybe do nothing
+     } else {
+		      	  
       	/*get some variables according to the count*/
 		var title = addressDetailsToGeoCode[geoCodeNewAddress.count]['title'];
 		var address = addressDetailsToGeoCode[geoCodeNewAddress.count]['address'];
 		var bnode = addressDetailsToGeoCode[geoCodeNewAddress.count]['bnode'];
 		var container = addressDetailsToGeoCode[geoCodeNewAddress.count]['container'];
 		var prefix = addressDetailsToGeoCode[geoCodeNewAddress.count]['prefix'];
-		
 		
 		/*the geocoded coords*/
         latitude = point.lat();
@@ -632,7 +605,6 @@ function geoCodeNewAddress(point){
       	var marker = new GMarker(point,{title: prefix});	
       	
       	/*so we can access the markers in the future*/
-      	alert("Setting New Marker from Geocoding: "+bnode);
 		mapMarkers[bnode] = marker;
 		map.addOverlay(marker);
 		map.setCenter(point);	
@@ -943,7 +915,6 @@ function updateBasedNearAddress(placemark){
 	} else{
 		updateBasedNearAddress.count++;
 	}
-	//alert(basedNearDetailsToGeoCode[updateBasedNearAddress.count]['containerId']);
 	
 	var elem = document.createElement('div');
 	elem.className= 'basedNearAddress';
@@ -957,7 +928,6 @@ function updateBasedNearAddress(placemark){
 		}
 	}
 	container.appendChild(elem);
-	//alert(placemark.Placemark[0].address);
 }
 
 /*updates the lat long text, for example, when a marker is dragged*/
@@ -1505,11 +1475,11 @@ function placeAddressDisplayToObjects(prefix,bNodeToPanTo){
 				if(isAddress){
 					var doPan = false;
 					//only pan the map if a bnode has been passed in to pan it
-					if(typeof(bNodeToPanTo) != 'undefined' && locationElement.id==bNodeToPanTo){
-						//alert("topanto: "+bNodeToPanTo);
+					if(typeof(bNodeToPanTo) != 'undefined' && bNodeToPanTo && locationElement.id==bNodeToPanTo){
 						doPan = true
 					}
 					//do the geo coding to get lat and long
+					//FIX BNODEKEY BUG.  It does the same in both cases
 					geoCodeExistingAddress(locationElement.id,prefix,doPan);
 				}
 			}
@@ -1521,54 +1491,75 @@ function placeAddressDisplayToObjects(prefix,bNodeToPanTo){
 function geoCodeExistingAddress(bNodeKey,prefix,doPan){
 
 		/*display the map*/
-	   	var mapDiv = document.getElementById('mapDiv');
-	   	if(mapDiv && typeof(mapDiv) != 'undefined'){
-	   		mapDiv.style.display = 'inline';
-	   		mapDiv.style.position = 'absolute';
-	   		mapDiv.style.left = (parseFloat(findPosX(document.getElementById('address_container')))-400)+'px'; 
-	   		mapDiv.style.top = findPosY(document.getElementById('address_container'))+'px';
+		if(doPan){
+			displayMap(bNodeKey);
 	   	}
-	   
+	   	
 		var addressArray = getProperties(globalFieldData.addressFields[prefix][bNodeKey]);//get the address
+		
 		
 		//some variables for the callback function
 		var theseDetails = new Array();
 		theseDetails['bnode'] = bNodeKey;	
-		theseDetails['prefix'] = prefix;
 		theseDetails['doPan'] = doPan;//whether to pan or not
-		existingAddressDetailsToGeoCode.push(theseDetails);
+		existingAddressDetailsToGeoCode[prefix] = theseDetails;
 		
 		/*do the geocoding*/
 		var geocoder = new GClientGeocoder();
-		geocoder.getLatLng(addressArray,displayToObjectsGeoCode);
-	 
+		if(prefix=='home'){
+			geocoder.getLatLng(addressArray,homeDisplayToObjectsGeoCode);
+	 	} else {
+	 		geocoder.getLatLng(addressArray,officeDisplayToObjectsGeoCode);
+	 	}
 }
 
-function displayToObjectsGeoCode(point) {
+/*displays the map level with the element shown*/
+function displayMap(anchorElementId){
+		var mapDiv = document.getElementById('mapDiv');
+	   	if(mapDiv && typeof(mapDiv) != 'undefined'){
+	   		mapDiv.style.display = 'inline';
+	   		mapDiv.style.position = 'absolute';
+	   		mapDiv.style.left = (parseFloat(findPosX(document.getElementById(anchorElementId)))-400)+'px'; 
+	   		mapDiv.style.top = findPosY(document.getElementById(anchorElementId))+'px';
+	   	}
+}
+
+function homeDisplayToObjectsGeoCode(point) {
+		if (!point) {
+			//TODO: possibly do something here, maybe do nothing
+	    } else {
+	    	//move the point and the centre of the map
+	      	mapMarkers[existingAddressDetailsToGeoCode['home']['bnode']].setLatLng(point);
+    		
+	      	//update the display to show the new latitude and longitude
+			updateLatLongText(existingAddressDetailsToGeoCode['home']['bnode'],mapMarkers[existingAddressDetailsToGeoCode['home']['bnode']]);
+
+			//set the global data with the appropriate stuff
+			globalFieldData.addressFields['home'][existingAddressDetailsToGeoCode['home']['bnode']]['latitude'] = point.lat();
+			globalFieldData.addressFields['home'][existingAddressDetailsToGeoCode['home']['bnode']]['longitude'] = point.lng();
+				
+			if(existingAddressDetailsToGeoCode['home']['doPan']){
+				map.panTo(point);
+	      	}
+	  	}			
+}
+
+function officeDisplayToObjectsGeoCode(point) {
 	    	if (!point) {
 	        	//TODO: possibly do something here, maybe do nothing
 	      	} else {
-	      	
-	      		/*so we use the right variables for each request*/
-	  			if(typeof(displayToObjectsGeoCode.count) == 'undefined'){
-	  				displayToObjectsGeoCode.count = 0;
-	  			} else{
-	  				displayToObjectsGeoCode.count++;
-	  			}
 	      		//move the point and the centre of the map
-	      		//TODO: this should be done in the same way as the other geocode.
-	      		mapMarkers[existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode']].setLatLng(point);
-			
-	      		//update the display to show the new latitude and longitude
-				updateLatLongText(existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode'],mapMarkers[existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode']]);
+	      		mapMarkers[existingAddressDetailsToGeoCode['office']['bnode']].setLatLng(point);
+				
+				//update the display to show the new latitude and longitude
+				updateLatLongText(existingAddressDetailsToGeoCode['office']['bnode'],mapMarkers[existingAddressDetailsToGeoCode['office']['bnode']]);
 
 				//set the global data with the appropriate stuff
-				globalFieldData.addressFields[existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['prefix']][existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode']]['latitude'] = point.lat();
-				globalFieldData.addressFields[existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['prefix']][existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode']]['longitude'] = point.lng();
+				globalFieldData.addressFields['office'][existingAddressDetailsToGeoCode['office']['bnode']]['latitude'] = point.lat();
+				globalFieldData.addressFields['office'][existingAddressDetailsToGeoCode['office']['bnode']]['longitude'] = point.lng();
 				
-				if(existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['doPan']){
+				if(existingAddressDetailsToGeoCode['office']['doPan']){
 					map.panTo(point);
-					//alert(existingAddressDetailsToGeoCode[displayToObjectsGeoCode.count]['bnode']);
 	      		}
 	      	}			
 }
@@ -1647,19 +1638,31 @@ function accountsDisplayToObjects(){
 
 /*creates and returns a google map*/
 function createMapElement(container){
-      if (GBrowserIsCompatible()) {
-      	var mapDiv = document.createElement('div');
-      	mapDiv.id = 'mapDiv'
-      	document.body.appendChild(mapDiv);
-        
-        var map = new GMap2(mapDiv);
-        map.setCenter(new GLatLng(37.4419, -122.1419), 13);
-        
-        var mapControl = new GSmallMapControl();
-		map.addControl(mapControl);
-		
-        return map;
-      }
+
+  		/*reset any previously drawn map*/
+		var addressDetailsToGeoCode = new Array();
+		var existingAddressDetailsToGeoCode = new Array();
+		var basedNearDetailsToGeoCode = new Array();
+		mapMarkers = new Array();
+  		map = null;
+  		if(document.getElementById('mapDiv')){
+  			document.getElementById('mapDiv').parentNode.removeChild(document.getElementById('mapDiv'));	
+  		}
+  		
+
+     	if (GBrowserIsCompatible()) {
+     		var mapDiv = document.createElement('div');
+     		mapDiv.id = 'mapDiv'
+     		document.body.appendChild(mapDiv);
+       
+       		map = new GMap2(mapDiv);
+       		map.setCenter(new GLatLng(37.4419, -122.1419), 13);
+       
+       		var mapControl = new GSmallMapControl();
+			map.addControl(mapControl);
+	
+       		return map;
+     	}
 }
 
 /*creates and appends a field container for the given name if it is not already there*/
@@ -1967,7 +1970,7 @@ function createLocationElement(attachElement, bnodeId,optionalClassName,softRemo
 	var locationDiv = document.createElement("div");
 	locationDiv.setAttribute('class',optionalClassName);
 	locationDiv.id = bnodeId;
-	locationDiv.setAttribute("onclick","map.panTo(mapMarkers['"+bnodeId+"'].getLatLng())");
+	locationDiv.setAttribute("onclick","map.panTo(mapMarkers['"+bnodeId+"'].getLatLng());displayMap('"+bnodeId+"');");
 	attachElement.appendChild(locationDiv);
 	
 	/*create remove link and attach it to the location div*/
