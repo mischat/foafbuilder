@@ -493,3 +493,8 @@ width:100%;
 	margin-right:auto;	
 }
 
+
+/*special airport autocomplete div*/
+#airport_autocomplete{
+	display:none;	
+}
