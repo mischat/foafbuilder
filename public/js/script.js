@@ -747,7 +747,6 @@ function addNearestAirportMarker(nearestAirport,containerElement,map){
 		iataCode = nearestAirport['iataCode'];
 	}
 	
-	//TODO: possibly render both of these codes
 	if(iataCode){
 		geocoder.getLatLng(
     	iataCode,
@@ -786,6 +785,20 @@ function addNearestAirportMarker(nearestAirport,containerElement,map){
 	}
 }
 
+/*gets the already rendered autocomplete div and attaches it to the container given*/
+function displayAndAttachAirportAutocompleteDiv(container){
+
+	/*get the already rendered autocomplete div*/
+	var autocompleteDiv = document.getElementById('airport_autocomplete');
+	
+	/*remove it from its current location and reattach it to our container*/
+	autocompleteDiv.parentNode.removeChild(autocompleteDiv);
+	container.appendChild(autocompleteDiv);
+	
+	/*make it display*/
+	autocompleteDiv.style.display = 'inline';
+}
+
 function createAirportDiv(latitude,longitude,iataCode,icaoCode,containerElement){
 	var locationDiv = createLocationElement(containerElement, "nearestAirport");
 	
@@ -800,6 +813,9 @@ function createAirportDiv(latitude,longitude,iataCode,icaoCode,containerElement)
 	longitudeDiv.className = 'longitude';
 	locationDiv.appendChild(longitudeDiv);
 	
+	displayAndAttachAirportAutocompleteDiv(locationDiv);
+	
+	locationDiv.appendChild
 	/*actually display the airport code(s)*/
 	//TODO: add some sort of geocoding to redraw the pin when one of these is changed
 	/*TODO: Need to make airport name lookupperable both ways so that people can edit it... it's not easily editable at the moment
@@ -2277,6 +2293,11 @@ function updateProfilePageUrl(container){
 			profilePageElement.value = pageValue;
 		}
 	} 
+}
+
+/*gets airport codes from the name of the airport*/
+function getCodesFromAirportName(value){
+	alert(value+" ... and now I\'m trying to get codes for this");
 }
 
 /*------------------------------miscellaneous utils-------------------------------*/
