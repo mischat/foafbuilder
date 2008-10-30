@@ -1148,7 +1148,6 @@ function displayToObjects(name){
 			basedNearDisplayToObjects();
 			mboxDisplayToObjects();
 			phoneDisplayToObjects();
-			alert(globalFieldData.basedNearFields['basedNear']);
 			break;
 		case 'load-accounts':
 			accountsDisplayToObjects();
@@ -1782,11 +1781,9 @@ function createBasedNearElementAboveAddLink(containerId, addLinkContainerId){
 	
 	//if this is the first based near
 	globalFieldData.basedNearFields.basedNear[bNodeKey] = thisBasedNear;
-	//alert(globalFieldData.basedNearFields.basedNear[bNodeKey].latitude);
-	alert("Lat on create in globalFieldData obj: "+(globalFieldData.basedNearFields.basedNear[bNodeKey].latitude));
+
 	//create a new based near marker and div
 	createSingleBasedNearMarker(containerId,bNodeKey,thisBasedNear);
-	
 	
 	//re-add the add link
 	container.appendChild(addLinkContainer);
