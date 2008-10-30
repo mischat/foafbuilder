@@ -102,9 +102,11 @@ function loadFoaf(name){
 
 /*saves all the foaf data*/
 function saveFoaf(){
-	displayToObjects(currentPage);
 	jsonstring = JSON.serialize(globalFieldData);
+	
+	displayToObjects(currentPage);
 
+	
 	//TODO use jquery event handler to deal with errors on this request
   	$.post("/ajax/save-Foaf", {model : jsonstring});
 }
@@ -499,6 +501,7 @@ function renderBasedNearFields(data){
 	var name = data.basedNearFields.name;
 	var label =	data.basedNearFields.displayLabel;
 	var containerElement = createFieldContainer(name, label);
+	
 	
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
@@ -1145,6 +1148,7 @@ function displayToObjects(name){
 			basedNearDisplayToObjects();
 			mboxDisplayToObjects();
 			phoneDisplayToObjects();
+			alert(globalFieldData.basedNearFields['basedNear']);
 			break;
 		case 'load-accounts':
 			accountsDisplayToObjects();
@@ -1163,6 +1167,7 @@ function displayToObjects(name){
 			return null;
 			break;
 	}
+	
 	
 	//TODO MISCHA
 	//birthdayDisplayToObjects();
@@ -1396,7 +1401,11 @@ function nearestAirportDisplayToObjects(){
 
 /*put basedNear data into the globalFieldData objects*/
 function basedNearDisplayToObjects(locationElement){
+	
 	var containerElement = document.getElementById('basedNear_container');
+	
+	//clear out the existing one
+	globalFieldData.basedNearFields['basedNear'] = new Object();
 	
 	for(i=0; i < containerElement.childNodes.length; i++){
 	
@@ -1410,12 +1419,17 @@ function basedNearDisplayToObjects(locationElement){
 						var coordArray = locationElement.childNodes[j].childNodes[0].nodeValue.split(' ');
 		
 						if(typeof(coordArray[1]) != 'undefined' && coordArray[1]){
+							//create an new array for this bnode (locationElement.id)
+							if(typeof(globalFieldData.basedNearFields['basedNear'][locationElement.id]) == 'undefined' || !globalFieldData.basedNearFields['basedNear'][locationElement.id]){
+								globalFieldData.basedNearFields['basedNear'][locationElement.id] = new Object();
+							}
 							globalFieldData.basedNearFields['basedNear'][locationElement.id][locationElement.childNodes[j].className] = coordArray[1];
 						}
 				} 
 			}
 		}
 	}
+	
 }
 
 /*bNodeToPanTo is the bnode the map should pan to, if any*/
@@ -1466,10 +1480,6 @@ function placeAddressDisplayToObjects(prefix,bNodeToPanTo){
 							globalFieldData.addressFields[prefix][locationElement.id][prefix+'City'] = locationElement.childNodes[j].value;
 					}
 					if(locationElement.childNodes[j].id == 'country'){
-							isAddress=true;
-							globalFieldData.addressFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
-					}
-					if(locationElement.childNodes[j].id == 'postalCode'){
 							isAddress=true;
 							globalFieldData.addressFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
 					}
@@ -1769,10 +1779,14 @@ function createBasedNearElementAboveAddLink(containerId, addLinkContainerId){
 	var thisBasedNear = new Object()
 	thisBasedNear.latitude = '50';
 	thisBasedNear.longitude = '10';
-	globalFieldData.basedNearFields.basedNear[bNodeKey] = thisBasedNear;
 	
+	//if this is the first based near
+	globalFieldData.basedNearFields.basedNear[bNodeKey] = thisBasedNear;
+	//alert(globalFieldData.basedNearFields.basedNear[bNodeKey].latitude);
+	alert("Lat on create in globalFieldData obj: "+(globalFieldData.basedNearFields.basedNear[bNodeKey].latitude));
 	//create a new based near marker and div
 	createSingleBasedNearMarker(containerId,bNodeKey,thisBasedNear);
+	
 	
 	//re-add the add link
 	container.appendChild(addLinkContainer);
