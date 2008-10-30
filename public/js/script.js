@@ -730,6 +730,7 @@ function createAddressDiv(title,address,bNodeKey,containerElement, latitude, lon
 }
 
 /*add markers for all the contact:Nearest airports*/
+//FIXME: I'm not sure whether this is going Ok
 function addNearestAirportMarker(nearestAirport,containerElement,map){
 	
 	if(!nearestAirport || typeof(nearestAirport) == 'undefined'){
@@ -737,8 +738,8 @@ function addNearestAirportMarker(nearestAirport,containerElement,map){
 	}
 	
 	var geocoder = new GClientGeocoder();
-	var icaoCode = null;
-	var iataCode = null;
+	var icaoCode = '';
+	var iataCode = '';
 	
 	if(nearestAirport['icaoCode']){
 		icaoCode = nearestAirport['icaoCode'];		
@@ -747,42 +748,7 @@ function addNearestAirportMarker(nearestAirport,containerElement,map){
 		iataCode = nearestAirport['iataCode'];
 	}
 	
-	if(iataCode){
-		geocoder.getLatLng(
-    	iataCode,
-    		function(point) {
-      			if (!point) {
-        			//TODO: possibly do something here, maybe do nothing
-      			} else {
-        			var marker = new GMarker(point,{title: "nearestAirport"});
-    				mapMarkers["nearestAirport"] = marker;
-        			map.addOverlay(marker);
-        			
-        			createAirportDiv(point.lat(),point.lng(),iataCode,icaoCode,containerElement);
-        			
-        			//TODO:need to have something that decides sensibly where to centre the map
-      				map.setCenter(point, 13);
-      			}			
-   			}
-   		);
-	} 
-	else if(icaoCode){
-		geocoder.getLatLng(
-    	icaoCode,
-    		function(point) {
-      			if (!point) {	
-      				//TODO: possibly do something here, maybe do nothing
-      			} else {
-        			var marker = new GMarker(point,{title: "My Nearest Airport"});
-        			mapMarkers["nearestAirport"] = marker;
-        			map.addOverlay(marker);
-        			createAirportDiv(point.lat(),point.lng(),iataCode,icaoCode,containerElement);
-        			
-      				map.setCenter(point, 13);
-      			}			
-   			}
-   		);
-	}
+	createAirportDiv(iataCode,icaoCode,containerElement);
 }
 
 /*gets the already rendered autocomplete div and attaches it to the container given*/
@@ -799,59 +765,86 @@ function displayAndAttachAirportAutocompleteDiv(container){
 	autocompleteDiv.style.display = 'inline';
 }
 
-function createAirportDiv(latitude,longitude,iataCode,icaoCode,containerElement){
+function createAirportDiv(iataCode,icaoCode,containerElement){
 	var locationDiv = createLocationElement(containerElement, "nearestAirport");
 	
 	/*display the latitude and longitude coords and the codes for the airport*/
 	var latitudeDiv = document.createElement('div');
-	latitudeDiv.appendChild(document.createTextNode('Latitude: '+latitude));
+	latitudeDiv.appendChild(document.createTextNode('Latitude: '));
 	latitudeDiv.className = 'latitude';
+	latitudeDiv.id = 'latitude_nearestAirport';
 	locationDiv.appendChild(latitudeDiv);
 		
 	var longitudeDiv = document.createElement('div');
-	longitudeDiv.appendChild(document.createTextNode('Longitude: '+longitude));
+	longitudeDiv.appendChild(document.createTextNode('Longitude: '));
 	longitudeDiv.className = 'longitude';
+	longitudeDiv.id = 'longitude_nearestAirport';
 	locationDiv.appendChild(longitudeDiv);
 	
 	displayAndAttachAirportAutocompleteDiv(locationDiv);
 	
 	locationDiv.appendChild
-	/*actually display the airport code(s)*/
-	//TODO: add some sort of geocoding to redraw the pin when one of these is changed
-	/*TODO: Need to make airport name lookupperable both ways so that people can edit it... it's not easily editable at the moment
-	 * and so that the name and address of teh airport can be shown.*/	
-	if(icaoCode){
-		//label
-		var icaoLabelElement = document.createElement('div');
-		icaoLabelElement.appendChild(document.createTextNode('ICAO Code: '));
-		icaoLabelElement.className = 'icaoLabel';
+
+	//label
+	var icaoLabelElement = document.createElement('div');
+	icaoLabelElement.appendChild(document.createTextNode('ICAO Code: '));
+	icaoLabelElement.className = 'icaoLabel';
 				
-		//input element
-		var icaoInputElement = document.createElement('input');
-		icaoInputElement.value = icaoCode;
-		icaoInputElement.className = 'icaoCode'
+	//input element
+	var icaoInputElement = document.createElement('input');
+	icaoInputElement.value = icaoCode;
+	icaoInputElement.className = 'icaoCode';
+	icaoInputElement.id = 'icaoCode';
 		
-		//attach them
-		locationDiv.appendChild(icaoLabelElement);
-		locationDiv.appendChild(icaoInputElement);
-	}
-	if(iataCode){
-		//label
-		var iataLabelElement = document.createElement('div');
-		iataLabelElement.appendChild(document.createTextNode('IATA Code: '));
-		iataLabelElement.className = 'iataLabel';
+	//attach them
+	locationDiv.appendChild(icaoLabelElement);
+	locationDiv.appendChild(icaoInputElement);
+	
+	//label
+	var iataLabelElement = document.createElement('div');
+	iataLabelElement.appendChild(document.createTextNode('IATA Code: '));
+	iataLabelElement.className = 'iataLabel';
+	iataLabelElement.id = 'iataLabel';
 		
-		//input element
-		var iataInputElement = document.createElement('input');
-		iataInputElement.value = iataCode;
-		iataInputElement.className = 'iataCode';
-		
-		//attach them
-		locationDiv.appendChild(iataLabelElement);
-		locationDiv.appendChild(iataInputElement);
+	//input element
+	var iataInputElement = document.createElement('input');
+	iataInputElement.value = iataCode;
+	iataInputElement.className = 'iataCode';
+	iataInputElement.id = 'iataCode';
+	
+	//attach them
+	locationDiv.appendChild(iataLabelElement);
+	locationDiv.appendChild(iataInputElement);
+	
+	//draw the marker
+	var geocoder = new GClientGeocoder();
+	if(icaoCode){
+		geocoder.getLatLng(icaoCode,geoCodeNearestAirport);
+	} else if(iataCode){
+		geocoder.getLatLng(iataCode,geoCodeNearestAirport);
+	} else {
+		alert('This should cope with no iata/icaoCodes');
+		//TODO: do something here
 	}
 }
 
+//callback for geocoding nearest airport info.  Updates the lat longs and creates a map marker if there isn't one already.
+function geoCodeNearestAirport(point){
+	if(!point){
+		//TODO: should we do something here?
+		alert('Geocoding failed');
+	} else {
+		var marker;
+		if(typeof(mapMarkers['nearestAirport']) == 'undefined'){
+			marker = new GMarker(point,{title: 'My Nearest Airport'}); 	
+			mapMarkers['nearestAirport'] = marker;
+		} else{
+			marker = mapMarkers['nearestAirport'];
+		}
+		map.addOverlay(marker);
+		updateLatLongText('nearestAirport',marker);
+	}
+}
 
 /*add markers for all the foaf:based_near elements*/
 function addBasedNearMarkers(basedNearArray, containerElement){
@@ -2295,9 +2288,33 @@ function updateProfilePageUrl(container){
 	} 
 }
 
-/*gets airport codes from the name of the airport*/
-function getCodesFromAirportName(value){
-	alert(value+" ... and now I\'m trying to get codes for this");
+/*gets airport codes from the name of the airport - called in autocomplete.js*/
+function updateCodesFromAirportName(value){
+	var iataCode = document.getElementById('iataCode');
+	var icaoCode = document.getElementById('icaoCode');
+	
+	if(iataCode && typeof(autocomplete_airportData[value]['iata']) != 'undefined'){
+		iataCode.value = autocomplete_airportData[value]['iata'];
+	}
+	else{
+		alert("iata not found");//TODO: perhaps use more graceful error handling
+		return;
+	}
+	
+	if(icaoCode && typeof(autocomplete_airportData[value]['icao']) != 'undefined'){
+		icaoCode.value = autocomplete_airportData[value]['icao'];
+	}
+	else{
+		alert("icao not found");//TODO: perhaps use more graceful error handling	
+		return;
+	}
+	
+	//do the geocoding as appropriate
+	//draw the marker
+	var geocoder = new GClientGeocoder();
+	if(iataCode.value){
+		geocoder.getLatLng(iataCode.value,geoCodeNearestAirport);
+	} 
 }
 
 /*------------------------------miscellaneous utils-------------------------------*/

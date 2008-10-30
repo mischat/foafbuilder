@@ -497,4 +497,8 @@ width:100%;
 /*special airport autocomplete div*/
 #airport_autocomplete{
 	display:none;	
+	width:200px;
+}
+#CityLocal{
+	width:200px;	
 }

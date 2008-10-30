@@ -512,7 +512,7 @@ function findValue(li) {
 	// otherwise, let's just display the value in the text box
 	else var sValue = li.selectValue;
 
-	getCodesFromAirportName(sValue);
+	updateCodesFromAirportName(sValue);
 }
 
 function selectItem(li) {
