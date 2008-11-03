@@ -5,6 +5,19 @@
 *
 **/
 
+/*generates a random string*/
+function createRandomString(varLength) {
+	var sourceArr = new Array("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z");
+	var randomKey;
+	var randomCode = "";
+
+	for (i=0; i<varLength; i++) {
+		randomKey = Math.floor(Math.random()*sourceArr.length);
+		randomCode = randomCode + sourceArr[randomKey];
+	}
+	return randomCode;
+}
+
 function findPosX(obj)
   {
     var curleft = 0;

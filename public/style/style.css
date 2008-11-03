@@ -350,10 +350,6 @@ width:100%;
 }
 
 /*location stuff*/
-#mapDiv{
-	width:300px;
-	height:300px;	
-}
 .latitude{
 	font-family:Arial,Helvetica,sans-serif;
 	font-size:12px;				
@@ -432,9 +428,8 @@ width:100%;
 	width:100px;	
 }
 .icaoCode{
-	float:left;
 	margin-top:5px;
-	width:100px;	
+	width:200px;	
 }
 /*pictures*/
 .uploadLabel{
@@ -487,12 +482,46 @@ width:100%;
 }
 
 /*location stuff*/
-#mapDiv{
+.hiddenMapDiv{
+	float:left;
+	margin-left:auto;
+	margin-right:auto;
+	text-align:center;
+	background:#00A8DE;	
+	width:375px;
+	height: 385px;
+	padding-left:10px;
+	padding-right:10px;
+	padding-top:5px;
+	padding-bottom:10px;
+	display: none;
+}
+.embeddedMapDiv{
+	width:455px;
+	height:300px;
+	margin-left:20px;
+	margin-right:5px;
+	margin-top:5px;
+}
+.viewOnMapContainer{
+	position:relative;
+	top:30px;
+	left:200px;
+}
+.innerMapDiv{
 	float:left;
 	margin-left:auto;
 	margin-right:auto;	
+	width:375px;
+	height: 375px;	
+	display:inline;
 }
-
+#mapCloseLink{
+	float:right;
+	font-size:10px;
+	color:#ffffff;
+	font-weight:600;	
+}
 
 /*special airport autocomplete div*/
 #airport_autocomplete{

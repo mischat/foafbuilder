@@ -31,6 +31,9 @@ class FieldNames {
 			case "contactDetails":
 				$this->instantiateContactDetailsFields();
 				break;
+			case "locations":
+				$this->instantiateLocationsFields();
+				break;
 			case "pictures":
 				$this->instantiatePicturesFields();
 				break;
@@ -50,6 +53,7 @@ class FieldNames {
 				$this->instantiateOtherFields();
 				break;
 			case "all":
+				$this->instantiateLocationsFields();
 				$this->instantiateTheBasicsFields();
 				$this->instantiateContactDetailsFields();
 				$this->instantiatePicturesFields();
@@ -73,35 +77,17 @@ class FieldNames {
 			new SimpleField('foafFamilyName', 'Family Name', 'http://xmlns.com/foaf/0.1/family_name',$this->foafData,'literal');
 		$this->allFieldNames['foafName'] = 
 			new SimpleField('foafName', 'Real Name', 'http://xmlns.com/foaf/0.1/name',$this->foafData,'literal');
-		/*
-		$this->allFieldNames['foafHomepage'] = 
-			new SimpleField('foafHomepage', 'Homepage', 'http://xmlns.com/foaf/0.1/homepage',$this->foafData,'resource');
-		*/
-
-		$this->allFieldNames['foafHomepage'] =  new HomepageField($this->foafData);
-
+		$this->allFieldNames['foafHomepage'] =  
+			new HomepageField($this->foafData);
 		$this->allFieldNames['foafNick'] = 
 			new SimpleField('foafNick', 'Nickname', 'http://xmlns.com/foaf/0.1/nick',$this->foafData,'literal');
 		
-		//$this->allFieldNames['geoLatLong'] =  new GeoLatLongField();
-		//$this->allFieldNames['geoLat'] =  new GeoLatField();
-		//$this->allFieldNames['geoLong'] =  new GeoLongField();	
 	}
 	
 	private function instantiateContactDetailsFields(){
-		/*$this->allFieldNames['foafMbox'] = 
-			new SimpleField('foafMbox', 'Email', '?x foaf:mbox ?foafMbox', 'literal',false,"http://xmlns.com/foaf/0.1/mbox");
-		$this->allFieldNames['foafPhone'] = 
-			new SimpleField('foafPhone', 'Phone', '?x foaf:phone ?foafPhone', 'literal',false,'http://xmlns.com/foaf/0.1/phone');
-		$this->allFieldNames['foafMbox_sha1sum'] = 
-			new SimpleField('foafMbox_sha1sum', 'Email (sha1sum)', '?x foaf:mbox_sha1sum ?foafMbox_sha1sum', 'literal',false,'http://xmlns.com/foaf/0.1/mbox_sha1sum');
-		*/
-		//$this->allFieldNames['email'] = new EmailField($this->foafData);
 		$this->allFieldNames['foafPhone'] = new PhoneField($this->foafData);
 		$this->allFieldNames['foafMbox'] = new MboxField($this->foafData);
-		$this->allFieldNames['nearestAirport'] = new NearestAirportField($this->foafData);
 		$this->allFieldNames['address'] = new AddressField($this->foafData);
-		$this->allFieldNames['basedNear'] = new BasedNearField($this->foafData);
 	}
 	
 	private function instantiatePicturesFields(){
@@ -123,8 +109,12 @@ class FieldNames {
 	}
 	
 	private function instantiateInterestsFields(){
-		$this->allFieldNames['foafInterest'] = 
-			new SimpleField('foafInterest', 'Interests', "http://xmlns.com/foaf/0.1/interest",$this->foafData,"resource");
+		$this->allFieldNames['foafInterest'] = new SimpleField('foafInterest', 'Interests', "http://xmlns.com/foaf/0.1/interest",$this->foafData,"resource");
+	}
+	
+	private function instantiateLocationsFields(){
+		$this->allFieldNames['nearestAirport'] = new NearestAirportField($this->foafData);
+		$this->allFieldNames['basedNear'] = new BasedNearField($this->foafData);	
 	}
 	
 	private function instantiateOtherFields(){
