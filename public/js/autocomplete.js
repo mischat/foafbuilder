@@ -1,3 +1,6 @@
+
+
+//create the autocomplete div
 jQuery.autocomplete = function(input, options) {
 	// Create a link to self
 	var me = this;
