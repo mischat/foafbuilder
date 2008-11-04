@@ -21,6 +21,14 @@ var map;
 
 /*--------------------------functions which make ajax calls to control the whole model - load, save, clear, write(TODO: implement this properly)--------------------------*/
 
+function turnOffLoading(){
+	document.getElementById('ajaxLoader').style.display = 'none';
+}
+
+function turnOnLoading(){
+	document.getElementById('ajaxLoader').style.display = 'inline';	
+}
+
 /*loads all the foaf data from the given file (or the session if there is no uri) into the editor.*/
 function loadFoaf(name){
 
@@ -31,7 +39,8 @@ function loadFoaf(name){
 	
   	//TODO use jquery event handler to deal with errors on requests
   	if(name != 'load-other'){
-  		$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);}, "json");
+  		turnOnLoading();
+  		$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);turnOffLoading();}, "json");
   	} else {
   		renderOther();
   	}
@@ -54,14 +63,16 @@ function saveFoaf(){
 	
 	displayToObjects(currentPage);
 
+	turnOnLoading();
 	
 	//TODO use jquery event handler to deal with errors on this request
-  	$.post("/ajax/save-Foaf", {model : jsonstring});
+  	$.post("/ajax/save-Foaf", {model : jsonstring}, function(data){turnOffLoading();});
 }
 
 /*Clears FOAF model from session*/
 function clearFoaf() {
-        $.post("/ajax/clear-Foaf", { }, function(){},null);
+        turnOnLoading();
+        $.post("/ajax/clear-Foaf", { }, function(){turnOffLoading();},null);
         
         /*empty all the text inputs*/
         var inputs = document.getElementsByTagName('input'); 
@@ -74,8 +85,9 @@ function clearFoaf() {
 
 /*Writes FOAF to screen*/
 function renderOther() {
+		turnOnLoading();
 		url = document.getElementById('writeUri').value;
-        $.post("/writer/write-foafn3", {uri: url }, function(data){drawOtherTextarea(data);},null);
+        $.post("/writer/write-foafn3", {uri: url }, function(data){drawOtherTextarea(data);turnOffLoading();},null);
 }
 
 
@@ -1208,7 +1220,8 @@ function nearestAirportDisplayToObjects(){
 		return;
 	}
 	
-	globalFieldData.nearestAirport = new Object();
+	//	globalFieldData.nearestAirportFields = new Object();
+	globalFieldData.nearestAirportFields.nearestAirport = new Object();
 	
 	var icaoCodeElem = document.getElementById('icaoCode');
 	var iataCodeElem = document.getElementById('iataCode');
@@ -1219,12 +1232,13 @@ function nearestAirportDisplayToObjects(){
 	if(iataCodeElem){
 		var iataCode = iataCodeElem.childNodes[0].nodeValue.replace('IATA Code: ','');
 	}
+
 	if(iataCode && iataCode!=''){
-		globalFieldData.nearestAirport['iataCode'] = iataCode;
+		globalFieldData.nearestAirportFields.nearestAirport['iataCode'] = iataCode;
 	}
 
 	if(icaoCode && icaoCode!=''){
-		globalFieldData.nearestAirport['icaoCode'] = iataCode;
+		globalFieldData.nearestAirportFields.nearestAirport['icaoCode'] = icaoCode;
 	}
 }	
 

@@ -9,7 +9,7 @@ class HoldsAccountField extends Field {
 	public function HoldsAccountField($foafData) {
 		//Put in test for an empty foafData, before querying
 		if ($foafData) {
-
+	
 			$queryString = 
 			"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 			 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
@@ -33,6 +33,11 @@ class HoldsAccountField extends Field {
 			$results = $foafData->getModel()->SparqlQuery($queryString);		
 				
 			$this->data['foafHoldsAccountFields'] = array();
+			$this->data['foafHoldsAccountFields']['displayLabel'] = 'Accounts';
+			$this->data['foafHoldsAccountFields']['name'] = 'foafHoldsAccount';
+			$this->name = 'foafHoldsAccount';
+			$this->label = 'Accounts';
+			
 			
 			if (!empty($results)) {
 				error_log("[foaf_editor] Have found some accounts to render");
@@ -59,21 +64,14 @@ class HoldsAccountField extends Field {
 					array_push( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'], $row['?foafAccountServiceHomepage']);
 					array_push( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'], $row['?foafAccountName']);
 				}
-				
-			
-				//TODO: perhaps it is better to keep all the display stuff in the javascript?
-				$this->data['foafHoldsAccountFields']['displayLabel'] = 'Accounts';
-				$this->data['foafHoldsAccountFields']['name'] = 'foafHoldsAccount';
-				$this->name = 'foafHoldsAccount';
-				$this->label = 'Accounts';
-				return 1;
 			} else {
 				error_log("[foaf_editor] There are no accounts to render");
-				return 0;
+				return null;
 			}
+		
 		} else {
 			//TODO MISCHA
-			return 0;
+			return null;
 		}
 	}
 
