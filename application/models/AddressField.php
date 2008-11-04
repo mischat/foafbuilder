@@ -105,7 +105,7 @@ class AddressField extends Field {
 
     private function isCoordValid($coord) {
     //FIXME: something should go here to make sure the string makes sense.
-    if (!$$coord) {
+    if (!$coord) {
             return false;
         } else {
             return true;
