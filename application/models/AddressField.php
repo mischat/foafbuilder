@@ -94,18 +94,18 @@ class AddressField extends Field {
 		$foafData->setRandomStringToBnodeArray($randomStringToBnodeArray);
     }
 
-    private function isLatLongValid($date) {
+    private function isLatLongValid($coord) {
         //FIXME: something should go here to make sure the string makes sense.
-        if ($date == null || $date == '') {
+        if (!$coord) {
             return false;
         } else {
             return true;
         }
     }
 
-    private function isCoordValid($date) {
+    private function isCoordValid($coord) {
     //FIXME: something should go here to make sure the string makes sense.
-    if ($date == null || $date == '') {
+    if (!$$coord) {
             return false;
         } else {
             return true;
