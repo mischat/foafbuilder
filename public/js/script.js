@@ -188,8 +188,8 @@ function renderSimpleFields(data){
 						i++;	
 					}	
 				} else {
-					//create an empty field
-					createGenericInputElement(data[element][fieldType]['name'], '', 0);	
+					//create an empty field passing in the isNew flag.
+					createGenericInputElement(data[element][fieldType]['name'], 'Enter '+data[element][fieldType]['displayLabel']+' here', 0,false,true);	
 				}
 				/*create an add link*/
 				createGenericAddElement(containerElement,data[element][fieldType]['name'],data[element][fieldType]['displayLabel']);
@@ -1514,21 +1514,26 @@ function otherDisplayToObjects(){
 		addLink.appendChild(document.createTextNode("+Add another "+displayLabel));
 		addLink.className="addLink";
 		
-		addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id);");
+		addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id,'"+displayLabel+"');");
 		
 		addDiv.appendChild(addLink);
 		container.appendChild(addDiv);
 	
 	}
 	//TODO: can we get rid of thisElementCount?
-	function createGenericInputElementAboveAddLink(name,thisElementCount,containerId,addElementId){
+	function createGenericInputElementAboveAddLink(name,thisElementCount,containerId,addElementId,displayLabel){
 		
 		/*remove the add element*/
 		var addElement = document.getElementById(addElementId);
 		addElement.parentNode.removeChild(addElement);
 		
+		var value = '';
 		/*append a child node*/
-		createGenericInputElement(name,'',thisElementCount,containerId);
+		if(displayLabel){
+			value = 'Enter '+displayLabel+' here';
+		}
+		
+		createGenericInputElement(name,value,thisElementCount,containerId,true);
 		
 		/*re add the add element*/
 		document.getElementById(containerId).appendChild(addElement);
@@ -1558,17 +1563,23 @@ function otherDisplayToObjects(){
 	}
 	
 	/*creates and appends a generic input element to the appropriate field container*/
-	function createGenericInputElement(name, value, thisElementCount, contname){
+	function createGenericInputElement(name, value, thisElementCount, contname,isNew){
 		var newElement = document.createElement('input');
 		newElement.id = name+'_'+thisElementCount;
 		newElement.setAttribute('value',value);
 		newElement.setAttribute('onchange','saveFoaf()');
 		
-		//if the contname does not choose a  specific container we want to put it in
+		//if the contname does not specify the container to put it in
 		if(!contname){
 			contname = name+'_container';
 		} 
-	
+		
+		/*if it is a new one, we need to remember to make the contents disappear when it is clicked*/
+		if(isNew){
+			newElement.style.color = '#dddddd';
+			newElement.setAttribute("onclick","if(this.value=='"+value+"'){this.value ='';this.style.color='#000000';}");
+		}
+		
 		createGenericInputElementRemoveLink(newElement.id,contname);
 		
 		document.getElementById(contname).appendChild(newElement);
@@ -2159,6 +2170,16 @@ function updateCodesFromAirportName(value){
 	if(typeof(autocomplete_airportData[value]['icao'])!='undefined'){
 		var geocoder = new GClientGeocoder();
 		geocoder.getLatLng(autocomplete_airportData[value]['icao'],geoCodeNearestAirport);
+	}
+}
+
+/*toggles the pale blue private UI*/
+function togglePrivateUI(fieldContainer){
+
+	if(fieldContainer.className!='fieldContainer'){
+		fieldContainer.className = 'fieldContainer';
+	} else {
+		fieldContainer.className = 'fieldContainerPrivate';
 	}
 }
 

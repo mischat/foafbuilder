@@ -229,6 +229,15 @@ width:100%;
 	margin-right:20px;
 	height:auto;
 }
+.fieldContainerPrivate{
+	padding-top: 20px;
+	padding-bottom:20px;
+	border-bottom: 1px solid #dddddd;
+	margin-left:20px;
+	margin-right:20px;
+	height:auto;	
+	background-color: #ddddff;
+}
 .fieldImage{
 	margin-top:10px;
 }
@@ -265,7 +274,7 @@ width:100%;
 	font-family:Arial,Helvetica,sans-serif;
 }
 .editorSubTitleEven{
-	height:15px;
+	height:20px;
 	width:230px;
 	margin-left:40px;
 	margin-right:10px;
@@ -280,7 +289,7 @@ width:100%;
 	background-color:#ffffff;
 }
 .editorSubTitleOdd{
-	height:15px;
+	height:20px;
 	width:230px;
 	margin-left:40px;
 	margin-right:10px;
@@ -294,6 +303,21 @@ width:100%;
 	font-weight:600;
 	background-color:#eeeeee;
 }
+
+.editorSubOptionsText{
+	font-size:10px;
+	position:relative;
+	float:right;
+	right:35px;	
+	top:-16px;
+}
+.privateCheckbox{
+	position:relative;
+	float:right;
+	right:50px;	
+	top:-16px;
+}
+
 /*accounts stuff*/
 .addLink{
 	font-family:Arial,Helvetica,sans-serif;
