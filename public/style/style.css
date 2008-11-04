@@ -216,7 +216,7 @@ width:100%;
 	position:relative;
 	left:140px;
 	width:330px;
-	padding-top:25px;
+	padding-top:20px;
 	/*to counteract the size of the fieldLabelContainer*/
 	/*top:-20px;*/
 	
@@ -330,18 +330,18 @@ width:100%;
 .removeLinkContainer{
 	float:right;
 	padding-left:110px;
-	margin-bottom:5px;
-	margin-top:5px;	
 }
 .holdsAccount .removeLinkContainer{
 	padding-left:140px;	
+	padding-top:20px;
+	height:auto;
 }
 #foafAccountName{
 	width:140px;
 	float:left;
 	margin-left:0px;
 	margin-right:0px;
-	margin-top:0px;
+	margin-top:5px;
 	margin-left:10px;
 	/*matches that from foafAccountServiceHomepageInputElement*/
 	margin-bottom:5px;
@@ -349,7 +349,7 @@ width:100%;
 #foafAccountServiceHomepage{
 	float:left;
 	width:100px;
-	margin-top:0px;
+	margin-top:5px;
 	margin-left:0px;
 	margin-right:0px;
 	/*matches that from foafAccountName*/
@@ -369,7 +369,7 @@ width:100%;
 	margin-right:10px;
 }
 #dayDropdown{
-	margin-left: -135px;
+	margin-left: 0px;
 	margin-top: 20px;
 }
 
@@ -554,4 +554,8 @@ width:100%;
 }
 #CityLocal{
 	width:200px;	
+}
+
+#ajaxLoader{
+	display:none;	
 }
