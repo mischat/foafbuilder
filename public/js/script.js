@@ -280,7 +280,7 @@ function renderPhoneFields(data){
 		}
 	} else {
 		//TODO: add the grey text with an onclick thing to make it disappear
-		createGenericInputElement(name, '+4402071234567', i);	
+		createGenericInputElement(name, '+4402071234567', i,false,true);	
 	}	
 	
 	/*create an add link*/
@@ -308,7 +308,7 @@ function renderMboxFields(data){
 		}
 	} else {
 		//TODO: add the grey text with an onclick thing to make it disappear
-		createGenericInputElement(name, 'example@example.com', i);
+		createGenericInputElement(name, 'example@example.com', i,false,true);
 	}	
 	
 	/*create an add link*/
@@ -1591,7 +1591,7 @@ function otherDisplayToObjects(){
 		/*if it is a new one, we need to remember to make the contents disappear when it is clicked*/
 		if(isNew){
 			newElement.style.color = '#dddddd';
-			newElement.setAttribute("onclick","if(this.value=='"+value+"'){this.value ='';this.style.color='#000000';}");
+			newElement.setAttribute("onfocus","if(this.value=='"+value+"'){this.value ='';this.style.color='#000000';}");
 		}
 		
 		createGenericInputElementRemoveLink(newElement.id,contname);
@@ -2081,7 +2081,11 @@ function previewImage(containerElementId,name,source,file){
 	var containerElement = document.getElementById(containerElementId);
 	
 	/*render the new image element*/
-	renderImgElement(image,containerElement.childNodes.length,document.getElementById(containerElementId));
+	if(name=='foafDepiction'){
+		renderDepictionElement(image,containerElement.childNodes.length,document.getElementById(containerElementId));
+	} else{
+		renderImgElement(image,containerElement.childNodes.length,document.getElementById(containerElementId));
+	}
 	
 	/*reattach the menu div underneath the existing menu*/
 	containerElement.appendChild(menuDiv);
