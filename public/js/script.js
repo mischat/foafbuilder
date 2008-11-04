@@ -1626,9 +1626,23 @@ function otherDisplayToObjects(){
 
 	/*creates and appends an account input element to the appropriate field container*/
 	function createAccountsInputElement(name, value, element){
+		
 		newElement = document.createElement('input');
 		newElement.setAttribute('onchange','saveFoaf()');
 		newElement.id = name;
+		
+		//XXX this is a bit of a hack
+		if(value=='' && name=='foafAccountName'){
+			value = 'Enter username here';
+			newElement.style.color='#dddddd';
+			newElement.setAttribute('onfocus',"if(this.value == 'Enter username here'){this.value = '';this.style.color='#000000'}");
+		}	
+		if(value=='' && name=='foafAccountProfilePage'){
+			value = 'Enter profile URL here';
+			newElement.style.color='#dddddd';
+			newElement.setAttribute('onfocus',"if(this.value == 'Enter profile URL here'){this.value = '';this.style.color='#000000'}");
+		}	
+		
 		newElement.setAttribute('value',value);
 		
 		/*if there is a specific container we want to put it in*/
