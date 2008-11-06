@@ -21,10 +21,10 @@ var map;
 
 /*--------------------------functions which make ajax calls to control the whole model - load, save, clear, write(TODO: implement this properly)--------------------------*/
 
+/*display/hide the spinner*/
 function turnOffLoading(){
 	document.getElementById('ajaxLoader').style.display = 'none';
 }
-
 function turnOnLoading(){
 	document.getElementById('ajaxLoader').style.display = 'inline';	
 }
@@ -81,6 +81,37 @@ function clearFoaf() {
         		document.getElementById(inputs[i].id).value = null;
         	}
         }
+}
+
+/*saves all the foaf data*/
+function findFriend(uri){
+	//TODO use jquery event handler to deal with errors on this request
+  	$.get("/friend/find-friend", {uri : uri}, function(data){renderFoundFriend(data);turnOffLoading();},'json');
+}
+
+function renderFoundFriend(data){
+	var containerElement = document.getElementById('addFriends_container');
+
+	var foundFriend = document.getElementById('foundFriend_0');
+	
+	if(typeof(foundFriend) != 'undefined' && foundFriend){
+		foundFriend.parentNode.removeChild(foundFriend);
+	}
+	
+	/*either render the friend just below or render a message apologising*/
+	if(typeof(data.ifps) != 'undefined' && typeof(data.ifps[0]) != 'undefined' && data.ifps[0] 
+		&& typeof(data.name) != 'undefined' && data.name){
+		
+		createFriendElement('foundFriend',data,0,containerElement);
+		createAddFriendLink(document.getElementById('foundFriend_0'));
+	} else {
+		var notFound = document.createElement('div');
+		notFound.id = 'foundFriend_0';
+		notFound.className = 'friend';
+		notFound.appendChild(document.createTextNode('Sorry but we didn\'t find anything for that uri/ifp'));
+		containerElement.appendChild(notFound);
+		
+	}
 }
 
 /*Writes FOAF to screen*/
@@ -438,6 +469,7 @@ function renderKnowsFields(data){
 	if(!data || !data.foafKnowsFields || typeof(data.foafKnowsFields) == 'undefined'){
 		return;
 	}
+	renderSearchUI();
 	renderMutualFriends(data.foafKnowsFields);
 	renderKnowsUserFields(data.foafKnowsFields);//like incoming friend requests
 	renderUserKnowsFields(data.foafKnowsFields);//like outgoing friend requests
@@ -572,6 +604,25 @@ function renderKnowsFields(data){
 	
 	
 	/*--------------------------Knows/Friends--------------------------*/
+	
+	/*renders the inputField etc*/
+	function renderSearchUI(){
+		var containerElement = createFieldContainer('addFriends', 'Add Friends');
+		
+		var findForm = document.createElement('form');
+		findForm.id='findForm';
+		containerElement.appendChild(findForm);
+		var inputElement = createGenericInputElement('searchInputField', 'Enter search IFP here', 0,findForm.id,true,true);
+		
+		findForm.setAttribute('action',"javascript:findFriend(document.getElementById('"+inputElement.id+"').value);");
+		
+		/*create a button to submit the form*/
+		var img = document.createElement('img');
+		img.id = 'findButton';
+		img.setAttribute('onclick',"document.getElementById('findForm').submit();");
+		img.setAttribute('src',"/images/go.png");
+		containerElement.appendChild(img);
+	}
 	
 	function renderMutualFriends(foafKnowsFields){
 		if(!foafKnowsFields || !foafKnowsFields.mutualFriends || typeof(foafKnowsFields.mutualFriends) == 'undefined'){
@@ -1577,7 +1628,7 @@ function otherDisplayToObjects(){
 	}
 	
 	/*creates and appends a generic input element to the appropriate field container*/
-	function createGenericInputElement(name, value, thisElementCount, contname,isNew){
+	function createGenericInputElement(name, value, thisElementCount, contname,isNew,softRemove){
 		var newElement = document.createElement('input');
 		newElement.id = name+'_'+thisElementCount;
 		newElement.setAttribute('value',value);
@@ -1593,9 +1644,9 @@ function otherDisplayToObjects(){
 			newElement.style.color = '#dddddd';
 			newElement.setAttribute("onfocus","if(this.value=='"+value+"'){this.value ='';this.style.color='#000000';}");
 		}
-		
-		createGenericInputElementRemoveLink(newElement.id,contname);
-		
+		if(!softRemove){
+			createGenericInputElementRemoveLink(newElement.id,contname);
+		}
 		document.getElementById(contname).appendChild(newElement);
 		newElement.setAttribute('class','fieldInput');
 		
@@ -1833,9 +1884,28 @@ function otherDisplayToObjects(){
 		}
 	}
 	
+	/*creates and attaches a link that allows a user to convert people who have said they know them into mutual friends*/
+	function createAddFriendLink(friendDiv){
+		
+		if(friendDiv && friendDiv.id){
+			var makeFriendDiv = document.createElement("div");
+			//TODO: should rename this class etc a bit more sensibly
+			makeFriendDiv.className = "friendRemoveLinkContainer";
+			
+			var makeFriendLink = document.createElement('a');
+			makeFriendLink.appendChild(document.createTextNode("-Add"));
+			makeFriendLink.className="removeLink";
+	
+			makeFriendLink.setAttribute("onclick" , "addFriend('"+friendDiv.id+"');");
+			
+			makeFriendDiv.appendChild(makeFriendLink);
+			friendDiv.appendChild(makeFriendDiv);
+		}
+	}
+	
 	/*creates a field with a friends image (if available) and name which links to foaf.qdos.com*/
 	function createFriendElement(idName,friend,thisElementCount,container){
-	
+
 		var ifp = null;
 		var img = null;
 		var name = null;
@@ -2019,6 +2089,26 @@ function removeMutualFriendElement(removeId,removeDivId){
 	/*remove the old one*/
 	removeGenericInputElement(removeId,removeDivId);
 	
+}
+
+/*converts a user that knows you to one that you know*/
+function addFriend(friendDivId){
+
+	alert('Adding a friend');
+
+	/*
+	var friend = getFriendInfoFromElement(friendDivId);
+
+	var containerElement = document.getElementById('mutualFriends_container');
+
+	if(containerElement){
+		var friendDiv = createFriendElement('mutualFriend',friend,containerElement.childNodes.length,containerElement);
+		createRemoveFriendsLink(friendDiv.id,friendDiv.id,true);
+	}
+
+	
+	removeGenericInputElement(friendDivId,'id');*/
+
 }
 
 /*converts a user that knows you to one that you know*/
