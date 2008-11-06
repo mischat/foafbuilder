@@ -1,9 +1,9 @@
 <?php
 require_once 'Field.php';
 require_once 'helpers/Utils.php';
-require_once 'IFPTriangulation.class.php';
-require_once 'settings.php';
-require_once 'sparql.php';
+require_once 'helpers/IFPTriangulation.class.php';
+require_once 'helpers/settings.php';
+require_once 'helpers/sparql.php';
 
 /*FIXME: perhaps fields shouldn't do the whole sparql query thing in the constructor.*/
 
@@ -19,8 +19,14 @@ class KnowsField extends Field {
 			/*get all known ifps of this person by making use of the foaf.qdos.com KB*/
         	$ifps = $this->getTriangulatedIfps($foafData);              
         	
-        	$knowsUserIfps = $this->getKnowsUserIfps($ifps);
-        	$userKnowsIfps = $this->getUserKnowsIfps($foafData);     
+        	$initialIfps = $this->getUserIfps($foafData);
+        	/**/
+        	$knowsUserIfps = $this->getKnowsUserIfps($initialIfps,$foafData->getPrimaryTopic());
+        	
+        	/*more or less done*/
+        	$userKnowsIfps = $this->getUserKnowsIfps($foafData);   
+
+        	/*needs refining*/
         	$mutualFriendsIfps = $this->getMutualFriendsIfps($userKnowsIfps, $knowsUserIfps);
         	
         	$knowsUserDetails = $this->getDetailsFromIfps($knowsUserIfps); 
@@ -31,27 +37,6 @@ class KnowsField extends Field {
         	$this->data['foafKnowsFields']['mutualFriends'] = $mutualFriendsDetails;
         	$this->data['foafKnowsFields']['userKnows'] = $userKnowsDetails;
         	$this->data['foafKnowsFields']['knowsUser'] = $knowsUserDetails;
-        	
-        	/*
-        	echo("\n"."\n".".........KNOWS USER......."."\n"."\n");
-        	foreach($knowsUserDetails as $thisFriendDetails){
-        		echo("img: ".$thisFriendDetails['img']."\n");
-        		echo("name ".$thisFriendDetails['name']."\n");
-        		echo("ifps ".$thisFriendDetails['ifps']."\n");
-        	}
-        	echo("\n"."\n".".........USER KNOWS......."."\n"."\n");
-       		foreach($userKnowsDetails as $thisFriendDetails){
-        		echo("img: ".$thisFriendDetails['img']."\n");
-        		echo("name ".$thisFriendDetails['name']."\n");
-        		echo("ifps ".$thisFriendDetails['ifps']."\n");
-        	}
-        	echo("\n"."\n".".........MUTUAL FRIENDS......."."\n"."\n");
-       		foreach($mutualFriendsDetails as $thisFriendDetails){
-        		echo("img: ".$thisFriendDetails['img']."\n");
-        		echo("name ".$thisFriendDetails['name']."\n");
-        		echo("ifps ".$thisFriendDetails['ifps']."\n");
-        	}*/
-        	
         	
             $this->data['foafKnowsFields']['displayLabel'] = 'Friends';
             $this->data['foafKnowsFields']['name'] = 'foafKnows';
@@ -172,11 +157,23 @@ class KnowsField extends Field {
         		$userKnowsDetails;
         	}
         	
+        	//sort alphabetically by name
+        	usort($userKnowsDetails, array('KnowsField','nameSorter'));
+        	
         	//var_dump($userKnowsArray);
         	return $userKnowsDetails;	
     }
     
-    /*get the ifps of the people who this person knows from the loaded foaf files, keyed on the persons uri*/
+    public function nameSorter($a,$b){
+    	$ret = strcmp($a['name'],$b['name']);
+    	if($ret == 0){
+    		return 1;
+    	}
+
+    	return $ret;
+    }
+    
+    /*get the ifps (or uris) of the people who this person knows from the loaded foaf files, keyed on the persons uri*/
     private function getUserKnowsIfps($foafData){
     	
     	$query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX ya: <http://blogs.yandex.ru/schema/foaf/>
@@ -195,7 +192,7 @@ class KnowsField extends Field {
 						 	 OPTIONAL{
 						 	 	?uri foaf:mbox_sha1sum ?mbox_sha1sum
 						 	 }
-						}";
+						}";//FIXME: need to look for uris here too
     	 //FILTER(?ifp_predicate = foaf:homepage || ?ifp_predicate = foaf:weblog || ?ifp_predicate = foaf:mbox  ||?ifp_predicate = foaf:mbox_sha1sum);
     	$potentialIfpArray = $foafData->getModel()->SparqlQuery($query);
     	$actualIfpArray = array();
@@ -203,7 +200,7 @@ class KnowsField extends Field {
     	if(!empty($potentialIfpArray)){
     		foreach($potentialIfpArray as $row){
     			
-				/* we need to key this on the uri of the person that the user */
+				/* we need to key this on the uri of the person that the user knows */
     			if(!isset($actualIfpArray[$row['?uri']->uri])){
     				$actualIfpArray[$row['?uri']->uri] = array();
     			}
@@ -253,58 +250,30 @@ class KnowsField extends Field {
     }
     
     /*get ifps, keyed on the uri, of people who say they know the user*/
-    private function getKnowsUserIfps($ifps){
-    	$inquery='';
-        		
-        		foreach($ifps as $ifp){
-                        if(isset($ifp) && $ifp && substr($ifp,0,2)!="_:"){
-                                $inquery.=" ?ifp = ".$ifp."||";
-                        }
-                }
-                if($inquery!=""){
-                        $inquery="
-						PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX ya: <http://blogs.yandex.ru/schema/foaf/>
-						SELECT DISTINCT ?infriend ?infriend_predicate ?infriend_ifp
-						WHERE {
-						 	?uri ?ifp_predicate ?ifp .
-						  	?infriend foaf:knows ?uri .
-						  	?infriend ?infriend_predicate ?infriend_ifp .
-					    	FILTER(?ifp_predicate = foaf:homepage || ?ifp_predicate = foaf:weblog || ?ifp_predicate = foaf:mbox  ||?ifp_predicate = foaf:mbox_sha1sum) .
-							FILTER(?infriend_predicate = foaf:homepage || ?infriend_predicate = foaf:weblog || ?infriend_predicate = foaf:mbox  ||?infriend_predicate = foaf:mbox_sha1sum) .				
-					    	FILTER(".substr($inquery,0,-2).")
-						
-                		} LIMIT 50";
-                }
-				
-                $inquery_array = sparql_query(FOAF_EP, $inquery);
-            	$knows = array();
-			
-                 foreach ($inquery_array as $row) {
-                    $value = sparql_strip($row['?infriend']);
-                 	if (substr($value, 0, 2) == '_:'){
-                    	$value = 'bnode:'.substr($value, 2);
-                 	}
-                    if(!isset($knows[$value])){
-                   		$knows[$value] = array();
-                    }
-                    array_push($knows[$value],$row['?infriend_ifp']);
-                 }	
-                 
-    			/*loop through the people who know them and triangulate their IFPs*/
-        		$knowsUserIfps = array();
-        		foreach($knows as $row){
-        			$thisFriendsIfps = IFPTriangulation::doIterativeIFPTriangulation($row);
-        			array_push($knowsUserIfps,$thisFriendsIfps);
-        		}
-        		//TODO: unique this array
-        		
-                return $knowsUserIfps;
+    private function getKnowsUserIfps($ifps,$primaryTopic){
+    
+	    $model = new MemModel('baseuri');
+	    echo("start");
+	    $model->load('http://foaf.qdos.com/reverse?path='.$primaryTopic);
+	    echo('1');
+    	
+	    foreach($ifps as $ifp){
+	   
+    			$model->load('http://foaf.qdos.com/reverse?path='.urlencode(sparql_strip($ifp))."&ifp");
+	    		//FIXME: behave well if there is a nasty error here and get rid of the break below for when the reverse bug is fixed
+	    		break;
+	    }
+    		
+    	$model->writeAsHTML();
+    	
+    	//need to actually return some knowsRDFs
+    	return array();
     }
     
-    /*queries the loaded foaf file and queries foaf.qdos.com then triangulates the two*/
-    private function getTriangulatedIfps($foafData){
+    
+    private function getUserIfps($foafData){
     	
-    	/*get the ifps that the person has already entered in their foaf file*/
+    /*get the ifps that the person has already entered in their foaf file*/
         $initialQuery = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX ya: <http://blogs.yandex.ru/schema/foaf/>
         			SELECT ?homepage ?weblog ?mbox ?mbox_sha1sum WHERE {
         				?person foaf:primaryTopic <".$foafData->getPrimaryTopic().">
@@ -327,33 +296,43 @@ class KnowsField extends Field {
         	
         /*loop through the results populating the ifp array - care about labels or uris*/
         $initialIfpArray = array();		
-        foreach($initialIfpResults as $row){
-        	if(isset($row['?weblog']) && property_exists($row['?weblog'],'uri')){
-        		array_push($initialIfpArray,"<".$row['?weblog']->uri.">");
-        	}
-        	if(isset($row['?mbox']) && property_exists($row['?mbox'],'uri')){
-        		array_push($initialIfpArray,"<".$row['?mbox']->uri.">");
-        	}
-        	if(isset($row['?mbox_sha1sum']) && property_exists($row['?mbox_sha1sum'],'uri')){
-        		array_push($initialIfpArray,'"'.$row['?mbox_sha1sum']->uri.'"');
-        	}
-        	if(isset($row['?homepage']) && property_exists($row['?homepage'],'uri')){
-        		array_push($initialIfpArray,"<".$row['?homepage']->uri.">");
-        	}		
-        	if(isset($row['?mbox']) && property_exists($row['?weblog'],'label')){
-        		array_push($initialIfpArray,"<".$row['?mbox']->label.">");
-        	}
-        	if(isset($row['?mbox_sha1sum']) && property_exists($row['?mbox_sha1sum'],'label')){
-        		array_push($initialIfpArray,'"'.$row['?mbox_sha1sum']->label.'"');
-        	}
-        	if(isset($row['?homepage']) && property_exists($row['?homepage'],'label')){
-        		array_push($initialIfpArray,"<".$row['?homepage']->label.">");
-        	}
-        	if(isset($row['?weblog']) && property_exists($row['?weblog'],'label')){
-        		array_push($initialIfpArray,"<".$row['?weblog']->label.">");
-        	}
+        if(!empty($initialIfpResults)){
+	        foreach($initialIfpResults as $row){
+	        	if(isset($row['?weblog']) && property_exists($row['?weblog'],'uri')){
+	        		array_push($initialIfpArray,"<".$row['?weblog']->uri.">");
+	        	}
+	        	if(isset($row['?mbox']) && property_exists($row['?mbox'],'uri')){
+	        		array_push($initialIfpArray,"<".$row['?mbox']->uri.">");
+	        	}
+	        	if(isset($row['?mbox_sha1sum']) && property_exists($row['?mbox_sha1sum'],'uri')){
+	        		array_push($initialIfpArray,'"'.$row['?mbox_sha1sum']->uri.'"');
+	        	}
+	        	if(isset($row['?homepage']) && property_exists($row['?homepage'],'uri')){
+	        		array_push($initialIfpArray,"<".$row['?homepage']->uri.">");
+	        	}		
+	        	if(isset($row['?mbox']) && property_exists($row['?weblog'],'label')){
+	        		array_push($initialIfpArray,"<".$row['?mbox']->label.">");
+	        	}
+	        	if(isset($row['?mbox_sha1sum']) && property_exists($row['?mbox_sha1sum'],'label')){
+	        		array_push($initialIfpArray,'"'.$row['?mbox_sha1sum']->label.'"');
+	        	}
+	        	if(isset($row['?homepage']) && property_exists($row['?homepage'],'label')){
+	        		array_push($initialIfpArray,"<".$row['?homepage']->label.">");
+	        	}
+	        	if(isset($row['?weblog']) && property_exists($row['?weblog'],'label')){
+	        		array_push($initialIfpArray,"<".$row['?weblog']->label.">");
+	        	}
+	        }
         }
-
+        
+        return $initialIfpArray;
+    }
+    
+    /*queries the loaded foaf file and queries foaf.qdos.com then triangulates the two*/
+    private function getTriangulatedIfps($foafData){
+    	
+    	$initialIfpArray = $this->getUserIfps($foafData);
+        
        	/*triangulate the ifps to grow the array*/
         $ifps = IFPTriangulation::doIterativeIFPTriangulation($initialIfpArray);
         
