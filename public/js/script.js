@@ -1,3 +1,192 @@
+//TODO: put this into utils
+function utf8_encode ( string ) {
+    // http://kevin.vanzonneveld.net
+    // +   original by: Webtoolkit.info (http://www.webtoolkit.info/)
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   improved by: sowberry
+    // +    tweaked by: Jack
+    // +   bugfixed by: Onno Marsman
+    // +   improved by: Yves Sucaet
+    // *     example 1: utf8_encode('Kevin van Zonneveld');
+    // *     returns 1: 'Kevin van Zonneveld'
+ 
+    string = (string+'').replace(/\r\n/g, "\n");
+    string = (string+'').replace(/\r/g, "\n");
+    var utftext = "";
+    var start, end;
+    var stringl = 0;
+ 
+    start = end = 0;
+    stringl = string.length;
+    for (var n = 0; n < stringl; n++) {
+        var c1 = string.charCodeAt(n);
+        var enc = null;
+ 
+        if (c1 < 128) {
+            end++;
+        } else if((c1 > 127) && (c1 < 2048)) {
+            enc = String.fromCharCode((c1 >> 6) | 192) + String.fromCharCode((c1 & 63) | 128);
+        } else {
+            enc = String.fromCharCode((c1 >> 12) | 224) + String.fromCharCode(((c1 >> 6) & 63) | 128) + String.fromCharCode((c1 & 63) | 128);
+        }
+        if (enc != null) {
+            if (end > start) {
+                utftext += string.substring(start, end);
+            }
+            utftext += enc;
+            start = end = n+1;
+        }
+    }
+ 
+    if (end > start) {
+        utftext += string.substring(start, string.length);
+    }
+ 
+    return utftext;
+}
+
+//TODO: put this in utils
+function sha1 ( str ) {
+    // http://kevin.vanzonneveld.net
+    // +   original by: Webtoolkit.info (http://www.webtoolkit.info/)
+    // + namespaced by: Michael White (http://getsprink.com)
+    // -    depends on: utf8_encode
+    // *     example 1: sha1('Kevin van Zonneveld');
+    // *     returns 1: '54916d2e62f65b3afa6e192e6a601cdbe5cb5897'
+ 
+    var rotate_left = function(n,s) {
+        var t4 = ( n<<s ) | (n>>>(32-s));
+        return t4;
+    };
+ 
+    var lsb_hex = function(val) {
+        var str="";
+        var i;
+        var vh;
+        var vl;
+ 
+        for( i=0; i<=6; i+=2 ) {
+            vh = (val>>>(i*4+4))&0x0f;
+            vl = (val>>>(i*4))&0x0f;
+            str += vh.toString(16) + vl.toString(16);
+        }
+        return str;
+    };
+ 
+    var cvt_hex = function(val) {
+        var str="";
+        var i;
+        var v;
+ 
+        for( i=7; i>=0; i-- ) {
+            v = (val>>>(i*4))&0x0f;
+            str += v.toString(16);
+        }
+        return str;
+    };
+ 
+    var blockstart;
+    var i, j;
+    var W = new Array(80);
+    var H0 = 0x67452301;
+    var H1 = 0xEFCDAB89;
+    var H2 = 0x98BADCFE;
+    var H3 = 0x10325476;
+    var H4 = 0xC3D2E1F0;
+    var A, B, C, D, E;
+    var temp;
+ 
+    str = utf8_encode(str);
+    var str_len = str.length;
+ 
+    var word_array = new Array();
+    for( i=0; i<str_len-3; i+=4 ) {
+        j = str.charCodeAt(i)<<24 | str.charCodeAt(i+1)<<16 |
+        str.charCodeAt(i+2)<<8 | str.charCodeAt(i+3);
+        word_array.push( j );
+    }
+ 
+    switch( str_len % 4 ) {
+        case 0:
+            i = 0x080000000;
+        break;
+        case 1:
+            i = str.charCodeAt(str_len-1)<<24 | 0x0800000;
+        break;
+        case 2:
+            i = str.charCodeAt(str_len-2)<<24 | str.charCodeAt(str_len-1)<<16 | 0x08000;
+        break;
+        case 3:
+            i = str.charCodeAt(str_len-3)<<24 | str.charCodeAt(str_len-2)<<16 | str.charCodeAt(str_len-1)<<8    | 0x80;
+        break;
+    }
+ 
+    word_array.push( i );
+ 
+    while( (word_array.length % 16) != 14 ) word_array.push( 0 );
+ 
+    word_array.push( str_len>>>29 );
+    word_array.push( (str_len<<3)&0x0ffffffff );
+ 
+    for ( blockstart=0; blockstart<word_array.length; blockstart+=16 ) {
+        for( i=0; i<16; i++ ) W[i] = word_array[blockstart+i];
+        for( i=16; i<=79; i++ ) W[i] = rotate_left(W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16], 1);
+ 
+        A = H0;
+        B = H1;
+        C = H2;
+        D = H3;
+        E = H4;
+ 
+        for( i= 0; i<=19; i++ ) {
+            temp = (rotate_left(A,5) + ((B&C) | (~B&D)) + E + W[i] + 0x5A827999) & 0x0ffffffff;
+            E = D;
+            D = C;
+            C = rotate_left(B,30);
+            B = A;
+            A = temp;
+        }
+ 
+        for( i=20; i<=39; i++ ) {
+            temp = (rotate_left(A,5) + (B ^ C ^ D) + E + W[i] + 0x6ED9EBA1) & 0x0ffffffff;
+            E = D;
+            D = C;
+            C = rotate_left(B,30);
+            B = A;
+            A = temp;
+        }
+ 
+        for( i=40; i<=59; i++ ) {
+            temp = (rotate_left(A,5) + ((B&C) | (B&D) | (C&D)) + E + W[i] + 0x8F1BBCDC) & 0x0ffffffff;
+            E = D;
+            D = C;
+            C = rotate_left(B,30);
+            B = A;
+            A = temp;
+        }
+ 
+        for( i=60; i<=79; i++ ) {
+            temp = (rotate_left(A,5) + (B ^ C ^ D) + E + W[i] + 0xCA62C1D6) & 0x0ffffffff;
+            E = D;
+            D = C;
+            C = rotate_left(B,30);
+            B = A;
+            A = temp;
+        }
+ 
+        H0 = (H0 + A) & 0x0ffffffff;
+        H1 = (H1 + B) & 0x0ffffffff;
+        H2 = (H2 + C) & 0x0ffffffff;
+        H3 = (H3 + D) & 0x0ffffffff;
+        H4 = (H4 + E) & 0x0ffffffff;
+    }
+ 
+    var temp = cvt_hex(H0) + cvt_hex(H1) + cvt_hex(H2) + cvt_hex(H3) + cvt_hex(H4);
+    return temp.toLowerCase();
+}
+
+
+
 /*--------------------------global variables--------------------------*/
 
 //TODO: namespacing!!!
@@ -5,6 +194,9 @@
 /*global variable for storing data*/
 var globalFieldData;
 var currentPage;//the page the user is on e.g. load-contact-details etc.
+
+/*for friend searching, so we know the type of the ifp we searched for*/
+var globalTypeArray = new Array;
 
 /*geocoding details so that the various callback functions can access them*/
 var addressDetailsToGeoCode = new Array();
@@ -59,9 +251,8 @@ function loadFoaf(name){
 
 /*saves all the foaf data*/
 function saveFoaf(){
-	jsonstring = JSON.serialize(globalFieldData);
-	
 	displayToObjects(currentPage);
+	jsonstring = JSON.serialize(globalFieldData);
 
 	turnOnLoading();
 	
@@ -90,6 +281,7 @@ function findFriend(uri){
 }
 
 function renderFoundFriend(data){
+	
 	var containerElement = document.getElementById('addFriends_container');
 
 	var foundFriend = document.getElementById('foundFriend_0');
@@ -103,12 +295,16 @@ function renderFoundFriend(data){
 		&& typeof(data.name) != 'undefined' && data.name){
 		
 		createFriendElement('foundFriend',data,0,containerElement);
+		
+		/*we need to store the type here for saving*/
+		globalTypeArray[data.ifps[0]] = data.ifp_type;
+		
 		createAddFriendLink(document.getElementById('foundFriend_0'));
 	} else {
 		var notFound = document.createElement('div');
 		notFound.id = 'foundFriend_0';
-		notFound.className = 'friend';
-		notFound.appendChild(document.createTextNode('Sorry but we didn\'t find anything for that uri/ifp'));
+		notFound.className = 'friend';	
+		notFound.appendChild(document.createTextNode("Sorry but we didn't find anything for that uri/ifp"));
 		containerElement.appendChild(notFound);
 		
 	}
@@ -1400,12 +1596,80 @@ function imgDisplayToObjects(){
 
 /*this is more or less identical to imgDisplayToObjects which is possibly not a good thing*/
 function knowsDisplayToObjects(){
-	var mutualFriendsContainer = document.getElementById('mutualFriends_container')
-	var userKnowsContainer = document.getElementById('userKnows_container');
+
+	if(typeof(globalFieldData.foafKnowsFields) == 'undefined' || !globalFieldData.foafKnowsFields){
+		return;
+	}
 	
-	//TODO
-	alert("Saving friends... need to implement this Luke");
+	//for use later in this function	
+	var newFoafKnowsFields = new Object();
+	newFoafKnowsFields.mutualFriends = new Array();
+	newFoafKnowsFields.userKnows = new Array();
 	
+	/*Save all mutual friends*/
+	var mutualFriendsContainer = document.getElementById('mutualFriends_container');	
+	for(childNode in mutualFriendsContainer.childNodes){
+		if(mutualFriendsContainer.childNodes[childNode].className == 'friend'){
+			var friendInfo = getFriendInfoFromElement(mutualFriendsContainer.childNodes[childNode].id);
+			
+			/*do some stuff to make sure the ifp type is there for any new person that we've added*/
+			if(typeof(globalTypeArray[friendInfo.ifps[0]]) != 'undefined' && globalTypeArray[friendInfo.ifps[0]]){
+				friendInfo.ifp_type = globalTypeArray[friendInfo.ifps[0]];
+			} 
+			
+			//TODO: do some stuff here to get the rest of the ifps from the global data object
+			friendInfo.ifps = getIFPsFromGlobalDataObject(friendInfo);
+			//alert(friendInfo.ifps);
+			newFoafKnowsFields.mutualFriends.push(friendInfo);
+		} 
+	}
+	
+	/*Save all user knows*/
+	var userKnowsContainer = document.getElementById('userKnows_container');	
+	for(childNode in userKnowsContainer.childNodes){
+		if(userKnowsContainer.childNodes[childNode].className == 'friend'){
+			var friendInfo = getFriendInfoFromElement(userKnowsContainer.childNodes[childNode].id);
+			
+			/*do some stuff to make sure the ifp type is there for any new person that we've added*/
+			if(typeof(globalTypeArray[friendInfo.ifps[0]]) != 'undefined' && globalTypeArray[friendInfo.ifps[0]]){
+				friendInfo.ifp_type = globalTypeArray[friendInfo.ifps[0]];
+			} 
+			
+			//TODO: do some stuff here to get the rest of the ifps from the global data object
+			friendInfo.ifps = getIFPsFromGlobalDataObject(friendInfo);
+			newFoafKnowsFields.userKnows.push(friendInfo);
+		} 
+	}	
+	
+	/*replace the original foaf knows fields stuff*/
+	globalFieldData.foafKnowsFields = newFoafKnowsFields;
+	
+}
+
+/*get all ifps from the single one passed in by friendInfo */
+function getIFPsFromGlobalDataObject(friendInfo){
+	
+	var ifps = friendInfo.ifps;
+	
+	for(person in globalFieldData.foafKnowsFields.userKnows){
+		for(ifp in globalFieldData.foafKnowsFields.userKnows[person].ifps){
+				if(globalFieldData.foafKnowsFields.userKnows[person].ifps[ifp] == friendInfo.ifps[0]){			
+					ifps = globalFieldData.foafKnowsFields.userKnows[person].ifps;
+					break;
+				}
+		}
+	}
+	
+	for(person in globalFieldData.foafKnowsFields.mutualFriends){
+		for(ifp in globalFieldData.foafKnowsFields.mutualFriends[person].ifps){
+				if(globalFieldData.foafKnowsFields.mutualFriends[person].ifps[ifp] == friendInfo.ifps[0]){			
+					ifps = globalFieldData.foafKnowsFields.mutualFriends[person].ifps;
+					break;
+				}
+		}
+	}
+
+	return ifps;
 }
 
 function otherDisplayToObjects(){
@@ -1513,7 +1777,7 @@ function otherDisplayToObjects(){
 						name = friendDiv.childNodes[childNode].childNodes[grandChildNode].childNodes[0].nodeValue;
 						
 						if(typeof(friendDiv.childNodes[childNode].childNodes[grandChildNode].href) != 'undefined'){
-							ifp = friendDiv.childNodes[childNode].childNodes[grandChildNode].href;
+							ifp = friendDiv.childNodes[childNode].childNodes[grandChildNode].href.replace("http://foaf.qdos.com/find/?q=","");
 						}
 					}
 				}
@@ -1521,22 +1785,23 @@ function otherDisplayToObjects(){
 		}
 		
 		/*create an array with the information about the friend in it*/
-		var friend=new Array();
+		var friend=new Object();
 		if(ifp){
-			friend['ifps'] = new Array();
+			friend.ifps = new Array();
+			//FIXME: we need to keep track of all of the ifps somehow
 			friend['ifps'][0] = ifp;
 		} 
 		if(name){
-			friend['name'] = name;
+			friend.name = name;
 		}
 		if(img){
-			friend['img'] = img;
+			friend.img = img;
 		}
 		
 		return friend;
 		
 	}
-
+	
 
 /*---------------------------element generators---------------------------*/
 
@@ -2091,24 +2356,118 @@ function removeMutualFriendElement(removeId,removeDivId){
 	
 }
 
-/*converts a user that knows you to one that you know*/
+/*adds a new friend that you've search for*/
 function addFriend(friendDivId){
 
-	alert('Adding a friend');
-
-	/*
 	var friend = getFriendInfoFromElement(friendDivId);
 
-	var containerElement = document.getElementById('mutualFriends_container');
-
-	if(containerElement){
-		var friendDiv = createFriendElement('mutualFriend',friend,containerElement.childNodes.length,containerElement);
-		createRemoveFriendsLink(friendDiv.id,friendDiv.id,true);
-	}
-
+	var isMutualFriend = false;
+	var isUserKnows = false;
+	var isKnowsUser = false;
 	
-	removeGenericInputElement(friendDivId,'id');*/
+	/*check whether this person is in the mutual friends bit*/
+	for(friendKey in globalFieldData.foafKnowsFields.mutualFriends){
+		for(ifpKey in globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps){		
+			//XXX this could this be more efficient
+			if(globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps[ifpKey]==friend.ifps[0] ||
+				globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps[ifpKey]==sha1(friend.ifps[0]) ||
+				globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps[ifpKey]==sha1('mailto:'+friend.ifps[0]) ||
+				sha1(globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps[ifpKey])==friend.ifps[0]){
+				
+				isMutualFriend = true;
+			}
+		}
+	}
+	/*check whether this person is in the user knows bit*/
+	for(friendKey in globalFieldData.foafKnowsFields.userKnows){
+		for(ifpKey in globalFieldData.foafKnowsFields.userKnows[friendKey].ifps){
+			//XXX this could this be more efficient
+			if(globalFieldData.foafKnowsFields.userKnows[friendKey].ifps[ifpKey]==friend.ifps[0] ||
+				globalFieldData.foafKnowsFields.userKnows[friendKey].ifps[ifpKey]==sha1(friend.ifps[0]) ||
+				globalFieldData.foafKnowsFields.userKnows[friendKey].ifps[ifpKey]==sha1('mailto:'+friend.ifps[0]) ||
+				sha1(globalFieldData.foafKnowsFields.userKnows[friendKey].ifps[ifpKey])==friend.ifps[0]){
+				
+				isUserKnows = true;
+			}
+		}
+	}
+	/*check whether this person is in the knows user bit*/
+	for(friendKey in globalFieldData.foafKnowsFields.knowsUser){
+		for(ifpKey in globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps){
+			//XXX this could this be more efficient
+			if(globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==friend.ifps[0] ||
+				globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==sha1(friend.ifps[0]) ||
+				globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==sha1('mailto:'+friend.ifps[0]) ||
+				sha1(globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==friend.ifps[0]){
+				
+				isKnowsUser = true;
+			}
+		}
+	}
+	
+	/*Add to the appropriate box*/
+	if(isUserKnows || isMutualFriend){
+		alert("Already there!");//TODO: add some sort of scrolling fading thing
+	} else if(!isKnowsUser){//a non mutual friend
+	
+		/*get container element*/
+		var containerElement = document.getElementById('userKnows_container');
+		
+		if(containerElement){
+			insertFriendInRightPlace(containerElement, 'userKnows', friend);
+			//TODO: add some sort of scrolling/fading thingy
+			saveFoaf();
+		}
+	} else {//a mutual friend
+		var containerElement = document.getElementById('mutualFriends_container');
+		
+		if(containerElement){
+			insertFriendInRightPlace(containerElement, 'mutualFriends', friend);
+			saveFoaf();
+			//TODO: add some sort of scrolling fading thing + alphabetical order
+			//TODO: need to delete from knows user place + combine ifps
+		}
+	}
+	
+	
+	removeGenericInputElement(friendDivId,'id');
+}
 
+/*insert a friend in the right place alphabetically. containerElement is the place we're inserting it.  
+ *Name is the name of the container e.g. userKnows and friend is the friend data (in array/object form)*/
+function insertFriendInRightPlace(containerElement, name, friend){
+	var reachedPoint = false;//whether we've got to the point alphabetically where we want to insert
+	var toReattachElements = new Array();
+			
+	/*remove all elements after the insertion point*/
+	for(contKey in containerElement.childNodes){
+		if(typeof(containerElement.childNodes[contKey]) == 'undefined' || typeof(containerElement.childNodes[contKey].id)=='undefined'){
+			continue;
+		}
+		var thisFriend = getFriendInfoFromElement(containerElement.childNodes[contKey].id);
+				
+		if(reachedPoint){
+			//remove this element and stow to reattach later.
+			containerElement.removeChild(containerElement.childNodes[contKey]);
+			toReattachElements.push(containerElement.childNodes[contKey]);
+		} else if(typeof(thisFriend.name) != 'undefined' && thisFriend.name){
+			if(thisFriend.name > friend.name){
+				/*remove this element and stow to reattach later.  Set reachedPoint so we remove all subsequent elements*/
+				containerElement.removeChild(containerElement.childNodes[contKey]);
+				toReattachElements.push(containerElement.childNodes[contKey]);
+				reachedPoint = true;
+			} 
+		}
+	}
+			
+	/*append our new element*/
+	var friendDiv = createFriendElement('userKnows',friend,containerElement.childNodes.length,containerElement);
+	createRemoveFriendsLink(friendDiv.id,friendDiv.id,true);
+			
+	/*reattach all those elements that we have removed*/
+	for(elemKey in toReattachElements){
+		containerElement.appendChild(toReattachElements[elemKey]);
+	}
 }
 
 /*converts a user that knows you to one that you know*/
@@ -2166,6 +2525,17 @@ function updateLatLongText(holderName,marker){
 	    	
 	latElement.appendChild(latText);
 	longElement.appendChild(longText);
+}
+
+function log(logline){
+	var debugDiv = document.getElementById('debugDiv');
+	if(!debugDiv){
+		debugDiv = document.createElement("div");
+		debugDiv.id='debugDiv';
+		document.body.appendChild(debugDiv);
+	}
+	debugDiv.appendChild(document.createTextNode(logline));
+	debugDiv.appendChild(document.createElement("br"));
 }
 
 /*preview an image that has been uploaded or entered as a url and save the page*/

@@ -2,6 +2,7 @@
 require_once 'Field.php';
 require_once 'helpers/Utils.php';
 require_once 'helpers/IFPTriangulation.class.php';
+require_once 'helpers/URITriangulation.class.php';
 require_once 'helpers/settings.php';
 require_once 'helpers/sparql.php';
 
@@ -19,14 +20,10 @@ class KnowsField extends Field {
 			/*get all known ifps of this person by making use of the foaf.qdos.com KB*/
         	$ifps = $this->getTriangulatedIfps($foafData);              
         	
-        	$initialIfps = $this->getUserIfps($foafData);
-        	/**/
-        	$knowsUserIfps = $this->getKnowsUserIfps($initialIfps,$foafData->getPrimaryTopic());
-        	
-        	/*more or less done*/
+        	$knowsUserIfps = $this->getKnowsUserIfps($ifps,$foafData);
         	$userKnowsIfps = $this->getUserKnowsIfps($foafData);   
 
-        	/*needs refining*/
+        	/*TODO: check that this works*/
         	$mutualFriendsIfps = $this->getMutualFriendsIfps($userKnowsIfps, $knowsUserIfps);
         	
         	$knowsUserDetails = $this->getDetailsFromIfps($knowsUserIfps); 
@@ -36,7 +33,7 @@ class KnowsField extends Field {
         	$this->data['foafKnowsFields'] = array();
         	$this->data['foafKnowsFields']['mutualFriends'] = $mutualFriendsDetails;
         	$this->data['foafKnowsFields']['userKnows'] = $userKnowsDetails;
-        	$this->data['foafKnowsFields']['knowsUser'] = $knowsUserDetails;
+        	$this->data['foafKnowsFields']['knowsUser'] = $knowsUserDetails; 	
         	
             $this->data['foafKnowsFields']['displayLabel'] = 'Friends';
             $this->data['foafKnowsFields']['name'] = 'foafKnows';
@@ -51,63 +48,74 @@ class KnowsField extends Field {
     	if(!$userKnowsIfps || !$knowsUserIfps || empty($userKnowsIfps) || empty($knowsUserIfps)){
     		return array();
     	}
+    	//to eventually return
+    	$mutualFriends = array();
     	
-    	/*build up intersecting mutual friends array*/
-    	$mutualFriendsIfps = array();
-    	$newUserKnowsIfps = $userKnowsIfps;
-    	$newKnowsUserIfps = $knowsUserIfps;
+    	//keys to clean afterwards
+    	$userKnowsRemoveKeys = array();
+    	$knowsUserRemoveKeys = array();
     	
-    	foreach($userKnowsIfps as $keyUK => $thisUserKnowsFriend){
+    	/*user knows */
+    	foreach($userKnowsIfps as $userKnowsURI => $userKnowsIFPs){
     		
-    		$thisMutualFriend = array();
-    		
-    		foreach($knowsUserIfps as $keyKU => $thisKnowsUserFriend){
-    			$intersection_array = array_intersect($thisUserKnowsFriend, $thisKnowsUserFriend);
-				
-    			if(!empty($intersection_array)){
-    	
-    				//a mutal friend was found
-    				$thisMutualFriend = array_merge($thisMutualFriend, $thisKnowsUserFriend);
-    				$thisMutualFriend = array_merge($thisMutualFriend, $thisUserKnowsFriend);
-					
-    				//since these are mutual friends we need to remove them from this array.  Nulls will be cleaned later.
-    				$newKnowsUserIfps[$keyKU] = null;
-    			} 
-    		}
-    		if(!empty($thisMutualFriend)){
-    			array_push($mutualFriendsIfps,array_unique($thisMutualFriend));
-    			$newUserKnowsIfps[$keyUK] = null;
-    		}
-    	}
+    		foreach($knowsUserIfps as $knowsUserURI => $knowsUserIFPs){
+    			
+    			if($knowsUserURI == $userKnowsURI){
+    				//if they have the same uri they must be the same person
+    				$thisFriendsIFPs = array_unique(array_merge($userKnowsIFPs,$userKnowsIFPs));
+    				
+    				//add mutual friend
+					array_push($mutualFriends,$thisFriendsIFPs);    	
+					//do appropriate cleaning
+					array_push($userKnowsRemoveKeys,$userKnowsURI);
+					array_push($knowsUserRemoveKeys,$knowsUserURI);
+					continue;			
+    			} else {
+    				//if they have a different uri they might still be the same person if at least one ifp matches
+    				foreach($userKnowsIFPs as $userKnowsIFP){
+    					foreach($knowsUserIFPs as $knowsUserIFP){
+    						if($knowsUserIFP == $userKnowsIFP){
+    							$thisFriendsIFPs = array_unique(array_merge($userKnowsIFPs,$userKnowsIFPs));
+    							
+    							//add  mutual friend
+								array_push($mutualFriends,$thisFriendsIFPs); 
+								//do appropriate cleaning
+								array_push($userKnowsRemoveKeys,$userKnowsURI);
+								array_push($knowsUserRemoveKeys,$knowsUserURI);   	
+								break;
+    						}
+    					}
+    				}
+    			}
 
-    	/*clean out nulls for user knows*/
-    	$cleanedUserKnowsIfps = array();
-    	foreach($newUserKnowsIfps as $elem){
-    		if($elem){
-    			array_push($cleanedUserKnowsIfps,$elem);
-    		} 
-    	}
-    	$userKnowsIfps = $cleanedUserKnowsIfps;
-    	
-        /*clean out nulls for knows user*/
-    	$cleanedKnowsUserIfps = array();
-    	foreach($newKnowsUserIfps as $elem){
-    		if($elem){
-    			array_push($cleanedKnowsUserIfps,$elem);
     		}
+    		
     	}
-    	$knowsUserIfps = $cleanedKnowsUserIfps;
     	
-    	return $mutualFriendsIfps;
+    	//clean out userknows/knows users that are now mutual friends
+    	foreach($userKnowsRemoveKeys as $key){
+    		unset($userKnowsIfps[$key]);
+    	}
+    	foreach($knowsUserRemoveKeys as $key){
+    		unset($knowsUserIfps[$key]);
+    	}
+    	
+    	return $mutualFriends;
     }
+    
+    
     
     /*array of the user details*/
     private function getDetailsFromIfps($userKnowsIfps){
     	//TODO: need to ask this query over the inMemModel as well
-    	//array to store all the details of people that the user knows
-        	$userKnowsDetails = array();
+    		
+    	 	//TODO: put this at the start of the details section so we can preserve the uri goodness here
+      	 	 $userKnowsIfps = $this->uniqueIterativelyUsingIfps($userKnowsIfps);
+        	//var_dump($userKnowsIfps);
+    		//array to store all the details of people that the user knows
+    		$userKnowsDetails = array();
         	
-        	foreach($userKnowsIfps as $thisFriendsIfps){
+        	foreach($userKnowsIfps as $thisUri => $thisFriendsIfps){
 				
         		$inquery = '';
 	        	foreach($thisFriendsIfps as $ifp){
@@ -118,9 +126,14 @@ class KnowsField extends Field {
 	                
 	        	/*build a query to get each friend's details*/
 	        	$query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX ya: <http://blogs.yandex.ru/schema/foaf/>";
-	        	$query .= " SELECT DISTINCT ?img ?name WHERE {";
-	        	$query .= " ?uri ?ifp_predicate ?ifp . 
-	        				?uri foaf:name ?name .
+	        	$query .= " SELECT DISTINCT ?img ?name ?nick WHERE {";
+	        	$query .= " ?uri ?ifp_predicate ?ifp. 
+	        				OPTIONAl{
+	        					?uri foaf:name ?name .
+	        				}
+	        				OPTIONAL{
+	        					?uri foaf:nick ?nick .
+	        				}
 	        				OPTIONAL{
 	        					?uri foaf:depiction ?img
 	        				} .
@@ -135,9 +148,15 @@ class KnowsField extends Field {
         		$thisFriendDetails = array();
         		/*pick just one name, depiction/image etc for this person*/
         		foreach($thisFriendResults as $row){
+        			/*only add stuff if there is a name or nick*/
         			if(isset($row['?name']) && $row['?name'] && $row['?name'] != 'NULL'){
         				$thisFriendDetails['name'] = sparql_strip($row['?name']);
+        			} else if(isset($row['?nick']) && $row['?nick'] && $row['?nick'] != 'NULL'){
+        				$thisFriendDetails['nick'] = sparql_strip($row['?nick']);
+        			} else{
+        				continue;
         			}
+        			
         			if(isset($row['?img']) && $row['?img'] && $row['?img'] != 'NULL'){
         				$thisFriendDetails['img'] = sparql_strip($row['?img']);
         			}
@@ -149,6 +168,11 @@ class KnowsField extends Field {
         				array_push($strippedIfps,sparql_strip($ifp));
         			}
         			$thisFriendDetails['ifps'] = $strippedIfps;
+        			
+        			if(!$this->isBnode($thisUri)){
+        				//echo("this is not a bnode".$thisUri."\n");
+        				$thisFriendDetails['uri'] = sparql_strip($thisUri);
+        			}
         		}
         		if(!empty($thisFriendDetails)){
         			array_push($userKnowsDetails,$thisFriendDetails);
@@ -156,7 +180,6 @@ class KnowsField extends Field {
      
         		$userKnowsDetails;
         	}
-        	
         	//sort alphabetically by name
         	usort($userKnowsDetails, array('KnowsField','nameSorter'));
         	
@@ -164,16 +187,24 @@ class KnowsField extends Field {
         	return $userKnowsDetails;	
     }
     
-    public function nameSorter($a,$b){
-    	$ret = strcmp($a['name'],$b['name']);
-    	if($ret == 0){
-    		return 1;
+    /*checks whether a uri is a bnode or not*/
+    private function isBnode($thisUri){
+    	
+    	$thisUri = sparql_strip($thisUri);
+    	if(substr($thisUri,0,2)=="_:"){
+    		return true;
     	}
-
-    	return $ret;
+    	if(substr($thisUri,0,6)=="bnode:"){
+    		return true;
+    	}
+    	if(substr($thisUri,0,5)=="bNode"){
+    		return true;		
+    	}
+    	
+    	return false;
     }
     
-    /*get the ifps (or uris) of the people who this person knows from the loaded foaf files, keyed on the persons uri*/
+    /*get the ifps of the people who this person knows from the loaded foaf files, keyed on the persons uri*/
     private function getUserKnowsIfps($foafData){
     	
     	$query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX ya: <http://blogs.yandex.ru/schema/foaf/>
@@ -192,7 +223,7 @@ class KnowsField extends Field {
 						 	 OPTIONAL{
 						 	 	?uri foaf:mbox_sha1sum ?mbox_sha1sum
 						 	 }
-						}";//FIXME: need to look for uris here too
+						}";
     	 //FILTER(?ifp_predicate = foaf:homepage || ?ifp_predicate = foaf:weblog || ?ifp_predicate = foaf:mbox  ||?ifp_predicate = foaf:mbox_sha1sum);
     	$potentialIfpArray = $foafData->getModel()->SparqlQuery($query);
     	$actualIfpArray = array();
@@ -200,7 +231,7 @@ class KnowsField extends Field {
     	if(!empty($potentialIfpArray)){
     		foreach($potentialIfpArray as $row){
     			
-				/* we need to key this on the uri of the person that the user knows */
+				/* we need to key this on the uri of the person that the user knows*/
     			if(!isset($actualIfpArray[$row['?uri']->uri])){
     				$actualIfpArray[$row['?uri']->uri] = array();
     			}
@@ -239,41 +270,157 @@ class KnowsField extends Field {
     	
     	/*loop through the people they know and triangulate their IFPs*/
         $userKnowsIfps = array();
-        foreach($actualIfpArray as $row){
+        foreach($actualIfpArray as $key => $row){
         	$thisFriendsIfps = IFPTriangulation::doIterativeIFPTriangulation($row);
-        	array_push($userKnowsIfps,$thisFriendsIfps);
+        	
+        	if(!isset($userKnowsIfps[$key])){
+        		$userKnowsIfps[$key] = array();	
+        	}
+        	
+        	$userKnowsIfps[$key] = array_merge($userKnowsIfps[$key],$thisFriendsIfps);
+           	
         }
-        /*unique the array in case some people were duplicated*/
-        //TODO: unique this array
-      
+        
+        
     	return $userKnowsIfps;
     }
     
-    /*get ifps, keyed on the uri, of people who say they know the user*/
-    private function getKnowsUserIfps($ifps,$primaryTopic){
+    /*combines all the elements which share at least one ifp*/
+    //XXX is this correct and fool proof or does it need to be done iteratively.
+    private function uniqueIterativelyUsingIfps($userKnowsIfps){
+ 		//echo("LENGTH:".sizeOf($userKnowsIfps)."\n");
+    	
+    	$this->uniqueArrayUsingIfps($userKnowsIfps);
+   		//echo("LENGTHaft:".sizeOf($userKnowsIfps)."\n");
+    //	var_dump($userKnowsIfps);
+    	//TODO we can do better than that!
+    	return  $userKnowsIfps;
+    	
+    }
     
-	    $model = new MemModel('baseuri');
-	    echo("start");
-	    $model->load('http://foaf.qdos.com/reverse?path='.$primaryTopic);
-	    echo('1');
+    //doesn't work! XXX
+    private function uniqueArrayUsingIfps(&$userKnowsIfps){
     	
-	    foreach($ifps as $ifp){
-	   
-    			$model->load('http://foaf.qdos.com/reverse?path='.urlencode(sparql_strip($ifp))."&ifp");
-	    		//FIXME: behave well if there is a nasty error here and get rid of the break below for when the reverse bug is fixed
-	    		break;
-	    }
+    	$ret = array();//the array we'
+    	$stillWorking = false;//whether or not we're still making changes to the array
+		$userKnowsIfps2 = $userKnowsIfps;
+
+    	foreach($userKnowsIfps as $ifps){
     		
-    	$model->writeAsHTML();
-    	
-    	//need to actually return some knowsRDFs
-    	return array();
+    		//the array we'll grow and eventually put in the array to return
+    		$snowballedIfps = $ifps;
+    		$addedToSnowball = false;
+    		
+    		//loop through the array seeing if this element has anything in common with any of the other elements.  
+    		//Keep doing this until we can't pick anything more up.
+    		//while(!$addedToSnowball){
+	    		foreach($userKnowsIfps2 as $ifps2){
+	    			
+	    			$intersectionArray = array_intersect($snowballedIfps,$ifps2);
+	
+	    			/*if there are any ifps in common with this one, the others should be added to the 'snowball' (if there are any)*/
+	    			if(!empty($intersectionArray) && sizeOf($intersectionArray) != sizeOf($ifps2)){
+	    				$snowballedIfps = array_merge($snowballedIfps,$ifps2);
+	    				$addedToSnowball = true;
+	    			}
+	
+	    		}
+    		//}
+    		
+    		/*if it isn't already there, shove the ifp list we've got into the array to return*/
+	    	$alreadyInRet = false;
+	    	foreach($ret as $retElement){
+    			$intersectArraySnowball = array_intersect($snowballedIfps,$retElement);
+    			if(!empty($intersectArraySnowball)){
+    				$alreadyInRet = true;
+    			}
+	    	}
+    		if(!$alreadyInRet){
+    			array_push($ret,array_unique($snowballedIfps));
+    		}
+    	}
+    	$userKnowsIfps = $ret;
+    	return $stillWorking;
+    }
+    
+    public function nameSorter($a,$b){
+    	$ret = strcmp($a['name'],$b['name']);
+    	if($ret == 0){
+    		return 1;
+    	}
+
+    	return $ret;
     }
     
     
-    private function getUserIfps($foafData){
+    /*get ifps, keyed on the uri, of people who say they know the user*/
+    private function getKnowsUserIfps($ifps,$foafData){
+    	$inquery='';
+        		
+        		foreach($ifps as $ifp){
+                        if(isset($ifp) && $ifp && substr($ifp,0,2)!="_:"){
+                                $inquery.=" ?ifp = ".$ifp." || ";
+                                //look for sha1s both done the correct way and the incorrect way too
+                                if(substr($ifp,0,8)=="<mailto:"){
+                                	$inquery.=" ?ifp = \"".sha1(sparql_strip($ifp))."\" ||";
+                                	$inquery.=" ?ifp = \"".sha1(substr(sparql_strip($ifp),7))."\" ||";
+                                }
+                        }
+                }
+                if($inquery!=""){
+                        $inquery="
+						PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX ya: <http://blogs.yandex.ru/schema/foaf/>
+						SELECT DISTINCT ?infriend ?infriend_predicate ?infriend_ifp
+						WHERE {
+						 	OPTIONAL{
+							  	?uri ?ifp_predicate ?ifp .
+						 		?infriend foaf:knows ?uri .						 	
+							  	?infriend ?infriend_predicate ?infriend_ifp .
+							  	FILTER(?ifp_predicate = foaf:homepage || ?ifp_predicate = foaf:weblog || ?ifp_predicate = foaf:mbox  || ?ifp_predicate = foaf:mbox_sha1sum) .
+								FILTER(?infriend_predicate = foaf:homepage || ?infriend_predicate = foaf:weblog || ?infriend_predicate = foaf:mbox  || ?infriend_predicate = foaf:mbox_sha1sum) .				
+						    	FILTER(".substr($inquery,0,-2).")
+						    }						
+                		}";
+                        //TODO: continue where I left off.  I just added the optional and I want
+                        //to use the infriend uri to get some of the details in order to make sure libby knows dan as she should
+                }//need to allow people who just know by uri to enter stuff here
+                
+				
+                $inquery_array = sparql_query(FOAF_EP, $inquery);
+            	$knows = array();
+			
+                 foreach ($inquery_array as $row) {
+                    $value = sparql_strip($row['?infriend']);
+                 	if (substr($value, 0, 2) == '_:'){
+                    	$value = 'bnode:'.substr($value, 2);
+                 	}
+                    if(!isset($knows[$value])){
+                   		$knows[$value] = array();
+                    }
+                    array_push($knows[$value],$row['?infriend_ifp']);
+                 }	
+                      
+              
+    			/*loop through the people who know them and triangulate their IFPs*/
+        		$knowsUserIfps = array();
+        		foreach($knows as $key => $values){
+        			$thisIfpArray = IFPTriangulation::doIterativeIFPTriangulation($values);
+        			array_walk($thisIfpArray,'sparql_strip');
+        			$knowsUserIfps[$key] = $thisIfpArray;
+
+        		}
+        		
+        		//echo("KNOWS USER IFPS:");
+        		//var_dump($knowsUserIfps);
+        		
+
+                return $knowsUserIfps;
+    }
+    
+    /*queries the loaded foaf file and queries foaf.qdos.com then triangulates the two*/
+    private function getTriangulatedIfps($foafData){
     	
-    /*get the ifps that the person has already entered in their foaf file*/
+    	/*get the ifps that the person has already entered in their foaf file*/
         $initialQuery = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX ya: <http://blogs.yandex.ru/schema/foaf/>
         			SELECT ?homepage ?weblog ?mbox ?mbox_sha1sum WHERE {
         				?person foaf:primaryTopic <".$foafData->getPrimaryTopic().">
@@ -296,43 +443,33 @@ class KnowsField extends Field {
         	
         /*loop through the results populating the ifp array - care about labels or uris*/
         $initialIfpArray = array();		
-        if(!empty($initialIfpResults)){
-	        foreach($initialIfpResults as $row){
-	        	if(isset($row['?weblog']) && property_exists($row['?weblog'],'uri')){
-	        		array_push($initialIfpArray,"<".$row['?weblog']->uri.">");
-	        	}
-	        	if(isset($row['?mbox']) && property_exists($row['?mbox'],'uri')){
-	        		array_push($initialIfpArray,"<".$row['?mbox']->uri.">");
-	        	}
-	        	if(isset($row['?mbox_sha1sum']) && property_exists($row['?mbox_sha1sum'],'uri')){
-	        		array_push($initialIfpArray,'"'.$row['?mbox_sha1sum']->uri.'"');
-	        	}
-	        	if(isset($row['?homepage']) && property_exists($row['?homepage'],'uri')){
-	        		array_push($initialIfpArray,"<".$row['?homepage']->uri.">");
-	        	}		
-	        	if(isset($row['?mbox']) && property_exists($row['?weblog'],'label')){
-	        		array_push($initialIfpArray,"<".$row['?mbox']->label.">");
-	        	}
-	        	if(isset($row['?mbox_sha1sum']) && property_exists($row['?mbox_sha1sum'],'label')){
-	        		array_push($initialIfpArray,'"'.$row['?mbox_sha1sum']->label.'"');
-	        	}
-	        	if(isset($row['?homepage']) && property_exists($row['?homepage'],'label')){
-	        		array_push($initialIfpArray,"<".$row['?homepage']->label.">");
-	        	}
-	        	if(isset($row['?weblog']) && property_exists($row['?weblog'],'label')){
-	        		array_push($initialIfpArray,"<".$row['?weblog']->label.">");
-	        	}
-	        }
+        foreach($initialIfpResults as $row){
+        	if(isset($row['?weblog']) && property_exists($row['?weblog'],'uri')){
+        		array_push($initialIfpArray,"<".$row['?weblog']->uri.">");
+        	}
+        	if(isset($row['?mbox']) && property_exists($row['?mbox'],'uri')){
+        		array_push($initialIfpArray,"<".$row['?mbox']->uri.">");
+        	}
+        	if(isset($row['?mbox_sha1sum']) && property_exists($row['?mbox_sha1sum'],'uri')){
+        		array_push($initialIfpArray,'"'.$row['?mbox_sha1sum']->uri.'"');
+        	}
+        	if(isset($row['?homepage']) && property_exists($row['?homepage'],'uri')){
+        		array_push($initialIfpArray,"<".$row['?homepage']->uri.">");
+        	}		
+        	if(isset($row['?mbox']) && property_exists($row['?weblog'],'label')){
+        		array_push($initialIfpArray,"<".$row['?mbox']->label.">");
+        	}
+        	if(isset($row['?mbox_sha1sum']) && property_exists($row['?mbox_sha1sum'],'label')){
+        		array_push($initialIfpArray,'"'.$row['?mbox_sha1sum']->label.'"');
+        	}
+        	if(isset($row['?homepage']) && property_exists($row['?homepage'],'label')){
+        		array_push($initialIfpArray,"<".$row['?homepage']->label.">");
+        	}
+        	if(isset($row['?weblog']) && property_exists($row['?weblog'],'label')){
+        		array_push($initialIfpArray,"<".$row['?weblog']->label.">");
+        	}
         }
-        
-        return $initialIfpArray;
-    }
-    
-    /*queries the loaded foaf file and queries foaf.qdos.com then triangulates the two*/
-    private function getTriangulatedIfps($foafData){
-    	
-    	$initialIfpArray = $this->getUserIfps($foafData);
-        
+
        	/*triangulate the ifps to grow the array*/
         $ifps = IFPTriangulation::doIterativeIFPTriangulation($initialIfpArray);
         
@@ -344,29 +481,201 @@ class KnowsField extends Field {
 
 			require_once 'FieldNames.php';
 			
-			$predicate_resource = new Resource('http://xmlns.com/foaf/0.1/mbox');
+			$predicate_resource = new Resource('http://xmlns.com/foaf/0.1/knows');
 			$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
+
+			$doNotCleanArray = array();
+
 			
-			//find existing triples
-			$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
 			
-			//remove existing triples
-			foreach($foundModel->triples as $triple){
-				$foafData->getModel()->remove($triple);
+			
+			
+			
+			
+			//TODO: this could be done with less repeated code
+			//add the new ones
+			if(property_exists($value,'mutualFriends')){
+				foreach($value->mutualFriends as $friend){
+					
+					/*Add the ifps to the doNotCleanArray so that this friend doesn't get deleted*/
+					//TODO: what if there is only a do not clean array for ifps
+					$doNotCleanArray = array_merge($doNotCleanArray,$friend->ifps);
+					
+					if(property_exists($friend,'ifp_type') && $friend->ifp_type){			
+						/*either spit out a uri if there is one, or link to them via a bnode and an IFP*/
+						if(property_exists($friend,'uri') && $friend->uri){
+							$knowsTripleUri = new Statement($primary_topic_resource,$predicate_resource,new Resource($uri));
+							$foafData->getModel()->add($knowsTripleUri);	
+						} else {
+							
+							echo("ADDING MU RESOURCE");
+							
+							$bNode = Utils::GenerateUniqueBnode($foafData->getModel());
+							$knowsTriple = new Statement($primary_topic_resource,$predicate_resource,$bNode);
+							$knowsTriple2 = new Statement($bNode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person"));
+							
+							$foafData->getModel()->add($knowsTriple);	
+							$foafData->getModel()->add($knowsTriple2);	
+							
+							if($friend->ifp_type == 'mbox'){
+								$knowsTriple3 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Resource("mailto:".$friend->ifps[0]));
+								$knowsTriple4 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal(sha1("mailto:".$friend->ifps[0])));
+								$foafData->getModel()->add($knowsTriple3);	
+								$foafData->getModel()->add($knowsTriple4);		
+							} else if($friend->ifp_type == 'mbox_sha1sum'){
+								$knowsTriple5 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Literal($friend->ifps[0]));
+								$foafData->getModel()->add($knowsTriple5);	
+							} else{
+								$knowsTriple5 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Resource($friend->ifps[0]));
+								$foafData->getModel()->add($knowsTriple5);	
+							}
+						}
+					}
+				}
 			}
-			
-			//add new triples
-			$valueArray = $value->values;
-			foreach($valueArray as $thisValue){
-				$mangledValue = $this->onSaveMangleEmailAddress($thisValue);
-				
-				$literalValue = new Literal($mangledValue);
-		
-				$new_statement = new Statement($primary_topic_resource,$predicate_resource,$literalValue);	
-				$foafData->getModel()->add($new_statement);
+    		if(property_exists($value,'userKnows')){
+    			foreach($value->userKnows as $friend){
+
+ 					/*Add the ifp to the doNotCleanArray so that this friend doesn't get deleted*/
+					$doNotCleanArray = array_merge($doNotCleanArray,$friend->ifps);
+					   				
+    				if(property_exists($friend,'ifp_type') && $friend->ifp_type){
+    					/*either spit out a uri if there is one, or link to them via a bnode and an IFP*/
+						if(property_exists($friend,'uri') && $friend->uri){
+							$knowsTripleUri = new Statement($primary_topic_resource,$predicate_resource,new Resource($uri));
+							$foafData->getModel()->add($knowsTripleUri);
+						} else {
+							
+							echo("ADDING UK RESOURCE");
+							
+							$bNode = Utils::GenerateUniqueBnode($foafData->getModel());
+							$knowsTriple = new Statement($primary_topic_resource,$predicate_resource,$bNode);
+							$knowsTriple2 = new Statement($bNode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person"));
+							
+							$foafData->getModel()->add($knowsTriple);	
+							$foafData->getModel()->add($knowsTriple2);	
+							
+							if($friend->ifp_type == 'mbox'){
+								$knowsTriple3 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Resource("mailto:".$friend->ifps[0]));
+								$knowsTriple4 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal(sha1("mailto:".$friend->ifps[0])));
+								$foafData->getModel()->add($knowsTriple3);	
+								$foafData->getModel()->add($knowsTriple4);		
+							} else if($friend->ifp_type == 'mbox_sha1sum'){
+								$knowsTriple5 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Literal($friend->ifps[0]));
+								$foafData->getModel()->add($knowsTriple5);	
+							} else{
+								$knowsTriple5 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Resource($friend->ifps[0]));
+								$foafData->getModel()->add($knowsTriple5);	
+							}
+						}
+    				} 
+				}
 			}
 
+		
+			
+
+			/*loop through removing all uris that the person foaf:knows that haven't been marked to keep*/
+			$foundKnowsFields = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
+			if(property_exists($foundKnowsFields,'triples') && !empty($foundKnowsFields->triples)){	
+				foreach($foundKnowsFields->triples as $triple){
+					$theseIFPs = $this->getIFPSFromFoafKnows($triple,$foafData);			
+					
+					$found = false;
+					
+					/*the ifps from this particular person*/
+					foreach($theseIFPs as $ifp){
+						$thisIfp;
+						if(property_exists($ifp->obj,'uri')){
+							$thisIfp = $ifp->obj->uri;
+						} else {
+							$thisIfp = $ifp->obj->label;
+						}
+						/*check if anything matches*/
+						foreach($doNotCleanArray as $cleanIFP){
+							if($cleanIFP == $thisIfp){
+								$found = true;
+								break;
+							}
+						}
+						if($found){
+							break;
+						}
+					}
+					
+					/*is this known or not*/
+					if(!$found){
+						$this->removeTripleRecursively($triple,$foafData);
+					} 
+				}
+			}
+			
+			$this->view->isSuccess = 1;
+    }
+    
+    
+    /*removes a triple and all hanging triples and the ones that hang off them
+     * but doesn't go any further. XXX perhaps it should?*/
+    //XXX: should be able to use rap's remove but with NULLs instead
+    public function removeTripleRecursively($triple, &$foafData){
+    	
+    	$foundHangingStuff = $foafData->getModel()->find($triple->obj,NULL,NULL);
+    	
+    	if($foundHangingStuff && $foundHangingStuff->triples){
+    		foreach($foundHangingStuff->triples as $subTriple){
+    			if(property_exists($subTriple,'obj') && $subTriple->obj && property_exists($subTriple->obj,'uri')){
+	    			
+    				$foundSubStuff = $foafData->getModel()->find($subTriple->obj,NULL,NULL);
+					
+	    			if($foundSubStuff && $foundSubStuff->triples){
+	    				foreach($foundHangingStuff->triples as $subSubTriple){
+	    					$foafData->getModel()->remove($subSubTriple);
+	    				}
+	    			}
+    				$foafData->getModel()->remove($subTriple);
+    			}
+    		}
+    	}
+    	$foafData->getModel()->remove($triple);	
     }
 
-}
+	/*gets an array of IFPS from a foaf knows triple such as <usersuri> foaf:knows <somedudesuriorbnodehere>*/
+    public function getIFPSFromFoafKnows($triple,$foafData){
+    	
+		/*get hold of all the ifps in one array*/
+		$friendsIFPS = array();
+		//XXX: simpler and more efficient with sparql perhaps?
+		$foundIFPFields1 = $foafData->getModel()->find($triple->obj,new Resource('http://xmlns.com/foaf/0.1/mbox'),NULL);
+		$foundIFPFields2 = $foafData->getModel()->find($triple->obj,new Resource('http://xmlns.com/foaf/0.1/mbox_sha1sum'),NULL);
+		$foundIFPFields3 = $foafData->getModel()->find($triple->obj,new Resource('http://xmlns.com/foaf/0.1/homepage'),NULL);
+		$foundIFPFields4 = $foafData->getModel()->find($triple->obj,new Resource('http://xmlns.com/foaf/0.1/weblog'),NULL);
+			
+		if($foundIFPFields1 && property_exists($foundIFPFields1,'triples') 
+			&& $foundIFPFields1->triples && !empty($foundIFPFields1->triples)){
+			$friendsIFPS = array_merge($friendsIFPS,$foundIFPFields1->triples);
+		}
+		if($foundIFPFields2 && property_exists($foundIFPFields2,'triples') 
+			&& $foundIFPFields2->triples && !empty($foundIFPFields2->triples)){
+			$friendsIFPS = array_merge($friendsIFPS,$foundIFPFields2->triples);
+		}
+		if($foundIFPFields3 && property_exists($foundIFPFields3,'triples') 
+			&& $foundIFPFields3->triples && !empty($foundIFPFields3->triples)){
+			$friendsIFPS = array_merge($friendsIFPS,$foundIFPFields3->triples);
+		}
+		if($foundIFPFields4 && property_exists($foundIFPFields4,'triples') 
+			&& $foundIFPFields4->triples && !empty($foundIFPFields4->triples)){
+			$friendsIFPS = array_merge($friendsIFPS,$foundIFPFields4->triples);
+		}	
 
+					
+		return $friendsIFPS;		
+    }
+    
+    
+	/*gets a url from the ifp that is passed in, if it isn't a bnode*/
+	public function getURIFromIFP($ifp){
+		
+		echo("This is the IFP: ".$ifp."\n");
+		//maybe flesh this out FIXME
+	}
+}
