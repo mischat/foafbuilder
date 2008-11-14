@@ -402,12 +402,11 @@ class KnowsField extends Field {
                       
               
     			/*loop through the people who know them and triangulate their IFPs*/
+                 
         		$knowsUserIfps = array();
         		foreach($knows as $key => $values){
         			$thisIfpArray = IFPTriangulation::doIterativeIFPTriangulation($values);
-        			array_walk($thisIfpArray,'sparql_strip');
         			$knowsUserIfps[$key] = $thisIfpArray;
-
         		}
         		
         		//echo("KNOWS USER IFPS:");
@@ -469,7 +468,8 @@ class KnowsField extends Field {
         		array_push($initialIfpArray,"<".$row['?weblog']->label.">");
         	}
         }
-
+        // decho("Initial IFP Array");
+		//var_dump($initialIfpArray);
        	/*triangulate the ifps to grow the array*/
         $ifps = IFPTriangulation::doIterativeIFPTriangulation($initialIfpArray);
         
