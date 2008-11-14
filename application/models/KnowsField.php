@@ -510,9 +510,10 @@ class KnowsField extends Field {
 							$foafData->getModel()->add($knowsTripleUri);	
 						} else {
 							
-							echo("ADDING MU RESOURCE");
-							
 							$bNode = Utils::GenerateUniqueBnode($foafData->getModel());
+							
+							echo("ADDING MU RESOURCE".$bNode->uri." ifp type: ".$friend->ifp_type);
+							
 							$knowsTriple = new Statement($primary_topic_resource,$predicate_resource,$bNode);
 							$knowsTriple2 = new Statement($bNode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person"));
 							
@@ -576,49 +577,13 @@ class KnowsField extends Field {
 
 		
 			
-
-			/*loop through removing all uris that the person foaf:knows that haven't been marked to keep*/
-			$foundKnowsFields = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
-			if(property_exists($foundKnowsFields,'triples') && !empty($foundKnowsFields->triples)){	
-				foreach($foundKnowsFields->triples as $triple){
-					$theseIFPs = $this->getIFPSFromFoafKnows($triple,$foafData);			
-					
-					$found = false;
-					
-					/*the ifps from this particular person*/
-					foreach($theseIFPs as $ifp){
-						$thisIfp;
-						if(property_exists($ifp->obj,'uri')){
-							$thisIfp = $ifp->obj->uri;
-						} else {
-							$thisIfp = $ifp->obj->label;
-						}
-						/*check if anything matches*/
-						foreach($doNotCleanArray as $cleanIFP){
-							if($cleanIFP == $thisIfp){
-								$found = true;
-								break;
-							}
-						}
-						if($found){
-							break;
-						}
-					}
-					
-					/*is this known or not*/
-					if(!$found){
-						$this->removeTripleRecursively($triple,$foafData);
-					} 
-				}
-			}
-			
 			$this->view->isSuccess = 1;
     }
     
     
     /*removes a triple and all hanging triples and the ones that hang off them
      * but doesn't go any further. XXX perhaps it should?*/
-    //XXX: should be able to use rap's remove but with NULLs instead
+    //XXX: should be able to use rap's remove with NULLs for pred/obj
     public function removeTripleRecursively($triple, &$foafData){
     	
     	$foundHangingStuff = $foafData->getModel()->find($triple->obj,NULL,NULL);
