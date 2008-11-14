@@ -1588,7 +1588,6 @@ function imgDisplayToObjects(){
 	}//end if
 }
 
-/*this is more or less identical to imgDisplayToObjects which is possibly not a good thing*/
 function knowsDisplayToObjects(){
 
 	if(typeof(globalFieldData.foafKnowsFields) == 'undefined' || !globalFieldData.foafKnowsFields){
@@ -1599,6 +1598,7 @@ function knowsDisplayToObjects(){
 	var newFoafKnowsFields = new Object();
 	newFoafKnowsFields.mutualFriends = new Array();
 	newFoafKnowsFields.userKnows = new Array();
+	newFoafKnowsFields.knowsUser = globalFieldData.foafKnowsFields.knowsUser;
 	
 	/*Save all mutual friends*/
 	var mutualFriendsContainer = document.getElementById('mutualFriends_container');	
@@ -1644,6 +1644,15 @@ function knowsDisplayToObjects(){
 function getIFPsFromGlobalDataObject(friendInfo){
 	
 	var ifps = friendInfo.ifps;
+	
+	for(person in globalFieldData.foafKnowsFields.knowsUser){
+		for(ifp in globalFieldData.foafKnowsFields.knowsUser[person].ifps){
+				if(globalFieldData.foafKnowsFields.knowsUser[person].ifps[ifp] == friendInfo.ifps[0]){			
+					ifps = globalFieldData.foafKnowsFields.knowsUser[person].ifps;
+					break;
+				}
+		}
+	}
 	
 	for(person in globalFieldData.foafKnowsFields.userKnows){
 		for(ifp in globalFieldData.foafKnowsFields.userKnows[person].ifps){
@@ -2352,12 +2361,15 @@ function removeMutualFriendElement(removeId,removeDivId){
 
 /*adds a new friend that you've search for*/
 function addFriend(friendDivId){
+	//XXX: perhaps we can do the smarts in here in the back end???
 
 	var friend = getFriendInfoFromElement(friendDivId);
 
 	var isMutualFriend = false;
 	var isUserKnows = false;
 	var isKnowsUser = false;
+	
+	var removeIfps = new Array;//the ifps of an element we want to remove
 	
 	/*check whether this person is in the mutual friends bit*/
 	for(friendKey in globalFieldData.foafKnowsFields.mutualFriends){
@@ -2394,6 +2406,7 @@ function addFriend(friendDivId){
 				globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==sha1('mailto:'+friend.ifps[0]) ||
 				sha1(globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==friend.ifps[0]){
 				
+				removeIfps = globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps;
 				isKnowsUser = true;
 			}
 		}
@@ -2402,29 +2415,58 @@ function addFriend(friendDivId){
 	/*Add to the appropriate box*/
 	if(isUserKnows || isMutualFriend){
 		alert("Already there!");//TODO: add some sort of scrolling fading thing
+		
 	} else if(!isKnowsUser){//a non mutual friend
-	
 		/*get container element*/
 		var containerElement = document.getElementById('userKnows_container');
 		
 		if(containerElement){
 			insertFriendInRightPlace(containerElement, 'userKnows', friend);
-			//TODO: add some sort of scrolling/fading thingy
 			saveFoaf();
 		}
 	} else {//a mutual friend
+		/*get container element*/
 		var containerElement = document.getElementById('mutualFriends_container');
 		
+		//add it as a mutual friend
 		if(containerElement){
-			insertFriendInRightPlace(containerElement, 'mutualFriends', friend);
+			insertFriendInRightPlace(containerElement, 'mutualFriend', friend);
 			saveFoaf();
-			//TODO: add some sort of scrolling fading thing + alphabetical order
-			//TODO: need to delete from knows user place + combine ifps
 		}
+		
+		//remove it  from knows user using the ifp
+		removeKnowsUserUsingIFPs(removeIfps);
 	}
 	
-	
 	removeGenericInputElement(friendDivId,'id');
+}
+
+/*remove a friend element which matches the given ifps from the knowsUser given*/
+//XXX this is slow and complicated, there ought to be an easier way
+function removeKnowsUserUsingIFPs(ifps){
+	var containerElement = document.getElementById('knowsUser_container');
+	var foundIt = false;
+	
+	for(elemKey in containerElement.childNodes){
+		for(ifpKey in ifps){
+
+			if(typeof(containerElement.childNodes[elemKey]) != 'undefined' 
+				&& containerElement.childNodes[elemKey] 
+				&& typeof(containerElement.childNodes[elemKey].id) != 'undefined' 
+				&& containerElement.childNodes[elemKey].id){
+			
+				var friendInfo = getFriendInfoFromElement(containerElement.childNodes[elemKey].id); 
+						
+				if(ifps[ifpKey] == friendInfo.ifps[0]){
+					containerElement.removeChild(containerElement.childNodes[elemKey]);
+					break
+				}	
+			}
+		}
+		if(foundIt){
+			break;
+		}
+	}
 }
 
 /*insert a friend in the right place alphabetically. containerElement is the place we're inserting it.  
@@ -2432,7 +2474,8 @@ function addFriend(friendDivId){
 function insertFriendInRightPlace(containerElement, name, friend){
 	var reachedPoint = false;//whether we've got to the point alphabetically where we want to insert
 	var toReattachElements = new Array();
-			
+	var originalNoOfChildNodes = containerElement.childNodes.length;
+	
 	/*remove all elements after the insertion point*/
 	for(contKey in containerElement.childNodes){
 		if(typeof(containerElement.childNodes[contKey]) == 'undefined' || typeof(containerElement.childNodes[contKey].id)=='undefined'){
@@ -2442,26 +2485,42 @@ function insertFriendInRightPlace(containerElement, name, friend){
 				
 		if(reachedPoint){
 			//remove this element and stow to reattach later.
-			containerElement.removeChild(containerElement.childNodes[contKey]);
 			toReattachElements.push(containerElement.childNodes[contKey]);
 		} else if(typeof(thisFriend.name) != 'undefined' && thisFriend.name){
-			if(thisFriend.name > friend.name){
+			if(thisFriend.name.toLowerCase() > friend.name.toLowerCase()){
 				/*remove this element and stow to reattach later.  Set reachedPoint so we remove all subsequent elements*/
-				containerElement.removeChild(containerElement.childNodes[contKey]);
 				toReattachElements.push(containerElement.childNodes[contKey]);
 				reachedPoint = true;
 			} 
 		}
 	}
 			
+	/*remove all those elements that come after our element*/
+	for(elemKey in toReattachElements){
+		if(typeof(toReattachElements[elemKey]) == 'undefined'){
+			continue;
+		}
+		containerElement.removeChild(toReattachElements[elemKey]);
+	}
+	
 	/*append our new element*/
-	var friendDiv = createFriendElement('userKnows',friend,containerElement.childNodes.length,containerElement);
-	createRemoveFriendsLink(friendDiv.id,friendDiv.id,true);
+	var friendDiv = createFriendElement(name,friend,originalNoOfChildNodes,containerElement);
+	if(name == 'mutualFriend'){//XXX: this is a bit dirty
+		createRemoveFriendsLink(friendDiv.id,friendDiv.id,true);
+	} else {
+		createRemoveFriendsLink(friendDiv.id,friendDiv.id,false);
+	}
 			
 	/*reattach all those elements that we have removed*/
 	for(elemKey in toReattachElements){
+		if(typeof(toReattachElements[elemKey]) == 'undefined'){
+			continue;
+		}
 		containerElement.appendChild(toReattachElements[elemKey]);
 	}
+	
+	return friendDiv.id;
+	
 }
 
 /*converts a user that knows you to one that you know*/
