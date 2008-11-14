@@ -31,22 +31,20 @@ class BirthdayField extends Field {
                         ?e bio:date ?bioBirthday .
                     } 
                 };";
+
             $results = $foafData->getModel()->SparqlQuery($queryString);		
     
             $this->data['birthdayFields'] = array();
-            $this->data['birthdayFields'] = array();
 
-              /*Check results !empty */
-              if (!(empty($results))) {
-                /*mangle the results so that they can be easily rendered*/
+            /*Check results !empty */
+            if (!(empty($results))) {
+            /*mangle the results so that they can be easily rendered*/
 
                 foreach ($results as $row) {	
-                error_log("[foaf_editor] Checking a birthday");
-                    //if (isset($row['?foafDateOfBirth']) && $this->isLongDateValid($row['?foafDateOfBirth'])) {
-                    //if (isset($row['?foafDateOfBirth']->label) && $this->isLongDateValid($row['?foafDateOfBirth']->label)) {
+                    error_log("[foaf_editor] For a birthday checking type...");
                     if (isset($row['?foafDateOfBirth']->label) && $this->isLongDateValid($row['?foafDateOfBirth']->label)) {
-                    //if ($this->isLongDateValid($row['?foafDateOfBirth']->label)) {
-            error_log("***********************************");
+                        error_log("['foaf_editor] found complete dateOfBirth");
+                        /* spliting with 3 different values : / - */
                         $birthdayArray = split("-",$row['?foafDateOfBirth']->label);
                         if (empty($birthdayArray)) {
                             $birthdayArray = split("/",$row['?foafDateOfBirth']->label);
@@ -59,16 +57,20 @@ class BirthdayField extends Field {
                             $this->data['birthdayFields']['day']= $birthdayArray[2];
                             $this->data['birthdayFields']['month']= $birthdayArray[1];
                             $this->data['birthdayFields']['year']= $birthdayArray[0];
+                        } else {
+                            error_log("[foaf_editor] couldn't parse date");
                         } 
                     } else if (isset($row['?foafBirthday']->label) && $this->isShortDateValid($row['?foafBirthday']->label)) {
-            error_log("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU");
+                        error_log("['foaf_editor] found short date");
                         $birthdayArray = split("-",$row['?foafBirthday']->label);
+                        /* spliting with 3 different values : / - */
                         if (empty($birthdayArray)) {
                             $birthdayArray = split("/",$row['?foafDateOfBirth']->label);
                         } 
                         if (empty($birthdayArray)) {
                             $birthdayArray = split(":",$row['?foafDateOfBirth']->label);
                         }
+                        /*normalise to \d{2}*/
                         if (strlen($birthdayArray[1]) == 1) {
                             $this->data['birthdayFields']['day']= "0".$birthdayArray[1];
                         } else {
@@ -80,20 +82,20 @@ class BirthdayField extends Field {
                             $this->data['birthdayFields']['month']= $birthdayArray[0];
                         }
                     } else if (isset($row['?bioBirthday']->label) && $this->isLongDateValid($row['?bioBirthday']->label)) {
-            error_log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+                        /* This one is actually well specified */
                         $birthdayArray = split("-",$row['?bioBirthday']->label);
                         $this->data['birthdayFields']['day']= $birthdayArray[2];
                         $this->data['birthdayFields']['month']= $birthdayArray[1];
                         $this->data['birthdayFields']['year']= $birthdayArray[0];
                     }
                 }	
-            //Perhaps this should be one level lower 
             }
-                //TODO: perhaps it is better to keep all the display stuff in the javascript?
-                $this->data['birthdayFields']['displayLabel'] = 'Birthday';
-                $this->data['birthdayFields']['name'] = 'birthday';
-                $this->name = 'birthday';
-                $this->label = 'Birthday';
+            //TODO: perhaps it is better to keep all the display stuff in the javascript?
+            //Write out values albeit empty
+            $this->data['birthdayFields']['displayLabel'] = 'Birthday';
+            $this->data['birthdayFields']['name'] = 'birthday';
+            $this->name = 'birthday';
+            $this->label = 'Birthday';
         } else {
             return 0;
         }
@@ -103,22 +105,20 @@ class BirthdayField extends Field {
     public function saveToModel(&$foafData, $value) {
         $valueArray = $this->objectToArray($value);
         /*Test to see if we have any dateOfBirth info*/
+        //First to make sure that at least has been selected*/
         if (isset($valueArray['month']) || isset($valueArray['day']) || isset($valueArray['year'])) {
             /*find existing triples for foafBirthday and foafDateOfBirth*/
             $foundModel1 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/birthday"),NULL);
-            $foundModel2 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/dateOfBirth"),NULL);
-
-            var_dump($foundModel1);
+            /*If foaf:birthday keep it */
             if (!$foundModel1->isEmpty()) {
                 error_log('[foaf_editor] So here we have foaf:birthday');
-error_log('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO');
                 foreach($foundModel1->triples as $triple) {
                     $foafData->getModel()->remove($triple);
                 }
-                /*So if foaf:birth existed and there is no value for year then add the birthday triples*/
-                //if (!$valueArray['year'] || $valueArray['year'] == '') {
+                /*So if foaf:birth existed then add it*/
                 error_log('[foaf_editor] Added foaf:birthday triple');
                 $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
+                /*Clean up to \d{2} */
                 if (!isset($valueArray['month'])) {
                     $month = "00"; 
                 } else if (strlen($valueArray['month']) == 1) {
@@ -126,6 +126,7 @@ error_log('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO');
                 } else {
                     $month = $valueArray['month'];
                 }
+                /*Clean up to \d{2} */
                 if (!isset($valueArray['day'])) {
                     $day = "00"; 
                 } else if (strlen($valueArray['day']) == 1) {
@@ -133,11 +134,11 @@ error_log('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO');
                 } else {
                     $day = $valueArray['day'];
                 }
-                //$newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($valueArray['month']."-".$valueArray['day']));
                 $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($month."-".$day));
                 $foafData->getModel()->addWithoutDuplicates($newFoafBirthday);
-               // }
             } 
+            /*If foaf:dateOfBirth keep only if you have all the information as it is not maintained, albeit LJ does it*/
+            $foundModel2 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/dateOfBirth"),NULL);
             if (!$foundModel2->isEmpty()) {
                 error_log('[foaf_editor] So here we have foaf:dateOfBirth');
                 foreach($foundModel2->triples as $triple) {
@@ -150,7 +151,23 @@ error_log('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO');
                     $foafData->getModel()->addWithoutDuplicates($newFoafDateOfBirth);
                 }
             } 
-            // < 3 fields 
+            /* Now to check for bio: and if exists write out */
+//http://purl.org/vocab/bio/0.1/
+            $bioDateResource = new Resource("http://purl.org/vocab/bio/0.1/date");
+            $foundModel3 = $foafData->getModel()->find(NULL,new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), $bioDateResource));
+            if (!$foundModel3->isEmpty()) {
+
+                $existingStatement = new Statement(e'], $bioDateResource, $results[0]['?bioBirthday']);
+                $foafData->getModel()->remove($existingStatement);
+
+                /*create a new triple if the date has been passed in*/
+                if(isset($valueArray['$day']) && $valueArray['day'] != '' && isset($valueArray['month']) && isset($valueArray['$year'])) {
+                    $dateLiteral = new Literal($valueArray['$year']."-".$valueArray['$month']."-".$valueArray['$day']);
+                    $newStatement = new Statement($results[0]['?e'], new Resource("http://purl.org/vocab/bio/0.1/date"), $dateLiteral);
+                    $foafData->getModel()->add($newStatement);
+                }
+            }
+
             /*Adds in the correct triples without duplicates*/
 //            var_dump($valueArray);
             if (isset($valueArray['month']) && $valueArray['month'] != '' && isset($valueArray['day']) && $valueArray['day'] != '' && !isset($valueArray['year'])) {
@@ -220,10 +237,9 @@ error_log('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO');
         }
     }
 
+    /*try and parse a short date for Event:Bio or dateOfBirth*/
     private function isLongDateValid($date) {
         //TODO MISCHA make this parse date into a format we understand
-        //if (!($date == null) && !($date == '')) {
-error_log("SOMETHIGNTHOGKGHDKDKHGKHDHG");
         if (preg_match('/(\d{4}?)[-|:|\/](\d{2}?)[-|:|\/](\d{2}?)/',$date,$matches)) {
             if (((int) $matches[2] <= 12) && ((int) $matches[2] > 0)) {
                 if (((int) $matches[3] <= 31) && ((int) $matches[3] > 0)) {
@@ -236,9 +252,8 @@ error_log("SOMETHIGNTHOGKGHDKDKHGKHDHG");
         return false;
     }
 
+    /*try and parse a short date for foaf:birthday */
     private function isShortDateValid($date) {
-        //TODO MISCHA Could do with checking if the date entered is valid i.e. if Feb then only 29 days! 
-        //if ($date == null || $date == '') {
         if (preg_match('/(\d{2}?)[-|:|\/](\d{2}?)/',$date,$matches)) {
             if (((int) $matches[1] <= 12) && ((int) $matches[1] > 0)) {
                 if (((int) $matches[2] <= 31) && ((int) $matches[2] > 0)) {
