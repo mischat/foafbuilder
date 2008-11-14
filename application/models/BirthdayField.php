@@ -94,9 +94,7 @@ class BirthdayField extends Field {
             $this->data['birthdayFields']['name'] = 'birthday';
             $this->name = 'birthday';
             $this->label = 'Birthday';
-        } else {
-            return 0;
-        }
+        } 
     }
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
