@@ -479,6 +479,9 @@ function renderHomepageFields(data){
 			createGenericInputElement(name, data.foafHomepageFields.values[phoneNumber], i);	
 			i++;
 		}
+		
+		//TODO: add the grey text with an onclick thing to make it disappear
+		createGenericInputElement(name, 'http://www.myexamplepage.com', 0,false,true);	
 	}
 
 	/*create an add link*/
