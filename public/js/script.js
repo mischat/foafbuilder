@@ -480,8 +480,10 @@ function renderHomepageFields(data){
 			i++;
 		}
 		
-		//TODO: add the grey text with an onclick thing to make it disappear
-		createGenericInputElement(name, 'http://www.myexamplepage.com', 0,false,true);	
+		if(i==0){
+			//TODO: add the grey text with an onclick thing to make it disappear
+			createGenericInputElement(name, 'http://www.myexamplepage.com', 0,false,true);	
+		}
 	}
 
 	/*create an add link*/
@@ -1273,18 +1275,24 @@ function displayToObjects(name){
 			break;
 	}
 	
+	//TODO MISCHA
+	//birthdayDisplayToObjects();
+	//simpleFieldsDisplayToObjects();
 }
 
 /*--------------------------second level display to objects functions--------------------------*/
 
 function birthdayDisplayToObjects(){
 	
-	globalFieldData.birthdayFields['year'] = "";
-	globalFieldData.birthdayFields['month'] = "";
-	globalFieldData.birthdayFields['day'] = "";
-	globalFieldData.birthdayFields['year'] = document.getElementById('yearDropdown').value; 
-	globalFieldData.birthdayFields['month'] = document.getElementById('monthDropdown').value; 
-	globalFieldData.birthdayFields['day'] = document.getElementById('dayDropdown').value; 
+	if(document.getElementById('yearDropdown').value){
+		globalFieldData.birthdayFields['year'] = document.getElementById('yearDropdown').value; 
+	} 
+	if(document.getElementById('monthDropdown').value){
+		globalFieldData.birthdayFields['month'] = document.getElementById('monthDropdown').value; 
+	}
+	if(document.getElementById('dayDropdown').value){
+		globalFieldData.birthdayFields['day'] = document.getElementById('dayDropdown').value; 
+	}
 
 }
 
