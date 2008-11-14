@@ -2350,8 +2350,9 @@ function removeMutualFriendElement(removeId,removeDivId){
 	
 	/*create the new element*/
 	if(containerElement){
-		var friendDiv = createFriendElement('knowsUser',friend,containerElement.childNodes.length,containerElement);
-		createMakeMutualFriendLink(friendDiv);
+		//var friendDiv = createFriendElement('knowsUser',friend,containerElement.childNodes.length,containerElement);
+		//createMakeMutualFriendLink(friendDiv);
+		insertFriendInRightPlace(containerElement, 'knowsUser', friend)
 	}
 	
 	/*remove the old one*/
@@ -2507,6 +2508,8 @@ function insertFriendInRightPlace(containerElement, name, friend){
 	var friendDiv = createFriendElement(name,friend,originalNoOfChildNodes,containerElement);
 	if(name == 'mutualFriend'){//XXX: this is a bit dirty
 		createRemoveFriendsLink(friendDiv.id,friendDiv.id,true);
+	} else if(name == 'knowsUser'){
+		createMakeMutualFriendLink(friendDiv);
 	} else {
 		createRemoveFriendsLink(friendDiv.id,friendDiv.id,false);
 	}
@@ -2533,8 +2536,7 @@ function makeMutualFriend(friendDivId){
 
 	/*create the new element*/
 	if(containerElement){
-		var friendDiv = createFriendElement('mutualFriend',friend,containerElement.childNodes.length,containerElement);
-		createRemoveFriendsLink(friendDiv.id,friendDiv.id,true);
+		 insertFriendInRightPlace(containerElement, "mutualFriend", friend);
 	}
 
 	/*remove the old one*/
