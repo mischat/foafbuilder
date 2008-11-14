@@ -15,7 +15,7 @@ class BirthdayField extends Field {
                 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
                 PREFIX bio: <http://purl.org/vocab/bio/0.1/>
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                SELECT ?bioBirthday ?foafBirthday ?foafDateOfBirth
+                SELECT ?e ?bioBirthday ?foafBirthday ?foafDateOfBirth
                 WHERE{
                     ?z foaf:primaryTopic <".$foafData->getPrimaryTopic()."> .
                     ?z foaf:primaryTopic ?primaryTopic .
@@ -151,13 +151,23 @@ class BirthdayField extends Field {
                     $foafData->getModel()->addWithoutDuplicates($newFoafDateOfBirth);
                 }
             } 
-            /* Now to check for bio: and if exists write out */
-//http://purl.org/vocab/bio/0.1/
-            $bioDateResource = new Resource("http://purl.org/vocab/bio/0.1/date");
-            $foundModel3 = $foafData->getModel()->find(NULL,new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), $bioDateResource));
-            if (!$foundModel3->isEmpty()) {
-
-                $existingStatement = new Statement(e'], $bioDateResource, $results[0]['?bioBirthday']);
+            /* Now to check for bio: and if exists replace */
+           $query = 
+               "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+               PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+               PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+   
+               SELECT ?e ?bioBirthday 
+               WHERE{
+                   <".$foafData->getPrimaryTopic()."> bio:event ?e .
+                   ?e rdf:type bio:Birth .
+                   ?e bio:date ?bioBirthday .
+               }";
+   
+           $results = $foafData->getModel()->sparqlQuery($query);
+           /*If it does exist*/
+           if (isset($results[0]['?e']) && isset($results[0]['?bioBirthday'])) { 
+                $existingStatement = new Statement($results[0]['?e'], $bioDateResource, $results[0]['?bioBirthday']);
                 $foafData->getModel()->remove($existingStatement);
 
                 /*create a new triple if the date has been passed in*/
@@ -168,8 +178,9 @@ class BirthdayField extends Field {
                 }
             }
 
+            /*No now at this point we have to check if we need to write out the triples correctly if possible*/
+
             /*Adds in the correct triples without duplicates*/
-//            var_dump($valueArray);
             if (isset($valueArray['month']) && $valueArray['month'] != '' && isset($valueArray['day']) && $valueArray['day'] != '' && !isset($valueArray['year'])) {
                     /*foaf:birthday*/
                     error_log('[foaf_editor] Added foaf:birthday triple');
