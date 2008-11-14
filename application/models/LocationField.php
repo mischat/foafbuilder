@@ -13,7 +13,6 @@ class LocationField extends Field {
         if ($foafData->getPrimaryTopic()) {
         	
             $queryString = $this->getQueryString($foafData->getPrimaryTopic());
-		
             $results = $foafData->getModel()->SparqlQuery($queryString);		
 
             //var_dump($results);
@@ -178,18 +177,18 @@ class LocationField extends Field {
 		$foafData->setRandomStringToBnodeArray($randomStringToBnodeArray);
     }
 
-    private function isLatLongValid($coord) {
+    private function isLatLongValid($date) {
         //FIXME: something should go here to make sure the string makes sense.
-        if (!$coord) {
+        if ($date == null || $date == '') {
             return false;
         } else {
             return true;
         }
     }
 
-    private function isCoordValid($coord) {
+    private function isCoordValid($date) {
     //FIXME: something should go here to make sure the string makes sense.
-    if (!$coord) {
+    if ($date == null || $date == '') {
             return false;
         } else {
             return true;
