@@ -1270,24 +1270,18 @@ function displayToObjects(name){
 			break;
 	}
 	
-	//TODO MISCHA
-	//birthdayDisplayToObjects();
-	//simpleFieldsDisplayToObjects();
 }
 
 /*--------------------------second level display to objects functions--------------------------*/
 
 function birthdayDisplayToObjects(){
 	
-	if(document.getElementById('yearDropdown').value){
-		globalFieldData.birthdayFields['year'] = document.getElementById('yearDropdown').value; 
-	} 
-	if(document.getElementById('monthDropdown').value){
-		globalFieldData.birthdayFields['month'] = document.getElementById('monthDropdown').value; 
-	}
-	if(document.getElementById('dayDropdown').value){
-		globalFieldData.birthdayFields['day'] = document.getElementById('dayDropdown').value; 
-	}
+	globalFieldData.birthdayFields['year'] = "";
+	globalFieldData.birthdayFields['month'] = "";
+	globalFieldData.birthdayFields['day'] = "";
+	globalFieldData.birthdayFields['year'] = document.getElementById('yearDropdown').value; 
+	globalFieldData.birthdayFields['month'] = document.getElementById('monthDropdown').value; 
+	globalFieldData.birthdayFields['day'] = document.getElementById('dayDropdown').value; 
 
 }
 
