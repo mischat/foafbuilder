@@ -24,6 +24,8 @@ class HomepageField extends Field {
 	
             $this->data['foafHomepageFields'] = array();
             $this->data['foafHomepageFields']['values'] = array();
+            $this->data['foafHomepageFields']['displayLabel'] = 'Homepage';
+            $this->data['foafHomepageFields']['name'] = 'foafHomepage';
 
             //Check if results are not empty
             if (!(empty($results))) {
@@ -57,10 +59,7 @@ class HomepageField extends Field {
                 $this->data['foafHomepageFields']['name'] = 'foafHomepage';
                 $this->name = 'foafHomepageFields';
                 $this->label = 'Homepages';
-                return 1;
-	    } else {
-	        return 0;
-	    }
+	    } 
         }
     }
 	
