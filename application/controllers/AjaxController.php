@@ -12,6 +12,7 @@ class AjaxController extends Zend_Controller_Action {
     private $foafData;
 	
     public function loadTheBasicsAction() {
+    	
     	/*build up a sparql query to get the values of all the fields we need*/
         $this->loadFoaf();
     	//if ($this->loadFoaf()) {   

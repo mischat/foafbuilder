@@ -12,11 +12,20 @@ require_once 'helpers/sparql.php';
 class KnowsField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function KnowsField($foafData) {
-        /*TODO MISCHA dump test to check if empty */
-
-        if($foafData->getPrimaryTopic()) {  	
-        			
+    public function KnowsField($foafData, $fullInstantiation = true) {
+        
+			/*TODO MISCHA dump test to check if empty */
+			
+        	$this->data['foafKnowsFields'] = array();
+            $this->name = 'foafKnows';
+            $this->label = 'Friends';
+        	$this->data['foafKnowsFields']['displayLabel'] = $this->label;
+            $this->data['foafKnowsFields']['name'] = $this->name;
+            
+           	if(!$fullInstantiation || !$foafData || $foafData->getPrimaryTopic()){
+				return;	
+    		}
+    		
 			/*get all known ifps of this person by making use of the foaf.qdos.com KB*/
         	$ifps = $this->getTriangulatedIfps($foafData);              
         	
@@ -30,16 +39,9 @@ class KnowsField extends Field {
         	$userKnowsDetails = $this->getDetailsFromIfps($userKnowsIfps);   
         	$mutualFriendsDetails = $this->getDetailsFromIfps($mutualFriendsIfps);
         	
-        	$this->data['foafKnowsFields'] = array();
         	$this->data['foafKnowsFields']['mutualFriends'] = $mutualFriendsDetails;
         	$this->data['foafKnowsFields']['userKnows'] = $userKnowsDetails;
         	$this->data['foafKnowsFields']['knowsUser'] = $knowsUserDetails; 	
-        	
-            $this->data['foafKnowsFields']['displayLabel'] = 'Friends';
-            $this->data['foafKnowsFields']['name'] = 'foafKnows';
-            $this->name = 'foafKnows';
-            $this->label = 'Friends';
-        }
     }
     
     /*returns an array of arrays of ifps for each friend that the user knows who knows the user as well.  

@@ -7,9 +7,21 @@ require_once 'helpers/Utils.php';
 class DepictionField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function DepictionField($foafData) {
+    public function DepictionField($foafData, $fullInstantiation = true) {
+    	
+        $this->name = 'foafDepiction';    
+        $this->label = 'Images';
+        $this->data['foafDepictionFields'] = array();
+        $this->data['foafDepictionFields']['displayLabel'] =  $this->label;
+        $this->data['foafDepictionFields']['name'] = $this->name;
+        $this->data['foafDepictionFields']['images'] = array();
+            
         /*TODO MISCHA dump test to check if empty */
-        if ($foafData->getPrimaryTopic()) {
+        if (!$foafData->getPrimaryTopic() || !$fullInstantiation) {
+        	return;
+        	
+        }
+          
             $queryString = 
                 "PREFIX dc: <http://purl.org/dc/elements/1.1/>
                 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -32,9 +44,6 @@ class DepictionField extends Field {
                 };";
 
             $results = $foafData->getModel()->SparqlQuery($queryString);		
-
-            $this->data['foafDepictionFields'] = array();
-            $this->data['foafDepictionFields']['images'] = array();
             
             /*mangle the results so that they can be easily rendered*/
             if($results && isset($results[0]) && isset($results[0]) && $results[0]){
@@ -54,14 +63,7 @@ class DepictionField extends Field {
 	            }	
             }
                    
-            //TODO: perhaps it is better to keep all the display stuff in the javascript?
-            $this->data['foafDepictionFields']['displayLabel'] = 'Images';
-            $this->data['foafDepictionFields']['name'] = 'foafDepiction';
-            $this->name = 'foafDepiction';
-            $this->label = 'Images';
-        } else {
-            return 0;
-        }
+        
     }
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/

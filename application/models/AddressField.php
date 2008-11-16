@@ -7,20 +7,27 @@ require_once 'helpers/Utils.php';
 class AddressField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function AddressField($foafData) {
+    public function AddressField($foafData,$fullInstantiation = true) {
         /*TODO MISCHA dump test to check if empty */
     	//TODO: add foaf:nearestAirport stuff
         if ($foafData->getPrimaryTopic()) {
         	
-            $queryString = $this->getQueryString($foafData->getPrimaryTopic());
-            $results = $foafData->getModel()->SparqlQuery($queryString);		
-
-            //var_dump($results);
-            
           	$this->data['addressFields'] = array();
 			$this->data['addressFields']['office'] = array();
 			$this->data['addressFields']['home'] = array();
-				
+            $this->name = 'address';
+            $this->label = 'Addresses';
+            $this->data['addressFields']['displayLabel'] =  $this->label;
+            $this->data['addressFields']['name'] =  $this->name;
+            
+            /*don't sparql query the model etc if a full instantiation is not required*/
+            if(!$fullInstantiation){
+            	return;
+            }
+            
+            $queryString = $this->getQueryString($foafData->getPrimaryTopic());
+            $results = $foafData->getModel()->SparqlQuery($queryString);		
+
             if($results && !empty($results)){
             	
 	            /*mangle the results so that they can be easily rendered*/
@@ -32,10 +39,7 @@ class AddressField extends Field {
             
         	}
 
-            $this->data['addressFields']['displayLabel'] = 'Addresses';
-            $this->data['addressFields']['name'] = 'address';
-            $this->name = 'address';
-            $this->label = 'Addresses';
+    
     	}
     }
 

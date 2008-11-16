@@ -7,16 +7,19 @@ require_once 'helpers/Utils.php';
 class NearestAirportField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function NearestAirportField($foafData) {
-        /*TODO MISCHA dump test to check if empty */
-    	//TODO: add foaf:nearestAirport save stuff
-        if ($foafData->getPrimaryTopic()) {
+    public function NearestAirportField($foafData,$fullInstantiation = true) {
+    	
+    	$this->data['nearestAirportFields'] = array();
+    	$this->data['nearestAirportFields']['displayLabel'] = 'My Nearest Airport';
+        $this->data['nearestAirportFields']['name'] = 'nearestAirport';
+        $this->name = 'nearestAirport';
+        $this->label = 'My Nearest Airport';
+	    $this->data['nearestAirportFields']['nearestAirport'] = array();
+	            
+        if ($foafData->getPrimaryTopic() && $fullInstantiation) {
         	
             $queryString = $this->getQueryString($foafData->getPrimaryTopic());
             $results = $foafData->getModel()->SparqlQuery($queryString);		
-
-          	$this->data['nearestAirportFields'] = array();
-	        $this->data['nearestAirportFields']['nearestAirport'] = array();
 
             if($results && !empty($results)){
             	
@@ -27,11 +30,6 @@ class NearestAirportField extends Field {
 	            }	
             
         	}
-
-            $this->data['nearestAirportFields']['displayLabel'] = 'My Nearest Airport';
-            $this->data['nearestAirportFields']['name'] = 'nearestAirport';
-            $this->name = 'nearestAirport';
-            $this->label = 'My Nearest Airport';
     	}
     }
 

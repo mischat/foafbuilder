@@ -7,59 +7,63 @@ require_once 'helpers/Utils.php';
 class HomepageField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function HomepageField($foafData) {
-        /*TODO MISCHA dump test to check if empty */
-        if ($foafData->getPrimaryTopic()) {
-            $queryString = 
-                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                SELECT ?foafHomepage
-                WHERE{
-			<".$foafData->getPrimaryTopic()."> foaf:homepage ?foafHomepage                  
-                };";
+    public function HomepageField($foafData,$fullInstantiation = true) {
+    	
+       
+        $this->name = 'foafHomepage';
+        $this->label = 'Homepage';
+        $this->data['foafHomepageFields'] = array();
+        $this->data['foafHomepageFields']['displayLabel'] = $this->label;
+        $this->data['foafHomepageFields']['name'] = $this->name;
+	    $this->data['foafHomepageFields']['values'] = array();    
+	        
+        /*only sparql query the model and get the title etc if there is a need to do a full instantiation.*/
+        if($fullInstantiation){
 
-            $results = $foafData->getModel()->SparqlQuery($queryString);		
+	        /*TODO MISCHA dump test to check if empty */
+	        if ($foafData->getPrimaryTopic()) {
+	            $queryString = 
+	                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+	                PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+	                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+	                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+	                SELECT ?foafHomepage
+	                WHERE{
+				<".$foafData->getPrimaryTopic()."> foaf:homepage ?foafHomepage                  
+	                };";
 	
-            $this->data['foafHomepageFields'] = array();
-            $this->data['foafHomepageFields']['values'] = array();
-            $this->data['foafHomepageFields']['displayLabel'] = 'Homepage';
-            $this->data['foafHomepageFields']['name'] = 'foafHomepage';
-
-            //Check if results are not empty
-            if (!(empty($results))) {
-                /*mangle the results so that they can be easily rendered*/
-                foreach ($results as $row) {	
-                    //TODO MISCHA ... checking if this is a literal foaf:homepage which starts with http :)
-                    if (isset($row['?foafHomepage']->uri) && $this->isHomepageValid($row['?foafHomepage']->uri)) {
-                        array_push($this->data['foafHomepageFields']['values'],$row['?foafHomepage']->uri);
-                        /*Over here to put in the homepage title*/
-                        $title = $this->getHomepageTitle($row['?foafHomepage']->uri);
-                        if ($title) {
-                            error_log("[foaf_editor] Homepage title returned");
-                            $new_statement = new Statement(new Resource($row['?foafHomepage']->uri),new Resource("http://purl.org/dc/elements/1.1/title"),new Literal($title));
-                            $foafData->getModel()->addWithoutDuplicates($new_statement);
-                        } 
-                    } else if (isset($row['?foafHomepage']->label) && $this->isHomepageValid($row['?foafHomepage']->label)) {
-                        if (preg_match('/^https?:\/\//',$row['?foafHomepage']->label)) {
-                            array_push($this->data['foafHomepageFields']['values'],$row['?foafHomepage']->label);
-                            /*Over here to put in the homepage title*/
-                            $title = $this->getHomepageTitle($row['?foafHomepage']->label);
-                            if ($title) {
-                                error_log("[foaf_editor] Homepage title returned");
-                                $new_statement = new Statement(new Resource($row['foafHomepage']->label),new Resource("http://purl.org/dc/elements/1.1/title"),new Literal($title));
-                                $foafData->getModel()->addWithoutDuplicates($new_statement);
-                            } 
-                            //TODO MISCHA ... mangle the name to put something in here!
-                        }
-                    }
-                }	
-                $this->data['foafHomepageFields']['displayLabel'] = 'Homepage';
-                $this->data['foafHomepageFields']['name'] = 'foafHomepage';
-                $this->name = 'foafHomepageFields';
-                $this->label = 'Homepages';
-	    } 
+	            $results = $foafData->getModel()->SparqlQuery($queryString);
+	
+	            //Check if results are not empty
+	            if (!(empty($results))) {
+	                /*mangle the results so that they can be easily rendered*/
+	                foreach ($results as $row) {	
+	                    //TODO MISCHA ... checking if this is a literal foaf:homepage which starts with http :)
+	                    if (isset($row['?foafHomepage']->uri) && $this->isHomepageValid($row['?foafHomepage']->uri)) {
+	                        array_push($this->data['foafHomepageFields']['values'],$row['?foafHomepage']->uri);
+	                        /*Over here to put in the homepage title*/
+	                        $title = $this->getHomepageTitle($row['?foafHomepage']->uri);
+	                        if ($title) {
+	                            error_log("[foaf_editor] Homepage title returned");
+	                            $new_statement = new Statement(new Resource($row['?foafHomepage']->uri),new Resource("http://purl.org/dc/elements/1.1/title"),new Literal($title));
+	                            $foafData->getModel()->addWithoutDuplicates($new_statement);
+	                        } 
+	                    } else if (isset($row['?foafHomepage']->label) && $this->isHomepageValid($row['?foafHomepage']->label)) {
+	                        if (preg_match('/^https?:\/\//',$row['?foafHomepage']->label)) {
+	                            array_push($this->data['foafHomepageFields']['values'],$row['?foafHomepage']->label);
+	                            /*Over here to put in the homepage title*/
+	                            $title = $this->getHomepageTitle($row['?foafHomepage']->label);
+	                            if ($title) {
+	                                error_log("[foaf_editor] Homepage title returned");
+	                                $new_statement = new Statement(new Resource($row['foafHomepage']->label),new Resource("http://purl.org/dc/elements/1.1/title"),new Literal($title));
+	                                $foafData->getModel()->addWithoutDuplicates($new_statement);
+	                            } 
+	                            //TODO MISCHA ... mangle the name to put something in here!
+	                        }
+	                    }
+	                }	
+		    	} 
+	        }
         }
     }
 	

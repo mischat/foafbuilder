@@ -8,9 +8,20 @@ require_once 'helpers/Utils.php';
 class ImgField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function ImgField($foafData) {
-        /*TODO MISCHA dump test to check if empty */
-        if ($foafData->getPrimaryTopic()) {
+    public function ImgField($foafData,$fullInstantiation = true) {
+    	
+     	$this->name = 'foafImg';
+        $this->label = 'Secondary Images';
+        $this->data['foafImgFields'] = array();
+        $this->data['foafImgFields']['displayLabel'] =  $this->label;
+        $this->data['foafImgFields']['name'] = $this->name;
+        $this->data['foafImgFields']['images'] = array();
+            
+        if (!$foafData->getPrimaryTopic() || !$fullInstantiation) {
+        	return;
+        	
+        }
+    	
             $queryString = 
                 "PREFIX dc: <http://purl.org/dc/elements/1.1/>
                 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -31,9 +42,6 @@ class ImgField extends Field {
 	             //   ?z foaf:primaryTopic ?primaryTopic .
 
             $results = $foafData->getModel()->SparqlQuery($queryString);		
-
-            $this->data['foafImgFields'] = array();
-            $this->data['foafImgFields']['images'] = array();
             
             /*mangle the results so that they can be easily rendered*/
             if($results && isset($results[0]) && isset($results[0]) && $results[0]){
@@ -53,14 +61,7 @@ class ImgField extends Field {
 	            }
         	}
                    
-            //TODO: perhaps it is better to keep all the display stuff in the javascript?
-            $this->data['foafImgFields']['displayLabel'] = 'Secondary Images';
-            $this->data['foafImgFields']['name'] = 'foafImg';
-            $this->name = 'foafImg';
-            $this->label = 'Secondary Images';
-        } else {
-            return 0;
-        }
+        
     }
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/

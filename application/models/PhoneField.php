@@ -7,9 +7,16 @@ require_once 'helpers/Utils.php';
 class PhoneField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function PhoneField($foafData) {
-        /*TODO MISCHA dump test to check if empty */
-        if ($foafData->getPrimaryTopic()) {
+    public function PhoneField($foafData, $fullInstantiation = true) {
+    	 
+    	$this->data['foafPhoneFields'] = array();
+        $this->data['foafPhoneFields']['values'] = array();       
+        $this->name = 'foafPhone';
+        $this->label = 'Phones';         
+        $this->data['foafPhoneFields']['displayLabel'] = $this->label;
+        $this->data['foafPhoneFields']['name'] =  $this->name;
+        
+        if ($foafData->getPrimaryTopic() && $fullInstantiation) {
             $queryString = 
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
@@ -25,8 +32,6 @@ class PhoneField extends Field {
 
             $results = $foafData->getModel()->SparqlQuery($queryString);		
 	
-            $this->data['foafPhoneFields'] = array();
-            $this->data['foafPhoneFields']['values'] = array();
 
                //Check if results are not empty
                if (!(empty($results))) {
@@ -40,10 +45,6 @@ class PhoneField extends Field {
                     	}
                 	}	
                } 
-               $this->data['foafPhoneFields']['displayLabel'] = 'Phone';
-               $this->data['foafPhoneFields']['name'] = 'foafPhone';
-               $this->name = 'foafPhone';
-               $this->label = 'Phones';     
         }
     }
 	

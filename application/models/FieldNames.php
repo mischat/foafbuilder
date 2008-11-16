@@ -1,9 +1,6 @@
 <?php
 //TODO: we shouldn't have to instantiate all of these in order to know which fields are on which 'page'
 require_once "SimpleField.php";
-require_once "GeoLatLongField.php";
-require_once "GeoLatField.php";
-require_once "GeoLongField.php";
 
 class FieldNames {
 	
@@ -53,72 +50,74 @@ class FieldNames {
 				$this->instantiateOtherFields();
 				break;
 			case "all":
-				$this->instantiateLocationsFields();
-				$this->instantiateTheBasicsFields();
-				$this->instantiateContactDetailsFields();
-				$this->instantiatePicturesFields();
-				$this->instantiateAccountsFields();
-				$this->instantiateFriendsFields();
-				$this->instantiateBlogsFields();
-				$this->instantiateInterestsFields();
-				$this->instantiateOtherFields();
+				$this->instantiateLocationsFields(false);
+				$this->instantiateTheBasicsFields(false);
+				$this->instantiateContactDetailsFields(false);
+				$this->instantiatePicturesFields(false);
+				$this->instantiateAccountsFields(false);
+				$this->instantiateFriendsFields(false);
+				$this->instantiateBlogsFields(false);
+				$this->instantiateInterestsFields(false);
+				$this->instantiateOtherFields(false);
 				break;	
 		}
 	}
 	
 	/*instantiates arrays of fields for all the items on the basics page*/
-	private function instantiateTheBasicsFields(){
-		$this->allFieldNames['birthday'] = new BirthdayField($this->foafData);
+	private function instantiateTheBasicsFields($fullInstantiation = true){
+	
+		
+		$this->allFieldNames['birthday'] = new BirthdayField($this->foafData,$fullInstantiation);
 		$this->allFieldNames['foafTitle'] = 
-			new SimpleField('foafTitle', 'Title', "http://xmlns.com/foaf/0.1/title",$this->foafData,"literal");
+			new SimpleField('foafTitle', 'Title', "http://xmlns.com/foaf/0.1/title",$this->foafData,"literal",$fullInstantiation);
 		$this->allFieldNames['foafGivenName'] = 
-			new SimpleField('foafGivenName', 'Given Name', "http://xmlns.com/foaf/0.1/givenname",$this->foafData,"literal");
+			new SimpleField('foafGivenName', 'Given Name', "http://xmlns.com/foaf/0.1/givenname",$this->foafData,"literal",$fullInstantiation);
 		$this->allFieldNames['foafFamilyName'] = 
-			new SimpleField('foafFamilyName', 'Family Name', 'http://xmlns.com/foaf/0.1/family_name',$this->foafData,'literal');
+			new SimpleField('foafFamilyName', 'Family Name', 'http://xmlns.com/foaf/0.1/family_name',$this->foafData,'literal',$fullInstantiation);
 		$this->allFieldNames['foafName'] = 
-			new SimpleField('foafName', 'Real Name', 'http://xmlns.com/foaf/0.1/name',$this->foafData,'literal');
+			new SimpleField('foafName', 'Real Name', 'http://xmlns.com/foaf/0.1/name',$this->foafData,'literal',$fullInstantiation);
 		$this->allFieldNames['foafHomepage'] =  
-			new HomepageField($this->foafData);
+			new HomepageField($this->foafData,$fullInstantiation);
 		$this->allFieldNames['foafNick'] = 
-			new SimpleField('foafNick', 'Nickname', 'http://xmlns.com/foaf/0.1/nick',$this->foafData,'literal');
+			new SimpleField('foafNick', 'Nickname', 'http://xmlns.com/foaf/0.1/nick',$this->foafData,'literal',$fullInstantiation);
 		
 	}
 	
-	private function instantiateContactDetailsFields(){
-		$this->allFieldNames['foafPhone'] = new PhoneField($this->foafData);
-		$this->allFieldNames['foafMbox'] = new MboxField($this->foafData);
-		$this->allFieldNames['address'] = new AddressField($this->foafData);
+	private function instantiateContactDetailsFields($fullInstantiation = true){
+		$this->allFieldNames['foafPhone'] = new PhoneField($this->foafData,$fullInstantiation);
+		$this->allFieldNames['foafMbox'] = new MboxField($this->foafData,$fullInstantiation);
+		$this->allFieldNames['address'] = new AddressField($this->foafData,$fullInstantiation);
 	}
 	
-	private function instantiatePicturesFields(){
-		$this->allFieldNames['foafDepiction'] = new DepictionField($this->foafData);
-		$this->allFieldNames['foafImg'] = new ImgField($this->foafData);
+	private function instantiatePicturesFields($fullInstantiation = true){
+		$this->allFieldNames['foafDepiction'] = new DepictionField($this->foafData,$fullInstantiation);
+		$this->allFieldNames['foafImg'] = new ImgField($this->foafData,$fullInstantiation);
 	}
 	
-	private function instantiateAccountsFields(){
-		$this->allFieldNames['foafHoldsAccount'] = new HoldsAccountField($this->foafData);
+	private function instantiateAccountsFields($fullInstantiation = true){
+		$this->allFieldNames['foafHoldsAccount'] = new HoldsAccountField($this->foafData,$fullInstantiation);
 	}
 	
-	private function instantiateFriendsFields(){
-		$this->allFieldNames['foafKnows'] = new KnowsField($this->foafData);
+	private function instantiateFriendsFields($fullInstantiation = true){
+		$this->allFieldNames['foafKnows'] = new KnowsField($this->foafData,$fullInstantiation);
 	}
 	
-	private function instantiateBlogsFields(){
+	private function instantiateBlogsFields($fullInstantiation = true){
 		$this->allFieldNames['foafWeblog'] = 
-			new SimpleField('foafWeblog', 'Blogs', "http://xmlns.com/foaf/0.1/weblog",$this->foafData,"resource");
+			new SimpleField('foafWeblog', 'Blogs', "http://xmlns.com/foaf/0.1/weblog",$this->foafData,"resource",$fullInstantiation);
 	}
 	
-	private function instantiateInterestsFields(){
-		$this->allFieldNames['foafInterest'] = new SimpleField('foafInterest', 'Interests', "http://xmlns.com/foaf/0.1/interest",$this->foafData,"resource");
+	private function instantiateInterestsFields($fullInstantiation = true){
+		$this->allFieldNames['foafInterest'] = new SimpleField('foafInterest', 'Interests', "http://xmlns.com/foaf/0.1/interest",$this->foafData,"resource", $fullInstantiation);
 	}
 	
-	private function instantiateLocationsFields(){
-		$this->allFieldNames['nearestAirport'] = new NearestAirportField($this->foafData);
-		$this->allFieldNames['basedNear'] = new BasedNearField($this->foafData);	
+	private function instantiateLocationsFields($fullInstantiation = true){
+		$this->allFieldNames['nearestAirport'] = new NearestAirportField($this->foafData,$fullInstantiation);
+		$this->allFieldNames['basedNear'] = new BasedNearField($this->foafData,$fullInstantiation);	
 	}
 	
-	private function instantiateOtherFields(){
-		
+	private function instantiateOtherFields($fullInstantiation = true){
+		//TODO: what goes on here?
 	}
 	
 	public function getAllFieldNames(){
