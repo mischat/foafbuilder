@@ -63,7 +63,7 @@ class FriendController extends Zend_Controller_Action {
                	
                	/*add the appropriate friend*/
                	$successfulAdd = $knowsField->addFriend($friend,$foafData);
-
+		echo($successfulAdd);
                	if($successfulAdd){
                 	$foafData->putInSession();
                 	$this->view->isSuccess = 1;
