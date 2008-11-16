@@ -14,6 +14,54 @@ class FriendController extends Zend_Controller_Action {
         $this->view->baseUrl = $this->_request->getBaseUrl();
     }
 	
+    /*remove the friend with the given IFPs from the in memory model*/
+    public function removeFriendAction() {
+      $this->view->isSuccess = 0;
+        require_once 'FoafData.php';
+        $ifpString = @$_POST['ifps'];
+        
+        if ($changes_model) {
+            $foafData = FoafData::getFromSession();	
+            
+            if($foafData) {
+            	
+                $json = new Services_JSON();
+        		$ifps = $json->decode(stripslashes($ifpString));
+        
+               	var_dump($ifps);
+               		
+                $foafData->putInSession();
+                $this->view->isSuccess = 1;
+            } else {
+                echo("there aint anything in the session");
+            }
+        }
+    }
+    
+    /*add a friend with the given IFPs to the in memory model*/
+    public function addFriendAction() {
+      $this->view->isSuccess = 0;
+        require_once 'FoafData.php';
+        $ifpString = @$_POST['ifps'];
+        
+        if ($changes_model) {
+            $foafData = FoafData::getFromSession();	
+            
+            if($foafData) {
+            	
+                $json = new Services_JSON();
+        		$ifps = $json->decode(stripslashes($ifpString));
+        
+               	var_dump($ifps);
+               		
+                $foafData->putInSession();
+                $this->view->isSuccess = 1;
+            } else {
+                echo("there aint anything in the session");
+            }
+        }
+    }
+    
     /*does a search for someone using ifp/uri triangulation*/
     public function findFriendAction() {
     	
