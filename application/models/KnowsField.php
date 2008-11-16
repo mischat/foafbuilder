@@ -12,8 +12,10 @@ require_once 'helpers/sparql.php';
 class KnowsField extends Field {
 	
 	/**/
-	private function removeFriend($friend){
+	public function removeFriend($friend,$foafData){
 		
+		$successfulRemove = 0;	
+
 		if(property_exists($friend,'uri')){
 			//TODO: remove via uri here
 		} else {
@@ -21,22 +23,33 @@ class KnowsField extends Field {
 			//?knowsResource ?ifp_predicate 
 						 	//}";
 			$query  = 	"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-						 	SELECT DISTINCT ?knowsResource WHERE {
-						 		<".$this->primaryTopic."> foaf:knows ?knowsResource
-						 		?knowResource ?ifp_predicate ?ifp . FILTER( ";
+						 	SELECT DISTINCT ?knowsResource ?ifp_predicate WHERE {
+						 		<".$foafData->getPrimaryTopic()."> foaf:knows ?knowsResource";
 			
 			
 			foreach($friend->ifps as $ifp){
-				$query.=" ?ifp = \"".$ifp."\" || ?ifp = <".$ifp."> ";				
+				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate <".$ifp.">  }";
+				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate \"".$ifp."\" }";
+				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate \"".sha1($ifp)."\" }";
+				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate \"".sha1('mailto:'.$ifp)."\" }";
 			}
 			
-			$query.=")}";
-			
-			$results = $foafData->getModel().SparqlQuery($query);
+			$query.="}";
+			$results = $foafData->getModel()->SparqlQuery($query);
 
-			var_dump($results);
+			foreach($results as $row){
+				if($row['?ifp_predicate']){
+					$triple = new Statement(new Resource($foafData->getPrimarytopic()),new Resource("http://xmlns.com/foaf/0.1/knows"),$row['?knowsResource']);
+					$this->removeTripleRecursively($triple, $foafData);
+					$successfulRemove = 1;	
+				}
+			}
 		}
+
+		return $successfulRemove;
 	}
+
+	
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
     public function KnowsField($foafData, $fullInstantiation = true) {
