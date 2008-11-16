@@ -32,7 +32,7 @@ class FriendController extends Zend_Controller_Action {
                	$knowsField = new KnowsField($foafData,false);
                	
                	/*remove the appropriate friend*/
-               	$successfulRemove = $knowsField->removeFriend($friend);
+               	$successfulRemove = $knowsField->removeFriend($friend,$foafData);
 
                	if($successfulRemove){
                 	$foafData->putInSession();
@@ -62,9 +62,9 @@ class FriendController extends Zend_Controller_Action {
                	$knowsField = new KnowsField($foafData,false);
                	
                	/*add the appropriate friend*/
-               	$successfulAdd = $knowsField->addFriend($friend);
+               	$successfulAdd = $knowsField->addFriend($friend,$foafData);
 
-               	if($successfulAdd{
+               	if($successfulAdd){
                 	$foafData->putInSession();
                 	$this->view->isSuccess = 1;
                	}
