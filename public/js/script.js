@@ -2247,8 +2247,9 @@ function addFriend(friendDivId){
 		var containerElement = document.getElementById('userKnows_container');
 		
 		if(containerElement){
+
 			//actually stick it in the model in the back end
-			$.post("/friend/add-friend", {ifp : friend.ifps[0]}, function(data){
+			$.post("/friend/add-friend", {friend : JSON.serialize(friend)}, function(data){
 				insertFriendInRightPlace(containerElement, 'userKnows', friend);
 			});
 		}
