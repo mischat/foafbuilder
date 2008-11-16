@@ -18,20 +18,26 @@ class FriendController extends Zend_Controller_Action {
     public function removeFriendAction() {
       $this->view->isSuccess = 0;
         require_once 'FoafData.php';
-        $ifpString = @$_POST['ifps'];
+        $friendString = @$_POST['friend'];
         
-        if ($changes_model) {
+        if ($friendString) {
             $foafData = FoafData::getFromSession();	
             
             if($foafData) {
             	
                 $json = new Services_JSON();
-        		$ifps = $json->decode(stripslashes($ifpString));
-        
-               	var_dump($ifps);
-               		
-                $foafData->putInSession();
-                $this->view->isSuccess = 1;
+        		$friend = $json->decode(stripslashes($friendString));
+               	
+				/*instantiate a knowsField*/
+               	$knowsField = new KnowsField($foafData,false);
+               	
+               	/*remove the appropriate friend*/
+               	$successfulRemove = $knowsField->removeFriend($friend);
+
+               	if($successfulRemove){
+                	$foafData->putInSession();
+                	$this->view->isSuccess = 1;
+               	}
             } else {
                 echo("there aint anything in the session");
             }
@@ -42,20 +48,26 @@ class FriendController extends Zend_Controller_Action {
     public function addFriendAction() {
       $this->view->isSuccess = 0;
         require_once 'FoafData.php';
-        $ifpString = @$_POST['ifps'];
+        $friendString = @$_POST['friend'];
         
-        if ($changes_model) {
+        if ($friendString) {
             $foafData = FoafData::getFromSession();	
             
             if($foafData) {
             	
                 $json = new Services_JSON();
-        		$ifps = $json->decode(stripslashes($ifpString));
-        
-               	var_dump($ifps);
+        		$friend = $json->decode(stripslashes($friendString));
                		
-                $foafData->putInSession();
-                $this->view->isSuccess = 1;
+            	/*instantiate a knowsField*/
+               	$knowsField = new KnowsField($foafData,false);
+               	
+               	/*add the appropriate friend*/
+               	$successfulAdd = $knowsField->addFriend($friend);
+
+               	if($successfulAdd{
+                	$foafData->putInSession();
+                	$this->view->isSuccess = 1;
+               	}
             } else {
                 echo("there aint anything in the session");
             }
