@@ -22,7 +22,7 @@ class KnowsField extends Field {
         	$this->data['foafKnowsFields']['displayLabel'] = $this->label;
             $this->data['foafKnowsFields']['name'] = $this->name;
             
-           	if(!$fullInstantiation || !$foafData || $foafData->getPrimaryTopic()){
+           	if(!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()){
 				return;	
     		}
     		
