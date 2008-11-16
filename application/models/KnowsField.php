@@ -12,7 +12,7 @@ require_once 'helpers/sparql.php';
 class KnowsField extends Field {
 	
 	/**/
-	public function removeFriend($friend,$foafData){
+	public function removeFriend($friend,&$foafData){
 		
 		$successfulRemove = 0;	
 
@@ -48,6 +48,43 @@ class KnowsField extends Field {
 
 		return $successfulRemove;
 	}
+
+
+	/**/
+        public function addFriend($friend,&$foafData){
+
+                $successfulAdd = 0;
+
+                if(property_exists($friend,'uri')){
+                        //TODO: add just the  uri here
+                } else {
+			
+			$bNode = Utils::GenerateUniqueBnode($foafData->getModel());
+			echo($bNode);
+                	$foafData->getModel()->add(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource("http://xmlns.com/foaf/0.1/knows"), $bNode));
+                	$foafData->getModel()->add(new Statement($bNode,new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person")));
+
+			if($friend->ifp_type=="mbox"){
+				if(substr($friend->ifps[0],0,7) != 'mailto:'){ 
+					$friend->ifps[0] = "mailto:".$friend->ifps[0];
+				}
+				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal(sha1($friend->ifps[0]))));
+				$successfulAdd = 1;
+	
+			} else if($friend->ifp_type=="mbox_sha1sum"){
+
+				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal($friend->ifps[0])));
+				$successfulAdd = 1;
+	
+			} else{
+				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Resource($friend->ifps[0])));
+				$successfulAdd = 1;
+			}
+                }
+
+                return $successfulAdd;
+        }
+
 
 	
 	
@@ -521,103 +558,9 @@ class KnowsField extends Field {
     /*saves the values created by the editor in value... as encoded in json. */
     public function saveToModel(&$foafData, $value) {
 
-			require_once 'FieldNames.php';
-			
-			$predicate_resource = new Resource('http://xmlns.com/foaf/0.1/knows');
-			$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
-
-			$doNotCleanArray = array();
-
-			
-			
-			
-			
-			
-			
-			//TODO: this could be done with less repeated code
-			//add the new ones
-			if(property_exists($value,'mutualFriends')){
-				foreach($value->mutualFriends as $friend){
-					
-					/*Add the ifps to the doNotCleanArray so that this friend doesn't get deleted*/
-					//TODO: what if there is only a do not clean array for ifps
-					$doNotCleanArray = array_merge($doNotCleanArray,$friend->ifps);
-					
-					if(property_exists($friend,'ifp_type') && $friend->ifp_type){			
-						/*either spit out a uri if there is one, or link to them via a bnode and an IFP*/
-						if(property_exists($friend,'uri') && $friend->uri){
-							$knowsTripleUri = new Statement($primary_topic_resource,$predicate_resource,new Resource($uri));
-							$foafData->getModel()->add($knowsTripleUri);	
-						} else {
-							
-							$bNode = Utils::GenerateUniqueBnode($foafData->getModel());
-							
-							echo("ADDING MU RESOURCE".$bNode->uri." ifp type: ".$friend->ifp_type);
-							
-							$knowsTriple = new Statement($primary_topic_resource,$predicate_resource,$bNode);
-							$knowsTriple2 = new Statement($bNode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person"));
-							
-							$foafData->getModel()->add($knowsTriple);	
-							$foafData->getModel()->add($knowsTriple2);	
-							
-							if($friend->ifp_type == 'mbox'){
-								$knowsTriple3 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Resource("mailto:".$friend->ifps[0]));
-								$knowsTriple4 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal(sha1("mailto:".$friend->ifps[0])));
-								$foafData->getModel()->add($knowsTriple3);	
-								$foafData->getModel()->add($knowsTriple4);		
-							} else if($friend->ifp_type == 'mbox_sha1sum'){
-								$knowsTriple5 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Literal($friend->ifps[0]));
-								$foafData->getModel()->add($knowsTriple5);	
-							} else{
-								$knowsTriple5 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Resource($friend->ifps[0]));
-								$foafData->getModel()->add($knowsTriple5);	
-							}
-						}
-					}
-				}
-			}
-    		if(property_exists($value,'userKnows')){
-    			foreach($value->userKnows as $friend){
-
- 					/*Add the ifp to the doNotCleanArray so that this friend doesn't get deleted*/
-					$doNotCleanArray = array_merge($doNotCleanArray,$friend->ifps);
-					   				
-    				if(property_exists($friend,'ifp_type') && $friend->ifp_type){
-    					/*either spit out a uri if there is one, or link to them via a bnode and an IFP*/
-						if(property_exists($friend,'uri') && $friend->uri){
-							$knowsTripleUri = new Statement($primary_topic_resource,$predicate_resource,new Resource($uri));
-							$foafData->getModel()->add($knowsTripleUri);
-						} else {
-							
-							echo("ADDING UK RESOURCE");
-							
-							$bNode = Utils::GenerateUniqueBnode($foafData->getModel());
-							$knowsTriple = new Statement($primary_topic_resource,$predicate_resource,$bNode);
-							$knowsTriple2 = new Statement($bNode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person"));
-							
-							$foafData->getModel()->add($knowsTriple);	
-							$foafData->getModel()->add($knowsTriple2);	
-							
-							if($friend->ifp_type == 'mbox'){
-								$knowsTriple3 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Resource("mailto:".$friend->ifps[0]));
-								$knowsTriple4 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal(sha1("mailto:".$friend->ifps[0])));
-								$foafData->getModel()->add($knowsTriple3);	
-								$foafData->getModel()->add($knowsTriple4);		
-							} else if($friend->ifp_type == 'mbox_sha1sum'){
-								$knowsTriple5 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Literal($friend->ifps[0]));
-								$foafData->getModel()->add($knowsTriple5);	
-							} else{
-								$knowsTriple5 = new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Resource($friend->ifps[0]));
-								$foafData->getModel()->add($knowsTriple5);	
-							}
-						}
-    				} 
-				}
-			}
-
-		
-			
-			$this->view->isSuccess = 1;
+	//this doesn't do anything since the session is kept up to date via the friend controller
+	$this->view->isSuccess = 1;
+	return;
     }
     
     
