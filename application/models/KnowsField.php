@@ -11,6 +11,33 @@ require_once 'helpers/sparql.php';
 /*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
 class KnowsField extends Field {
 	
+	/**/
+	private function removeFriend($friend){
+		
+		if(property_exists($friend,'uri')){
+			//TODO: remove via uri here
+		} else {
+			
+			//?knowsResource ?ifp_predicate 
+						 	//}";
+			$query  = 	"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+						 	SELECT DISTINCT ?knowsResource WHERE {
+						 		<".$this->primaryTopic."> foaf:knows ?knowsResource
+						 		?knowResource ?ifp_predicate ?ifp . FILTER( ";
+			
+			
+			foreach($friend->ifps as $ifp){
+				$query.=" ?ifp = \"".$ifp."\" || ?ifp = <".$ifp."> ";				
+			}
+			
+			$query.=")}";
+			
+			$results = $foafData->getModel().SparqlQuery($query);
+
+			var_dump($results);
+		}
+	}
+	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
     public function KnowsField($foafData, $fullInstantiation = true) {
         
