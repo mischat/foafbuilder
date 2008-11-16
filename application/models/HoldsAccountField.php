@@ -6,9 +6,15 @@ require_once 'helpers/Utils.php';
 class HoldsAccountField extends Field {
 	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
-	public function HoldsAccountField($foafData) {
-		//Put in test for an empty foafData, before querying
-		if ($foafData) {
+	public function HoldsAccountField($foafData,$fullInstantiation) {
+		
+		$this->data['foafHoldsAccountFields'] = array();
+		$this->name = 'foafHoldsAccount';
+		$this->label = 'Accounts';
+		$this->data['foafHoldsAccountFields']['displayLabel'] = $this->label;
+		$this->data['foafHoldsAccountFields']['name'] = $this->name;
+			
+		if ($fullInstantiation) {
 	
 			$queryString = 
 			"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -30,14 +36,7 @@ class HoldsAccountField extends Field {
 					}
 				};";
 		 
-			$results = $foafData->getModel()->SparqlQuery($queryString);		
-				
-			$this->data['foafHoldsAccountFields'] = array();
-			$this->data['foafHoldsAccountFields']['displayLabel'] = 'Accounts';
-			$this->data['foafHoldsAccountFields']['name'] = 'foafHoldsAccount';
-			$this->name = 'foafHoldsAccount';
-			$this->label = 'Accounts';
-			
+			$results = $foafData->getModel()->SparqlQuery($queryString);				
 			
 			if (!empty($results)) {
 				error_log("[foaf_editor] Have found some accounts to render");
@@ -66,13 +65,9 @@ class HoldsAccountField extends Field {
 				}
 			} else {
 				error_log("[foaf_editor] There are no accounts to render");
-				return null;
 			}
 		
-		} else {
-			//TODO MISCHA
-			return null;
-		}
+		} 
 	}
 
 	public function getPredicateUri() {
@@ -83,7 +78,7 @@ class HoldsAccountField extends Field {
 	}
 	/*saves the values created by the editor in value... as encoded in json.*/
 	public function saveToModel(&$foafData, $value) {
-		echo("SAVING ACCOUNTSFields");
+
 		require_once 'SimpleField.php';
 		require_once 'FieldNames.php';
 		
@@ -120,7 +115,6 @@ class HoldsAccountField extends Field {
 								
 					/*check whether it is a totally new account or whether the bnode has already been generated*/
 					if(isset($randomStringToBnodeArray[$holdsAccountName])){
-						echo("\n"."FOUND IN ARRAY: ".$randomStringToBnodeArray[$holdsAccountName]."\n");
 						$holdsAccountBnode = new BlankNode($randomStringToBnodeArray[$holdsAccountName]);
 					} else {
 						
@@ -137,10 +131,8 @@ class HoldsAccountField extends Field {
 						
 						/*so that we can keep track of what's going on*/
 						$randomStringToBnodeArray[$holdsAccountName] = $holdsAccountBnode->uri;
-						echo("\n"."NOT FOUND IN ARRAY: ".$randomStringToBnodeArray[$holdsAccountName]."\n");
 					}	
 				} else {
-					echo("\n"."EXISTING BNODE: ".$holdsAccountName."\n");
 					$holdsAccountBnode = new BlankNode($holdsAccountName);
 				}
 			
@@ -148,15 +140,15 @@ class HoldsAccountField extends Field {
 				$doNotCleanArray[$holdsAccountBnode->uri] = $holdsAccountBnode->uri;
 				
 				/*add new ones*/
-				if($holdsAccountContents->foafAccountProfilePage && $holdsAccountContents->foafAccountProfilePage[0] && $holdsAccountContents->foafAccountProfilePage[0]->uri){
+				if(property_exists($holdsAccountContents,'foafAccountProfilePage') && $holdsAccountContents->foafAccountProfilePage && $holdsAccountContents->foafAccountProfilePage[0] && $holdsAccountContents->foafAccountProfilePage[0]->uri){
 					$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($holdsAccountContents->foafAccountProfilePage[0]->uri));
 					$foafData->getModel()->add($newStatement);
 				}
-				if($holdsAccountContents->foafAccountServiceHomepage && $holdsAccountContents->foafAccountServiceHomepage[0] && $holdsAccountContents->foafAccountServiceHomepage[0]->uri){
+				if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage && $holdsAccountContents->foafAccountServiceHomepage[0] && $holdsAccountContents->foafAccountServiceHomepage[0]->uri){
 					$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountServiceHomepage'), new Resource($holdsAccountContents->foafAccountServiceHomepage[0]->uri));
 					$foafData->getModel()->add($newStatement);
 				}
-				if($holdsAccountContents->foafAccountName && $holdsAccountContents->foafAccountName[0] && $holdsAccountContents->foafAccountName[0]->label){
+				if(property_exists($holdsAccountContents,'foafAccountName') && $holdsAccountContents->foafAccountName && $holdsAccountContents->foafAccountName[0] && $holdsAccountContents->foafAccountName[0]->label){
 					$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountName'), new Literal($holdsAccountContents->foafAccountName[0]->label));
 					$foafData->getModel()->add($newStatement);
 				}

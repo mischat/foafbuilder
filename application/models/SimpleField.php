@@ -8,33 +8,39 @@ class SimpleField extends Field{
 	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
 	//TODO: should label be here
-	public function SimpleField($name, $label, $predicateUri, $foafData, $type){
+	public function SimpleField($name, $label, $predicateUri, $foafData, $type, $fullInstantiation = true){
 		
-		$queryString = "SELECT ?".$name." WHERE {<".$foafData->getPrimaryTopic()."> <".$predicateUri."> ?".$name." }";
-		$results = $foafData->getModel()->SparqlQuery($queryString);		
+		/*only query the model if a full instantiation is required*/
 		
-		$this->data = array();
-		$this->data['fields'] = array();
-		
-		/*mangle the results so that they can be easily rendered*/
-		
-		$this->data['fields'][$name] = array();
-		$this->data['fields'][$name]['values'] = array();
-		
-		if(isset($results[0])){
-			foreach($results as $row){
-				foreach($row as $key => $value){	
-					$key = str_replace('?','',$key);
-					
-					if(property_exists($value,'label')){
-				       	array_push($this->data['fields'][$name]['values'],$value->label);
-				    } else if(property_exists($value,'uri')){
-				       	array_push($this->data['fields'][$name]['values'],$value->uri);
-				    }
-				     
-				}
-	    	}
+		if($fullInstantiation){
+			
+			$queryString = "SELECT ?".$name." WHERE {<".$foafData->getPrimaryTopic()."> <".$predicateUri."> ?".$name." }";
+			$results = $foafData->getModel()->SparqlQuery($queryString);		
+			
+			$this->data = array();
+			$this->data['fields'] = array();
+			
+			/*mangle the results so that they can be easily rendered*/
+			
+			$this->data['fields'][$name] = array();
+			$this->data['fields'][$name]['values'] = array();
+			
+			if(isset($results[0])){
+				foreach($results as $row){
+					foreach($row as $key => $value){	
+						$key = str_replace('?','',$key);
+						
+						if(property_exists($value,'label')){
+					       	array_push($this->data['fields'][$name]['values'],$value->label);
+					    } else if(property_exists($value,'uri')){
+					       	array_push($this->data['fields'][$name]['values'],$value->uri);
+					    }
+					     
+					}
+		    	}
+			}
 		}
+		
        	$this->data['fields'][$name]['displayLabel'] = $label;
 		$this->data['fields'][$name]['name'] = $name;
 		

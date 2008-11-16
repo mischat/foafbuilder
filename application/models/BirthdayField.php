@@ -7,93 +7,97 @@ require_once 'helpers/Utils.php';
 class BirthdayField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function BirthdayField($foafData) {
-        if ($foafData->getPrimaryTopic()) {
-            $queryString = 
-                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                SELECT ?bioBirthday ?foafBirthday ?foafDateOfBirth
-                WHERE{
-                    ?z foaf:primaryTopic <".$foafData->getPrimaryTopic()."> .
-                    ?z foaf:primaryTopic ?primaryTopic .
-                    OPTIONAL{
-                        ?primaryTopic foaf:birthday ?foafBirthday
-                    } .
-                    OPTIONAL{
-                        ?primaryTopic foaf:dateOfBirth ?foafDateOfBirth
-                    } .
-                    OPTIONAL{
-                        ?primaryTopic bio:event ?e .
-                        ?e rdf:type bio:Birth .
-                        ?e bio:date ?bioBirthday .
-                    } 
-                };";
-
-            $results = $foafData->getModel()->SparqlQuery($queryString);		
-        
-            $this->data['birthdayFields'] = array();
-
-            /*Check results !empty */
-            if (!(empty($results))) {
-            /*mangle the results so that they can be easily rendered*/
-
-                foreach ($results as $row) {	
-                    error_log("[foaf_editor] For a birthday checking type...");
-                    if (isset($row['?foafDateOfBirth']->label) && $this->isLongDateValid($row['?foafDateOfBirth']->label)) {
-                        error_log("[foaf_editor] found complete dateOfBirth");
-                        /* spliting with 3 different values : / - */
-                        $birthdayArray = split("-",$row['?foafDateOfBirth']->label);
-                        if (empty($birthdayArray)) {
-                            $birthdayArray = split("/",$row['?foafDateOfBirth']->label);
-                        } 
-                        if (empty($birthdayArray)) {
-                            $birthdayArray = split(":",$row['?foafDateOfBirth']->label);
-                        }
-                        /*If the birthdayArray is nice and easy to parse!*/
-                        if (count($birthdayArray == 3)) {
-                            $this->data['birthdayFields']['day']= $birthdayArray[2];
-                            $this->data['birthdayFields']['month']= $birthdayArray[1];
-                            $this->data['birthdayFields']['year']= $birthdayArray[0];
-                        } else {
-                            error_log("[foaf_editor] couldn't parse date");
-                        } 
-                    } else if (isset($row['?foafBirthday']->label) && $this->isShortDateValid($row['?foafBirthday']->label)) {
-                        error_log("['foaf_editor] found short date");
-                        $birthdayArray = split("-",$row['?foafBirthday']->label);
-                        /* spliting with 3 different values : / - */
-                        if (empty($birthdayArray)) {
-                            $birthdayArray = split("/",$row['?foafDateOfBirth']->label);
-                        } 
-                        if (empty($birthdayArray)) {
-                            $birthdayArray = split(":",$row['?foafDateOfBirth']->label);
-                        }
-                        /*normalise to \d{2}*/
-                        if (strlen($birthdayArray[1]) == 1) {
-                            $this->data['birthdayFields']['day']= "0".$birthdayArray[1];
-                        } else {
-                            $this->data['birthdayFields']['day']= $birthdayArray[1];
-                        }
-                        if (strlen($birthdayArray[0]) == 1) {
-                            $this->data['birthdayFields']['month']= "0".$birthdayArray[0];
-                        } else {
-                            $this->data['birthdayFields']['month']= $birthdayArray[0];
-                        }
-                    } else if (isset($row['?bioBirthday']->label) && $this->isLongDateValid($row['?bioBirthday']->label)) {
-                        /* This one is actually well specified */
-                        $birthdayArray = split("-",$row['?bioBirthday']->label);
-                        $this->data['birthdayFields']['day']= $birthdayArray[2];
-                        $this->data['birthdayFields']['month']= $birthdayArray[1];
-                        $this->data['birthdayFields']['year']= $birthdayArray[0];
-                    }
-                }	
-            }
-            //Write out values albeit empty
-            $this->data['birthdayFields']['displayLabel'] = 'Birthday';
-            $this->data['birthdayFields']['name'] = 'birthday';
-            $this->name = 'birthday';
-            $this->label = 'Birthday';
+    public function BirthdayField($foafData, $fullInstantiation = true) {
+ 	    
+    	$this->data['birthdayFields'] = array();  	
+    	$this->data['birthdayFields']['displayLabel'] = 'Birthday';
+        $this->data['birthdayFields']['name'] = 'birthday';
+        $this->name = 'birthday';
+        $this->label = 'Birthday';
+            
+    	/*only sparql query the model if a full instantiation is called for*/
+    	if($fullInstantiation){
+    		
+	        if ($foafData->getPrimaryTopic()) {
+	            $queryString = 
+	                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+	                PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+	                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+	                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+	                SELECT ?bioBirthday ?foafBirthday ?foafDateOfBirth
+	                WHERE{
+	                    ?z foaf:primaryTopic <".$foafData->getPrimaryTopic()."> .
+	                    ?z foaf:primaryTopic ?primaryTopic .
+	                    OPTIONAL{
+	                        ?primaryTopic foaf:birthday ?foafBirthday
+	                    } .
+	                    OPTIONAL{
+	                        ?primaryTopic foaf:dateOfBirth ?foafDateOfBirth
+	                    } .
+	                    OPTIONAL{
+	                        ?primaryTopic bio:event ?e .
+	                        ?e rdf:type bio:Birth .
+	                        ?e bio:date ?bioBirthday .
+	                    } 
+	                };";
+	
+	            $results = $foafData->getModel()->SparqlQuery($queryString);		
+				
+	            /*Check results !empty */
+	            if (!(empty($results))) {
+	            /*mangle the results so that they can be easily rendered*/
+	
+	                foreach ($results as $row) {	
+	                    error_log("[foaf_editor] For a birthday checking type...");
+	                    if (isset($row['?foafDateOfBirth']->label) && $this->isLongDateValid($row['?foafDateOfBirth']->label)) {
+	                        error_log("[foaf_editor] found complete dateOfBirth");
+	                        /* spliting with 3 different values : / - */
+	                        $birthdayArray = split("-",$row['?foafDateOfBirth']->label);
+	                        if (empty($birthdayArray)) {
+	                            $birthdayArray = split("/",$row['?foafDateOfBirth']->label);
+	                        } 
+	                        if (empty($birthdayArray)) {
+	                            $birthdayArray = split(":",$row['?foafDateOfBirth']->label);
+	                        }
+	                        /*If the birthdayArray is nice and easy to parse!*/
+	                        if (count($birthdayArray == 3)) {
+	                            $this->data['birthdayFields']['day']= $birthdayArray[2];
+	                            $this->data['birthdayFields']['month']= $birthdayArray[1];
+	                            $this->data['birthdayFields']['year']= $birthdayArray[0];
+	                        } else {
+	                            error_log("[foaf_editor] couldn't parse date");
+	                        } 
+	                    } else if (isset($row['?foafBirthday']->label) && $this->isShortDateValid($row['?foafBirthday']->label)) {
+	                        error_log("['foaf_editor] found short date");
+	                        $birthdayArray = split("-",$row['?foafBirthday']->label);
+	                        /* spliting with 3 different values : / - */
+	                        if (empty($birthdayArray)) {
+	                            $birthdayArray = split("/",$row['?foafDateOfBirth']->label);
+	                        } 
+	                        if (empty($birthdayArray)) {
+	                            $birthdayArray = split(":",$row['?foafDateOfBirth']->label);
+	                        }
+	                        /*normalise to \d{2}*/
+	                        if (strlen($birthdayArray[1]) == 1) {
+	                            $this->data['birthdayFields']['day']= "0".$birthdayArray[1];
+	                        } else {
+	                            $this->data['birthdayFields']['day']= $birthdayArray[1];
+	                        }
+	                        if (strlen($birthdayArray[0]) == 1) {
+	                            $this->data['birthdayFields']['month']= "0".$birthdayArray[0];
+	                        } else {
+	                            $this->data['birthdayFields']['month']= $birthdayArray[0];
+	                        }
+	                    } else if (isset($row['?bioBirthday']->label) && $this->isLongDateValid($row['?bioBirthday']->label)) {
+	                        /* This one is actually well specified */
+	                        $birthdayArray = split("-",$row['?bioBirthday']->label);
+	                        $this->data['birthdayFields']['day']= $birthdayArray[2];
+	                        $this->data['birthdayFields']['month']= $birthdayArray[1];
+	                        $this->data['birthdayFields']['year']= $birthdayArray[0];
+	                    }
+	                }	
+	            }
+	        }    
         } 
     }
 	

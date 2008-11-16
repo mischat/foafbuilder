@@ -7,18 +7,29 @@ require_once 'helpers/Utils.php';
 class BasedNearField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function BasedNearField($foafData) {
+    public function BasedNearField($foafData,$fullInstantiation = true) {
         /*TODO MISCHA dump test to check if empty */
     	//TODO: add foaf:nearestAirport stuff
         if ($foafData->getPrimaryTopic()) {
-        	
+ 			
+        	$this->data['basedNearFields'] = array();
+			$this->data['basedNearFields']['basedNear'] = array();
+  			$this->name = 'basedNear';
+            $this->label = "I'm based near...";
+			$this->data['basedNearFields']['displayLabel'] = $this->label;
+            $this->data['basedNearFields']['name'] = $this->name;
+          
+         	/*don't sparql query the model etc if a full instantiation is not required*/
+            if(!$fullInstantiation){
+            	return;
+            }
+            
             $queryString = $this->getQueryString($foafData->getPrimaryTopic());
             $results = $foafData->getModel()->SparqlQuery($queryString);		
 
             //var_dump($results);
             
-          	$this->data['basedNearFields'] = array();
-			$this->data['basedNearFields']['basedNear'] = array();
+ 
 				
             if($results && !empty($results)){
             	
@@ -30,11 +41,6 @@ class BasedNearField extends Field {
 	            }	
             
         	}
-
-            $this->data['basedNearFields']['displayLabel'] = "I'm based near...";
-            $this->data['basedNearFields']['name'] = 'basedNear';
-            $this->name = 'basedNear';
-            $this->label = "I'm based near...";
     	}
     }
 

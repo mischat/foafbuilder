@@ -7,9 +7,16 @@ require_once 'helpers/Utils.php';
 class MboxField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function MboxField($foafData) {
-        /*TODO MISCHA dump test to check if empty */
-        if ($foafData->getPrimaryTopic()) {
+    public function MboxField($foafData,$fullInstantiation = true) {
+     	
+    	$this->data['foafMboxFields'] = array();
+        $this->data['foafMboxFields']['values'] = array();
+        $this->name = 'foafMbox';
+        $this->label = 'Email';
+        $this->data['foafMboxFields']['displayLabel'] = $this->name;
+        $this->data['foafMboxFields']['name'] = $this->label;
+    	
+        if ($foafData->getPrimaryTopic() && $fullInstantiation) {
             $queryString = 
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
@@ -24,9 +31,6 @@ class MboxField extends Field {
                 };";
 
             $results = $foafData->getModel()->SparqlQuery($queryString);		
-	
-            $this->data['foafMboxFields'] = array();
-            $this->data['foafMboxFields']['values'] = array();
 
              //Check if results are not empty
 	        if (!(empty($results))) {
@@ -41,13 +45,6 @@ class MboxField extends Field {
 	                }
 	             }
 	         }	
-
-            $this->data['foafMboxFields']['displayLabel'] = 'Email';
-            $this->data['foafMboxFields']['name'] = 'foafMbox';
-            $this->name = 'foafMbox';
-            $this->label = 'Email';
-
-	    
         }
     }
 	
