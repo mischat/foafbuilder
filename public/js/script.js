@@ -1950,7 +1950,7 @@ function otherDisplayToObjects(){
 			if(isMutual){
 				removeLink.setAttribute("onclick" , "removeMutualFriendElement('"+removeId+"','"+removeDiv.id+"');");
 			} else {
-				removeLink.setAttribute("onclick" , "removeGenericInputElement('"+removeId+"','"+removeDiv.id+"');");
+				removeLink.setAttribute("onclick" , "removeUserKnowsElement('"+removeId+"','"+removeDiv.id+"');");
 			}
 			
 			removeDiv.appendChild(removeLink);
@@ -2175,10 +2175,25 @@ function removeMutualFriendElement(removeId,removeDivId){
 	
 	/*create the new element*/
 	if(containerElement){
-		//var friendDiv = createFriendElement('knowsUser',friend,containerElement.childNodes.length,containerElement);
-		//createMakeMutualFriendLink(friendDiv);
-		insertFriendInRightPlace(containerElement, 'knowsUser', friend)
+		//TODO: add urls here
+		friend.ifps = getIFPsFromGlobalDataObject(friend);
+		$.post("/friend/remove-friend", {friend : JSON.serialize(friend)}, function(data){
+			insertFriendInRightPlace(containerElement, 'knowsUser', friend);
+		});
 	}
+	
+	/*remove the old one*/
+	removeGenericInputElement(removeId,removeDivId);
+	
+}
+
+/*remove the user knows friend whose div is given by the id removeId*/
+function removeUserKnowsElement(removeId,removeDivId){
+	var friend = getFriendInfoFromElement(removeId);
+	
+	//TODO: add urls here
+	friend.ifps = getIFPsFromGlobalDataObject(friend);
+	$.post("/friend/remove-friend", {friend : JSON.serialize(friend)}, function(data){});
 	
 	/*remove the old one*/
 	removeGenericInputElement(removeId,removeDivId);
@@ -2247,8 +2262,11 @@ function addFriend(friendDivId){
 		var containerElement = document.getElementById('userKnows_container');
 		
 		if(containerElement){
-
 			//actually stick it in the model in the back end
+			if(typeof(globalTypeArray[friend.ifps[0]]) != 'undefined' && globalTypeArray[friend.ifps[0]]){
+				//TODO: this same technique could be used to preserve the uri
+				friend.ifp_type = globalTypeArray[friend.ifps[0]];
+			} 
 			$.post("/friend/add-friend", {friend : JSON.serialize(friend)}, function(data){
 				insertFriendInRightPlace(containerElement, 'userKnows', friend);
 			});
@@ -2259,7 +2277,14 @@ function addFriend(friendDivId){
 		
 		//add it as a mutual friend
 		if(containerElement){
-			insertFriendInRightPlace(containerElement, 'mutualFriend', friend);
+			//actually stick it in the model in the back end
+			if(typeof(globalTypeArray[friend.ifps[0]]) != 'undefined' && globalTypeArray[friend.ifps[0]]){
+				//TODO: this same technique could be used to preserve the uri
+				friend.ifp_type = globalTypeArray[friend.ifps[0]];
+			} 
+			$.post("/friend/add-friend", {friend : JSON.serialize(friend)}, function(data){
+				insertFriendInRightPlace(containerElement, 'userKnows', friend);
+			});
 		}
 		
 		//remove it from knows user using the ifp
