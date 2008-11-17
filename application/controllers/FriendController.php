@@ -109,7 +109,7 @@ class FriendController extends Zend_Controller_Action {
     	
 		/*now we need to use these IFPs to get the details*/
     	$query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-					SELECT DISTINCT ?name ?depiction ?img WHERE {
+					SELECT DISTINCT ?name ?depiction ?img ?person WHERE {
 					   ?person ?ifp_type ?ifp .
 					   ?person foaf:name ?name .
 					   OPTIONAL{
@@ -146,7 +146,16 @@ class FriendController extends Zend_Controller_Action {
     			break;
     		}
     	}
-    	
+
+	//we only want one uri
+	//FIXME: this should only use the uri from the ifp given.
+	foreach($results as $row){
+		//check that the uri is not a bnode, which would be useless
+		if(isset($row['?person']) && $row['?person'] && $row['?person'] != 'NULL' && substr($row['?person'],0,2)!="_:"){
+                        $this->view->results['uri'] = sparql_strip($row['?person']);
+                        break;
+                }
+	}
     	
     	//the originally passed uri/ifp
     	$this->view->results['ifps'] = array($_GET['uri']);

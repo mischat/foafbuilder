@@ -2197,6 +2197,9 @@ function removeUserKnowsElement(removeId,removeDivId){
 	
 	/*remove the old one*/
 	removeGenericInputElement(removeId,removeDivId);
+
+	/*update the global data object*/
+	knowsDisplayToObjects();
 	
 }
 
@@ -2292,6 +2295,9 @@ function addFriend(friendDivId){
 	}
 	
 	removeGenericInputElement(friendDivId,'id');
+
+	//update the global field data object but don't save
+	knowsDisplayToObjects();
 }
 
 /*remove a friend element which matches the given ifps from the knowsUser given*/
@@ -2393,6 +2399,9 @@ function makeMutualFriend(friendDivId){
 
 	/*remove the old one*/
 	removeGenericInputElement(friendDivId,'id');
+
+	/*update the global object but don't save*/
+	knowsDisplayToObjects();
 }
 
 /*removes the input element with the given id as well as its corresponding remove element*/
