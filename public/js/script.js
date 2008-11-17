@@ -1446,7 +1446,7 @@ function knowsDisplayToObjects(){
 	/*Save all user knows*/
 	var userKnowsContainer = document.getElementById('userKnows_container');	
 	for(childNode in userKnowsContainer.childNodes){
-		if(userKnowsContainer.childNodes[childNode].className == 'friend'){
+		if(typeof(userKnowsContainer.childNodes[childNode]) != 'undefined' && userKnowsContainer.childNodes[childNode].className == 'friend'){
 			var friendInfo = getFriendInfoFromElement(userKnowsContainer.childNodes[childNode].id);
 			
 			/*do some stuff to make sure the ifp type is there for any new person that we've added*/
@@ -2184,6 +2184,9 @@ function removeMutualFriendElement(removeId,removeDivId){
 	
 	/*remove the old one*/
 	removeGenericInputElement(removeId,removeDivId);
+
+	/*update the global data object but don't save*/
+	knowsDisplayToObjects();
 	
 }
 
@@ -2199,6 +2202,9 @@ function removeUserKnowsElement(removeId,removeDivId){
 	removeGenericInputElement(removeId,removeDivId);
 
 	/*update the global data object*/
+	knowsDisplayToObjects();
+	
+	/*update the global data object but don't save*/
 	knowsDisplayToObjects();
 	
 }
@@ -2248,8 +2254,12 @@ function addFriend(friendDivId){
 			if(globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==friend.ifps[0] ||
 				globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==sha1(friend.ifps[0]) ||
 				globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==sha1('mailto:'+friend.ifps[0]) ||
-				sha1(globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==friend.ifps[0]){
-				
+				sha1(globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==friend.ifps[0] ||
+				sha1(globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==sha1('mailto:'+friend.ifps[0]) ||
+				sha1('mailto:'+globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==friend.ifps[0] ||
+				sha1('mailto:'+globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==sha1(friend.ifps[0]) ||
+				sha1('mailto:'+globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==sha1("mailto:"+friend.ifps[0])){
+
 				removeIfps = globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps;
 				isKnowsUser = true;
 			}
@@ -2334,7 +2344,8 @@ function insertFriendInRightPlace(containerElement, name, friend){
 	var reachedPoint = false;//whether we've got to the point alphabetically where we want to insert
 	var toReattachElements = new Array();
 	var originalNoOfChildNodes = containerElement.childNodes.length;
-	
+	var i = 0;
+
 	/*remove all elements after the insertion point*/
 	for(contKey in containerElement.childNodes){
 		if(typeof(containerElement.childNodes[contKey]) == 'undefined' || typeof(containerElement.childNodes[contKey].id)=='undefined'){
@@ -2343,6 +2354,7 @@ function insertFriendInRightPlace(containerElement, name, friend){
 		var thisFriend = getFriendInfoFromElement(containerElement.childNodes[contKey].id);
 				
 		if(reachedPoint){
+			i++;
 			//remove this element and stow to reattach later.
 			toReattachElements.push(containerElement.childNodes[contKey]);
 		} else if(typeof(thisFriend.name) != 'undefined' && thisFriend.name){
@@ -2350,6 +2362,7 @@ function insertFriendInRightPlace(containerElement, name, friend){
 				/*remove this element and stow to reattach later.  Set reachedPoint so we remove all subsequent elements*/
 				toReattachElements.push(containerElement.childNodes[contKey]);
 				reachedPoint = true;
+				i++;
 			} 
 		}
 	}
@@ -2379,7 +2392,16 @@ function insertFriendInRightPlace(containerElement, name, friend){
 		}
 		containerElement.appendChild(toReattachElements[elemKey]);
 	}
-	
+
+	if(containerElement){
+		/*scroll the div to the appropriate place*/
+		//TODO: un hardcode the 60 and 150 here
+		containerElement.scrollTop = (containerElement.childNodes.length - i-2) * 60;
+	}
+
+	/*do some fancy yellow fading*/
+	yellowFade(friendDiv);	
+
 	return friendDiv.id;
 	
 }
