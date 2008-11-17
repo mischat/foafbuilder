@@ -5,6 +5,7 @@ require_once 'helpers/IFPTriangulation.class.php';
 require_once 'helpers/URITriangulation.class.php';
 require_once 'helpers/settings.php';
 require_once 'helpers/sparql.php';
+require_once 'helpers/image-cache.php';
 
 /*FIXME: perhaps fields shouldn't do the whole sparql query thing in the constructor.*/
 
@@ -223,8 +224,9 @@ class KnowsField extends Field {
 	        				FILTER(".substr($inquery,0,-2).") } LIMIT 50";
 	        	
 	        	$thisFriendResults = sparql_query(FOAF_EP, $query);
-      
+      			$friendImageArray = array();
         		$thisFriendDetails = array();
+
         		/*pick just one name, depiction/image etc for this person*/
         		foreach($thisFriendResults as $row){
         			/*only add stuff if there is a name or nick*/
@@ -237,7 +239,7 @@ class KnowsField extends Field {
         			}
         			
         			if(isset($row['?img']) && $row['?img'] && $row['?img'] != 'NULL'){
-        				$thisFriendDetails['img'] = sparql_strip($row['?img']);
+        				array_push($friendImageArray,sparql_strip($row['?img']));
         			}
         			//array_walk($thisFriendsIfps,'sparql_strip');
         			
@@ -246,9 +248,12 @@ class KnowsField extends Field {
         			foreach($thisFriendsIfps as $ifp){
         				array_push($strippedIfps,sparql_strip($ifp));
         			}
+
         			$thisFriendDetails['ifps'] = $strippedIfps;
-        			
-        			if(!$this->isBnode($thisUri)){
+				$manyImages = cache_get($strippedIfps, $friendImageArray);
+				$thisFriendDetails['img'] =$manyImages[0];				
+
+				if(!$this->isBnode($thisUri)){
         				//echo("this is not a bnode".$thisUri."\n");
         				$thisFriendDetails['uri'] = sparql_strip($thisUri);
         			}
