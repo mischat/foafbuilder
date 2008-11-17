@@ -343,3 +343,14 @@ function sha1 ( str ) {
     var temp = cvt_hex(H0) + cvt_hex(H1) + cvt_hex(H2) + cvt_hex(H3) + cvt_hex(H4);
     return temp.toLowerCase();
 }
+
+function yellowFade(el) {
+  var b = 155;
+  function f() {
+    el.style.background = 'rgb(255,255,'+ (b+=4) +')';
+    if (b < 255) {
+      setTimeout(f, 40);
+    }
+  };
+  f();
+}
