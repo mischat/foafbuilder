@@ -8,9 +8,6 @@ class AddressField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
     public function AddressField($foafData,$fullInstantiation = true) {
-        /*TODO MISCHA dump test to check if empty */
-    	//TODO: add foaf:nearestAirport stuff
-        if ($foafData->getPrimaryTopic()) {
         	
           	$this->data['addressFields'] = array();
 			$this->data['addressFields']['office'] = array();
@@ -21,9 +18,9 @@ class AddressField extends Field {
             $this->data['addressFields']['name'] =  $this->name;
             
             /*don't sparql query the model etc if a full instantiation is not required*/
-            if(!$fullInstantiation){
-            	return;
-            }
+        	if (!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()) {
+				return;
+        	}
             
             $queryString = $this->getQueryString($foafData->getPrimaryTopic());
             $results = $foafData->getModel()->SparqlQuery($queryString);		
@@ -38,9 +35,6 @@ class AddressField extends Field {
 	            }	
             
         	}
-
-    
-    	}
     }
 
 	
@@ -61,8 +55,7 @@ class AddressField extends Field {
 			$this->removeExistingAddressTriples($foafData,$bNodeName,$type);
 
 	 		/*check whether we've already created this bnode or not*/
-			if(strlen($bNodeName) == 50){		
-					echo("IN IF");
+			if(strlen($bNodeName) == 50){		;
 		    	if(isset($randomStringToBnodeArray[$bNodeName])){	
 		    		
 					$homeBnode = new BlankNode($randomStringToBnodeArray[$bNodeName]);
@@ -136,7 +129,7 @@ class AddressField extends Field {
 		
     	foreach($allHomes->triples as $triple){
 			if(!$doNotCleanArray[$triple->obj->uri]){
-				echo("Removing home address triples");
+
 				$this->removeExistingAddressTriples($foafData,$triple->obj->uri,'home');
 				$foafData->getModel()->remove($triple);
 			}

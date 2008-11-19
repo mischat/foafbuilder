@@ -7,9 +7,17 @@ class FieldNames {
 	//an array containing all the fieldNames in this object
 	private $allFieldNames = Array();
 	private $foafData;
+	private $privateFoafData;
 	
-	public function FieldNames($type,$foafData){
-		$this->foafData = $foafData;
+	public function FieldNames($type,$foafData = false ,$privateFoafData = false ){
+		
+		if($foafData){
+			$this->foafData = $foafData;
+		}
+		if($privateFoafData){
+			$this->privateFoafData = $privateFoafData;
+		}
+		
 		//TODO: possibly we don't want two different arrays here
 		require_once 'Field.php';
 		/*
@@ -50,15 +58,16 @@ class FieldNames {
 				$this->instantiateOtherFields();
 				break;
 			case "all":
-				$this->instantiateLocationsFields(false);
+				//FIXME: commented others out for development purposes
+				//$this->instantiateLocationsFields(false);
 				$this->instantiateTheBasicsFields(false);
-				$this->instantiateContactDetailsFields(false);
-				$this->instantiatePicturesFields(false);
-				$this->instantiateAccountsFields(false);
-				$this->instantiateFriendsFields(false);
-				$this->instantiateBlogsFields(false);
-				$this->instantiateInterestsFields(false);
-				$this->instantiateOtherFields(false);
+				//$this->instantiateContactDetailsFields(false);
+				//$this->instantiatePicturesFields(false);
+				//$this->instantiateAccountsFields(false);
+				//$this->instantiateFriendsFields(false);
+				//$this->instantiateBlogsFields(false);
+				//$this->instantiateInterestsFields(false);
+				//$this->instantiateOtherFields(false);
 				break;	
 		}
 	}
@@ -66,20 +75,21 @@ class FieldNames {
 	/*instantiates arrays of fields for all the items on the basics page*/
 	private function instantiateTheBasicsFields($fullInstantiation = true){
 	
-		
-		$this->allFieldNames['birthday'] = new BirthdayField($this->foafData,$fullInstantiation);
+		//var_dump($this->privateFoafData);
+		//FIXME: homepage and birthday temporarily commented out for dev purposes
+		//$this->allFieldNames['birthday'] = new BirthdayField($this->foafData,$fullInstantiation);
 		$this->allFieldNames['foafTitle'] = 
-			new SimpleField('foafTitle', 'Title', "http://xmlns.com/foaf/0.1/title",$this->foafData,"literal",$fullInstantiation);
+			new SimpleField('foafTitle', 'Title', "http://xmlns.com/foaf/0.1/title",$this->foafData, $this->privateFoafData, "literal",$fullInstantiation);
 		$this->allFieldNames['foafGivenName'] = 
-			new SimpleField('foafGivenName', 'Given Name', "http://xmlns.com/foaf/0.1/givenname",$this->foafData,"literal",$fullInstantiation);
+			new SimpleField('foafGivenName', 'Given Name', "http://xmlns.com/foaf/0.1/givenname",$this->foafData, $this->privateFoafData,"literal",$fullInstantiation);
 		$this->allFieldNames['foafFamilyName'] = 
-			new SimpleField('foafFamilyName', 'Family Name', 'http://xmlns.com/foaf/0.1/family_name',$this->foafData,'literal',$fullInstantiation);
+			new SimpleField('foafFamilyName', 'Family Name', 'http://xmlns.com/foaf/0.1/family_name',$this->foafData, $this->privateFoafData,'literal',$fullInstantiation);
 		$this->allFieldNames['foafName'] = 
-			new SimpleField('foafName', 'Real Name', 'http://xmlns.com/foaf/0.1/name',$this->foafData,'literal',$fullInstantiation);
-		$this->allFieldNames['foafHomepage'] =  
-			new HomepageField($this->foafData,$fullInstantiation);
+			new SimpleField('foafName', 'Real Name', 'http://xmlns.com/foaf/0.1/name',$this->foafData, $this->privateFoafData,'literal',$fullInstantiation);
+		//$this->allFieldNames['foafHomepage'] =  
+			//new HomepageField($this->foafData,$fullInstantiation);
 		$this->allFieldNames['foafNick'] = 
-			new SimpleField('foafNick', 'Nickname', 'http://xmlns.com/foaf/0.1/nick',$this->foafData,'literal',$fullInstantiation);
+			new SimpleField('foafNick', 'Nickname', 'http://xmlns.com/foaf/0.1/nick',$this->foafData, $this->privateFoafData,'literal',$fullInstantiation);
 		
 	}
 	

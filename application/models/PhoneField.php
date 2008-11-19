@@ -16,8 +16,13 @@ class PhoneField extends Field {
         $this->data['foafPhoneFields']['displayLabel'] = $this->label;
         $this->data['foafPhoneFields']['name'] =  $this->name;
         
-        if ($foafData->getPrimaryTopic() && $fullInstantiation) {
-            $queryString = 
+     	/*don't sparql query the model etc if a full instantiation is not required*/
+        if (!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()) {
+			return;
+        }
+        
+        /*load the actual data from the model*/
+        $queryString = 
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
                 PREFIX bio: <http://purl.org/vocab/bio/0.1/>
@@ -30,22 +35,21 @@ class PhoneField extends Field {
                  
                 };";
 
-            $results = $foafData->getModel()->SparqlQuery($queryString);		
-	
+        $results = $foafData->getModel()->SparqlQuery($queryString);		
 
-               //Check if results are not empty
-               if (!(empty($results))) {
+        //Check if results are not empty
+        if (!(empty($results))) {
                 /*mangle the results so that they can be easily rendered*/
-                	foreach ($results as $row) {	
-                    	if (isset($row['?foafPhone']) && property_exists($row['?foafPhone'],'label') && $this->isPhoneNumberValid($row['?foafPhone']->label)) {
-                        	array_push($this->data['foafPhoneFields']['values'],$this->onLoadManglePhoneNumber($row['?foafPhone']->label));
-                    	}
-                		if (isset($row['?foafPhone']) && property_exists($row['?foafPhone'],'uri') && $this->isPhoneNumberValid($row['?foafPhone']->uri)) {
-                        	array_push($this->data['foafPhoneFields']['values'],$this->onLoadManglePhoneNumber($row['?foafPhone']->uri));
-                    	}
-                	}	
-               } 
-        }
+                foreach ($results as $row) {	
+                   	if (isset($row['?foafPhone']) && property_exists($row['?foafPhone'],'label') && $this->isPhoneNumberValid($row['?foafPhone']->label)) {
+                       	array_push($this->data['foafPhoneFields']['values'],$this->onLoadManglePhoneNumber($row['?foafPhone']->label));
+                   	}
+                	if (isset($row['?foafPhone']) && property_exists($row['?foafPhone'],'uri') && $this->isPhoneNumberValid($row['?foafPhone']->uri)) {
+                       	array_push($this->data['foafPhoneFields']['values'],$this->onLoadManglePhoneNumber($row['?foafPhone']->uri));
+                   	}
+               }	
+        } 
+        
     }
 	
     /*saves the values created by the editor in value... as encoded in json. */

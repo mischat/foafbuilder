@@ -1,7 +1,6 @@
 <?php
 require_once 'Field.php';
 require_once 'helpers/Utils.php';
-/*FIXME: perhaps fields shouldn't do the whole sparql query thing in the constructor.*/
 
 /*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
 class DepictionField extends Field {
@@ -16,10 +15,9 @@ class DepictionField extends Field {
         $this->data['foafDepictionFields']['name'] = $this->name;
         $this->data['foafDepictionFields']['images'] = array();
             
-        /*TODO MISCHA dump test to check if empty */
-        if (!$foafData->getPrimaryTopic() || !$fullInstantiation) {
-        	return;
-        	
+        /*don't sparql query the model etc if a full instantiation is not required*/
+        if (!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()) {
+			return;
         }
           
             $queryString = 
@@ -62,8 +60,6 @@ class DepictionField extends Field {
 	                }
 	            }	
             }
-                   
-        
     }
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/

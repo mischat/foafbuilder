@@ -8,40 +8,30 @@ class BasedNearField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
     public function BasedNearField($foafData,$fullInstantiation = true) {
-        /*TODO MISCHA dump test to check if empty */
-    	//TODO: add foaf:nearestAirport stuff
-        if ($foafData->getPrimaryTopic()) {
- 			
-        	$this->data['basedNearFields'] = array();
-			$this->data['basedNearFields']['basedNear'] = array();
-  			$this->name = 'basedNear';
-            $this->label = "I'm based near...";
-			$this->data['basedNearFields']['displayLabel'] = $this->label;
-            $this->data['basedNearFields']['name'] = $this->name;
+
+    	$this->data['basedNearFields'] = array();
+		$this->data['basedNearFields']['basedNear'] = array();
+  		$this->name = 'basedNear';
+        $this->label = "I'm based near...";
+		$this->data['basedNearFields']['displayLabel'] = $this->label;
+        $this->data['basedNearFields']['name'] = $this->name;
           
-         	/*don't sparql query the model etc if a full instantiation is not required*/
-            if(!$fullInstantiation){
-            	return;
-            }
+        /*don't sparql query the model etc if a full instantiation is not required*/
+        if (!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()) {
+			return;
+        }
             
-            $queryString = $this->getQueryString($foafData->getPrimaryTopic());
-            $results = $foafData->getModel()->SparqlQuery($queryString);		
+        /*load data from the model*/
+        $queryString = $this->getQueryString($foafData->getPrimaryTopic());
+        $results = $foafData->getModel()->SparqlQuery($queryString);		
 
-            //var_dump($results);
-            
- 
-				
-            if($results && !empty($results)){
+        if($results && !empty($results)){
             	
-	            /*mangle the results so that they can be easily rendered*/
-	            foreach ($results as $row) {
-	       
-	            	$this->addBasedNearElements($row);
-
-	            }	
-            
-        	}
-    	}
+	    	/*mangle the results so that they can be easily rendered*/
+	        foreach ($results as $row) {
+	            $this->addBasedNearElements($row);
+	        }	    
+       	}
     }
 
 	

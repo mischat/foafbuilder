@@ -10,21 +10,34 @@ class AjaxController extends Zend_Controller_Action {
     private $queryString;
     private $fieldNamesObject; 
     private $foafData;
+    private $privateFoafData;
 	
     public function loadTheBasicsAction() {
     	
     	/*build up a sparql query to get the values of all the fields we need*/
         $this->loadFoaf();
-    	//if ($this->loadFoaf()) {   
-    	if ($this->foafData->getPrimaryTopic()) {   
-            $this->fieldNamesObject = new FieldNames('theBasics',$this->foafData);  	
-            $this->view->results = array();
-            foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
-            	
-            	//need to cope with multiple fields of the same type
-            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
-          
-            }
+		
+        //echo("HERE:");
+        //echo("Load basics PT ".$this->privateFoafData->getPrimaryTopic());
+        //var_dump($this->foafData);
+        
+        $this->fieldNamesObject = new FieldNames('theBasics',$this->foafData,$this->privateFoafData);  	
+        $this->view->results = array();
+        $this->view->results['private'] = array();
+        $this->view->results['public'] = array();
+        
+        foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+           	//one day we might need to cope with multiple fields of the same type
+        	if($field->getData()){
+        		
+        		$thisData = $field->getData();
+        		if(isset($thisData['private']) && $thisData['private']){
+        			$this->view->results['private'] = array_merge_recursive($this->view->results['private'], $thisData['private']);
+        		} 
+        		if(isset($thisData['public']) && $thisData['public']){
+        			$this->view->results['public'] = array_merge_recursive($this->view->results['public'],$thisData['public']);
+        		} 
+        	}
         } 
     }
     
@@ -150,34 +163,29 @@ class AjaxController extends Zend_Controller_Action {
 
     	require_once 'FoafData.php';
         require_once 'FieldNames.php';
-        require_once 'Field.php';
-/* 
-        if ($uri && $uri != "") {
-            $this->foafData = new FoafData($uri);	
-        } else {
-            $this->foafData = FoafData::getFromSession();
-        }
-*/
-        /* TODO Need to have a function which gets from the session first, 
-        and if not then loads from a uri! */
-        $this->foafData = FoafData::getFromSession();
+        require_once 'Field.php';  
+        
+        
         /* This returns a null if nothing in session! */
+        $this->foafData = FoafData::getFromSession(true);
+		$this->privateFoafData = FoafData::getFromSession(false);
+		//echo("foafData primary topic: ".$this->foafData->getPrimaryTopic());
+		//echo("privateFoafData primary topic: ".$this->privateFoafData->getPrimaryTopic());
+		//var_dump($this->privateFoafData);
+		//var_dump(privateFoafData);
+		
         if (!$this->foafData) {
             //print "First time !\n";
             $uri = @$_POST['uri'];
-            $this->foafData = new FoafData($uri);	
+            $this->foafData = new FoafData($uri);	  
         }
-			
-        if ($this->foafData) {
-            /*push some stuff to the view TODO: do we need to push this to the view here 
-            * since javascript is doing most of the rendering? */
-            $this->view->model =   $this->foafData->getModel();	
-            $this->view->uri =   $this->foafData->getURI();	
-            $this->view->graphset =   $this->foafData->getGraphset();    
-	    return 1;
-        } else {
-	    return 0;
+    	if (!$this->privateFoafData) {
+            //print "First time !\n";
+            $uri = @$_POST['uri'];
+            $this->privateFoafData = new FoafData($uri,false);	
         }
+        
+ //       	var_dump($this->privateFoafData); 
     }
     
     private function putResultsIntoView() {
@@ -232,18 +240,26 @@ class AjaxController extends Zend_Controller_Action {
         $changes_model = @$_POST['model'];
         
         if ($changes_model) {
-            $foafData = FoafData::getFromSession();	
-            if($foafData) {
-                $this->applyChangesToModel($foafData,$changes_model);	
-                $foafData->putInSession();
+            $publicFoafData = FoafData::getFromSession(true);	
+            $privateFoafData = FoafData::getFromSession(false);
+            //echo($privateFoafData->getPrimaryTopic()."Hmmm");
+            //echo($publicFoafData->getPrimaryTopic()."Hmmm"); 
+            
+            if($publicFoafData) {
+          //  	echo("Saving public");
+                $this->applyChangesToModel($publicFoafData,$changes_model);	
                 $this->view->isSuccess = 1;
-            } else {
-                echo("there aint anything in the session");
             }
+            if($privateFoafData) {
+       //     	echo("Saving private");
+            	$this->applyChangesToModel($privateFoafData,$changes_model);
+            	$this->view->isSuccess = 1;
+            }
+               
         }
     }
 	
-    /*does the actual saving to the model*/
+    /*saves stuff to the model*/
     public function applyChangesToModel(&$foafData,&$changes_model) {
         require_once 'Field.php';
         require_once 'SimpleField.php';
@@ -251,19 +267,26 @@ class AjaxController extends Zend_Controller_Action {
 
         //json representing stuff that is to be saved
         $json = new Services_JSON();
-        $almost_model = $json->decode(stripslashes($changes_model));
-        $model = $foafData->getModel();
-
-        /*
-        * TODO Need to add language tags etc.
-        */
-
-        //get all the detail for each of the fields
-        $fieldNames = new FieldNames('all',$foafData);
+        $almost_model = $json->decode(stripslashes($changes_model));      
+        //get all the details for each of the fields
+        $fieldNames = new FieldNames('all');
         $allFieldNames = $fieldNames->getAllFieldNames();
+       
+       // var_dump($almost_model);
+        //save private and public 
+        if(!$foafData->isPublic && property_exists($almost_model,'private') && $almost_model->private){
+        	$this->saveAllFields($almost_model->private,$allFieldNames,$foafData);   
+  			     
+        } else if($foafData->isPublic && property_exists($almost_model,'public') && $almost_model->public){
+        	$this->saveAllFields($almost_model->public,$allFieldNames,$foafData);
+        } 
 
-        /*loop through all the rows in the sparql results style 'almost model'*/
-        foreach($almost_model as $key => $value) {
+    }
+    
+    private function saveAllFields($privateOrPublicModel,$allFieldNames,&$foafData){
+        
+    	/*loop through all the rows in the sparql results style 'almost model'*/
+        foreach($privateOrPublicModel as $key => $value) {
             /*get rid of 'fields at the end of the name'*/
             if(isset($allFieldNames[substr($key,0,-6)])) {
                 /*get some details about the fields we're dealing with*/
@@ -279,7 +302,8 @@ class AjaxController extends Zend_Controller_Action {
             		 	/*get some details about the fields we're dealing with*/
                	 		$field = $allFieldNames[$fieldName];
           
-						/*save them using the appropriate method*/
+						/*save them using the appropriate method (notice that the save process
+						 is different depending on whether it is public or private*/
                			$field->saveToModel($foafData, $value);
                		
             		 }            	 
@@ -287,7 +311,7 @@ class AjaxController extends Zend_Controller_Action {
             }else{
                 echo("unrecognised fields:".$key."\n");	
             }//end if
-        }//end foreach
+        }//end foreach 	
     }
 	
     //TODO really dirty	MISCHA not sure why this isnt working properly !
