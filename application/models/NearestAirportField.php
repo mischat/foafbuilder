@@ -16,21 +16,20 @@ class NearestAirportField extends Field {
         $this->label = 'My Nearest Airport';
 	    $this->data['nearestAirportFields']['nearestAirport'] = array();
 	            
-        if ($foafData->getPrimaryTopic() && $fullInstantiation) {
-        	
-            $queryString = $this->getQueryString($foafData->getPrimaryTopic());
-            $results = $foafData->getModel()->SparqlQuery($queryString);		
-
-            if($results && !empty($results)){
-            	
-	            /*mangle the results so that they can be easily rendered*/
-	            foreach ($results as $row) {
-	            	$this->addNearestAirportElements($row);
-
-	            }	
+        if (!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()) {
+			return;
+        }
+        
+	    $queryString = $this->getQueryString($foafData->getPrimaryTopic());
+	    $results = $foafData->getModel()->SparqlQuery($queryString);		
+		
+        if($results && !empty($results)){
             
-        	}
-    	}
+	        /*mangle the results so that they can be easily rendered*/
+	        foreach ($results as $row) {
+	        	$this->addNearestAirportElements($row);
+	        }	
+        }
     }
 
 	

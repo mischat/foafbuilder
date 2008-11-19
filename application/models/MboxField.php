@@ -13,11 +13,15 @@ class MboxField extends Field {
         $this->data['foafMboxFields']['values'] = array();
         $this->name = 'foafMbox';
         $this->label = 'Email';
-        $this->data['foafMboxFields']['displayLabel'] = $this->name;
-        $this->data['foafMboxFields']['name'] = $this->label;
+        $this->data['foafMboxFields']['displayLabel'] = $this->label;
+        $this->data['foafMboxFields']['name'] = $this->name;
     	
-        if ($foafData->getPrimaryTopic() && $fullInstantiation) {
-            $queryString = 
+        /*don't sparql query the model etc if a full instantiation is not required*/
+        if (!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()) {
+			return;
+        }
+        
+        $queryString = 
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
                 PREFIX bio: <http://purl.org/vocab/bio/0.1/>
@@ -30,12 +34,12 @@ class MboxField extends Field {
                  
                 };";
 
-            $results = $foafData->getModel()->SparqlQuery($queryString);		
+        $results = $foafData->getModel()->SparqlQuery($queryString);		
 
-             //Check if results are not empty
-	        if (!(empty($results))) {
-	        /*mangle the results so that they can be easily rendered*/
-	            foreach ($results as $row) {	
+        //Check if results are not empty
+	    if (!(empty($results))) {
+	    /*mangle the results so that they can be easily rendered*/
+	        foreach ($results as $row) {	
 	                if (isset($row['?foafMbox'])) {
 	                	if(property_exists($row['?foafMbox'],'label') && $this->isEmailAddressValid($row['?foafMbox']->label)){
 	                   		array_push($this->data['foafMboxFields']['values'],$this->onLoadMangleEmailAddress($row['?foafMbox']->label));
@@ -44,7 +48,7 @@ class MboxField extends Field {
 	                	}
 	                }
 	             }
-	         }	
+	         
         }
     }
 	

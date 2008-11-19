@@ -8,46 +8,76 @@ class SimpleField extends Field{
 	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
 	//TODO: should label be here
-	public function SimpleField($name, $label, $predicateUri, $foafData, $type, $fullInstantiation = true){
+	public function SimpleField($name, $label, $predicateUri, $foafDataPublic, $foafDataPrivate, $type, $fullInstantiation = true){
 		
-		/*only query the model if a full instantiation is required*/
-		
-		if($fullInstantiation){
-			
-			$queryString = "SELECT ?".$name." WHERE {<".$foafData->getPrimaryTopic()."> <".$predicateUri."> ?".$name." }";
-			$results = $foafData->getModel()->SparqlQuery($queryString);		
-			
-			$this->data = array();
-			$this->data['fields'] = array();
-			
-			/*mangle the results so that they can be easily rendered*/
-			
-			$this->data['fields'][$name] = array();
-			$this->data['fields'][$name]['values'] = array();
-			
-			if(isset($results[0])){
-				foreach($results as $row){
-					foreach($row as $key => $value){	
-						$key = str_replace('?','',$key);
-						
-						if(property_exists($value,'label')){
-					       	array_push($this->data['fields'][$name]['values'],$value->label);
-					    } else if(property_exists($value,'uri')){
-					       	array_push($this->data['fields'][$name]['values'],$value->uri);
-					    }
-					     
-					}
-		    	}
-			}
-		}
-		
-       	$this->data['fields'][$name]['displayLabel'] = $label;
-		$this->data['fields'][$name]['name'] = $name;
+		//XXX: a bit inefficient
+		$this->data = array();
+		$this->data['private']['fields'] = array();
+		$this->data['private']['fields'][$name] = array();
+		$this->data['private']['fields'][$name]['displayLabel'] = $label;
+		$this->data['private']['fields'][$name]['values'] = array();
+		$this->data['private']['fields'][$name]['name'] = $name;
+		$this->data['public']['fields'] = array();
+		$this->data['public']['fields'][$name] = array();
+		$this->data['public']['fields'][$name]['displayLabel'] = $label;
+		$this->data['public']['fields'][$name]['values'] = array();
+		$this->data['public']['fields'][$name]['name'] = $name;
 		
         $this->name = $name;
 		$this->label = $label;
 		$this->type = $type;
-		$this->predicateUri = $predicateUri;		
+		$this->predicateUri = $predicateUri;	
+		
+		/*only query the model if a full instantiation is required*/
+		if($fullInstantiation){
+			if($foafDataPublic){
+				$this->doFullLoad($foafDataPublic);
+			} 
+			if($foafDataPrivate){
+				$this->doFullLoad($foafDataPrivate);
+			}
+		}
+		
+	}
+	
+	/*does a full load of whichever model is in the foafData object that is passed in*/
+	private function doFullLoad($foafData){
+		
+		if(!$foafData || !$foafData->getPrimaryTopic() ){
+			return;
+		}
+		
+		$queryString = "SELECT ?".$this->name." WHERE {<".$foafData->getPrimaryTopic()."> <".$this->predicateUri."> ?".$this->name." }";
+		$results = $foafData->getModel()->SparqlQuery($queryString);		
+		//var_dump($results);
+
+		//var_dump($results);
+		/*make sure that we populate the public or the private bit*/
+		$privacy;
+		if($foafData->isPublic){
+			$privacy = 'public';
+		} else {
+			$privacy = 'private';
+		}
+		
+		//var_dump($privacy);
+		
+		/*mangle the results so that they can be easily rendered*/
+		if(isset($results[0])){
+			foreach($results as $row){
+				foreach($row as $key => $value){	
+					$key = str_replace('?','',$key);
+					
+					if(property_exists($value,'label')){
+				       	array_push($this->data[$privacy]['fields'][$this->name]['values'],$value->label);
+				    } else if(property_exists($value,'uri')){
+				    	array_push($this->data[$privacy]['fields'][$this->name]['values'],$value->uri);
+				    }
+				     
+				}
+		    }
+		
+		}	
 	}
 
 	/*saves the appropriate triples in the model at the appropriate index and replace them with $value*/
@@ -56,15 +86,17 @@ class SimpleField extends Field{
 		require_once 'SimpleField.php';
 		require_once 'FieldNames.php';
 		
+		
+		$model = $foafData->getModel();		
 		$predicate_resource = new Resource($this->predicateUri);
 		$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
 		
 		//find existing triples
-		$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
+		$foundModel = $model->find($primary_topic_resource,$predicate_resource,NULL);
 		
 		//remove existing triples
 		foreach($foundModel->triples as $triple){
-			$foafData->getModel()->remove($triple);
+			$model->remove($triple);
 		}
 		
 		//add new triples
@@ -76,7 +108,7 @@ class SimpleField extends Field{
 				$value_res_or_literal = new Resource($thisValue);
 			} 		
 			$new_statement = new Statement($primary_topic_resource,$predicate_resource,$value_res_or_literal);	
-			$foafData->getModel()->add($new_statement);
+			$model->add($new_statement);
 		}
 	}
 	

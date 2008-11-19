@@ -1,13 +1,17 @@
 
-
-
 /*--------------------------global variables--------------------------*/
 
 //TODO: namespacing!!!
 
 /*global variable for storing data*/
-var globalFieldData;
+var globalFieldData = new Object();
+
+/*global variable for storing private data*/
+var globalPrivateFieldData = new Object();
+
+/*current page*/
 var currentPage;//the page the user is on e.g. load-contact-details etc.
+
 
 /*for friend searching, so we know the type of the ifp we searched for*/
 var globalTypeArray = new Array;
@@ -66,12 +70,16 @@ function loadFoaf(name){
 /*saves all the foaf data*/
 function saveFoaf(){
 	displayToObjects(currentPage);
-	jsonstring = JSON.serialize(globalFieldData);
+	
+	var totalFieldData = new Object();
+	totalFieldData.private = globalPrivateFieldData;
+	totalFieldData.public = globalFieldData;
+	jsonString = JSON.serialize(totalFieldData);
 
 	turnOnLoading();
 	
 	//TODO use jquery event handler to deal with errors on this request
-  	$.post("/ajax/save-Foaf", {model : jsonstring}, function(data){turnOffLoading();});
+  	$.post("/ajax/save-Foaf", {model : jsonString}, function(data){turnOffLoading();});
 }
 
 /*Clears FOAF model from session*/
@@ -141,7 +149,8 @@ function renderOther() {
 function genericObjectsToDisplay(data){
 	
 	/*set the global variable which holds the data*/
-	globalFieldData = data;
+	globalFieldData = data.public;
+	globalPrivateFieldData = data.private;
 	
 	/*clear out the right hand pane*/
 	document.getElementById('personal');
@@ -152,10 +161,11 @@ function genericObjectsToDisplay(data){
 		var mapDiv = document.getElementById('mapDiv');
 		mapDiv.parentNode.removeChild(mapDiv);
 	}
+	/*for the new style privacy stuff*/
+	simpleFieldsObjectsToDisplay(data);
 	
 	/*render the various fields*/
 	renderAccountFields(data);
-	renderSimpleFields(data);
 	renderBirthdayFields(data);
 	renderHomepageFields(data);
 	renderPhoneFields(data);
@@ -224,32 +234,60 @@ function renderAccountFields(data){
 	createAccountsAddElement(containerElement);
 }
 
-function renderSimpleFields(data){
-	if(!data || !data.fields || typeof(data.fields) == 'undefined'){
+function simpleFieldsObjectsToDisplay(data){
+	if(!data){
 		return;
 	}
 	
+	if(data.private){
+		renderSimpleFields(data.private,false);
+	}
+	if(data.public){
+		renderSimpleFields(data.public,true);
+	}
+	
+}
+
+/*renders either the private or the public fields*/
+function renderSimpleFields(data,isPublic){
+
 	for(element in data){
 		if(element == 'fields'){
 			for(fieldType in data[element]){
-				var containerElement = createFieldContainer(data[element][fieldType]['name'], data[element][fieldType]['displayLabel']);
-				var i=0;
+				var name = data[element][fieldType]['name'];
+				var label = data[element][fieldType]['displayLabel'];
+				var values = data[element][fieldType]['values'];
 				
-				if(data[element][fieldType]['values'].length != 0){
-					for(item in data[element][fieldType]['values']){
-						createGenericInputElement(data[element][fieldType]['name'], data[element][fieldType]['values'][item], i);	
+				//either get the container or create a new one (depends on the private function being called first).
+				var containerElement = document.getElementById(name+'_container');
+		
+				if(!containerElement){
+					containerElement = createFieldContainer(name, label);
+				} 
+				
+				var i = containerElement.childNodes.length;
+				
+				if(values.length != 0){
+					//create an input element for each value
+					for(item in values){
+						createGenericInputElement(name, values[item], containerElement.childNodes.length,false, false, false, !isPublic);	
 						i++;	
 					}	
 				} else {
-					//create an empty field passing in the isNew flag.
-					createGenericInputElement(data[element][fieldType]['name'], 'Enter '+data[element][fieldType]['displayLabel']+' here', 0,false,true);	
+					if(isPublic){
+						//create an empty field passing in the isNew flag.  Only do this once for a public field
+						createGenericInputElement(name, 'Enter '+label+' here',0,false,true,false,!isPublic);	
+					}
 				}
-				/*create an add link*/
-				createGenericAddElement(containerElement,data[element][fieldType]['name'],data[element][fieldType]['displayLabel']);
+				if(isPublic){
+					/*create an add link XXX this means that we always have to do private fields before public ones*/
+					createGenericAddElement(containerElement,name,label);
+				}
 			}
 		}
 	}	
 }
+
 
 /*Render the birthday dropdown (assumes only one birthday)*/
 function renderBirthdayFields(data){
@@ -402,7 +440,7 @@ function renderBasedNearFields(data){
 		//change the class of the map inside this one
 		mapElement.childNodes[0].className = 'embeddedMapDiv';
 	} else {
-		alert('dsadsa');
+		//perhaps we should do something here
 	}
 	
 	/*build the container*/
@@ -514,7 +552,7 @@ function renderKnowsFields(data){
 	
 		//FIXME: the function below is badly named!
 		/*create (and append) the remove link*/
-		createGenericInputElementRemoveLink(imageElement.id, containerElement.id,true);
+		createGenericInputElementRemoveLink(imageElement.id, containerElement.id,true);	
 			
 		/*tack the image element onto the container*/
 		containerElement.appendChild(imageElement);
@@ -1058,9 +1096,10 @@ function renderKnowsFields(data){
 function displayToObjects(name){  
 	switch(name){
 		case 'load-the-basics':
-			birthdayDisplayToObjects();
+			//XXX: these are only commented out for development purposes
+			//birthdayDisplayToObjects();
 			simpleFieldsDisplayToObjects();
-			homepageDisplayToObjects();
+			//homepageDisplayToObjects();
 			break;
 		case 'load-contact-details':
 			addressDisplayToObjects();
@@ -1112,26 +1151,53 @@ function birthdayDisplayToObjects(){
 
 function simpleFieldsDisplayToObjects(){
 	
-	if(typeof(globalFieldData.fields) != 'undefined' && globalFieldData.fields){
-		for(simpleField in globalFieldData.fields){
-			var containerElement = document.getElementById(simpleField + "_container");
-			
-			if(containerElement){
-				/*remove all existing elements in globalFieldData*/
-				if(globalFieldData.fields[simpleField].values){
-					 globalFieldData.fields[simpleField].values = new Array();
-				}
-				
-				/*add the elements that are present in the display again*/
-				for(i=0 ; i <containerElement.childNodes.length ; i++){
-					var element = containerElement.childNodes[i];
-					if(element.className == 'fieldInput' && element.value != null){
-						globalFieldData.fields[simpleField].values.push(element.value);	
-					}
-				}
-			} 
+	if(typeof(globalFieldData.fields) == 'undefined' || !globalFieldData.fields){
+		return;
+	}
+	
+	/*loop through the different kinds of fields*/
+	for(simpleField in globalFieldData.fields){
+
+		var containerElement = document.getElementById(simpleField + "_container");
+		
+		if(!containerElement){
+			continue;
 		}
-	}	
+		
+		/*remove all existing elements in globalFieldData and globalPrivateFieldData*/
+		globalFieldData.fields[simpleField] = new Object();
+		globalFieldData.fields[simpleField].values = new Array();
+		
+		globalPrivateFieldData.fields[simpleField] = new Object();
+		globalPrivateFieldData.fields[simpleField].values = new Array();
+			
+		/*add the elements that are present in the display to the appropriate object*/
+		for(i=0 ; i <containerElement.childNodes.length ; i++){
+
+			var element = containerElement.childNodes[i];	
+							
+			/*if it isn't an input field then skip it (it could be a remove link or something else)*/
+			if(element.className != 'fieldInput' || element.value == null){
+				continue;
+			} 
+			
+			var privacyBox = document.getElementById('privacycheckbox_'+element.id);
+			
+			/*no privacy checkbox, so skip to next childNode*/
+			if(typeof(privacyBox) == 'undefined' || !privacyBox){
+				continue;
+			}
+			
+			/*put it into the appropriate field data object, private or not private*/
+			if(!privacyBox.checked){	
+				globalFieldData.fields[simpleField].values.push(element.value);
+			} else {
+				globalPrivateFieldData.fields[simpleField].values.push(element.value);
+			}
+			
+		}
+	}
+	
 }
 
 //TODO MISCHA
@@ -1720,8 +1786,34 @@ function otherDisplayToObjects(){
 		}
 	}
 	
+	/*creates a privacy checkbox for the particular element passed in, in the container passed in*/
+	function createGenericInputElementPrivacyBox(elementId,containerId,isPrivate){
+		/*create remove link and attach it to the container div*/
+		var containerDiv = document.getElementById(containerId);
+		if(containerDiv){
+			var privacyDiv = document.createElement("div");
+			privacyDiv.id = "privacydiv_"+elementId;
+			privacyDiv.className = "privacyContainer";
+			
+			var privacyText = document.createTextNode('Private?');
+			privacyDiv.appendChild(privacyText);
+		
+			var lineBreak = document.createElement("br");
+			privacyDiv.appendChild(lineBreak);
+			
+			var privacyCheckbox = document.createElement('input');
+			privacyCheckbox.setAttribute('type','checkbox');
+			privacyCheckbox.id = "privacycheckbox_"+elementId;
+			privacyCheckbox.checked = isPrivate;
+			privacyDiv.appendChild(privacyCheckbox);
+			
+			containerDiv.appendChild(privacyDiv);
+		}
+	}
+	
+	
 	/*creates and appends a generic input element to the appropriate field container*/
-	function createGenericInputElement(name, value, thisElementCount, contname,isNew,softRemove){
+	function createGenericInputElement(name, value, thisElementCount, contname,isNew,softRemove,isPrivate){
 		var newElement = document.createElement('input');
 		newElement.id = name+'_'+thisElementCount;
 		newElement.setAttribute('value',value);
@@ -1740,6 +1832,8 @@ function otherDisplayToObjects(){
 		if(!softRemove){
 			createGenericInputElementRemoveLink(newElement.id,contname);
 		}
+		createGenericInputElementPrivacyBox(newElement.id,contname,isPrivate);	
+		
 		document.getElementById(contname).appendChild(newElement);
 		newElement.setAttribute('class','fieldInput');
 		
@@ -2432,15 +2526,25 @@ function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
 	/*Get the ids*/
 	var inputElement = document.getElementById(inputIdForRemoval);
 	var removeElement = document.getElementById(removeDivId);
+	var privacyDiv = document.getElementById("privacydiv_"+inputIdForRemoval);
+	
 	if(isImage){
 		var source = inputElement.src;
 		$.post("/file/remove-image", {filename: source}, function(){saveFoaf();},null);
 	}
 	
 	/*remove the old element*/
-	inputElement.parentNode.removeChild(inputElement);
-	removeElement.parentNode.removeChild(removeElement);
-
+	if(inputElement){
+		inputElement.parentNode.removeChild(inputElement);
+	}
+	if(removeElement){
+		removeElement.parentNode.removeChild(removeElement);
+	}
+	if(privacyDiv){
+		privacyDiv.parentNode.removeChild(privacyDiv);
+	}
+	
+	
 }
 
 

@@ -17,11 +17,10 @@ class ImgField extends Field {
         $this->data['foafImgFields']['name'] = $this->name;
         $this->data['foafImgFields']['images'] = array();
             
-        if (!$foafData->getPrimaryTopic() || !$fullInstantiation) {
-        	return;
-        	
+        /*don't sparql query the model etc if a full instantiation is not required*/
+        if (!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()) {
+			return;
         }
-    	
             $queryString = 
                 "PREFIX dc: <http://purl.org/dc/elements/1.1/>
                 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
