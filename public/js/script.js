@@ -163,6 +163,8 @@ function genericObjectsToDisplay(data){
 	}
 	/*for the new style privacy stuff*/
 	simpleFieldsObjectsToDisplay(data);
+	mboxFieldsObjectsToDisplay(data);
+	
 	
 	/*render the various fields*/
 	renderAccountFields(data);
@@ -178,7 +180,32 @@ function genericObjectsToDisplay(data){
 	renderKnowsFields(data);
 }
 
+/*-----------------objects to display elements to convert data to html elements and split public/private pairs up-----------------*/
 
+
+function simpleFieldsObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderSimpleFields(data.private,false);
+	}
+	if(data.public){
+		renderSimpleFields(data.public,true);
+	}
+}
+
+function mboxFieldsObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderMboxFields(data.private,false);
+	}
+	if(data.public){
+		renderMboxFields(data.public,true);
+	}
+}
 
 
 
@@ -232,20 +259,6 @@ function renderAccountFields(data){
 	}//end for
 	/*a link to add another account*/	
 	createAccountsAddElement(containerElement);
-}
-
-function simpleFieldsObjectsToDisplay(data){
-	if(!data){
-		return;
-	}
-	
-	if(data.private){
-		renderSimpleFields(data.private,false);
-	}
-	if(data.public){
-		renderSimpleFields(data.public,true);
-	}
-	
 }
 
 /*renders either the private or the public fields*/
@@ -359,12 +372,13 @@ function renderPhoneFields(data){
 	var i =0;
 	if(typeof(data.foafPhoneFields.values) != 'undefined' && data.foafPhoneFields.values && typeof(data.foafPhoneFields.values[0])!='undefined'){
 		for(phoneNumber in data.foafPhoneFields.values){
-			createGenericInputElement(name, data.foafPhoneFields.values[phoneNumber], i);	
+			createGenericInputElement(name, data.foafPhoneFields.values[phoneNumber], i,false,false,false,!isPublic);	
 			i++;
 		}
 	} else {
-		//TODO: add the grey text with an onclick thing to make it disappear
-		createGenericInputElement(name, '+4402071234567', i,false,true);	
+		if(isPublic){
+			createGenericInputElement(name, '+4402071234567', i,false,true,false,!isPublic);	
+		}
 	}	
 	
 	/*create an add link*/
@@ -372,32 +386,40 @@ function renderPhoneFields(data){
 
 }
 
-/*renders the appropriate phone fields*/
-function renderMboxFields(data){
+/*renders the appropriate mbox fields*/
+function renderMboxFields(data,isPublic){
 	if(!data || !data.foafMboxFields || typeof(data.foafMboxFields) == 'undefined'){
 		return;
 	}
 	
-	/*build the container*/
 	var name = data.foafMboxFields.name;
 	var label = data.foafMboxFields.displayLabel;
-	var containerElement = createFieldContainer(name, label);
-
+	var name = data.foafMboxFields.name;
+	
+	/*build the container if it isn't there already*/
+	var containerElement = document.getElementById(name+"_container");
+	if(!containerElement){
+		containerElement = createFieldContainer(name, label);
+	}
+	
 	/*render each individual phone element*/	
-	var i =0;
+	var i = containerElement.childNodes.length;
 	if(typeof(data.foafMboxFields.values) != 'undefined' && data.foafMboxFields.values && typeof(data.foafMboxFields.values[0])!='undefined'){
 		for(mbox in data.foafMboxFields.values){
-			createGenericInputElement(name, data.foafMboxFields.values[mbox], i);	
+			createGenericInputElement(name, data.foafMboxFields.values[mbox], i,false,false,false,!isPublic);	
 			i++;
 		}
 	} else {
-		//TODO: add the grey text with an onclick thing to make it disappear
-		createGenericInputElement(name, 'example@example.com', i,false,true);
+		/*create an empty field but only if this is the first one XXX this depends on this function being called in the public sense initially*/
+		if(isPublic){
+			createGenericInputElement(name, 'example@example.com', i,false,true,false,!isPublic);
+		}
 	}	
 	
-	/*create an add link*/
-	createGenericAddElement(containerElement,name,label);
-
+	/*create an add link XXX this means we have to display public fields before private ones*/
+	if(isPublic){
+		createGenericAddElement(containerElement,name,label);
+	}
 }
 
 
@@ -1102,9 +1124,9 @@ function displayToObjects(name){
 			//homepageDisplayToObjects();
 			break;
 		case 'load-contact-details':
-			addressDisplayToObjects();
+			//addressDisplayToObjects();
 			mboxDisplayToObjects();
-			phoneDisplayToObjects();
+			//phoneDisplayToObjects();
 			break;
 		case 'load-accounts':
 			accountsDisplayToObjects();
@@ -1149,9 +1171,42 @@ function birthdayDisplayToObjects(){
 
 }
 
+//TODO MISCHA
+function homepageDisplayToObjects() {
+	var containerElement = document.getElementById('foafHomepage_container');	
+
+	if(containerElement && typeof(globalFieldData.foafHomepageFields != 'undefined') && globalFieldData.foafHomepageFields) {
+		if(typeof(globalFieldData.foafHomepageFields.values) != 'undefined'){
+			
+			/*remove the existing values*/
+			globalFieldData.foafHomepageFields.values = new Array();
+			
+			/*add the elements that are present in the display again*/
+			for(i=0 ; i <containerElement.childNodes.length ; i++){
+				
+				var element = containerElement.childNodes[i];
+					
+				if(element.className == 'fieldInput'){	
+					globalFieldData.foafHomepageFields.values.push(element.value);
+				}//end if
+			}//end for	
+		}//end if	
+	}
+}
+
+/*bNodeToPanTo is the bnode the map should pan to, if any*/
+function addressDisplayToObjects(){
+	placeAddressDisplayToObjects('home');
+	placeAddressDisplayToObjects('office');
+}
+
+
 function simpleFieldsDisplayToObjects(){
 	
 	if(typeof(globalFieldData.fields) == 'undefined' || !globalFieldData.fields){
+		return;
+	}
+	if(typeof(globalPrivateFieldData.fields) == 'undefined' || !globalPrivateFieldData.fields){
 		return;
 	}
 	
@@ -1200,56 +1255,47 @@ function simpleFieldsDisplayToObjects(){
 	
 }
 
-//TODO MISCHA
-function homepageDisplayToObjects() {
-	var containerElement = document.getElementById('foafHomepage_container');	
-
-	if(containerElement && typeof(globalFieldData.foafHomepageFields != 'undefined') && globalFieldData.foafHomepageFields) {
-		if(typeof(globalFieldData.foafHomepageFields.values) != 'undefined'){
-			
-			/*remove the existing values*/
-			globalFieldData.foafHomepageFields.values = new Array();
-			
-			/*add the elements that are present in the display again*/
-			for(i=0 ; i <containerElement.childNodes.length ; i++){
-				
-				var element = containerElement.childNodes[i];
-					
-				if(element.className == 'fieldInput'){	
-					globalFieldData.foafHomepageFields.values.push(element.value);
-				}//end if
-			}//end for	
-		}//end if	
-	}
-}
-
-/*bNodeToPanTo is the bnode the map should pan to, if any*/
-function addressDisplayToObjects(){
-	placeAddressDisplayToObjects('home');
-	placeAddressDisplayToObjects('office');
-}
-
 function mboxDisplayToObjects(){
 	var containerElement = document.getElementById('foafMbox_container');
 	
-	if(containerElement && typeof(globalFieldData.foafMboxFields != 'undefined') && globalFieldData.foafMboxFields){
-		if(typeof(globalFieldData.foafMboxFields.values) != 'undefined'){
-			
-			/*remove the existing values*/
-			globalFieldData.foafMboxFields.values = new Array();
-			
-			/*add the elements that are present in the display again*/
-			for(i=0 ; i <containerElement.childNodes.length ; i++){
+	if(!containerElement){
+		return
+	}
+	if(typeof(globalFieldData.foafMboxFields) == 'undefined' || !globalFieldData.foafMboxFields){
+		return;
+	}
+	if(typeof(globalPrivateFieldData.foafMboxFields) == 'undefined' || !globalPrivateFieldData.foafMboxFields){
+		return;
+	}
+	
+	/*remove the existing values*/
+	globalFieldData.foafMboxFields.values = new Array();
+	globalPrivateFieldData.foafMboxFields.values = new Array();
+		
+	/*add the elements that are present in the display again*/
+	for(i=0 ; i <containerElement.childNodes.length ; i++){
 				
-				var element = containerElement.childNodes[i];
+		var element = containerElement.childNodes[i];
 					
-				/*take the various attributes of the image tag and add them to the globalFieldData object*/
-				if(element.className == 'fieldInput'){	
-					globalFieldData.foafMboxFields.values.push(element.value);
-				}//end if
-			}//end for	
-		}//end if	
-	}//end if	
+		//we only want input elements
+		if(element.className != 'fieldInput'){	
+			continue;
+		}
+		
+		var privacyBox = document.getElementById('privacycheckbox_'+element.id);
+		
+		/*no privacy checkbox, so skip to next childNode*/
+		if(typeof(privacyBox) == 'undefined' || !privacyBox){
+			continue;
+		}	
+		
+		/*put it into the appropriate field data object, private or not private*/
+		if(!privacyBox.checked){	
+			globalFieldData.foafMboxFields.values.push(element.value);
+		} else {
+			globalPrivateFieldData.foafMboxFields.values.push(element.value);
+		}		
+	}
 }
 
 function phoneDisplayToObjects(){
