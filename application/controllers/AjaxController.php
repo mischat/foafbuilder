@@ -13,32 +13,10 @@ class AjaxController extends Zend_Controller_Action {
     private $privateFoafData;
 	
     public function loadTheBasicsAction() {
-    	
-    	/*build up a sparql query to get the values of all the fields we need*/
-        $this->loadFoaf();
-		
-        //echo("HERE:");
-        //echo("Load basics PT ".$this->privateFoafData->getPrimaryTopic());
-        //var_dump($this->foafData);
-        
-        $this->fieldNamesObject = new FieldNames('theBasics',$this->foafData,$this->privateFoafData);  	
-        $this->view->results = array();
-        $this->view->results['private'] = array();
-        $this->view->results['public'] = array();
-        
-        foreach($this->fieldNamesObject->getAllFieldNames() as $field){
-           	//one day we might need to cope with multiple fields of the same type
-        	if($field->getData()){
-        		
-        		$thisData = $field->getData();
-        		if(isset($thisData['private']) && $thisData['private']){
-        			$this->view->results['private'] = array_merge_recursive($this->view->results['private'], $thisData['private']);
-        		} 
-        		if(isset($thisData['public']) && $thisData['public']){
-        			$this->view->results['public'] = array_merge_recursive($this->view->results['public'],$thisData['public']);
-        		} 
-        	}
-        } 
+    	$this->loadAnyPage('theBasics');
+    }
+    public function loadContactDetailsAction() {
+    	$this->loadAnyPage('contactDetails');
     }
     
 	public function loadLocationsAction() {
@@ -55,23 +33,7 @@ class AjaxController extends Zend_Controller_Action {
           
             }
         } 
-    }
-
-    
-    public function loadContactDetailsAction() {
-    	/*build up a sparql query to get the values of all the fields we need*/
-    	if ($this->loadFoaf()) {   
-            $this->fieldNamesObject = new FieldNames('contactDetails',$this->foafData);  	
-            $this->view->results = array();
-            foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
-            	
-            	//need to cope with multiple fields of the same type
-            	if($field->getData()){
-            		$this->view->results = array_merge_recursive($this->view->results,$field->getData());
-            	}
-            }
-        } 
-    }
+	}
     
     public function loadPicturesAction() {
         /*build up a sparql query to get the values of all the fields we need*/
@@ -157,6 +119,31 @@ class AjaxController extends Zend_Controller_Action {
         } 
     } 
     
+    /*Does the mechanics of loading for the given page (e.g. theBasics etc) */
+    private function loadAnyPage($fieldName){
+    	/*build up a sparql query to get the values of all the fields we need*/
+        $this->loadFoaf();
+        
+        $this->fieldNamesObject = new FieldNames($fieldName,$this->foafData,$this->privateFoafData);  	
+        $this->view->results = array();
+        $this->view->results['private'] = array();
+        $this->view->results['public'] = array();
+        
+        foreach($this->fieldNamesObject->getAllFieldNames() as $field){
+           	//one day we might need to cope with multiple fields of the same type
+        	if($field->getData()){
+        		
+        		$thisData = $field->getData();
+        		if(isset($thisData['private']) && $thisData['private']){
+        			$this->view->results['private'] = array_merge_recursive($this->view->results['private'], $thisData['private']);
+        		} 
+        		if(isset($thisData['public']) && $thisData['public']){
+        			$this->view->results['public'] = array_merge_recursive($this->view->results['public'],$thisData['public']);
+        		} 
+        	}
+        } 
+    }
+    
     /*gets the foaf (either from the uri or from the session) as well as adding stuff to the view*/
 
     private function loadFoaf() {
@@ -164,7 +151,6 @@ class AjaxController extends Zend_Controller_Action {
     	require_once 'FoafData.php';
         require_once 'FieldNames.php';
         require_once 'Field.php';  
-        
         
         /* This returns a null if nothing in session! */
         $this->foafData = FoafData::getFromSession(true);

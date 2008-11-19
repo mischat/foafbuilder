@@ -61,7 +61,7 @@ class FieldNames {
 				//FIXME: commented others out for development purposes
 				//$this->instantiateLocationsFields(false);
 				$this->instantiateTheBasicsFields(false);
-				//$this->instantiateContactDetailsFields(false);
+				$this->instantiateContactDetailsFields(false);
 				//$this->instantiatePicturesFields(false);
 				//$this->instantiateAccountsFields(false);
 				//$this->instantiateFriendsFields(false);
@@ -94,9 +94,9 @@ class FieldNames {
 	}
 	
 	private function instantiateContactDetailsFields($fullInstantiation = true){
-		$this->allFieldNames['foafPhone'] = new PhoneField($this->foafData,$fullInstantiation);
-		$this->allFieldNames['foafMbox'] = new MboxField($this->foafData,$fullInstantiation);
-		$this->allFieldNames['address'] = new AddressField($this->foafData,$fullInstantiation);
+		//$this->allFieldNames['foafPhone'] = new PhoneField($this->foafData,$fullInstantiation);
+		$this->allFieldNames['foafMbox'] = new MboxField($this->foafData,$this->privateFoafData,$fullInstantiation);
+		//$this->allFieldNames['address'] = new AddressField($this->foafData,$fullInstantiation);
 	}
 	
 	private function instantiatePicturesFields($fullInstantiation = true){
