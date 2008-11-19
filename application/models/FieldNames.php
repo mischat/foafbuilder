@@ -94,9 +94,9 @@ class FieldNames {
 	}
 	
 	private function instantiateContactDetailsFields($fullInstantiation = true){
-		//$this->allFieldNames['foafPhone'] = new PhoneField($this->foafData,$fullInstantiation);
+		$this->allFieldNames['foafPhone'] = new PhoneField($this->foafData,$this->privateFoafData,$fullInstantiation);
 		$this->allFieldNames['foafMbox'] = new MboxField($this->foafData,$this->privateFoafData,$fullInstantiation);
-		//$this->allFieldNames['address'] = new AddressField($this->foafData,$fullInstantiation);
+		$this->allFieldNames['address'] = new AddressField($this->foafData,$this->privateFoafData,$fullInstantiation);
 	}
 	
 	private function instantiatePicturesFields($fullInstantiation = true){

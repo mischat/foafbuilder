@@ -164,15 +164,14 @@ function genericObjectsToDisplay(data){
 	/*for the new style privacy stuff*/
 	simpleFieldsObjectsToDisplay(data);
 	mboxFieldsObjectsToDisplay(data);
+	phoneFieldsObjectsToDisplay(data);
+	addressFieldsObjectsToDisplay(data);
 	
 	
 	/*render the various fields*/
 	renderAccountFields(data);
 	renderBirthdayFields(data);
 	renderHomepageFields(data);
-	renderPhoneFields(data);
-	renderMboxFields(data);
-	renderAddressFields(data);
 	renderBasedNearFields(data);
 	renderNearestAirportFields(data);
 	renderDepictionFields(data);
@@ -204,6 +203,31 @@ function mboxFieldsObjectsToDisplay(data){
 	}
 	if(data.public){
 		renderMboxFields(data.public,true);
+	}
+}
+
+function phoneFieldsObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderPhoneFields(data.private,false);
+	}
+	if(data.public){
+		renderPhoneFields(data.public,true);
+	}
+}
+
+function addressFieldsObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	/*We only want to render home once and office once (not once for both public and private)*/
+	if(data.private){
+		renderAddressFields(data.private,false);
+	}
+	if(data.public){
+		renderAddressFields(data.public,true);
 	}
 }
 
@@ -358,33 +382,43 @@ function renderHomepageFields(data){
 
 
 /*renders the appropriate phone fields*/
-function renderPhoneFields(data){
+function renderPhoneFields(data,isPublic){
+	//XXX this is just like renderMboxFields
 	if(!data || !data.foafPhoneFields || typeof(data.foafPhoneFields) == 'undefined'){
 		return;
 	}
 	
-	/*build the container*/
 	var name = data.foafPhoneFields.name;
 	var label = data.foafPhoneFields.displayLabel;
-	var containerElement = createFieldContainer(name, label);
-
+	var name = data.foafPhoneFields.name;
+	
+	/*build the container if it isn't there already*/
+	var containerElement = document.getElementById(name+"_container");
+	if(!containerElement){
+		containerElement = createFieldContainer(name, label);
+	}
+	
 	/*render each individual phone element*/	
-	var i =0;
+	var i = containerElement.childNodes.length;
 	if(typeof(data.foafPhoneFields.values) != 'undefined' && data.foafPhoneFields.values && typeof(data.foafPhoneFields.values[0])!='undefined'){
-		for(phoneNumber in data.foafPhoneFields.values){
-			createGenericInputElement(name, data.foafPhoneFields.values[phoneNumber], i,false,false,false,!isPublic);	
+		for(phone in data.foafPhoneFields.values){
+			log(data.foafPhoneFields.values[phone]);
+			createGenericInputElement(name, data.foafPhoneFields.values[phone], i,false,false,false,!isPublic);	
 			i++;
 		}
 	} else {
+		/*create an empty field but only if this is the first one XXX this depends on this function being called in the public sense initially*/
 		if(isPublic){
-			createGenericInputElement(name, '+4402071234567', i,false,true,false,!isPublic);	
+			createGenericInputElement(name, '+4402071234567', i,false,true,false,!isPublic);
 		}
 	}	
 	
-	/*create an add link*/
-	createGenericAddElement(containerElement,name,label);
-
+	/*create an add link XXX this means we have to display public fields before private ones*/
+	if(isPublic){
+		createGenericAddElement(containerElement,name,label);
+	}
 }
+
 
 /*renders the appropriate mbox fields*/
 function renderMboxFields(data,isPublic){
@@ -394,7 +428,6 @@ function renderMboxFields(data,isPublic){
 	
 	var name = data.foafMboxFields.name;
 	var label = data.foafMboxFields.displayLabel;
-	var name = data.foafMboxFields.name;
 	
 	/*build the container if it isn't there already*/
 	var containerElement = document.getElementById(name+"_container");
@@ -424,23 +457,27 @@ function renderMboxFields(data,isPublic){
 
 
 /*Render the location map*/
-function renderAddressFields(data){
+function renderAddressFields(data,isPublic){
 	
 	if(!data || !data.addressFields || typeof(data.addressFields) == 'undefined'){
 		return;
 	}
 	
+	var name = data.addressFields.name;
+	var label =	data.addressFields.displayLabel;
+	
 	/*create a map element if there isn't one already*/
 	createMapElement();
 	
-	/*build the container*/
-	var name = data.addressFields.name;
-	var label =	data.addressFields.displayLabel;
-	var containerElement = createFieldContainer(name, label);
+	/*create a container if there isn't one already*/
+	var containerElement = document.getElementById(name+"_container");
+	if(!containerElement){
+		containerElement = createFieldContainer(name, label);
+	}
 	
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
-		addAddressMarkers(data.addressFields['office'],data.addressFields['home'],containerElement,map);			
+		addAddressMarkers(data.addressFields['office'],data.addressFields['home'],containerElement,map,isPublic);			
 	}
 }
 
@@ -753,26 +790,28 @@ function renderKnowsFields(data){
 
 
 	/*adds markers and divs for home and office addresses*/
-	function addAddressMarkers(office,home,containerElement,map){
+	function addAddressMarkers(office,home,containerElement,map,isPublic){
 		
 		var i=0;
 		for(bNodeKey in office){
 			i++;
-			addSingleAddressMarker('Office Address',office[bNodeKey],bNodeKey,containerElement,'office');
+			addSingleAddressMarker('Office Address',office[bNodeKey],bNodeKey,containerElement,'office',isPublic);
 		}
-		if(i==0){
+		//add an empty office address field if necessary XXX this depends on the public stuff being done second
+		if(i==0 && isPublic){
 			var bNodeKeyPlacemark = createRandomString(50);
-			addSingleAddressMarker('Office Address',bNodeKeyPlacemark,bNodeKeyPlacemark,containerElement,'office');
+			addSingleAddressMarker('Office Address',bNodeKeyPlacemark,bNodeKeyPlacemark,containerElement,'office',isPublic);
 		}
 		
 		var j=0;	
 		for(bNodeKey in home){
 			j++;
-			addSingleAddressMarker('Home Address',home[bNodeKey],bNodeKey,containerElement,'home');
+			addSingleAddressMarker('Home Address',home[bNodeKey],bNodeKey,containerElement,'home',isPublic);
 		}
-		if(j==0){
+		//add an empty home address field if necessary XXX this depends on the public stuff being done second
+		if(j==0 && isPublic){
 			var bNodeKeyPlacemark = createRandomString(50);
-			addSingleAddressMarker('Home Address',bNodeKeyPlacemark,bNodeKeyPlacemark,containerElement,'home');
+			addSingleAddressMarker('Home Address',bNodeKeyPlacemark,bNodeKeyPlacemark,containerElement,'home',isPublic);
 		}
 		
 		
@@ -780,7 +819,8 @@ function renderKnowsFields(data){
 	}
 	
 	/*adds one address marker*/
-	function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix){
+	function addSingleAddressMarker(title,address,bNodeKey,containerElement,prefix,isPublic){
+		
 		var latitude = address['latitude'];
 		var longitude = address['longitude'];
 		
@@ -801,7 +841,8 @@ function renderKnowsFields(data){
 			theseDetails['prefix'] = prefix;
 			theseDetails['container'] = containerElement;
 			theseDetails['address'] = address;
-			theseDetails['title'] = title;		
+			theseDetails['title'] = title;	
+			theseDetails['isPublic'] = isPublic;	
 			addressDetailsToGeoCode.push(theseDetails);
 	
 			/*do the actual geoCoding*/
@@ -817,15 +858,18 @@ function renderKnowsFields(data){
 			map.addOverlay(marker);
 			map.setCenter(point);
 			
-			createAddressDiv(title,address,bNodeKey,containerElement,latitude,longitude, prefix);
+			createAddressDiv(title,address,bNodeKey,containerElement,latitude,longitude, prefix,isPublic);
 		}
 	}
 		
 	/*creates divs for addresses*/
-	function createAddressDiv(title,address,bNodeKey,containerElement, latitude, longitude, prefix){
+	function createAddressDiv(title,address,bNodeKey,containerElement, latitude, longitude, prefix,isPublic){
 	
 		/*TODO: need to worry about how we pick all of this stuff up when we save and this method can easily be made shorter*/
 		var locationDiv = createLocationElement(containerElement, bNodeKey, prefix+'Address',true);
+		
+		/*create the radiobutton for privacy*/
+		createGenericInputElementPrivacyBox(bNodeKey,bNodeKey,!isPublic)
 		
 		/*link to view on map*/
 		var viewOnMapDiv = document.createElement('div');
@@ -1124,9 +1168,9 @@ function displayToObjects(name){
 			//homepageDisplayToObjects();
 			break;
 		case 'load-contact-details':
-			//addressDisplayToObjects();
+			addressDisplayToObjects();
 			mboxDisplayToObjects();
-			//phoneDisplayToObjects();
+			phoneDisplayToObjects();
 			break;
 		case 'load-accounts':
 			accountsDisplayToObjects();
@@ -1194,8 +1238,25 @@ function homepageDisplayToObjects() {
 	}
 }
 
-/*bNodeToPanTo is the bnode the map should pan to, if any*/
 function addressDisplayToObjects(){
+	
+	/*some initial checks*/
+	if(typeof(globalFieldData.addressFields) == 'undefined' || !globalFieldData.addressFields){
+		return;
+	}
+	if(typeof(globalPrivateFieldData.addressFields) == 'undefined' || !globalPrivateFieldData.addressFields){
+		return;
+	}
+	if(typeof(globalFieldData) == 'undefined' || !globalFieldData
+		||typeof(globalPrivateFieldData) == 'undefined' || !globalPrivateFieldData){		
+		return
+	}
+	
+	/*clear out the existing 'home' and 'office' properties*/
+	globalFieldData.addressFields['home'] = new Object();
+	globalPrivateFieldData.addressFields['office'] = new Object();
+	
+	/*populate the appropriate objects*/
 	placeAddressDisplayToObjects('home');
 	placeAddressDisplayToObjects('office');
 }
@@ -1296,29 +1357,6 @@ function mboxDisplayToObjects(){
 			globalPrivateFieldData.foafMboxFields.values.push(element.value);
 		}		
 	}
-}
-
-function phoneDisplayToObjects(){
-	var containerElement = document.getElementById('foafPhone_container');
-	
-	if(containerElement && typeof(globalFieldData.foafPhoneFields != 'undefined') && globalFieldData.foafPhoneFields){
-		if(typeof(globalFieldData.foafPhoneFields.values) != 'undefined'){
-			
-			/*remove the existing values*/
-			globalFieldData.foafPhoneFields.values = new Array();
-			
-			/*add the elements that are present in the display again*/
-			for(i=0 ; i <containerElement.childNodes.length ; i++){
-				
-				var element = containerElement.childNodes[i];
-					
-				/*take the various attributes of the image tag and add them to the globalFieldData object*/
-				if(element.className == 'fieldInput'){	
-					globalFieldData.foafPhoneFields.values.push(element.value);
-				}//end if
-			}//end for	
-		}//end if	
-	}//end if	
 }
 
 function accountsDisplayToObjects(){
@@ -1620,7 +1658,49 @@ function otherDisplayToObjects(){
 
 
 
-
+//XXX this is vvv similar to Mbox display to objects
+function phoneDisplayToObjects(){
+	var containerElement = document.getElementById('foafPhone_container');
+	
+	if(!containerElement){
+		return
+	}
+	if(typeof(globalFieldData.foafPhoneFields) == 'undefined' || !globalFieldData.foafPhoneFields){
+		return;
+	}
+	if(typeof(globalPrivateFieldData.foafPhoneFields) == 'undefined' || !globalPrivateFieldData.foafPhoneFields){
+		return;
+	}
+	
+	/*remove the existing values*/
+	globalFieldData.foafPhoneFields.values = new Array();
+	globalPrivateFieldData.foafPhoneFields.values = new Array();
+		
+	/*add the elements that are present in the display again*/
+	for(i=0 ; i <containerElement.childNodes.length ; i++){
+				
+		var element = containerElement.childNodes[i];
+					
+		//we only want input elements
+		if(element.className != 'fieldInput'){	
+			continue;
+		}
+		
+		var privacyBox = document.getElementById('privacycheckbox_'+element.id);
+		
+		/*no privacy checkbox, so skip to next childNode*/
+		if(typeof(privacyBox) == 'undefined' || !privacyBox){
+			continue;
+		}	
+		
+		/*put it into the appropriate field data object, private or not private*/
+		if(!privacyBox.checked){	
+			globalFieldData.foafPhoneFields.values.push(element.value);
+		} else {
+			globalPrivateFieldData.foafPhoneFields.values.push(element.value);
+		}		
+	}
+}
 
 /*--------------------------second level display To objects functions --------------------------*/
 
@@ -1630,62 +1710,99 @@ function otherDisplayToObjects(){
 	/*copies values from display for an address of type prefix (e.g. office, home) into the globalFieldData object
 	bNodeToPanTo specifies the bnode that the map should pan to, if any.*/
 	function placeAddressDisplayToObjects(prefix,bNodeToPanTo){
-	   	
-	   	//clear out the existing 'home' and 'office' properties
-		globalFieldData.addressFields[prefix] = new Object();
 		
+		log("in function "+prefix);
+		
+	   	/*get a new container and do some initial checks*/
 	   	var containerElement = document.getElementById('address_container');
+	   	
+	   	if(!containerElement){
+	   		return;
+	   	}
+	   	if(typeof(prefix) == 'undefined' || !prefix){
+	   		return;
+	   	} 
+	   	if(typeof(globalFieldData.addressFields) == 'undefined' || !globalFieldData.addressFields[prefix]){
+	   		return;
+	   	}
+ 		if(typeof(globalPrivateFieldData.addressFields) == 'undefined' || !globalPrivateFieldData.addressFields[prefix]){
+	   		return;
+	   	}
 		
+		/*loop through the container looking for a home or address one*/
 		for(i=0; i < containerElement.childNodes.length; i++){
-		
+			
+			/*we only care about certain locations*/
 			var locationElement = containerElement.childNodes[i];
+			if(locationElement.className != prefix+'Address'){
+				continue;
+			}
+			if(!locationElement.id){
+				continue;
+			}
 			
-			if(locationElement.id != 'mapDiv' && locationElement.className == prefix+'Address'){
-				//create a new array for this particular address
-				globalFieldData.addressFields[prefix][locationElement.id] = new Object();
-				var isAddress = false;
+			/*get the privacy checkbox*/
+			var privacyCheckbox = document.getElementById('privacycheckbox_'+locationElement.id);
+			if(typeof(privacyCheckbox) == 'undefined' || !privacyCheckbox){
+				continue;
+			}
+			
+			var isPrivate = privacyCheckbox.checked;
+			var thisAddressObject = new Object;		
+			var isAddress = false;//stops us from saving if it is empty
+			
+			/*loop through the childnodes saving the various ones*/
+			for(j=0; j < locationElement.childNodes.length; j++){
+			
+				/*address*/
+				var elemId = locationElement.childNodes[j].id;
 				
-				for(j=0; j < locationElement.childNodes.length; j++){
-					
-						/*address*/
-						if(locationElement.childNodes[j].id == 'street'){
-								isAddress=true;
-								globalFieldData.addressFields[prefix][locationElement.id][prefix+'Street'] = locationElement.childNodes[j].value;
-						} 
-						if(locationElement.childNodes[j].id == 'street2'){
-								isAddress=true;
-								globalFieldData.addressFields[prefix][locationElement.id][prefix+'Street2'] = locationElement.childNodes[j].value;
-						} 
-						if(locationElement.childNodes[j].id == 'street3'){
-								isAddress=true;
-								globalFieldData.addressFields[prefix][locationElement.id][prefix+'Street3'] = locationElement.childNodes[j].value;
-						} 
-						if(locationElement.childNodes[j].id == 'postalCode'){
-								isAddress=true;
-								globalFieldData.addressFields[prefix][locationElement.id][prefix+'PostalCode'] = locationElement.childNodes[j].value;
-						} 
-						if(locationElement.childNodes[j].id == 'city'){
-								isAddress=true;
-								globalFieldData.addressFields[prefix][locationElement.id][prefix+'City'] = locationElement.childNodes[j].value;
-						}
-						if(locationElement.childNodes[j].id == 'country'){
-								isAddress=true;
-								globalFieldData.addressFields[prefix][locationElement.id][prefix+'Country'] = locationElement.childNodes[j].value;
-						}
-						
-					}
-					
-					if(isAddress){
-						var doPan = false;
-						//only pan the map if a bnode has been passed in to pan it
-						if(typeof(bNodeToPanTo) != 'undefined' && bNodeToPanTo && locationElement.id==bNodeToPanTo){
-							doPan = true
-						}
-						//do the geo coding to get lat and long
-						geoCodeExistingAddress(locationElement.id,prefix,doPan);
-					}
+				if(elemId == 'street'){
+					isAddress=true;
+					thisAddressObject[prefix+'Street'] = locationElement.childNodes[j].value;
+				} 
+				if(elemId == 'street2'){
+					isAddress=true;
+					thisAddressObject[prefix+'Street2'] = locationElement.childNodes[j].value;
+				} 
+				if(elemId == 'street3'){
+					isAddress=true;
+					thisAddressObject[prefix+'Street3'] = locationElement.childNodes[j].value;
+				} 
+				if(elemId == 'postalCode'){
+					isAddress=true;
+					thisAddressObject[prefix+'PostalCode'] = locationElement.childNodes[j].value;
+				} 
+				if(elemId == 'city'){
+					isAddress=true;
+					thisAddressObject[prefix+'City'] = locationElement.childNodes[j].value;
+				}	
+				if(elemId == 'country'){
+					isAddress=true;
+					thisAddressObject[prefix+'Country'] = locationElement.childNodes[j].value;
 				}
+			}
+				
+			/*only save if we've at least got some information*/		
+			if(isAddress){
 			
+				log("saving address"+prefix+"  "+isPrivate);
+				//put in the right place depending on the privacy checkbox
+				if(isPrivate){
+					globalPrivateFieldData.addressFields[prefix][locationElement.id] = thisAddressObject;
+				} else {
+					globalFieldData.addressFields[prefix][locationElement.id] = thisAddressObject;
+				}
+				
+				//only pan the map if a bnode has been passed in to pan to
+				var doPan = false;
+				if(typeof(bNodeToPanTo) != 'undefined' && bNodeToPanTo && locationElement.id==bNodeToPanTo){
+					doPan = true
+				}
+				//alert(isPrivate);
+				//do the geo coding to get lat and long
+				geoCodeExistingAddress(locationElement.id,prefix,doPan,isPrivate);
+			}
 		}
 	}
 	
@@ -2837,6 +2954,7 @@ function geoCodeNewAddress(point){
 		var bnode = addressDetailsToGeoCode[geoCodeNewAddress.count]['bnode'];
 		var container = addressDetailsToGeoCode[geoCodeNewAddress.count]['container'];
 		var prefix = addressDetailsToGeoCode[geoCodeNewAddress.count]['prefix'];
+		var isPublic = addressDetailsToGeoCode[geoCodeNewAddress.count]['isPublic'];
 		
 		/*the geocoded coords*/
         latitude = point.lat();
@@ -2849,7 +2967,7 @@ function geoCodeNewAddress(point){
 		mapMarkers[bnode] = marker;
 		map.addOverlay(marker);
 		map.setCenter(point);	
-		createAddressDiv(title,address,bnode,container,latitude,longitude, prefix);
+		createAddressDiv(title,address,bnode,container,latitude,longitude, prefix,isPublic);
 	}			
 }
 
@@ -2903,20 +3021,41 @@ function updateBasedNearAddress(placemark){
 }
 
 /*geocodes the address and updates the latitude/longitude fields and sets the appropriate element in the globalFieldData object*/
-function geoCodeExistingAddress(bNodeKey,prefix,doPan){
+function geoCodeExistingAddress(bNodeKey,prefix,doPan,isPrivate){
 
-		/*display the map*/
-		//if(doPan){
-		//	displayMap(bNodeKey);
-	   	//}
+	   	if(typeof(bNodeKey) == 'undefined' || !bNodeKey || !prefix){
+	   		return;
+	   	}
+	   	if(typeof(bNodeKey) == 'undefined' 
+	   		|| typeof(prefix) == 'undefined' 
+	   		|| typeof(doPan) == 'undefined'
+	   		|| typeof(privacy) == 'undefined'){
+	   		return;
+	   	}
+	   	if(typeof(globalFieldData.addressFields[prefix]) == 'undefined'
+	   		|| typeof(globalPrivateFieldData.addressFields[prefix]) == 'undefined'){
+	   		return;
+	   	}   
+	   	var prefixObject = globalFieldData.addressFields[prefix];
 	   	
-		var addressArray = getProperties(globalFieldData.addressFields[prefix][bNodeKey]);//get the address
-		
-		
-		//some variables for the callback function
+	   	if(typeof(prefixObject[bNodeKey]) == 'undefined'
+	   		|| typeof(prefixObject[bNodeKey]) == 'undefined'){
+	   		return;
+	   	}   		
+	   	
+	   	/*get the address and convert it to an array*/
+	   	var addressArray;
+	   	if(!isPrivate){
+			addressArray = getProperties(prefixObject[bNodeKey]);
+		} else {
+			addressArray = getProperties(prefixObject[bNodeKey]);
+		}
+
+		/*some details for the callback function*/
 		var theseDetails = new Array();
 		theseDetails['bnode'] = bNodeKey;	
 		theseDetails['doPan'] = doPan;//whether to pan or not
+		theseDetails['isPrivate'] = isPrivate;
 		existingAddressDetailsToGeoCode[prefix] = theseDetails;
 		
 		/*do the geocoding*/
@@ -2932,19 +3071,10 @@ function homeDisplayToObjectsGeoCode(point) {
 		if (!point) {
 			//TODO: possibly do something here, maybe do nothing
 	    } else {
-	    	//move the point and the centre of the map
-	      	mapMarkers[existingAddressDetailsToGeoCode['home']['bnode']].setLatLng(point);
-    		
-	      	//update the display to show the new latitude and longitude
-			updateLatLongText(existingAddressDetailsToGeoCode['home']['bnode'],mapMarkers[existingAddressDetailsToGeoCode['home']['bnode']]);
+	    	var prefix = 'home';
+	    	anyPrefixDisplayToObjectsGeoCode(prefix);
+	    	
 
-			//set the global data with the appropriate stuff
-			globalFieldData.addressFields['home'][existingAddressDetailsToGeoCode['home']['bnode']]['latitude'] = point.lat();
-			globalFieldData.addressFields['home'][existingAddressDetailsToGeoCode['home']['bnode']]['longitude'] = point.lng();
-				
-			if(existingAddressDetailsToGeoCode['home']['doPan']){
-				map.panTo(point);
-	      	}
 	  	}			
 }
 
@@ -2952,21 +3082,41 @@ function officeDisplayToObjectsGeoCode(point) {
 	    	if (!point) {
 	        	//TODO: possibly do something here, maybe do nothing
 	      	} else {
-	      		//move the point and the centre of the map
-	      		mapMarkers[existingAddressDetailsToGeoCode['office']['bnode']].setLatLng(point);
-				
-				//update the display to show the new latitude and longitude
-				updateLatLongText(existingAddressDetailsToGeoCode['office']['bnode'],mapMarkers[existingAddressDetailsToGeoCode['office']['bnode']]);
-
-				//set the global data with the appropriate stuff
-				globalFieldData.addressFields['office'][existingAddressDetailsToGeoCode['office']['bnode']]['latitude'] = point.lat();
-				globalFieldData.addressFields['office'][existingAddressDetailsToGeoCode['office']['bnode']]['longitude'] = point.lng();
-				
-				if(existingAddressDetailsToGeoCode['office']['doPan']){
-					map.panTo(point);
-	      		}
+	      		var prefix = 'office';
+	    		anyPrefixDisplayToObjectsGeoCode(prefix);
 	      	}			
 }
+
+function anyPrefixDisplayToObjectsGeoCode(prefix){
+		if(typeof(prefix) || !prefix){
+			return;
+		}
+		
+		var homeArray = existingAddressDetailsToGeoCode[prefix];
+	    var bNodekey = homeArray['bnode'];
+	    var doPan = homeArray['doPan'];
+	    var isPrivate = homeArray['isPrivate'];
+	    	
+	    //move the point and the centre of the map
+	    mapMarkers[bNodekey].setLatLng(point);
+    		
+	    //update the display to show the new latitude and longitude	  	
+	    updateLatLongText(bNodekey,mapMarkers[bNodekey]);
+		
+		//set the global data with the appropriate stuff
+		if(isPrivate){
+			globalPrivateFieldData.addressFields[prefix][bNodekey]['latitude'] = point.lat();
+			globalPrivateFieldData.addressFields[prefix][bNodekey]['longitude'] = point.lat();
+		} else {
+			globalPublicFieldData.addressFields[prefix][bNodekey]['latitude'] = point.lat();
+			globalPublicFieldData.addressFields[prefix][bNodekey]['longitude'] = point.lat();
+		}
+			
+		if(doPan){
+			map.panTo(point);
+	    }
+}
+
 
 
 /*--------------------------map stuff--------------------------*/
