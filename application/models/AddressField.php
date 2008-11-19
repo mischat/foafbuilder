@@ -7,34 +7,53 @@ require_once 'helpers/Utils.php';
 class AddressField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function AddressField($foafData,$fullInstantiation = true) {
+    public function AddressField($publicFoafData, $privateFoafData, $fullInstantiation = true) {
         	
-          	$this->data['addressFields'] = array();
-			$this->data['addressFields']['office'] = array();
-			$this->data['addressFields']['home'] = array();
+          	//XXX this is slightly innefficient
             $this->name = 'address';
             $this->label = 'Addresses';
-            $this->data['addressFields']['displayLabel'] =  $this->label;
-            $this->data['addressFields']['name'] =  $this->name;
+            
+            $this->data['public']['addressFields'] = array();
+			$this->data['public']['addressFields']['office'] = array();
+			$this->data['public']['addressFields']['home'] = array();
+            $this->data['public']['addressFields']['displayLabel'] =  $this->label;
+            $this->data['public']['addressFields']['name'] =  $this->name;
+            
+            $this->data['private']['addressFields'] = array();
+			$this->data['private']['addressFields']['office'] = array();
+			$this->data['private']['addressFields']['home'] = array();
+            $this->data['private']['addressFields']['displayLabel'] =  $this->label;
+            $this->data['private']['addressFields']['name'] =  $this->name;
             
             /*don't sparql query the model etc if a full instantiation is not required*/
-        	if (!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()) {
+        	if (!$fullInstantiation) {
 				return;
         	}
             
-            $queryString = $this->getQueryString($foafData->getPrimaryTopic());
-            $results = $foafData->getModel()->SparqlQuery($queryString);		
-
-            if($results && !empty($results)){
-            	
-	            /*mangle the results so that they can be easily rendered*/
-	            foreach ($results as $row) {
-	       
-	            	$this->addAddressElements($row,'office');
-	            	$this->addAddressElements($row,'home');
-	            }	
-            
+        	/*load the public and private foaf data*/
+        	if($publicFoafData){
+        		$this->doFullLoad($publicFoafData);
         	}
+        	if($privateFoafData){
+        		$this->doFullLoad($privateFoafData);
+        	}
+    }
+    
+    private function doFullLoad(&$foafData){
+    	
+    	$queryString = $this->getQueryString($foafData->getPrimaryTopic());
+        $results = $foafData->getModel()->SparqlQuery($queryString);		
+
+        if($results && !empty($results)){
+            	
+	    	/*mangle the results so that they can be easily rendered*/
+	    	foreach ($results as $row) {
+	 				         	
+	    		$this->addAddressElements($row,'office',$foafData->isPublic);
+	            $this->addAddressElements($row,'home',$foafData->isPublic);
+	        }	
+            
+        }
     }
 
 	
@@ -231,7 +250,6 @@ class AddressField extends Field {
 		    }
     }
     
-    /*if the flag is 0, preserve existing triples, if not, delete them all (for the case where the address has been removed*/
     private function removeExistingAddressTriples(&$foafData,$bNodeName){
     		//XXX FIXME : it is to do with bnodes replacing other ones that have been removed
 			/*find the triples associated with this address*/		
@@ -279,10 +297,18 @@ class AddressField extends Field {
     }
     
    	/*takes a row from a sparql resultset and puts any home/office (determined by prefix) address information into data*/
-    private function addAddressElements($row,$prefix){
+    private function addAddressElements($row,$prefix,$isPublic){
 		
     	if(!isset($row['?'.$prefix]) || !$row['?'.$prefix]){
     		return;
+    	}
+    	
+    	/*We need to know which model the results have come from so we know whether to display them as private or public*/
+    	$privacy;
+    	if($isPublic){
+    		$privacy = 'public';
+    	} else {
+    		$privacy = 'private';
     	}
     	
     	$newArray = array();
@@ -331,9 +357,8 @@ class AddressField extends Field {
             $newArray[$prefix.'StateOrProvince'] = $row['?'.$prefix.'StateOrProvince']->label;
 
     	}    
-    	
     	if(!empty($newArray)){
-    		 $this->data['addressFields'][$prefix.''][$row['?'.$prefix.'']->uri] = $newArray;    	
+    		 $this->data[$privacy]['addressFields'][$prefix.''][$row['?'.$prefix.'']->uri] = $newArray;    	
     	} 
     }
     

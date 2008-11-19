@@ -1,12 +1,9 @@
 <?php
 require_once 'Field.php';
 require_once 'helpers/Utils.php';
-/*FIXME: perhaps fields shouldn't do the whole sparql query thing in the constructor.*/
 
-/*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
 class MboxField extends Field {
-	
-    /*predicateUri is only appropriate for simple ones (one triple only)*/
+
     public function MboxField($foafDataPublic,$foafDataPrivate,$fullInstantiation = true) {
      	
     	//XXX this is a bit inefficient
@@ -109,7 +106,6 @@ class MboxField extends Field {
 			//add new triples
 			$valueArray = $value->values;
 			
-			var_dump($valueArray);
 			foreach($valueArray as $thisValue){
 				$mangledValue = $this->onSaveMangleEmailAddress($thisValue);
 				
