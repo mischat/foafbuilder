@@ -12,9 +12,12 @@ var globalPrivateFieldData = new Object();
 /*current page*/
 var currentPage;//the page the user is on e.g. load-contact-details etc.
 
-
 /*for friend searching, so we know the type of the ifp we searched for*/
 var globalTypeArray = new Array;
+
+/*some variables to show that we've added address details*/
+var addedOfficeAddressMarker
+var addedHomeAddressMarker;
 
 /*geocoding details so that the various callback functions can access them*/
 var addressDetailsToGeoCode = new Array();
@@ -222,6 +225,9 @@ function addressFieldsObjectsToDisplay(data){
 	if(!data){
 		return;
 	}
+	addedOfficeAddressMarker = false;
+	addedHomeAddressMarker = false;
+	
 	/*We only want to render home once and office once (not once for both public and private)*/
 	if(data.private){
 		renderAddressFields(data.private,false);
@@ -477,7 +483,7 @@ function renderAddressFields(data,isPublic){
 	
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
-		addAddressMarkers(data.addressFields['office'],data.addressFields['home'],containerElement,map,isPublic);			
+		addAddressMarkers(data.addressFields['office'],data.addressFields['home'],containerElement,map,isPublic);	
 	}
 }
 
@@ -791,31 +797,76 @@ function renderKnowsFields(data){
 
 	/*adds markers and divs for home and office addresses*/
 	function addAddressMarkers(office,home,containerElement,map,isPublic){
-		
-		var i=0;
-		for(bNodeKey in office){
-			i++;
-			addSingleAddressMarker('Office Address',office[bNodeKey],bNodeKey,containerElement,'office',isPublic);
-		}
-		//add an empty office address field if necessary XXX this depends on the public stuff being done second
-		if(i==0 && isPublic){
-			var bNodeKeyPlacemark = createRandomString(50);
-			addSingleAddressMarker('Office Address',bNodeKeyPlacemark,bNodeKeyPlacemark,containerElement,'office',isPublic);
+
+		//check if they've both been done
+		if(addedOfficeAddressMarker && addedHomeAddressMarker){
+			return;
 		}
 		
-		var j=0;	
-		for(bNodeKey in home){
-			j++;
-			addSingleAddressMarker('Home Address',home[bNodeKey],bNodeKey,containerElement,'home',isPublic);
+		//add the office address if required
+		if(!addedOfficeAddressMarker){
+			
+			for(bNodeKey in office){
+				log("Adding Office Marker isPublic? "+isPublic);
+				addSingleAddressMarker('Office Address',office[bNodeKey],bNodeKey,containerElement,'office',isPublic);
+				addedOfficeAddressMarker = true;
+				break;//currently we only want one office + one home address
+			}
+			
+			//we haven't added an office marker and we're on the last call of this function, so add a blank element.
+			//XXX this relies on rendering private then public 
+			if(!addedOfficeAddressMarker && isPublic){
+				log("adding blank office address");
+				var bNodeKeyPlacemark = createRandomString(50);
+				addSingleAddressMarker('Office Address',bNodeKeyPlacemark,bNodeKeyPlacemark,containerElement,'office',isPublic);
+				addedOfficeAddressMarker = true;
+			}
 		}
-		//add an empty home address field if necessary XXX this depends on the public stuff being done second
-		if(j==0 && isPublic){
-			var bNodeKeyPlacemark = createRandomString(50);
-			addSingleAddressMarker('Home Address',bNodeKeyPlacemark,bNodeKeyPlacemark,containerElement,'home',isPublic);
+		
+		//add the home address if required
+		if(!addedHomeAddressMarker){
+
+			for(bNodeKey in home){
+				log("Adding Home Marker "+isPublic);
+				addSingleAddressMarker('Home Address',home[bNodeKey],bNodeKey,containerElement,'home',isPublic);
+				addedHomeAddressMarker = true;
+				break;//currently we only want one office + one home address
+			}
+			
+			//we haven't added a home marker and we're on the last call of this function, so add a blank element.
+			//XXX this relies on rendering private then public 
+			if(!addedHomeAddressMarker && isPublic){
+				log("adding blank home address");
+				var bNodeKeyPlacemark = createRandomString(50);
+				addSingleAddressMarker('Home Address',bNodeKeyPlacemark,bNodeKeyPlacemark,containerElement,'home',isPublic);
+				addedHomeAddressMarker = true;
+			}
+		}
+	}
+	
+	/*get either the home or office address element, or nothing*/
+	//XXX no longer used
+	function getAddressElementByPrefix(prefix){
+		
+		if(!prefix){
+			return;
+		}
+		var addressContainer = document.getElementById('address_Container');
+		
+		if(!addressContainer){
+			return;
 		}
 		
+		var returnElem;
 		
+		for(nodeKey in addressContainer.childNodes){
+			if(addressContainer.childNodes[nodeKey].className==prefix+"Address"){
+				returnElem = addressContainer.childNodes[nodeKey];
+				break;
+			}
+		}	
 		
+		return returnElem;	
 	}
 	
 	/*adds one address marker*/
@@ -1254,7 +1305,9 @@ function addressDisplayToObjects(){
 	
 	/*clear out the existing 'home' and 'office' properties*/
 	globalFieldData.addressFields['home'] = new Object();
+	globalFieldData.addressFields['office'] = new Object();
 	globalPrivateFieldData.addressFields['office'] = new Object();
+	globalPrivateFieldData.addressFields['home'] = new Object();
 	
 	/*populate the appropriate objects*/
 	placeAddressDisplayToObjects('home');
@@ -1711,8 +1764,6 @@ function phoneDisplayToObjects(){
 	bNodeToPanTo specifies the bnode that the map should pan to, if any.*/
 	function placeAddressDisplayToObjects(prefix,bNodeToPanTo){
 		
-		log("in function "+prefix);
-		
 	   	/*get a new container and do some initial checks*/
 	   	var containerElement = document.getElementById('address_container');
 	   	
@@ -1786,7 +1837,6 @@ function phoneDisplayToObjects(){
 			/*only save if we've at least got some information*/		
 			if(isAddress){
 			
-				log("saving address"+prefix+"  "+isPrivate);
 				//put in the right place depending on the privacy checkbox
 				if(isPrivate){
 					globalPrivateFieldData.addressFields[prefix][locationElement.id] = thisAddressObject;
@@ -2738,6 +2788,9 @@ function log(logline){
 		debugDiv = document.createElement("div");
 		debugDiv.id='debugDiv';
 		document.body.appendChild(debugDiv);
+		debugDiv.style.position = 'absolute';
+		debugDiv.style.top = '0px';
+		debugDiv.style.left = '0px';
 	}
 	debugDiv.appendChild(document.createTextNode(logline));
 	debugDiv.appendChild(document.createElement("br"));
@@ -2945,6 +2998,7 @@ function geoCodeNewAddress(point){
   }
   
      if (!point) {
+     	log("No point");
      	//TODO: possibly do something here, maybe do nothing
      } else {
 		      	  
@@ -2975,6 +3029,7 @@ function geoCodeNewAddress(point){
 function geoCodeNearestAirport(point){
 	if(!point){
 		//TODO: should we do something here?
+		log('No Point');
 	} else {
 		var marker;
 		if(typeof(mapMarkers['nearestAirport']) == 'undefined'){
@@ -3022,14 +3077,16 @@ function updateBasedNearAddress(placemark){
 
 /*geocodes the address and updates the latitude/longitude fields and sets the appropriate element in the globalFieldData object*/
 function geoCodeExistingAddress(bNodeKey,prefix,doPan,isPrivate){
-
-	   	if(typeof(bNodeKey) == 'undefined' || !bNodeKey || !prefix){
-	   		return;
-	   	}
+		
+		log('In geocode existing address function');
+	
 	   	if(typeof(bNodeKey) == 'undefined' 
 	   		|| typeof(prefix) == 'undefined' 
 	   		|| typeof(doPan) == 'undefined'
-	   		|| typeof(privacy) == 'undefined'){
+	   		|| typeof(isPrivate) == 'undefined'){
+	   		return;
+	   	}	   	
+	   	if(typeof(bNodeKey) == 'undefined' || !bNodeKey || !prefix){
 	   		return;
 	   	}
 	   	if(typeof(globalFieldData.addressFields[prefix]) == 'undefined'
@@ -3069,36 +3126,39 @@ function geoCodeExistingAddress(bNodeKey,prefix,doPan,isPrivate){
 
 function homeDisplayToObjectsGeoCode(point) {
 		if (!point) {
+			log("No point");
 			//TODO: possibly do something here, maybe do nothing
 	    } else {
-	    	var prefix = 'home';
-	    	anyPrefixDisplayToObjectsGeoCode(prefix);
-	    	
-
+	    	anyPrefixDisplayToObjectsGeoCode('home',point);
 	  	}			
 }
 
 function officeDisplayToObjectsGeoCode(point) {
 	    	if (!point) {
+	    		log('no point office');
 	        	//TODO: possibly do something here, maybe do nothing
 	      	} else {
-	      		var prefix = 'office';
-	    		anyPrefixDisplayToObjectsGeoCode(prefix);
+	    		anyPrefixDisplayToObjectsGeoCode('office',point);
 	      	}			
 }
 
-function anyPrefixDisplayToObjectsGeoCode(prefix){
-		if(typeof(prefix) || !prefix){
+function anyPrefixDisplayToObjectsGeoCode(prefix,point){
+		if(typeof(prefix) == 'undefined' || !prefix){
+			log('error');
 			return;
 		}
-		
+		log('geocoding');
 		var homeArray = existingAddressDetailsToGeoCode[prefix];
 	    var bNodekey = homeArray['bnode'];
 	    var doPan = homeArray['doPan'];
 	    var isPrivate = homeArray['isPrivate'];
-	    	
+	   	
+	   	log('geocoding1');
+	   	
 	    //move the point and the centre of the map
 	    mapMarkers[bNodekey].setLatLng(point);
+    	
+    	log('geocoding2');
     		
 	    //update the display to show the new latitude and longitude	  	
 	    updateLatLongText(bNodekey,mapMarkers[bNodekey]);
