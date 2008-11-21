@@ -373,7 +373,8 @@ function renderImgFields(data, isPublic){
 	}
 	
 	/*render the image menu i.e. upload new, link to an image if one has not been rendered already*/
-	if(!document.getElementById('menuDiv_'+name)){
+	//relies on private being done before public
+	if(!document.getElementById('menuDiv_'+name) && isPublic){
 		renderImageMenu(name, containerElement,isPublic);
 	}
 }
@@ -1672,20 +1673,21 @@ function imgDisplayToObjects(){
 	var containerElement = document.getElementById('foafImg_container');
 	
 	if(!containerElement){
-		log('Couldnt find container element');
+		log("['imgDisplayToObjects'] couldn't get container element");
 		return;
 	}
 	if(typeof(globalFieldData.foafImgFields) == 'undefined'
 		|| !globalFieldData.foafImgFields
 		|| typeof(globalFieldData.foafImgFields.images) == 'undefined'
 		|| !globalFieldData.foafImgFields.images){
-		log('foafImgFields not set');
+		log("['imgDisplayToObjects'] globalField data (public) img setup incorrect");
 		return;
 	}
 	if(typeof(globalPrivateFieldData.foafImgFields) == 'undefined'
 		|| !globalPrivateFieldData.foafImgFields
 		|| typeof(globalPrivateFieldData.foafImgFields.images) == 'undefined'
 		|| !globalPrivateFieldData.foafImgFields.images){
+		log("['imgDisplayToObjects'] globalField data (private) img setup incorrect");
 		return;
 	}
 
@@ -1698,7 +1700,7 @@ function imgDisplayToObjects(){
 		
 		/*the image element*/
 		var element = containerElement.childNodes[i];				
-		if(element.className != 'image' || typeof(element.id)=='undefined' || !element.id){	
+		if(element.className != 'image' || typeof(element.id)=='undefined' || !element.id){
 			continue;
 		}	
 	
@@ -1721,7 +1723,6 @@ function imgDisplayToObjects(){
 			thisImageArray.description = element.alt;
 		}
 		
-		log("in img display to objects "+privacyCheckbox.checked);
 		/*add to the appropriate global object depending on whether it is private or publi*/
 		if(!privacyCheckbox.checked){
 			globalFieldData.foafImgFields.images.push(thisImageArray);
