@@ -18,7 +18,9 @@ class AjaxController extends Zend_Controller_Action {
     public function loadContactDetailsAction() {
     	$this->loadAnyPage('contactDetails');
     }
-    
+    public function loadPicturesAction() {
+    	$this->loadAnyPage('pictures');
+    }
 	public function loadLocationsAction() {
     	/*build up a sparql query to get the values of all the fields we need*/
         $this->loadFoaf();
@@ -35,20 +37,6 @@ class AjaxController extends Zend_Controller_Action {
         } 
 	}
     
-    public function loadPicturesAction() {
-        /*build up a sparql query to get the values of all the fields we need*/
-        if ($this->loadFoaf()) {   
-            $this->fieldNamesObject = new FieldNames('pictures',$this->foafData);  	
-            $this->view->results = array();
-           foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
-            	
-            	//need to cope with multiple fields of the same type
-            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
-          
-            }
-        } 
-    }
-    
     public function loadAccountsAction() {
     	/*build up a sparql query to get the values of all the fields we need*/
     	if ($this->loadFoaf()) {   
@@ -56,20 +44,6 @@ class AjaxController extends Zend_Controller_Action {
             $this->view->results = array();
             foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
             	
-            	//need to cope with multiple fields of the same type
-            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
-          
-            }
-        } 
-    }
-    
-    public function loadFriendsAction() {
-        /*build up a sparql query to get the values of all the fields we need*/
-        if($this->loadFoaf()) {
-            $this->fieldNamesObject = new FieldNames('friends',$this->foafData);  	
-            $this->view->results = array();
-            
-            foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
             	//need to cope with multiple fields of the same type
             	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
           

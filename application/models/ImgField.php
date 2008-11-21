@@ -8,28 +8,43 @@ require_once 'helpers/Utils.php';
 class ImgField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function ImgField($foafData,$fullInstantiation = true) {
+    public function ImgField($foafDataPublic,$foafDataPrivate,$fullInstantiation = true) {
     	
      	$this->name = 'foafImg';
         $this->label = 'Secondary Images';
-        $this->data['foafImgFields'] = array();
-        $this->data['foafImgFields']['displayLabel'] =  $this->label;
-        $this->data['foafImgFields']['name'] = $this->name;
-        $this->data['foafImgFields']['images'] = array();
-            
+        $this->data['public']['foafImgFields'] = array();
+        $this->data['public']['foafImgFields']['displayLabel'] =  $this->label;
+        $this->data['public']['foafImgFields']['name'] = $this->name;
+        $this->data['public']['foafImgFields']['images'] = array();
+        
+        $this->data['private']['foafImgFields'] = array();
+        $this->data['private']['foafImgFields']['displayLabel'] =  $this->label;
+        $this->data['private']['foafImgFields']['name'] = $this->name;
+        $this->data['private']['foafImgFields']['images'] = array();
+       	
         /*don't sparql query the model etc if a full instantiation is not required*/
-        if (!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()) {
+        if (!$fullInstantiation) {
 			return;
         }
-            $queryString = 
-                "PREFIX dc: <http://purl.org/dc/elements/1.1/>
-                PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                SELECT ?foafImg ?dcTitle ?dcDescription
-                WHERE{
-	                <".$foafData->getPrimaryTopic()."> foaf:img ?foafImg .
+    	if($foafDataPublic){
+			$this->doFullLoad($foafDataPublic,'public');
+		} 
+		if($foafDataPrivate){
+			$this->doFullLoad($foafDataPrivate,'private');
+		}
+    }
+    
+    private function doFullLoad($foafData,$privacy){
+  		
+    	$queryString = 
+        	"PREFIX dc: <http://purl.org/dc/elements/1.1/>
+             PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+             PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+             PREFIX bio: <http://purl.org/vocab/bio/0.1/>
+             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+             SELECT ?foafImg ?dcTitle ?dcDescription
+             	WHERE{
+	            	<".$foafData->getPrimaryTopic()."> foaf:img ?foafImg .
 		            OPTIONAL{
 		            	?foafImg dc:title ?dcTitle .
 		            } .
@@ -37,30 +52,28 @@ class ImgField extends Field {
 		                ?foafImg dc:description ?dcDescription .
 		            }	
                 };";
-	             //   ?z foaf:primaryTopic <".$foafData->getPrimaryTopic()."> .
-	             //   ?z foaf:primaryTopic ?primaryTopic .
 
             $results = $foafData->getModel()->SparqlQuery($queryString);		
             
             /*mangle the results so that they can be easily rendered*/
-            if($results && isset($results[0]) && isset($results[0]) && $results[0]){
-	            foreach ($results as $row) {	
-	                if (isset($row['?foafImg']) && $this->isImageUrlValid($row['?foafImg'])) {
-	                	$thisImage = array();
-	                	$thisImage['uri'] = $row['?foafImg']->uri;            
+            if(!$results || !isset($results[0]) || !isset($results[0]) || !$results[0]){
+            	return;
+            }
+	        
+            foreach ($results as $row) {	
+	        	if (isset($row['?foafImg']) && $this->isImageUrlValid($row['?foafImg'])) {
+	            	$thisImage = array();
+	                $thisImage['uri'] = $row['?foafImg']->uri;            
 	                	
-	                	if(isset($row['?dcTitle']) && $row['?dcTitle'] && $row['?dcTitle']->label){
-	                		$thisImage['title'] = $row['?dcTitle']->label;
-	                	} 
-	                	if(isset($row['?dcDescription']) && $row['?dcDescription'] && $row['?dcDescription']->label){
-	                		$thisImage['description'] = $row['?dcDescription']->label;
-	                	}
-	                	array_push($this->data['foafImgFields']['images'],$thisImage);
+	                if(isset($row['?dcTitle']) && $row['?dcTitle'] && $row['?dcTitle']->label){
+	                	$thisImage['title'] = $row['?dcTitle']->label;
+	                } 
+	                if(isset($row['?dcDescription']) && $row['?dcDescription'] && $row['?dcDescription']->label){
+	                	$thisImage['description'] = $row['?dcDescription']->label;
 	                }
+	                array_push($this->data[$privacy]['foafImgFields']['images'],$thisImage);
 	            }
-        	}
-                   
-        
+	        }
     }
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/

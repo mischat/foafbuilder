@@ -23,8 +23,7 @@ class MboxField extends Field {
         /*don't sparql query the model etc if a full instantiation is not required*/
         if (!$fullInstantiation) {
 			return;
-        }
-        
+        } 
 
 		if($foafDataPublic){
 			$this->doFullLoad($foafDataPublic);

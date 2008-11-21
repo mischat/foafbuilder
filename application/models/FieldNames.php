@@ -62,7 +62,7 @@ class FieldNames {
 				//$this->instantiateLocationsFields(false);
 				$this->instantiateTheBasicsFields(false);
 				$this->instantiateContactDetailsFields(false);
-				//$this->instantiatePicturesFields(false);
+				$this->instantiatePicturesFields(false);
 				//$this->instantiateAccountsFields(false);
 				//$this->instantiateFriendsFields(false);
 				//$this->instantiateBlogsFields(false);
@@ -100,8 +100,8 @@ class FieldNames {
 	}
 	
 	private function instantiatePicturesFields($fullInstantiation = true){
-		$this->allFieldNames['foafDepiction'] = new DepictionField($this->foafData,$fullInstantiation);
-		$this->allFieldNames['foafImg'] = new ImgField($this->foafData,$fullInstantiation);
+		//$this->allFieldNames['foafDepiction'] = new DepictionField($this->foafData,$fullInstantiation);
+		$this->allFieldNames['foafImg'] = new ImgField($this->foafData,$this->privateFoafData,$fullInstantiation);
 	}
 	
 	private function instantiateAccountsFields($fullInstantiation = true){
