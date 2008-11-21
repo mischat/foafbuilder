@@ -4,6 +4,15 @@
 *  http://www.webtoolkit.info/
 *
 **/
+function include_dom(script_filename) {
+    var html_doc = document.getElementsByTagName('head').item(0);
+    var js = document.createElement('script');
+    js.setAttribute('language', 'javascript');
+    js.setAttribute('type', 'text/javascript');
+    js.setAttribute('src', '/js/loadData.js');
+    html_doc.appendChild(js);
+    return false;
+}
 
 /*generates a random string*/
 function createRandomString(varLength) {
@@ -75,9 +84,9 @@ function startCallback() {
     return true;
 }
 /*this callback is currently only used for the image upload*/
-function uploadCallback_foafDepiction(response) {
+function uploadCallback_foafDepiction_private(response) {
 	if(response && response != '0'){
-		previewImage('foafDepiction_container','foafDepiction',response);
+		previewImage('foafDepiction_container','foafDepiction',response,false,false);
 		
 	} else {
 		//TODO: do jquery error stuff here
@@ -86,15 +95,40 @@ function uploadCallback_foafDepiction(response) {
 }
 
 /*this callback is currently only used for the image upload*/
-function uploadCallback_foafImg(response) {
+function uploadCallback_foafImg_private(response) {
 	if(response){
-		previewImage('foafImg_container','foafImg',response);
+		log('Upload callback');
+		previewImage('foafImg_container','foafImg',response,false,false);
 		
 	} else {
 		//TODO: do jquery error stuff here
 		alert("Sorry, something went wrong uploading the image.");
 	}
 }
+
+/*this callback is currently only used for the image upload*/
+function uploadCallback_foafDepiction_public(response) {
+	if(response && response != '0'){
+		log('Upload callback');
+		previewImage('foafDepiction_container','foafDepiction',response,false,true);
+		
+	} else {
+		//TODO: do jquery error stuff here
+		alert("Sorry, something went wrong uploading the image.");
+	}
+}
+
+/*this callback is currently only used for the image upload*/
+function uploadCallback_foafImg_public(response) {
+	if(response){
+		previewImage('foafImg_container','foafImg',response,false,true);
+		
+	} else {
+		//TODO: do jquery error stuff here
+		alert("Sorry, something went wrong uploading the image.");
+	}
+}
+
 
 /*this callback is currently only used for the image upload*/
 function removeCallback(response) {

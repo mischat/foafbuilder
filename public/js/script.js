@@ -1,7 +1,12 @@
+/*for logging purposes*/
+var loggingOn = true;
 
 /*--------------------------global variables--------------------------*/
 
 //TODO: namespacing!!!
+
+/*load the data that is required for the airport autocomplete.  This will take a while.*/
+//window.onload = include_dom('/js/loadData.js');
 
 /*global variable for storing data*/
 var globalFieldData = new Object();
@@ -44,7 +49,7 @@ function turnOnLoading(){
 
 /*loads all the foaf data from the given file (or the session if there is no uri) into the editor.*/
 function loadFoaf(name){
-
+	
 	var url = document.getElementById('foafUri').value;
 	
 	/*so we can track which page the person is on*/
@@ -169,7 +174,8 @@ function genericObjectsToDisplay(data){
 	mboxFieldsObjectsToDisplay(data);
 	phoneFieldsObjectsToDisplay(data);
 	addressFieldsObjectsToDisplay(data);
-	
+	imgFieldsObjectsToDisplay(data);
+	//depictionFieldsObjectsToDisplay(data);
 	
 	/*render the various fields*/
 	renderAccountFields(data);
@@ -178,13 +184,24 @@ function genericObjectsToDisplay(data){
 	renderBasedNearFields(data);
 	renderNearestAirportFields(data);
 	renderDepictionFields(data);
-	renderImgFields(data);
+	//renderImgFields(data);
 	renderKnowsFields(data);
 }
 
 /*-----------------objects to display elements to convert data to html elements and split public/private pairs up-----------------*/
 
 
+function imgFieldsObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderImgFields(data.private,false);
+	}
+	if(data.public){
+		renderImgFields(data.public,true);
+	}
+}
 function simpleFieldsObjectsToDisplay(data){
 	if(!data){
 		return;
@@ -329,6 +346,36 @@ function renderSimpleFields(data,isPublic){
 			}
 		}
 	}	
+}
+
+/*Render the image fields*/
+function renderImgFields(data, isPublic){
+	
+	if(typeof(data) == 'undefined' || !data || typeof(isPublic) == 'undefined'){
+		log("Returning!!! isPublic: "+isPublic);
+		return;
+	}
+	
+	/*build the container*/
+	var name = data.foafImgFields.name;
+	var label = data.foafImgFields.displayLabel;
+	
+	/*create a container if required*/
+	var containerElement = document.getElementById(name+'_container');
+	if(!containerElement){
+		var containerElement = createFieldContainer(name, label);
+	}
+
+	/*render each individual image element*/	
+	for(image in data.foafImgFields['images']){
+		log("rendering image element: "+isPublic);
+		renderImgElement(data.foafImgFields['images'][image],image,containerElement,isPublic);
+	}
+	
+	/*render the image menu i.e. upload new, link to an image if one has not been rendered already*/
+	if(!document.getElementById('menuDiv_'+name)){
+		renderImageMenu(name, containerElement,isPublic);
+	}
 }
 
 
@@ -560,28 +607,6 @@ function renderDepictionFields(data){
 	renderImageMenu('foafDepiction', containerElement);
 }
 
-/*Render the image fields*/
-function renderImgFields(data){
-	if(!data || !data.foafImgFields || typeof(data.foafImgFields) == 'undefined'){
-		return;
-	}
-	
-	/*build the container*/
-	var name = data.foafImgFields.name;
-	var label = data.foafImgFields.displayLabel;
-	var containerElement = createFieldContainer(name, label);
-
-	/*render each individual image element*/	
-	for(image in data.foafImgFields['images']){
-		renderImgElement(data.foafImgFields['images'][image],image,containerElement);
-	}
-	
-	/*render the image menu i.e. upload new, link to an image*/
-	renderImageMenu('foafImg', containerElement);
-}
-
-
-
 /*render the various relationships of the user*/
 function renderKnowsFields(data){
 	if(!data || !data.foafKnowsFields || typeof(data.foafKnowsFields) == 'undefined'){
@@ -601,23 +626,36 @@ function renderKnowsFields(data){
 
 	/*--------------------------Img/Depiction--------------------------*/
 	//XXX why is this different to the one below it?
-	function renderImgElement(image,count,containerElement){
+	function renderImgElement(image,count,containerElement,isPublic){
+		
+		log('in function render image element');
+		if(typeof(image) == 'undefined' ||
+			!image || 
+			typeof(containerElement) == 'undefined' ||
+			!containerElement ||
+			typeof(isPublic) == 'undefined'){
+			
+			log('returning fron render image element isPublic = '+isPublic);
+			return;
+		}		
 		
 		/*create the image element*/
 		var imageElement = document.createElement('img');
 		imageElement.setAttribute('src',image['uri']);
+		
 		if(typeof(image['title']) != 'undefined' && image['title']){
 			imageElement.setAttribute('title',image['title']);
 		}
 		if(typeof(image['description']) != 'undefined' && image['description']){
 			imageElement.setAttribute('alt',image['description']);
 		}
+		
 		imageElement.id = 'foafImg_'+count;
 		imageElement.className = 'image';
 	
-		//FIXME: the function below is badly named!
 		/*create (and append) the remove link*/
-		createGenericInputElementRemoveLink(imageElement.id, containerElement.id,true);	
+		createGenericInputElementPrivacyBox(imageElement.id, containerElement.id,!isPublic);
+		createGenericInputElementRemoveLink(imageElement.id, containerElement.id,true);		
 			
 		/*tack the image element onto the container*/
 		containerElement.appendChild(imageElement);
@@ -663,7 +701,9 @@ function renderKnowsFields(data){
 		var menuForm = document.createElement('form');
 		menuDiv.appendChild(menuForm);
 		menuForm.id = 'menuForm_'+name;
-		menuForm.setAttribute('onsubmit',"return AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_"+name+"})")
+		
+		menuForm.setAttribute('onsubmit',"return AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_"+name+"_public})")
+	
 		
 		/*create a form to do the link to image stuff*/
 		var menuFormLink = document.createElement('form');
@@ -698,7 +738,7 @@ function renderKnowsFields(data){
 		linkToImageInput.className = 'linkToImage';
 		linkToImageInput.name = 'linkToImage_'+name;
 		linkToImageInput.id = 'linkToImage_'+name;
-		linkToImageInput.setAttribute('onchange','previewImage("'+containerElement.id+'","'+name+'",this.value);');
+		linkToImageInput.setAttribute('onchange','previewImage("'+containerElement.id+'","'+name+'",this.value,false,true);');
 		menuFormLink.appendChild(linkToImageInput);
 		
 		/*create a submit button and append it*/
@@ -1231,7 +1271,7 @@ function displayToObjects(name){
 			basedNearDisplayToObjects();
 			break;
 		case 'load-pictures':
-			depictionDisplayToObjects();
+			//depictionDisplayToObjects();
 			imgDisplayToObjects();
 			break;
 		case 'load-friends':
@@ -1549,71 +1589,146 @@ function depictionDisplayToObjects(){
 	var containerElement = document.getElementById('foafDepiction_container');
 	
 	if(containerElement && typeof(globalFieldData.foafDepictionFields != 'undefined') && globalFieldData.foafDepictionFields){
-		if(typeof(globalFieldData.foafDepictionFields.images) != 'undefined'){
-		
-			/*remove all existing images in globalFieldData*/		
-			globalFieldData.foafDepictionFields.images = new Array();
+		return;
+	}
+	if(typeof(globalFieldData.foafDepictionFields.images) != 'undefined'){
+		return;
+	}
+	/*remove all existing images in globalFieldData*/		
+	globalFieldData.foafDepictionFields.images = new Array();
 			
-			/*add the elements that are present in the display again*/
-			for(i=0 ; i <containerElement.childNodes.length ; i++){
+	/*add the elements that are present in the display again*/
+	for(i=0 ; i <containerElement.childNodes.length ; i++){
 				
-				var element = containerElement.childNodes[i];
+		var element = containerElement.childNodes[i];
+				
+		/*take the various attributes of the image tag and add them to the globalFieldData object*/
+		if(element.className != 'image'){	
+			continue;
+		}	
+		var thisImageArray = new Object();
+									
+		if(typeof(element.src) != 'undefined' && element.src){
+			thisImageArray.uri = element.src;
+		}
+		if(typeof(element.title) != 'undefined' && element.title){
+			thisImageArray.title= element.title;
+		}
+		//TODO: need to actually set alt when the image is rendered
+		if(typeof(element.alt) != 'undefinied' && element.alt){
+			thisImageArray.description = element.alt;
+		}
+		globalFieldData.foafDepictionFields.images.push(thisImageArray);
+	}
+}
+
+
+function mboxDisplayToObjects(){
+	var containerElement = document.getElementById('foafMbox_container');
+	
+	if(!containerElement){
+		return
+	}
+	if(typeof(globalFieldData.foafMboxFields) == 'undefined' || !globalFieldData.foafMboxFields){
+		return;
+	}
+	if(typeof(globalPrivateFieldData.foafMboxFields) == 'undefined' || !globalPrivateFieldData.foafMboxFields){
+		return;
+	}
+	
+	/*remove the existing values*/
+	globalFieldData.foafMboxFields.values = new Array();
+	globalPrivateFieldData.foafMboxFields.values = new Array();
+		
+	/*add the elements that are present in the display again*/
+	for(i=0 ; i <containerElement.childNodes.length ; i++){
+				
+		var element = containerElement.childNodes[i];
 					
-				/*take the various attributes of the image tag and add them to the globalFieldData object*/
-				if(element.className == 'image'){	
-				
-					var thisImageArray = new Object();
-										
-					if(typeof(element.src) != 'undefined' && element.src){
-						thisImageArray.uri = element.src;
-					}
-					if(typeof(element.title) != 'undefined' && element.title){
-						thisImageArray.title= element.title;
-					}
-					//TODO: need to actually set alt when the image is rendered
-					if(typeof(element.alt) != 'undefinied' && element.alt){
-						thisImageArray.description = element.alt;
-					}
-					globalFieldData.foafDepictionFields.images.push(thisImageArray);
-				}//end if
-			}//end for	
-		}//end if	
-	}//end if
+		//we only want input elements
+		if(element.className != 'fieldInput'){	
+			continue;
+		}
+		
+		var privacyBox = document.getElementById('privacycheckbox_'+element.id);
+		
+		/*no privacy checkbox, so skip to next childNode*/
+		if(typeof(privacyBox) == 'undefined' || !privacyBox){
+			continue;
+		}	
+		
+		/*put it into the appropriate field data object, private or not private*/
+		if(!privacyBox.checked){	
+			globalFieldData.foafMboxFields.values.push(element.value);
+		} else {
+			globalPrivateFieldData.foafMboxFields.values.push(element.value);
+		}		
+	}
 }
 
 function imgDisplayToObjects(){
+
+	/*the container of the images*/
 	var containerElement = document.getElementById('foafImg_container');
 	
-	if(containerElement && typeof(globalFieldData.foafImgFields != 'undefined') && globalFieldData.foafImgFields){
-		if(typeof(globalFieldData.foafImgFields.images) != 'undefined'){
-		
-			/*remove all existing images in globalFieldData*/		
-			globalFieldData.foafImgFields.images = new Array();
+	if(!containerElement){
+		log('Couldnt find container element');
+		return;
+	}
+	if(typeof(globalFieldData.foafImgFields) == 'undefined'
+		|| !globalFieldData.foafImgFields
+		|| typeof(globalFieldData.foafImgFields.images) == 'undefined'
+		|| !globalFieldData.foafImgFields.images){
+		log('foafImgFields not set');
+		return;
+	}
+	if(typeof(globalPrivateFieldData.foafImgFields) == 'undefined'
+		|| !globalPrivateFieldData.foafImgFields
+		|| typeof(globalPrivateFieldData.foafImgFields.images) == 'undefined'
+		|| !globalPrivateFieldData.foafImgFields.images){
+		return;
+	}
+
+	/*remove all existing images in globalFieldData*/		
+	globalFieldData.foafImgFields.images = new Array();
+	globalPrivateFieldData.foafImgFields.images = new Array();
 			
-			/*add the elements that are present in the display again*/
-			for(i=0 ; i <containerElement.childNodes.length ; i++){
-				
-				var element = containerElement.childNodes[i];
-					
-				/*take the various attributes of the image tag and add them to the globalFieldData object*/
-				if(element.className == 'image'){	
-					var thisImageArray = new Object();
-										
-					if(typeof(element.src) != 'undefined' && element.src){
-						thisImageArray.uri = element.src;
-					}
-					if(typeof(element.title) != 'undefined' && element.title){
-						thisImageArray.title= element.title;
-					}
-					//TODO: need to actually set alt when the image is rendered
-					if(typeof(element.alt) != 'undefinied' && element.alt){
-						thisImageArray.description = element.alt;
-					}
-					globalFieldData.foafImgFields.images.push(thisImageArray);
-				}//end if
-			}//end for	
-		}//end if	
-	}//end if
+	/*add the elements that are present in the display again*/
+	for(i=0 ; i <containerElement.childNodes.length ; i++){
+		
+		/*the image element*/
+		var element = containerElement.childNodes[i];				
+		if(element.className != 'image' || typeof(element.id)=='undefined' || !element.id){	
+			continue;
+		}	
+	
+		/*the privacy checkbox*/
+		var privacyCheckbox = document.getElementById('privacycheckbox_'+element.id);		
+		if(typeof(privacyCheckbox) == 'undefined' || !privacyCheckbox){
+			continue;
+		}
+		
+		/*take the various attributes of the image tag and add them to the globalFieldData object*/		
+		var thisImageArray = new Object();
+									
+		if(typeof(element.src) != 'undefined' && element.src){
+			thisImageArray.uri = element.src;
+		}
+		if(typeof(element.title) != 'undefined' && element.title){
+			thisImageArray.title= element.title;
+		}
+		if(typeof(element.alt) != 'undefinied' && element.alt){
+			thisImageArray.description = element.alt;
+		}
+		
+		log("in img display to objects "+privacyCheckbox.checked);
+		/*add to the appropriate global object depending on whether it is private or publi*/
+		if(!privacyCheckbox.checked){
+			globalFieldData.foafImgFields.images.push(thisImageArray);
+		} else {
+			globalPrivateFieldData.foafImgFields.images.push(thisImageArray);
+		}
+	}
 }
 
 function knowsDisplayToObjects(){
@@ -2783,21 +2898,25 @@ function updateLatLongText(holderName,marker){
 }
 
 function log(logline){
-	var debugDiv = document.getElementById('debugDiv');
-	if(!debugDiv){
-		debugDiv = document.createElement("div");
-		debugDiv.id='debugDiv';
-		document.body.appendChild(debugDiv);
-		debugDiv.style.position = 'absolute';
-		debugDiv.style.top = '0px';
-		debugDiv.style.left = '0px';
+
+	if(loggingOn){	
+		var debugDiv = document.getElementById('debugDiv');
+		if(!debugDiv){
+			debugDiv = document.createElement("div");
+			debugDiv.id='debugDiv';
+			document.body.appendChild(debugDiv);
+			debugDiv.style.position = 'absolute';
+			debugDiv.style.top = '0px';
+			debugDiv.style.left = '0px';
+		}
+		debugDiv.appendChild(document.createTextNode(logline));
+		debugDiv.appendChild(document.createElement("br"));
 	}
-	debugDiv.appendChild(document.createTextNode(logline));
-	debugDiv.appendChild(document.createElement("br"));
 }
 
 /*preview an image that has been uploaded or entered as a url and save the page*/
-function previewImage(containerElementId,name,source,file){
+function previewImage(containerElementId,name,source,file,isPublic){
+	log('in preview image '+isPublic);
 	var image = new Array();
 	
 	//XXX need to worry about browser compatibility here
@@ -2816,13 +2935,12 @@ function previewImage(containerElementId,name,source,file){
 	if(name=='foafDepiction'){
 		renderDepictionElement(image,containerElement.childNodes.length,document.getElementById(containerElementId));
 	} else{
-		renderImgElement(image,containerElement.childNodes.length,document.getElementById(containerElementId));
+		renderImgElement(image,containerElement.childNodes.length,document.getElementById(containerElementId),isPublic);
 	}
 	
 	/*reattach the menu div underneath the existing menu*/
 	containerElement.appendChild(menuDiv);
-	
-	/*save the page as is prudent*/
+
 	saveFoaf();	
 }	
 
