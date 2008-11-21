@@ -100,7 +100,7 @@ class FieldNames {
 	}
 	
 	private function instantiatePicturesFields($fullInstantiation = true){
-		//$this->allFieldNames['foafDepiction'] = new DepictionField($this->foafData,$fullInstantiation);
+		$this->allFieldNames['foafDepiction'] = new DepictionField($this->foafData,$this->privateFoafData,$fullInstantiation);
 		$this->allFieldNames['foafImg'] = new ImgField($this->foafData,$this->privateFoafData,$fullInstantiation);
 	}
 	

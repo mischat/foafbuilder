@@ -175,7 +175,7 @@ function genericObjectsToDisplay(data){
 	phoneFieldsObjectsToDisplay(data);
 	addressFieldsObjectsToDisplay(data);
 	imgFieldsObjectsToDisplay(data);
-	//depictionFieldsObjectsToDisplay(data);
+	depictionFieldsObjectsToDisplay(data);
 	
 	/*render the various fields*/
 	renderAccountFields(data);
@@ -183,7 +183,7 @@ function genericObjectsToDisplay(data){
 	renderHomepageFields(data);
 	renderBasedNearFields(data);
 	renderNearestAirportFields(data);
-	renderDepictionFields(data);
+	//renderDepictionFields(data);
 	//renderImgFields(data);
 	renderKnowsFields(data);
 }
@@ -200,6 +200,17 @@ function imgFieldsObjectsToDisplay(data){
 	}
 	if(data.public){
 		renderImgFields(data.public,true);
+	}
+}
+function depictionFieldsObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderDepictionFields(data.private,false);
+	}
+	if(data.public){
+		renderDepictionFields(data.public,true);
 	}
 }
 function simpleFieldsObjectsToDisplay(data){
@@ -355,6 +366,21 @@ function renderImgFields(data, isPublic){
 		log("Returning!!! isPublic: "+isPublic);
 		return;
 	}
+	if(!data.foafImgFields 
+		|| typeof(data.foafImgFields) == 'undefined'){
+		log('returning img');
+		return;
+	}
+	if(!data.foafImgFields.name
+		|| typeof(data.foafImgFields.name) == 'undefined'){
+			log('returning img');
+		return;	
+	}
+	if(!data.foafImgFields.displayLabel
+		|| typeof(data.foafImgFields.displayLabel) == 'undefined'){
+			log('returning img');
+		return;	
+	}
 	
 	/*build the container*/
 	var name = data.foafImgFields.name;
@@ -373,12 +399,58 @@ function renderImgFields(data, isPublic){
 	}
 	
 	/*render the image menu i.e. upload new, link to an image if one has not been rendered already*/
-	//relies on private being done before public
+	//XXX relies on private being done before public
 	if(!document.getElementById('menuDiv_'+name) && isPublic){
 		renderImageMenu(name, containerElement,isPublic);
 	}
 }
 
+
+/*Render the image fields*/
+function renderDepictionFields(data, isPublic){
+	
+	if(typeof(data) == 'undefined' || !data || typeof(isPublic) == 'undefined'){
+		log("Returning!!! isPublic: "+isPublic);
+		return;
+	}
+	if(!data.foafDepictionFields 
+		|| typeof(data.foafDepictionFields) == 'undefined'){
+		log('returning depiction');
+		return;
+	}
+	if(!data.foafDepictionFields.name
+		|| typeof(data.foafDepictionFields.name) == 'undefined'){
+			log('returning depiction');
+		return;	
+	}
+	if(!data.foafDepictionFields.displayLabel
+		|| typeof(data.foafDepictionFields.displayLabel) == 'undefined'){
+			log('returning depiction');
+		return;	
+	}
+	
+	/*build the container*/
+	var name = data.foafDepictionFields.name;
+	var label = data.foafDepictionFields.displayLabel;
+	
+	/*create a container if required*/
+	var containerElement = document.getElementById(name+'_container');
+	if(!containerElement){
+		var containerElement = createFieldContainer(name, label);
+	}
+
+	/*render each individual image element*/	
+	for(image in data.foafDepictionFields['images']){
+		log("rendering image element: "+isPublic);
+		renderDepictionElement(data.foafDepictionFields['images'][image],image,containerElement,isPublic);
+	}
+	
+	/*render the image menu i.e. upload new, link to an image if one has not been rendered already*/
+	//XXX relies on private being done before public
+	if(!document.getElementById('menuDiv_'+name) && isPublic){
+		renderImageMenu(name, containerElement,isPublic);
+	}
+}
 
 /*Render the birthday dropdown (assumes only one birthday)*/
 function renderBirthdayFields(data){
@@ -588,26 +660,6 @@ function renderNearestAirportFields(data){
 	}
 }
 
-/*Render the image fields*/
-function renderDepictionFields(data){
-	if(!data || !data.foafDepictionFields || typeof(data.foafDepictionFields) == 'undefined'){
-		return;
-	}
-	
-	/*build the container*/
-	var name = data.foafDepictionFields.name;
-	var label = data.foafDepictionFields.displayLabel;
-	var containerElement = createFieldContainer(name, label);
-
-	/*render each individual image element*/	
-	for(image in data.foafDepictionFields['images']){
-		renderDepictionElement(data.foafDepictionFields['images'][image],image,containerElement);
-	}
-	
-	/*render the image menu i.e. upload new, link to an image*/
-	renderImageMenu('foafDepiction', containerElement);
-}
-
 /*render the various relationships of the user*/
 function renderKnowsFields(data){
 	if(!data || !data.foafKnowsFields || typeof(data.foafKnowsFields) == 'undefined'){
@@ -664,29 +716,41 @@ function renderKnowsFields(data){
 		return imageElement;
 	}
 	
-	function renderDepictionElement(image,count,containerElement){
+	function renderDepictionElement(image,count,containerElement,isPublic){
 		
-		/*create the image element*/
-		var imageElement = document.createElement(imageElement, containerElement.id);
+		log('in function render image element');
+		if(typeof(image) == 'undefined' ||
+			!image || 
+			typeof(containerElement) == 'undefined' ||
+			!containerElement ||
+			typeof(isPublic) == 'undefined'){
+			
+			log('returning from render image element isPublic = '+isPublic);
+			return;
+		}		
 		
 		/*create the image element*/
 		var imageElement = document.createElement('img');
 		imageElement.setAttribute('src',image['uri']);
+		
 		if(typeof(image['title']) != 'undefined' && image['title']){
 			imageElement.setAttribute('title',image['title']);
 		}
 		if(typeof(image['description']) != 'undefined' && image['description']){
 			imageElement.setAttribute('alt',image['description']);
 		}
-		imageElement.id = 'foafDepiction'+count;
-		imageElement.className = 'image';
 		
-		//FIXME: this function is badly named!
-		/*create (and append) the remove link*/
-		createGenericInputElementRemoveLink(imageElement.id, containerElement.id,true);
+		imageElement.id = 'foafDepiction_'+count;
+		imageElement.className = 'image';
+	
+		/*create (and append) the remove link and privacy checkbox*/
+		createGenericInputElementPrivacyBox(imageElement.id, containerElement.id,!isPublic);
+		createGenericInputElementRemoveLink(imageElement.id, containerElement.id,true);		
 			
 		/*tack the image element onto the container*/
 		containerElement.appendChild(imageElement);
+		
+		return imageElement;
 	}
 	
 	/*renders the menu which allows you to upload images or submit urls*/
@@ -1272,7 +1336,7 @@ function displayToObjects(name){
 			basedNearDisplayToObjects();
 			break;
 		case 'load-pictures':
-			//depictionDisplayToObjects();
+			depictionDisplayToObjects();
 			imgDisplayToObjects();
 			break;
 		case 'load-friends':
@@ -1587,26 +1651,49 @@ function basedNearDisplayToObjects(locationElement){
 
 /*this is more or less identical to imgDisplayToObjects which is possibly not a good thing*/
 function depictionDisplayToObjects(){
+	log("saving depictions");
+	/*the container of the images*/
 	var containerElement = document.getElementById('foafDepiction_container');
 	
-	if(containerElement && typeof(globalFieldData.foafDepictionFields != 'undefined') && globalFieldData.foafDepictionFields){
+	if(!containerElement){
+		log("['depictionDisplayToObjects'] couldn't get container element");
 		return;
 	}
-	if(typeof(globalFieldData.foafDepictionFields.images) != 'undefined'){
+	if(typeof(globalFieldData.foafDepictionFields) == 'undefined'
+		|| !globalFieldData.foafDepictionFields
+		|| typeof(globalFieldData.foafDepictionFields.images) == 'undefined'
+		|| !globalFieldData.foafDepictionFields.images){
+		log("['depictionDisplayToObjects'] globalField data (public) img setup incorrect");
 		return;
 	}
+	if(typeof(globalPrivateFieldData.foafDepictionFields) == 'undefined'
+		|| !globalPrivateFieldData.foafDepictionFields
+		|| typeof(globalPrivateFieldData.foafDepictionFields.images) == 'undefined'
+		|| !globalPrivateFieldData.foafDepictionFields.images){
+		log("['depictionDisplayToObjects'] globalField data (private) img setup incorrect");
+		return;
+	}
+
 	/*remove all existing images in globalFieldData*/		
 	globalFieldData.foafDepictionFields.images = new Array();
+	globalPrivateFieldData.foafDepictionFields.images = new Array();
 			
 	/*add the elements that are present in the display again*/
 	for(i=0 ; i <containerElement.childNodes.length ; i++){
-				
-		var element = containerElement.childNodes[i];
-				
-		/*take the various attributes of the image tag and add them to the globalFieldData object*/
-		if(element.className != 'image'){	
+		
+		/*the image element*/
+		var element = containerElement.childNodes[i];				
+		if(element.className != 'image' || typeof(element.id)=='undefined' || !element.id){
 			continue;
 		}	
+	
+		/*the privacy checkbox*/
+		var privacyCheckbox = document.getElementById('privacycheckbox_'+element.id);		
+		if(typeof(privacyCheckbox) == 'undefined' || !privacyCheckbox){
+			continue;
+		}
+		
+		/*take the various attributes of the image tag and add them to the globalFieldData object*/		
 		var thisImageArray = new Object();
 									
 		if(typeof(element.src) != 'undefined' && element.src){
@@ -1615,11 +1702,16 @@ function depictionDisplayToObjects(){
 		if(typeof(element.title) != 'undefined' && element.title){
 			thisImageArray.title= element.title;
 		}
-		//TODO: need to actually set alt when the image is rendered
 		if(typeof(element.alt) != 'undefinied' && element.alt){
 			thisImageArray.description = element.alt;
 		}
-		globalFieldData.foafDepictionFields.images.push(thisImageArray);
+		
+		/*add to the appropriate global object depending on whether it is private or publi*/
+		if(!privacyCheckbox.checked){
+			globalFieldData.foafDepictionFields.images.push(thisImageArray);
+		} else {
+			globalPrivateFieldData.foafDepictionFields.images.push(thisImageArray);
+		}
 	}
 }
 
@@ -2934,7 +3026,7 @@ function previewImage(containerElementId,name,source,file,isPublic){
 	
 	/*render the new image element*/
 	if(name=='foafDepiction'){
-		renderDepictionElement(image,containerElement.childNodes.length,document.getElementById(containerElementId));
+		renderDepictionElement(image,containerElement.childNodes.length,document.getElementById(containerElementId),isPublic);
 	} else{
 		renderImgElement(image,containerElement.childNodes.length,document.getElementById(containerElementId),isPublic);
 	}
