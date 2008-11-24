@@ -63,7 +63,7 @@ class FieldNames {
 				$this->instantiateTheBasicsFields(false);
 				$this->instantiateContactDetailsFields(false);
 				$this->instantiatePicturesFields(false);
-				//$this->instantiateAccountsFields(false);
+				$this->instantiateAccountsFields(false);
 				//$this->instantiateFriendsFields(false);
 				//$this->instantiateBlogsFields(false);
 				//$this->instantiateInterestsFields(false);
@@ -105,7 +105,7 @@ class FieldNames {
 	}
 	
 	private function instantiateAccountsFields($fullInstantiation = true){
-		$this->allFieldNames['foafHoldsAccount'] = new HoldsAccountField($this->foafData,$fullInstantiation);
+		$this->allFieldNames['foafHoldsAccount'] = new HoldsAccountField($this->foafData,$this->privateFoafData,$fullInstantiation);
 	}
 	
 	private function instantiateFriendsFields($fullInstantiation = true){

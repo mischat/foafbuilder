@@ -178,9 +178,10 @@ function genericObjectsToDisplay(data){
 	depictionFieldsObjectsToDisplay(data);
 	nearestAirportFieldsObjectsToDisplay(data);
 	basedNearFieldsObjectsToDisplay(data);
+	accountsObjectsToDisplay(data);
 	
 	/*render the various fields*/
-	renderAccountFields(data);
+	//renderAccountFields(data);
 	renderBirthdayFields(data);
 	renderHomepageFields(data);
 	renderKnowsFields(data);
@@ -272,7 +273,6 @@ function addressFieldsObjectsToDisplay(data){
 		renderAddressFields(data.public,true);
 	}
 }
-
 function basedNearFieldsObjectsToDisplay(data){
 	if(!data){
 		return;
@@ -284,59 +284,81 @@ function basedNearFieldsObjectsToDisplay(data){
 		renderBasedNearFields(data.public,true);
 	}
 }
+function accountsObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderAccountFields(data.private,false);
+	}
+	if(data.public){
+		renderAccountFields(data.public,true);
+	}
+}
 
 
 
 /*--------------------------second level functions to convert globalFieldData into HTML elements--------------------------*/
-function renderAccountFields(data){
+function renderAccountFields(data,isPublic){
 	
 	//if(!data.foafHoldsAccountFields || typeof(data.foafHoldsAccountFields) == 'undefined'){
 	if(!data || !data.foafHoldsAccountFields || typeof(data.foafHoldsAccountFields) == 'undefined'){
 		return;
 	}
 	
-	/*build the container*/
+	/*some details*/
 	var name = data.foafHoldsAccountFields.name;
 	var label =	data.foafHoldsAccountFields.displayLabel;
-	var containerElement = createFieldContainer(name, label);
-	
+
+	/*build the container if it isn't already there*/
+	var containerElement = document.getElementById(name+'_container');
+	if(!containerElement){
+		containerElement = createFieldContainer(name, label);
+	}
+
 	/*fill it up with accounts*/
 	for(accountBnodeId in data.foafHoldsAccountFields){
-		if(accountBnodeId != "displayLabel" && accountBnodeId != "name"){
+		if(accountBnodeId == "displayLabel" || accountBnodeId == "name"){
+			continue;
+		}
 		
-	 		/*create a container for this account. E.g. a Skype account represented by accountBnodeId=bNode3*/
-			var holdsAccountElement = createHoldsAccountElement(containerElement,accountBnodeId);
+	 	/*create a container for this account. E.g. a Skype account represented by accountBnodeId=bNode3*/
+		var holdsAccountElement = createHoldsAccountElement(containerElement,accountBnodeId,isPublic);
 			
-			/*create an element for the foafAccountServiceHomepage*/
-			if(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]){
-				createFoafAccountServiceHomepageInputElement(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
-			} else {
-				/*create an empty element*/
-				createFoafAccountServiceHomepageInputElement('', holdsAccountElement);	
-			}
-			/*create an element for the foafAccountName*/
-			if(data.foafHoldsAccountFields[accountBnodeId].foafAccountName[0]){
-				createAccountsInputElement('foafAccountName', data.foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label, holdsAccountElement);	
-			} else {
-				/*create an empty element*/
-				createAccountsInputElement('foafAccountName', '', holdsAccountElement);	
-			}
-			/*create an element for the foafAccountProfilePage*/
-			if(data.foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]){
-				createAccountsInputElement('foafAccountProfilePage', data.foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri, holdsAccountElement);	
-			} else {
-				/*create an empty element*/
-				createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
-			}
+		/*create an element for the foafAccountServiceHomepage*/
+		if(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]){
+			createFoafAccountServiceHomepageInputElement(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
+		} else {
+			/*create an empty element*/
+			createFoafAccountServiceHomepageInputElement('', holdsAccountElement);	
+		}
+		
+		/*create an element for the foafAccountName*/
+		if(data.foafHoldsAccountFields[accountBnodeId].foafAccountName[0]){
+			createAccountsInputElement('foafAccountName', data.foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label, holdsAccountElement);	
+		} else {
+			/*create an empty element*/
+			createAccountsInputElement('foafAccountName', '', holdsAccountElement);	
+		}
+		
+		/*create an element for the foafAccountProfilePage*/
+		if(data.foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]){
+			createAccountsInputElement('foafAccountProfilePage', data.foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri, holdsAccountElement);	
+		} else {
+			/*create an empty element*/
+			createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
+		}
 			
-			/*hide/show the profilePage url as appropriate*/	
-			if(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri){
-				toggleHiddenAccountInputElements(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri,holdsAccountElement,'');
-			}
-		}//end if
-	}//end for
-	/*a link to add another account*/	
-	createAccountsAddElement(containerElement);
+		/*hide/show the profilePage url as appropriate*/	
+		if(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri){
+			toggleHiddenAccountInputElements(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri,holdsAccountElement,'');
+		}
+	}
+	
+	//add a link to add another account. We only want to do this once. XXX this relies on the public bit being rendered second
+	if(isPublic){
+		createAccountsAddElement(containerElement);
+	}
 }
 
 /*renders either the private or the public fields*/
@@ -2484,7 +2506,7 @@ function phoneDisplayToObjects(){
 	
 	}
 	
-	function createHoldsAccountElement(attachElement, bnodeId){
+	function createHoldsAccountElement(attachElement, bnodeId,isPublic){
 		
 		/*if new, create a random id*/
 		if(!bnodeId){
@@ -2509,6 +2531,9 @@ function phoneDisplayToObjects(){
 		removeDiv.appendChild(removeLink);
 		holdsAccountElement.appendChild(removeDiv);
 		
+		/*create privacy checkbox*/
+		createGenericInputElementPrivacyBox(bnodeId, bnodeId,!isPublic);
+		
 		return holdsAccountElement;
 	}
 
@@ -2516,7 +2541,7 @@ function phoneDisplayToObjects(){
 	function createEmptyHoldsAccountElement(container){
 		
 		/*create a new holdsaccount div*/
-		var holdsAccountElement = createHoldsAccountElement(container, '');
+		var holdsAccountElement = createHoldsAccountElement(container, '',true);
 		
 		/*generate fields to fill it up*/
 		createFoafAccountServiceHomepageInputElement('', holdsAccountElement);

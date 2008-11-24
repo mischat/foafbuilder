@@ -6,16 +6,48 @@ require_once 'helpers/Utils.php';
 class HoldsAccountField extends Field {
 	
 	/*predicateUri is only appropriate for simple ones (one triple only)*/
-	public function HoldsAccountField($foafData,$fullInstantiation) {
+	public function HoldsAccountField($foafDataPublic,$foafDataPrivate,$fullInstantiation) {
 		
-		$this->data['foafHoldsAccountFields'] = array();
 		$this->name = 'foafHoldsAccount';
 		$this->label = 'Accounts';
-		$this->data['foafHoldsAccountFields']['displayLabel'] = $this->label;
-		$this->data['foafHoldsAccountFields']['name'] = $this->name;
+		
+		$this->data['public'] = array();
+		$this->data['public']['foafHoldsAccountFields'] = array();
+		$this->data['public']['foafHoldsAccountFields']['displayLabel'] = $this->label;
+		$this->data['public']['foafHoldsAccountFields']['name'] = $this->name;
+		
+		$this->data['private'] = array();
+		$this->data['private']['foafHoldsAccountFields'] = array();
+		$this->data['private']['foafHoldsAccountFields']['displayLabel'] = $this->label;
+		$this->data['private']['foafHoldsAccountFields']['name'] = $this->name;
+		
+		if(!$fullInstantiation){
+			return;
+		}
+		
+	  	/*Do full load*/
+    	if($foafDataPublic){
+			$this->doFullLoad($foafDataPublic);
+		} 
+		if($foafDataPrivate){
+			$this->doFullLoad($foafDataPrivate);
+		}
 			
-		if ($fullInstantiation) {
-			$queryString = 
+	}
+	
+	private function doFullLoad($foafData){
+		
+		if(!$foafData || !$foafData->getPrimaryTopic()){
+			return;
+		}
+		
+		/*so we output the right stuff*/
+		$privacy = 'private';
+		if($foafData->isPublic){
+			$privacy = 'public';
+		}
+		
+		$queryString = 
 			"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 			 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
 			 PREFIX bio: <http://purl.org/vocab/bio/0.1/>
@@ -35,38 +67,35 @@ class HoldsAccountField extends Field {
 					}
 				};";
 		 
-			$results = $foafData->getModel()->SparqlQuery($queryString);				
+		$results = $foafData->getModel()->SparqlQuery($queryString);				
 			
-			if (!empty($results)) {
-				error_log("[foaf_editor] Have found some accounts to render");
-				/*mangle the results so that they can be easily rendered*/
-				foreach($results as $row){	
-					/*key them on the account*/
-					if(!isset($this->data['foafHoldsAccountFields'][$row['?a']->uri])){
-						$this->data['foafHoldsAccountFields'][$row['?a']->uri] = array();
-					}
-					
-					/*create an array for each of the properties we care about*/
-					if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'])){
-						 $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'] = array();
-					}
-					if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'])){
-						 $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'] = array();
-					}
-					if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'])){
-						 $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'] = array();
-					}
-					
-					/*fill the array we've created*/
-					array_push( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'], $row['?foafAccountProfilePage']);
-					array_push( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'], $row['?foafAccountServiceHomepage']);
-					array_push( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'], $row['?foafAccountName']);
-				}
-			} else {
-				error_log("[foaf_editor] There are no accounts to render");
+		if(!$results || empty($results)){
+			return;
+		}
+				
+		/*mangle the results so that they can be easily rendered*/
+		foreach($results as $row){	
+			/*key them on the account*/
+			if(!isset($this->data['foafHoldsAccountFields'][$row['?a']->uri])){
+				$this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri] = array();
 			}
-
-		} 
+			
+			/*create an array for each of the properties we care about*/
+			if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'])){
+				 $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'] = array();
+			}
+			if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'])){
+				 $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'] = array();
+			}
+			if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'])){
+				 $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'] = array();
+			}
+			
+			/*fill the array we've created*/
+			array_push( $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'], $row['?foafAccountProfilePage']);
+			array_push( $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'], $row['?foafAccountServiceHomepage']);
+			array_push( $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'], $row['?foafAccountName']);
+		}
 	}
 
 	public function getPredicateUri() {
