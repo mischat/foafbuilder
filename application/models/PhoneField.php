@@ -22,7 +22,7 @@ class PhoneField extends Field {
         $this->data['private']['foafPhoneFields']['name'] = $this->name;
     	
         /*don't sparql query the model etc if a full instantiation is not required*/
-        if (!$fullInstantiation) {
+        if (!$fullInstantiation){
 			return;
         }
 		if($foafDataPublic){
@@ -111,11 +111,8 @@ class PhoneField extends Field {
 				$phoneStatement = new Statement($primary_topic_resource,$predicate_resource,$resourceValue);	
 				
 				$foafData->getModel()->add($phoneStatement);
-				echo("SAVING--");
-			}
-			echo("SAVING");
-			
 
+			}
     }
     /*mangles the email address for display purposes*/
 	private function onLoadManglePhoneNo($value){
