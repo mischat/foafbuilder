@@ -22,21 +22,10 @@ class AjaxController extends Zend_Controller_Action {
     	$this->loadAnyPage('pictures');
     }
 	public function loadLocationsAction() {
-    	/*build up a sparql query to get the values of all the fields we need*/
-        $this->loadFoaf();
-    	//if ($this->loadFoaf()) {   
-    	if ($this->foafData->getPrimaryTopic()) {   
-            $this->fieldNamesObject = new FieldNames('locations',$this->foafData);  	
-            $this->view->results = array();
-            foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
-            	
-            	//need to cope with multiple fields of the same type
-            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
-          
-            }
-        } 
-	}
+    	$this->loadAnyPage('locations');
+    }
     
+  
     public function loadAccountsAction() {
     	/*build up a sparql query to get the values of all the fields we need*/
     	if ($this->loadFoaf()) {   

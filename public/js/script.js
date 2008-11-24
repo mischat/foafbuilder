@@ -15,7 +15,7 @@ var globalFieldData = new Object();
 var globalPrivateFieldData = new Object();
 
 /*current page*/
-var currentPage;//the page the user is on e.g. load-contact-details etc.
+var currentPage ='load-basics';//the page the user is on e.g. load-contact-details etc.
 
 /*for friend searching, so we know the type of the ifp we searched for*/
 var globalTypeArray = new Array;
@@ -176,6 +176,7 @@ function genericObjectsToDisplay(data){
 	addressFieldsObjectsToDisplay(data);
 	imgFieldsObjectsToDisplay(data);
 	depictionFieldsObjectsToDisplay(data);
+	nearestAirportFieldsObjectsToDisplay(data);
 	
 	/*render the various fields*/
 	renderAccountFields(data);
@@ -190,7 +191,17 @@ function genericObjectsToDisplay(data){
 
 /*-----------------objects to display elements to convert data to html elements and split public/private pairs up-----------------*/
 
-
+function nearestAirportFieldsObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderNearestAirportFields(data.private,false);
+	}
+	if(data.public){
+		renderNearestAirportFields(data.public,true);
+	}
+}
 function imgFieldsObjectsToDisplay(data){
 	if(!data){
 		return;
@@ -546,6 +557,51 @@ function renderPhoneFields(data,isPublic){
 }
 
 
+function renderNearestAirportFields(data,isPublic){
+	if(!data || typeof(data.nearestAirportFields) == 'undefined'){
+		return;
+	}
+	if(typeof(data.nearestAirportFields.name) == 'undefined' ||
+		typeof(data.nearestAirportFields.displayLabel) == 'undefined' ||
+		!data.nearestAirportFields.name ||
+		!data.nearestAirportFields.displayLabel){
+		return;	
+	}
+	//don't bother if we've already rendered it
+	if(document.getElementById('nearestAirport')){
+		return;
+	}
+
+	/*create a map element if there isn't one already*/
+	var mapElement = createMapElement();	
+	
+	/*append the mapElement to the main container and change the class to ensure it's right*/
+	if(mapElement){
+		var containerDiv = document.getElementById('personal');
+		containerDiv.appendChild(mapElement);
+		mapElement.className = 'embeddedMapDiv';
+		map.checkResize();
+		
+		//change the class of the map inside this one
+		mapElement.childNodes[0].className = 'embeddedMapDiv';
+	} 
+	
+	/*build the container element if it doesn't already exist*/
+	var name = data.nearestAirportFields.name;
+	var label =	data.nearestAirportFields.displayLabel;
+
+	var containerElement = document.getElementById(name+'_container');
+	if(!containerElement){
+		containerElement = createFieldContainer(name, label);
+	}
+	
+	if(map){
+		/*render the markers on the map and add divs containing the information below*/
+		addNearestAirportMarker(data.nearestAirportFields['nearestAirport'],containerElement,map,isPublic);			
+	}
+}
+
+
 /*renders the appropriate mbox fields*/
 function renderMboxFields(data,isPublic){
 	if(!data || !data.foafMboxFields || typeof(data.foafMboxFields) == 'undefined'){
@@ -637,26 +693,6 @@ function renderBasedNearFields(data){
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
 		addBasedNearMarkers(data.basedNearFields['basedNear'],containerElement,map);		
-	}
-}
-
-/*Render the location map*/
-function renderNearestAirportFields(data){
-	if(!data || typeof(data.nearestAirportFields) == 'undefined'){
-		return;
-	}
-
-	/*create a map element if there isn't one already*/
-	createMapElement();
-	
-	/*build the container*/
-	var name = data.nearestAirportFields.name;
-	var label =	data.nearestAirportFields.displayLabel;
-	var containerElement = createFieldContainer(name, label);
-
-	if(map){
-		/*render the markers on the map and add divs containing the information below*/
-		addNearestAirportMarker(data.nearestAirportFields['nearestAirport'],containerElement,map);			
 	}
 }
 
@@ -1149,15 +1185,18 @@ function renderKnowsFields(data){
 	
 	/*--------------------------nearestAirport--------------------------*/
 
-
-	/*add markers for all the contact:Nearest airports*/
-	//FIXME: this is not complete
-	function addNearestAirportMarker(nearestAirport,containerElement,map){
+	function addNearestAirportMarker(nearestAirport,containerElement,map,isPublic){
 		
-		if(!nearestAirport || typeof(nearestAirport) == 'undefined'){
+		if(typeof(nearestAirport) == 'undefined' || !nearestAirport){
 			return;
 		}
-		
+		if(typeof(containerElement) == 'undefined' || !containerElement){
+			return;
+		}
+		if(typeof(map) == 'undefined' || !map){
+			return;
+		}
+
 		var geocoder = new GClientGeocoder();
 		var icaoCode = '';
 		var iataCode = '';
@@ -1169,7 +1208,12 @@ function renderKnowsFields(data){
 			iataCode = nearestAirport['iataCode'];
 		}
 		
-		createAirportDiv(iataCode,icaoCode,containerElement);
+		/*only add it if either there is info there or if this is the last go*/
+		//XXX this relies on the method being called with isPublic at the start
+		if(icaoCode || iataCode || isPublic){
+			createGenericInputElementPrivacyBox('nearestAirport', containerElement.id,!isPublic);
+			createAirportDiv(iataCode,icaoCode,containerElement);
+		}
 	}
 
 	/*gets the already rendered autocomplete div and attaches it to the container given*/
@@ -1588,36 +1632,68 @@ function accountsDisplayToObjects(){
 
 /*put nearestAirport data into the globalFieldData objects*/
 function nearestAirportDisplayToObjects(){
-	var nearestAirport = document.getElementById('nearestAirport');
 	
+	log('started nearest airport display to objects');
+	/*get the required elements*/
+	var nearestAirport = document.getElementById('nearestAirport');
+	var icaoCodeElem = document.getElementById('icaoCode');
+	var iataCodeElem = document.getElementById('iataCode');
+	var privacyCheckbox = document.getElementById('privacycheckbox_nearestAirport');
+	
+	/*do some initial checks*/
 	if(!nearestAirport || typeof(nearestAirport)=='undefined'){
 		return;
 	}
-	
-	//	globalFieldData.nearestAirportFields = new Object();
-	globalFieldData.nearestAirportFields.nearestAirport = new Object();
-	
-	var icaoCodeElem = document.getElementById('icaoCode');
-	var iataCodeElem = document.getElementById('iataCode');
-
-	if(icaoCodeElem){
-		var icaoCode = icaoCodeElem.childNodes[0].nodeValue.replace('ICAO Code: ','');
+	if(typeof(icaoCodeElem) == 'undefined' || !icaoCodeElem){
+		return;
 	}
-	if(iataCodeElem){
-		var iataCode = iataCodeElem.childNodes[0].nodeValue.replace('IATA Code: ','');
+	if(typeof(iataCodeElem) == 'undefined' || !iataCodeElem || 
+		typeof(iataCodeElem.childNodes[0]) == 'undefined' || 
+		!iataCodeElem.childNodes[0] ||
+		typeof(icaoCodeElem.childNodes[0].nodeValue) == 'undefined' || 
+		!icaoCodeElem.childNodes[0]){
+		return;
 	}
-
+	if(typeof(icaoCodeElem.childNodes[0].nodeValue) == 'undefined' 
+		|| !icaoCodeElem.childNodes[0].nodeValue){
+		return;	
+	}
+	if(typeof(iataCodeElem.childNodes[0].nodeValue) == 'undefined' 
+		|| !iataCodeElem.childNodes[0].nodeValue){
+		return;	
+	}
+	if(typeof(privacyCheckbox) == 'undefined' || !privacyCheckbox){
+		return;
+	}
+	log('got past the five billion nearest airport checks');
+	/*get the codes from the text*/
+	var icaoCode = icaoCodeElem.childNodes[0].nodeValue.replace('ICAO Code: ','');
+	var iataCode = iataCodeElem.childNodes[0].nodeValue.replace('IATA Code: ','');
+		
+	/*create the nearest airport fields object*/
+	thisAirport = new Object();
 	if(iataCode && iataCode!=''){
-		globalFieldData.nearestAirportFields.nearestAirport['iataCode'] = iataCode;
+		thisAirport['iataCode'] = iataCode;
 	}
-
 	if(icaoCode && icaoCode!=''){
-		globalFieldData.nearestAirportFields.nearestAirport['icaoCode'] = icaoCode;
+		thisAirport['icaoCode'] = icaoCode;
+	}
+	
+	/*add the object to either the public or the private global data object and empty the info from the other one*/
+	if(privacyCheckbox.checked){
+		globalFieldData.nearestAirportFields.nearestAirport = new Object();
+		globalPrivateFieldData.nearestAirportFields.nearestAirport = thisAirport;
+	} else {
+		globalPrivateFieldData.nearestAirportFields.nearestAirport = new Object();
+		globalFieldData.nearestAirportFields.nearestAirport = thisAirport;
 	}
 }	
 
 /*put basedNear data into the globalFieldData objects*/
 function basedNearDisplayToObjects(locationElement){
+	
+	//FIXME: this is next!
+	return;
 	
 	var containerElement = document.getElementById('basedNear_container');
 	

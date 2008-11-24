@@ -7,72 +7,97 @@ require_once 'helpers/Utils.php';
 class NearestAirportField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
-    public function NearestAirportField($foafData,$fullInstantiation = true) {
+    public function NearestAirportField($foafDataPublic,$foafDataPrivate,$fullInstantiation = true) {
     	
-    	$this->data['nearestAirportFields'] = array();
-    	$this->data['nearestAirportFields']['displayLabel'] = 'My Nearest Airport';
-        $this->data['nearestAirportFields']['name'] = 'nearestAirport';
-        $this->name = 'nearestAirport';
+    	$this->name = 'nearestAirport';
         $this->label = 'My Nearest Airport';
-	    $this->data['nearestAirportFields']['nearestAirport'] = array();
-	            
-        if (!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()) {
+        
+    	$this->data['public']['nearestAirportFields'] = array();
+    	$this->data['public']['nearestAirportFields']['displayLabel'] = $this->label;
+        $this->data['public']['nearestAirportFields']['name'] = $this->name;
+        $this->data['public']['nearestAirportFields']['nearestAirport'] = array();
+     	
+        $this->data['private']['nearestAirportFields'] = array();
+    	$this->data['private']['nearestAirportFields']['displayLabel'] = $this->label;
+        $this->data['private']['nearestAirportFields']['name'] = $this->name;
+        $this->data['private']['nearestAirportFields']['nearestAirport'] = array();
+       
+        if (!$fullInstantiation) {
 			return;
         }
-        
-	    $queryString = $this->getQueryString($foafData->getPrimaryTopic());
+
+   		if($foafDataPublic){
+			$this->doFullLoad($foafDataPublic,'public');
+		} 
+		if($foafDataPrivate){
+			$this->doFullLoad($foafDataPrivate,'private');
+		}
+       
+    }
+    
+    private function doFullLoad($foafData,$privacy){
+
+    	if(!$foafData || !$privacy){
+    		return;	
+    	}
+    	
+    	$queryString = $this->getQueryString($foafData->getPrimaryTopic());
 	    $results = $foafData->getModel()->SparqlQuery($queryString);		
 		
         if($results && !empty($results)){
-            
+    
 	        /*mangle the results so that they can be easily rendered*/
 	        foreach ($results as $row) {
-	        	$this->addNearestAirportElements($row);
+	        	$this->addNearestAirportElements($row,$privacy);
 	        }	
         }
     }
 
+    private function removeAirports(&$foafData,$existingAirports1,$exceptionBnode = false){
+		
+    	//loop through existing airports removing them
+		foreach($existingAirports1->triples as $triple){
+			
+			/*don't remove the exception*/
+			if($exceptionBnode && $triple->obj == $exceptionBnode){
+				continue;	
+			}
+			
+			//remove this triple
+			$foafData->getModel()->remove($triple);
+			$foundSubTriples = $foafData->getModel()->find($triple->obj,NULL,NULL);
+					
+			//remove all triples that are hanging off this one
+			if(!$foundSubTriples->triples || empty($foundSubTriples->triples)){
+				continue;
+			}
+			foreach($foundSubTriples->triples as $subTriple){
+				$foafData->getModel()->remove($subTriple);
+			}
+		}
+    }
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
     public function saveToModel(&$foafData, $value) {
-	
-    	if(!property_exists($value,'nearestAirport') || !$value->nearestAirport){
+	    
+    	if(!property_exists($value,'nearestAirport')|| !$value->nearestAirport){
     		return;
     	}
     	
     	//check for existing airports of either type
     	$existingAirports1 = $foafData->getModel()->find(new Resource($foafData->getPrimaryTopic()),new Resource('http://www.w3.org/2000/10/swap/pim/contact#nearestAirport'),NULL);
-    	$airportBnode = null;
     	
+    	 /*check if there are any airport codes in the response, if not delete all the airports in this model*/
+    	if(!property_exists($value->nearestAirport,'iataCode') 
+    		&& !property_exists($value->nearestAirport,'icaoCode')){
+    		$this->removeAirports($foafData,$existingAirports1);
+    	} 
+    	
+    	/*remove all but the first airport, since there should only be one*/
+    	$airportBnode = false;
     	if($existingAirports1 && !empty($existingAirports1->triples)){
-    		
-    		//grab the dirst airport and set the airportBnode variable to it
-			foreach($existingAirports1->triples as $triple){
-				/*check if the triple is actually an airport and if so set the airportBnode variable to it*/
-				if(property_exists($triple->obj,'uri')){
-					$foundAirport = $foafData->getModel()->find($triple->obj,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource('http://xmlns.com/wordnet/1.6/Airport'));
-					if($foundAirport && !empty($foundAirport->triples)){
-						$airportBnode = $triple->obj;
-						break;
-					}
-				}
-			}
-			
-			//Delete all but the first airport, since we're assuming that one can only have one nearest airport
-			foreach($existingAirports1->triples as $triple){
-				if($triple->obj != $airportBnode){
-					//remove this triple
-					$foafData->getModel()->remove($triple);
-					$foundSubTriples = $foafData->getModel()->find($triple->obj,NULL,NULL);
-							
-					//remove all triples that are hanging off this one
-					if($foundSubTriples && !empty($foundSubTriples->triples)){
-						foreach($foundSubTriples as $subTriple){
-							$foafData->getModel()->remove($subTriple);
-						}
-					}
-				} 
-			}
+    		$airportBnode = $existingAirports1->triples[0]->obj;
+			$this->removeAirports(&$foaf,$existingAirports1,$existingAirports1->triples[0]->obj);
 		} 
 				
     	/*if there is no airport already there then add one*/
@@ -140,7 +165,7 @@ class NearestAirportField extends Field {
     }
 
     /*add nearest airport elements*/
-    private function addNearestAirportElements($row){
+    private function addNearestAirportElements($row,$privacy){
     	$newArray = array();
 
         if (isset($row['?icaoCodeAlt']) && $row['?icaoCodeAlt'] && $row['?icaoCodeAlt']->label) {
@@ -156,7 +181,7 @@ class NearestAirportField extends Field {
             $newArray['iataCode'] = $row['?iataCode']->label;
     	}
     	if(!empty($newArray)){
-    		 $this->data['nearestAirportFields']['nearestAirport'] = $newArray;
+    		 $this->data[$privacy]['nearestAirportFields']['nearestAirport'] = $newArray;
     	} 
     }
     
