@@ -123,7 +123,7 @@ class FieldNames {
 	
 	private function instantiateLocationsFields($fullInstantiation = true){
 		$this->allFieldNames['nearestAirport'] = new NearestAirportField($this->foafData,$this->privateFoafData, $fullInstantiation);
-		//$this->allFieldNames['basedNear'] = new BasedNearField($this->foafData,$fullInstantiation);	
+		$this->allFieldNames['basedNear'] = new BasedNearField($this->foafData,$this->privateFoafData, $fullInstantiation);	
 	}
 	
 	private function instantiateOtherFields($fullInstantiation = true){
