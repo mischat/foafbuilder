@@ -177,15 +177,12 @@ function genericObjectsToDisplay(data){
 	imgFieldsObjectsToDisplay(data);
 	depictionFieldsObjectsToDisplay(data);
 	nearestAirportFieldsObjectsToDisplay(data);
+	basedNearFieldsObjectsToDisplay(data);
 	
 	/*render the various fields*/
 	renderAccountFields(data);
 	renderBirthdayFields(data);
 	renderHomepageFields(data);
-	renderBasedNearFields(data);
-	renderNearestAirportFields(data);
-	//renderDepictionFields(data);
-	//renderImgFields(data);
 	renderKnowsFields(data);
 }
 
@@ -273,6 +270,18 @@ function addressFieldsObjectsToDisplay(data){
 	}
 	if(data.public){
 		renderAddressFields(data.public,true);
+	}
+}
+
+function basedNearFieldsObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderBasedNearFields(data.private,false);
+	}
+	if(data.public){
+		renderBasedNearFields(data.public,true);
 	}
 }
 
@@ -663,8 +672,11 @@ function renderAddressFields(data,isPublic){
 	}
 }
 
-function renderBasedNearFields(data){
+function renderBasedNearFields(data,isPublic){
 	if(!data || !data.basedNearFields || typeof(data.basedNearFields) == 'undefined'){
+		return;
+	}
+	if(typeof(isPublic) == 'undefined'){
 		return;
 	}
 	
@@ -681,18 +693,20 @@ function renderBasedNearFields(data){
 		//change the class of the map inside this one
 		mapElement.childNodes[0].className = 'embeddedMapDiv';
 	} else {
-		//perhaps we should do something here
+		//perhaps we should do something here?
 	}
 	
-	/*build the container*/
+	/*build the container if it isn't there already*/
 	var name = data.basedNearFields.name;
 	var label =	data.basedNearFields.displayLabel;
-	var containerElement = createFieldContainer(name, label);
+	var containerElement = document.getElementById(name+'_container');
 	
-	
+	if(!containerElement){
+		containerElement = createFieldContainer(name, label);
+	}
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
-		addBasedNearMarkers(data.basedNearFields['basedNear'],containerElement,map);		
+		addBasedNearMarkers(data.basedNearFields['basedNear'],containerElement,map,isPublic);		
 	}
 }
 
@@ -1277,21 +1291,31 @@ function renderKnowsFields(data){
 	/*--------------------------basedNear--------------------------*/
 
 	/*add markers for all the foaf:based_near elements*/
-	function addBasedNearMarkers(basedNearArray, containerElement){
+	function addBasedNearMarkers(basedNearArray, containerElement,map,isPublic){
+		if(typeof(isPublic) == 'undefined'){
+			log('isPublic is undefined');
+			return;
+		}
 		
 		/*loop over each based_near instance*/
 		for(bNodeKey in basedNearArray){			
-			createSingleBasedNearMarker(containerElement.id, bNodeKey, basedNearArray[bNodeKey]);	
+			createSingleBasedNearMarker(containerElement.id, bNodeKey, basedNearArray[bNodeKey],isPublic);	
 		}
-		createBasedNearAddElement(containerElement);
-		  
+		//XXX we only want to render one of these.  This depends on the public stuff being rendered last.
+		if(isPublic){
+			log('creating Add element '+isPublic);
+			createBasedNearAddElement(containerElement);
+		}
 	}
 
-	function createSingleBasedNearMarker(containerElementId, bNodeKey, basedNearValue){
+	function createSingleBasedNearMarker(containerElementId, bNodeKey, basedNearValue,isPublic){
 			
 			var containerElement = document.getElementById(containerElementId);
 			/*create an element to hold each location*/
 			var locationDiv = createLocationElement(containerElement, bNodeKey);
+			
+			/*create the radiobutton for privacy*/
+			createGenericInputElementPrivacyBox(bNodeKey,bNodeKey,!isPublic)
 			
 			/*title: e.g. home address, office address etc*/
 			var basedNearTitleDiv = document.createElement('div');
@@ -2482,7 +2506,6 @@ function phoneDisplayToObjects(){
 	/*---------------------------basedNear---------------------------*/
 
 	function createBasedNearAddElement(container){
-		//TODO: continue from here
 		/*create add link and attach it to the container*/
 		var addDiv = document.createElement("div");
 		addDiv.id = "basedNearAddLinkContainer";
@@ -2513,7 +2536,7 @@ function phoneDisplayToObjects(){
 		globalFieldData.basedNearFields.basedNear[bNodeKey] = thisBasedNear;
 	
 		//create a new based near marker and div
-		createSingleBasedNearMarker(containerId,bNodeKey,thisBasedNear);
+		createSingleBasedNearMarker(containerId,bNodeKey,thisBasedNear,isPublic);
 		
 		//re-add the add link
 		container.appendChild(addLinkContainer);
@@ -2655,7 +2678,7 @@ function phoneDisplayToObjects(){
 			var optionalClassName = 'location';
 		}
 		
-		/*create holdsAccount div and attach it to the element given*/
+		/*create div and attach it to the element given*/
 		var locationDiv = document.createElement("div");
 		locationDiv.setAttribute('class',optionalClassName);
 		locationDiv.id = bnodeId;
@@ -2663,6 +2686,8 @@ function phoneDisplayToObjects(){
 			locationDiv.setAttribute("onclick","map.panTo(mapMarkers['"+bnodeId+"'].getLatLng());");
 		}
 		attachElement.appendChild(locationDiv);
+		
+		//XXX... lukelukeluke
 		
 		/*create remove link and attach it to the location div*/
 		var removeDiv = document.createElement("div");
