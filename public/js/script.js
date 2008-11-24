@@ -1439,10 +1439,6 @@ function displayToObjects(name){
 			return null;
 			break;
 	}
-	
-	//TODO MISCHA
-	//birthdayDisplayToObjects();
-	//simpleFieldsDisplayToObjects();
 }
 
 /*--------------------------second level display to objects functions--------------------------*/
@@ -1461,7 +1457,6 @@ function birthdayDisplayToObjects(){
 
 }
 
-//TODO MISCHA
 function homepageDisplayToObjects() {
 	var containerElement = document.getElementById('foafHomepage_container');	
 
@@ -1608,72 +1603,84 @@ function mboxDisplayToObjects(){
 }
 
 function accountsDisplayToObjects(){
-
-	/*TODO This will change when the display is improved + need a bit less hardcoding possibly*/
-  	var containerElement = document.getElementById('foafHoldsAccount_container');
-  	
-  	if(!containerElement){
-  		return;
-  	}
-  	
-  	/*an array of keys that have not been removed from the dom tree*/
- 	var doNotCleanArray = new Array();
+	//XXX we no longer preserve things across models because of the privacy implementation.
+	
+	/*get the countainer of all the accounts*/
+	var containerElement = document.getElementById('foafHoldsAccount_container');
+	
+	if(!containerElement){
+		log('[ACCOUNTS] no container elem');
+		return
+	}
+	
+	/*reset the accounts bit of the globalPrivateFieldData/globalFieldData object*/
+	globalPrivateFieldData.foafHoldsAccountFields = new Object();
+	globalFieldData.foafHoldsAccountFields = new Object();
  	
   	for(i=0; i < containerElement.childNodes.length; i++){
   		
   		var holdsAccountElement = containerElement.childNodes[i];
-  		var bNodeId = containerElement.childNodes[i].id;
   		
-		/*some mangling to autogenerate profilePage urils */
+  		if(typeof(holdsAccountElement.id) == 'undefined' || !holdsAccountElement.id){
+  			log('ACCOUNTS no id');
+  			continue;
+  		}
+  		
+  		var bNodeId = holdsAccountElement.id;
+  		
+		/*some mangling to autogenerate profilePage uris*/
   		updateProfilePageUrl(holdsAccountElement);
   		
-  		/*we don't want to clean this from the globalFieldData*/
-  		doNotCleanArray[bNodeId] = bNodeId;
-  		
-  		/*ignore all elements that don't don't contain accounts (such as add/remove links)*/
-  		if(holdsAccountElement.className == "holdsAccount"){
-  			//globalFieldData[i].foafHoldsAccountFields[containerElement.childNodes[i].id] = new Array();
-		
-			
-  			for(k=0; k < containerElement.childNodes[i].childNodes.length; k++){
-  				
-  				if(holdsAccountElement.childNodes[k].value != ''){
-  				
-	  				//do the right thing for the right element, and miss any elements we don't care about.
-	  				if (holdsAccountElement.childNodes[k].id == 'foafAccountName'){
-	  					/*create a new element if this account is new*/
-	  					if(!globalFieldData.foafHoldsAccountFields[bNodeId]){
-	  						globalFieldData.foafHoldsAccountFields[bNodeId] = new Object;
-	  					}
-	  					if(globalFieldData.foafHoldsAccountFields[bNodeId]){
-	  						globalFieldData.foafHoldsAccountFields[bNodeId]['foafAccountName'] = [{label : holdsAccountElement.childNodes[k].value}];
-	  					}
-	  				} else if(holdsAccountElement.childNodes[k].id == 'foafAccountProfilePage'){
-	  					/*create a new element if this account is new*/
-	  					if(!globalFieldData.foafHoldsAccountFields[bNodeId]){
-	  						globalFieldData.foafHoldsAccountFields[bNodeId] = new Object;
-	  					}
-	  					globalFieldData.foafHoldsAccountFields[bNodeId]['foafAccountProfilePage'] = [{uri : holdsAccountElement.childNodes[k].value}];
-	  				} else if (holdsAccountElement.childNodes[k].id == 'foafAccountServiceHomepage'){		
-	  					/*create a new element if this account is new*/
-	  					if(!globalFieldData.foafHoldsAccountFields[bNodeId]){
-	  						globalFieldData.foafHoldsAccountFields[bNodeId] = new Object;
-	  					}
-	  					if(globalFieldData.foafHoldsAccountFields[bNodeId]){
-	  						globalFieldData.foafHoldsAccountFields[bNodeId]['foafAccountServiceHomepage'] = [{uri : holdsAccountElement.childNodes[k].value}];				
-	  					}
-	  				} 	
-	  			} 
-  			}
-  		} 
-  	}
-  	
-  	/*remove all elements (accounts) from the globalFieldData object that have been removed from the dom tree*/
-  	for(key in globalFieldData.foafHoldsAccountFields){
-  		if(!doNotCleanArray[key]){
-  			delete globalFieldData.foafHoldsAccountFields[key];
+  		/*ignore all elements that don't contain accounts (such as add/remove links)*/
+  		if(holdsAccountElement.className != "holdsAccount"){	
+  			log('ACOUNTS wrong classname');
+  			continue;
   		}
-  	}
+  		
+  		/*get the privacy checkbox*/
+  		var privacyBox = document.getElementById('privacycheckbox_'+bNodeId);
+  		if(typeof(privacyBox) == 'undefined' || !privacyBox){
+  			log('ACCOUNTS no privacy box');
+  			continue;
+  		}
+		/*will hold the data for just this account*/	
+		thisAccount = new Object();
+		
+		/*loop through the child nodes of this box and add to the appropriate place*/	
+  		for(k=0; k < containerElement.childNodes[i].childNodes.length; k++){
+  			
+  			if(holdsAccountElement.childNodes[k].value == ''){
+  				log('ACCOUNTS empty value');
+  				//don't save if there is no value here
+  				continue;
+  			}	
+  			
+  			var id = holdsAccountElement.childNodes[k].id;
+  			
+	  		//do the right thing for the right element, and miss any elements we don't care about.
+	  		if (holdsAccountElement.childNodes[k].id == 'foafAccountName'){
+	  			
+	  			thisAccount['foafAccountName'] = holdsAccountElement.childNodes[k].value;
+	  					
+	  		} else if(holdsAccountElement.childNodes[k].id == 'foafAccountProfilePage'){
+	  			
+	  			thisAccount['foafAccountProfilePage'] = holdsAccountElement.childNodes[k].value;
+	  		
+	  		} else if (holdsAccountElement.childNodes[k].id == 'foafAccountServiceHomepage'){		
+	  				
+	  			thisAccount['foafAccountServiceHomepage'] = holdsAccountElement.childNodes[k].value;
+	  		} 	
+	  	} 	
+	  	
+	  	/*add to the appropriate global data object*/
+  		if(privacyBox.checked){
+  			log('SAVING private ACCOUNT INFO');
+  			globalPrivateFieldData.foafHoldsAccountFields[bNodeId] = thisAccount;
+  		} else {
+  			log('SAVING public ACCOUNT INFO');
+			globalFieldData.foafHoldsAccountFields[bNodeId] = thisAccount;
+		} 
+  	} 
 }
 
 /*put nearestAirport data into the globalFieldData objects*/
