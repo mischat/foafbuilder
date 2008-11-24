@@ -212,7 +212,7 @@ class AjaxController extends Zend_Controller_Action {
         $fieldNames = new FieldNames('all');
         $allFieldNames = $fieldNames->getAllFieldNames();
        
-       // var_dump($almost_model);
+        //var_dump($almost_model);
         //save private and public 
         if(!$foafData->isPublic && property_exists($almost_model,'private') && $almost_model->private){
         	$this->saveAllFields($almost_model->private,$allFieldNames,$foafData);   
@@ -231,8 +231,11 @@ class AjaxController extends Zend_Controller_Action {
             if(isset($allFieldNames[substr($key,0,-6)])) {
                 /*get some details about the fields we're dealing with*/
                 $field = $allFieldNames[substr($key,0,-6)];
+                
+                echo("before save");
                 /*save them using the appropriate method*/
                 $field->saveToModel($foafData, $value);
+                echo("after save");
                 
             } else if($key == 'fields'){
             	//we need to look inside the simplefield array to do the right kind of save
