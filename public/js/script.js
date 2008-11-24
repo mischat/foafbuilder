@@ -15,7 +15,7 @@ var globalFieldData = new Object();
 var globalPrivateFieldData = new Object();
 
 /*current page*/
-var currentPage ='load-basics';//the page the user is on e.g. load-contact-details etc.
+var currentPage ='load-the-basics';//the page the user is on e.g. load-contact-details etc.
 
 /*for friend searching, so we know the type of the ifp we searched for*/
 var globalTypeArray = new Array;
@@ -144,7 +144,8 @@ function renderFoundFriend(data){
 function renderOther() {
 		turnOnLoading();
 		url = document.getElementById('writeUri').value;
-        $.post("/writer/write-foafn3", {uri: url }, function(data){drawOtherTextarea(data);turnOffLoading();},null);
+        $.post("/writer/write-foafn3", {uri: url }, function(data){drawOtherTextarea(data);turnOffLoading();},'json');
+        
 }
 
 
@@ -180,11 +181,13 @@ function genericObjectsToDisplay(data){
 	basedNearFieldsObjectsToDisplay(data);
 	accountsObjectsToDisplay(data);
 	
-	/*render the various fields*/
-	//renderAccountFields(data);
-	renderBirthdayFields(data);
-	renderHomepageFields(data);
+	/*friends stuff does not have pricacy settings*/
 	renderKnowsFields(data);
+	
+	/*render the various fields*/
+	//renderBirthdayFields(data);
+	//renderHomepageFields(data);
+
 }
 
 /*-----------------objects to display elements to convert data to html elements and split public/private pairs up-----------------*/
@@ -2798,8 +2801,16 @@ function phoneDisplayToObjects(){
 	//renders the geek view
 	function drawOtherTextarea(data){
 		if(!data || typeof(data) == 'undefined'){
+			log('no data for geek view!');
 			return;
 		}
+		if(typeof(data.private) == 'undefined' && !data.private &&
+			typeof(data.public) == 'undefined' && !data.public){
+			
+			log('no data for geek view');
+			return;
+		}
+		
 		document.getElementById('personal').innerHTML = '';	
 		
 		/*build the container*/
@@ -2817,15 +2828,17 @@ function phoneDisplayToObjects(){
 		rdfForm.setAttribute('action','javascript:saveFoaf()');//TODO: need to have a good name for this
 		rdfForm.id = 'otherForm';
 		rdfContainerDiv.appendChild(rdfForm);
-		
-		/*build a textarea*/
-		var rdfTextArea = document.createElement('textarea');
-		rdfTextArea.id = ('otherTextArea');
-		rdfTextArea.setAttribute('cols','1000');
-		rdfTextArea.setAttribute('rows','50000'); 
-		rdfTextArea.className = ('otherTextArea');
-		rdfForm.appendChild(rdfTextArea);
-		rdfTextArea.appendChild(document.createTextNode(data));
+		log('here');
+		/*build a textarea for private & public*/
+		if(typeof(data.private) != 'undefined' && data.private){
+			log('creating one container');
+			createOtherTextArea(data.private,'Private',rdfForm,rdfContainerDiv,'private');
+		}
+		if(typeof(data.public) != 'undefined' && data.public){
+			log('creating another container');
+			createOtherTextArea(data.public,'Public',rdfForm,rdfContainerDiv,'public');
+		}
+		log('and now here');
 		
 		/*add a submit button*/
 		var rdfButton = document.createElement('input');
@@ -2834,6 +2847,31 @@ function phoneDisplayToObjects(){
 		rdfButton.id = 'otherButton';
 		rdfButton.className = 'otherButton';
 		rdfForm.appendChild(rdfButton);
+	}
+	
+	function createOtherTextArea(data,header,rdfForm,container,privacy){
+		
+		if(typeof(data) == 'undefined' || !data){
+			log('no data');
+			return;
+		}
+		
+		/*render the header*/
+		var headerDiv = document.createElement('div');
+		headerDiv.className = 'otherHeader';
+		headerDiv.appendChild(document.createTextNode(header))
+		rdfForm.appendChild(headerDiv);
+		
+		/*render the textarea*/
+		var rdfTextArea = document.createElement('textarea');
+		rdfTextArea.name = privacy;
+		rdfTextArea.id = ('otherTextArea_'+privacy);
+		rdfTextArea.setAttribute('cols','1000');
+		rdfTextArea.setAttribute('rows','50000'); 
+		rdfTextArea.className = ('otherTextArea');
+		rdfTextArea.appendChild(document.createTextNode(data));
+		rdfForm.appendChild(rdfTextArea);
+		
 	}
 
 	/*---------------------------other (geek view)---------------------------*/

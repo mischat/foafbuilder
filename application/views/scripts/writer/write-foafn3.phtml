@@ -1,10 +1,9 @@
 <?php
-//TODO not sure what is meant to be happening here
-//	require_once("helpers/JSON.php");
+	require_once("helpers/JSON.php");
 	//We don't want any HTML gubbins here
 	$this->layout()->setLayout('ajax');
 	
-	//FIXME: return this?  Or something else, or nothing?
 	//var_dump($this->results);
-	echo $this->results;
+	$json = new Services_JSON();
+	echo $json->encode($this->data);
 ?>
