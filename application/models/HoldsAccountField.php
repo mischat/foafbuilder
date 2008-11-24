@@ -15,7 +15,6 @@ class HoldsAccountField extends Field {
 		$this->data['foafHoldsAccountFields']['name'] = $this->name;
 			
 		if ($fullInstantiation) {
-	
 			$queryString = 
 			"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 			 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
@@ -66,7 +65,7 @@ class HoldsAccountField extends Field {
 			} else {
 				error_log("[foaf_editor] There are no accounts to render");
 			}
-		
+
 		} 
 	}
 

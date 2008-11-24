@@ -59,7 +59,7 @@ class FieldNames {
 				break;
 			case "all":
 				//FIXME: commented others out for development purposes
-				//$this->instantiateLocationsFields(false);
+				$this->instantiateLocationsFields(false);
 				$this->instantiateTheBasicsFields(false);
 				$this->instantiateContactDetailsFields(false);
 				$this->instantiatePicturesFields(false);
@@ -122,8 +122,8 @@ class FieldNames {
 	}
 	
 	private function instantiateLocationsFields($fullInstantiation = true){
-		$this->allFieldNames['nearestAirport'] = new NearestAirportField($this->foafData,$fullInstantiation);
-		$this->allFieldNames['basedNear'] = new BasedNearField($this->foafData,$fullInstantiation);	
+		$this->allFieldNames['nearestAirport'] = new NearestAirportField($this->foafData,$this->privateFoafData, $fullInstantiation);
+		//$this->allFieldNames['basedNear'] = new BasedNearField($this->foafData,$fullInstantiation);	
 	}
 	
 	private function instantiateOtherFields($fullInstantiation = true){
