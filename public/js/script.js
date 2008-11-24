@@ -1714,39 +1714,93 @@ function nearestAirportDisplayToObjects(){
 }	
 
 /*put basedNear data into the globalFieldData objects*/
-function basedNearDisplayToObjects(locationElement){
-	
-	//FIXME: this is next!
-	return;
-	
+function basedNearDisplayToObjects(){
+
 	var containerElement = document.getElementById('basedNear_container');
 	
-	//clear out the existing one
+	if(typeof(containerElement) == 'undefined' || !containerElement){
+		log('no container for based near');
+		return;
+	}	
+
+	//clear out the existing data
 	globalFieldData.basedNearFields['basedNear'] = new Object();
+	globalPrivateFieldData.basedNearFields['basedNear'] = new Object();
 	
+	
+	//go through each of the container elements
 	for(i=0; i < containerElement.childNodes.length; i++){
 	
 		var locationElement = containerElement.childNodes[i];
 		
-		if(locationElement.id != 'mapDiv'){
-			/*loop through the elements to make sure we save the right ones*/
-			for(j=0; j < locationElement.childNodes.length; j++){
-				if((locationElement.childNodes[j].className == 'latitude' || locationElement.childNodes[j].className == 'longitude')
-					&& locationElement.childNodes[j].childNodes[0] && locationElement.childNodes[j].childNodes[0].nodeValue){
-						var coordArray = locationElement.childNodes[j].childNodes[0].nodeValue.split(' ');
+		if(typeof(locationElement) == 'undefined' || !locationElement || locationElement.id =='mapDiv'){
+			log('map div found instead of location div');
+			continue;
+		}
 		
-						if(typeof(coordArray[1]) != 'undefined' && coordArray[1]){
-							//create an new array for this bnode (locationElement.id)
-							if(typeof(globalFieldData.basedNearFields['basedNear'][locationElement.id]) == 'undefined' || !globalFieldData.basedNearFields['basedNear'][locationElement.id]){
-								globalFieldData.basedNearFields['basedNear'][locationElement.id] = new Object();
-							}
-							globalFieldData.basedNearFields['basedNear'][locationElement.id][locationElement.childNodes[j].className] = coordArray[1];
-						}
-				} 
+		//loop through the elements to make sure we save the right ones
+		for(j=0; j < locationElement.childNodes.length; j++){
+				
+			if(typeof(locationElement.childNodes[j].className)=='undefined' 
+				|| !locationElement.childNodes[j].className){
+				log('no classname in div');
+				continue;
+			}
+			if(locationElement.childNodes[j].className != 'latitude' 
+				&& locationElement.childNodes[j].className != 'longitude'){
+				log('div found with className not equal to latitude or longitude');
+				continue;	
+			}
+			if(typeof(locationElement.childNodes[j].childNodes[0]) == 'undefined' 
+				|| !locationElement.childNodes[j].childNodes[0] 
+				|| typeof(locationElement.childNodes[j].childNodes[0].nodeValue) == 'undefined' 
+				|| !locationElement.childNodes[j].childNodes[0].nodeValue){
+				log('no node value for this field');
+				continue;
+			}
+			
+			//get the coordinates from this element	
+			var coordArray = locationElement.childNodes[j].childNodes[0].nodeValue.split(' ');
+			
+			if(typeof(coordArray) == 'undefined' || !coordArray ||
+				typeof(coordArray[1]) == 'undefined' && !coordArray[1]){
+				log('coord array is empty');
+				continue;
+			}
+		
+			//get the privacy checkbox
+			var privacyCheckbox = document.getElementById('privacycheckbox_'+locationElement.id);
+			
+			if(typeof(privacyCheckbox) == 'undefined' || !privacyCheckbox){
+				log('privacy checkbox not found or undefined '+locationElement.id);
+				continue
+			}
+			log("GOT TO HERE "+locationElement.id+" elemclass: "+locationElement.childNodes[j].className);
+			
+			//add to different global object depending if public or private
+			if(privacyCheckbox.checked){
+				//create a new object for this bnode (locationElement.id) if required
+				if(typeof(globalPrivateFieldData.basedNearFields['basedNear'][locationElement.id]) == 'undefined' 
+					|| !globalPrivateFieldData.basedNearFields['basedNear'][locationElement.id]){
+					globalPrivateFieldData.basedNearFields['basedNear'][locationElement.id] = new Object();
+				}
+						
+				globalPrivateFieldData.basedNearFields['basedNear'][locationElement.id][locationElement.childNodes[j].className] = coordArray[1];
+				globalPrivateFieldData.basedNearFields['basedNear'][locationElement.id][locationElement.childNodes[j].className] = coordArray[1];
+			
+			} else {
+				//create a new object for this bnode (locationElement.id) if required
+				if(typeof(globalFieldData.basedNearFields['basedNear'][locationElement.id]) == 'undefined' 
+					|| !globalFieldData.basedNearFields['basedNear'][locationElement.id]){
+					globalFieldData.basedNearFields['basedNear'][locationElement.id] = new Object();
+				}
+						
+				globalFieldData.basedNearFields['basedNear'][locationElement.id][locationElement.childNodes[j].className] = coordArray[1];
+				globalFieldData.basedNearFields['basedNear'][locationElement.id][locationElement.childNodes[j].className] = coordArray[1];
+			
 			}
 		}
 	}
-	
 }
 
 /*this is more or less identical to imgDisplayToObjects which is possibly not a good thing*/
@@ -2536,7 +2590,7 @@ function phoneDisplayToObjects(){
 		globalFieldData.basedNearFields.basedNear[bNodeKey] = thisBasedNear;
 	
 		//create a new based near marker and div
-		createSingleBasedNearMarker(containerId,bNodeKey,thisBasedNear,isPublic);
+		createSingleBasedNearMarker(containerId,bNodeKey,thisBasedNear,true);
 		
 		//re-add the add link
 		container.appendChild(addLinkContainer);

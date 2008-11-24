@@ -19,7 +19,7 @@ class FoafData {
         $this->isPublic = $isPublic;
         
     	/*
-    	 * XXX this empty instantiation stuff is for new private models.  In future it should try to fetch	
+    	 * TODO MISCHA this empty instantiation stuff is for new private models.  In future it should try to fetch	
     	 * the private model from an oauth server or similar.
     	 */
         if(!$this->isPublic){
@@ -32,12 +32,11 @@ class FoafData {
 			
 			$primaryResource = new Resource("http://".md5($uri."#me"));
 			$personalProfileDocumentTriple = new Statement(new Resource($uri), new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/PersonalProfileDocument"));
-			$primaryTopicTriple = new Statement(new Resource("http://99060082.fb.joyent.us/foaf/foaf.rdf"), new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),$primaryResource);
+			$primaryTopicTriple = new Statement(new Resource($uri), new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),$primaryResource);
 			
 			$this->model->add($personalProfileDocumentTriple);
 			$this->model->add($primaryTopicTriple);
 			
-			//echo($this->primaryTopic." JUST DONE PRIMARY TOPIC");
 			$this->primaryTopic = $primaryResource->uri;
 			$this->graphset = $graphset;
 			$this->uri = $uri;

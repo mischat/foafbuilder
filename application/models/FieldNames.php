@@ -77,7 +77,7 @@ class FieldNames {
 	
 		//var_dump($this->privateFoafData);
 		//FIXME: homepage and birthday temporarily commented out for dev purposes
-		//$this->allFieldNames['birthday'] = new BirthdayField($this->foafData,$fullInstantiation);
+		//$this->allFieldNames['birthday'] = new BirthdayField($this->foafData,$this->privateFieldData,$fullInstantiation);
 		$this->allFieldNames['foafTitle'] = 
 			new SimpleField('foafTitle', 'Title', "http://xmlns.com/foaf/0.1/title",$this->foafData, $this->privateFoafData, "literal",$fullInstantiation);
 		$this->allFieldNames['foafGivenName'] = 
@@ -87,7 +87,7 @@ class FieldNames {
 		$this->allFieldNames['foafName'] = 
 			new SimpleField('foafName', 'Real Name', 'http://xmlns.com/foaf/0.1/name',$this->foafData, $this->privateFoafData,'literal',$fullInstantiation);
 		//$this->allFieldNames['foafHomepage'] =  
-			//new HomepageField($this->foafData,$fullInstantiation);
+			//new HomepageField($this->foafData,$this->privateFieldData,$fullInstantiation);
 		$this->allFieldNames['foafNick'] = 
 			new SimpleField('foafNick', 'Nickname', 'http://xmlns.com/foaf/0.1/nick',$this->foafData, $this->privateFoafData,'literal',$fullInstantiation);
 		
