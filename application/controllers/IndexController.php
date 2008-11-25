@@ -7,30 +7,14 @@ class IndexController extends Zend_Controller_Action
     public function init() {
         $this->view->baseUrl = $this->_request->getBaseUrl();
     }
-
-	public static function getForm()
-    {
-/*        $form = new Zend_Form(array(
-            'method'   => 'post',
-        	'action'   => "javascript:loadFoafData($(foaf_uri));",
-            'elements' => array(
-                	'foafUri' => array('text', array(
-    					'required' => true,
-                    	'label' => 'Paste FOAF uri in here.'
-            		)    
-        	),
-            'submit' => array('submit', array(
-                    'label' => 'Load'
-             ))
-            ),
-        ));
-*/
-        return $form;
-    }
     
     public function indexAction(){
-
-    	/* $this->view->form = $this->getForm();*/
+    	
+    	$url = @$_GET['url'];
+    	
+    	if($url){
+    		$this->view->onload = "loadFoaf('load-the-basics');";
+    	}
     }
     //TODO: worry about what sort of validation to do + possibly seed the view here.
 	public function loadTheBasicsAction(){

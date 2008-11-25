@@ -48,17 +48,20 @@ function turnOnLoading(){
 }
 
 /*loads all the foaf data from the given file (or the session if there is no uri) into the editor.*/
-function loadFoaf(name){
+function loadFoaf(name,url){
 	
-	var url = document.getElementById('foafUri').value;
+	var foafUrl = url;
 	
+	if(!url || typeof(url) == 'undefined'){
+		foafUrl = document.getElementById('foafUri').value;
+	}
 	/*so we can track which page the person is on*/
 	currentPage = name;
 	
   	//TODO use jquery event handler to deal with errors on requests
   	if(name != 'load-other'){
   		turnOnLoading();
-  		$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);turnOffLoading();}, "json");
+  		$.post("/ajax/"+name, { uri: foafUrl}, function(data){genericObjectsToDisplay(data);turnOffLoading();}, "json");
   	} else {
   		renderOther();
   	}
@@ -3334,6 +3337,8 @@ function updateCodesFromAirportName(value){
 	var iataCode = document.getElementById('iataCode');
 	var icaoCode = document.getElementById('icaoCode');
 	
+		log('this is value: '+value);
+		
 	if(iataCode && typeof(autocomplete_airportData[value]['iata']) != 'undefined'){
 		//set the iata value
 		iataCode.childNodes[0].nodeValue ='IATA Code: '+autocomplete_airportData[value]['iata'];	
