@@ -3,10 +3,18 @@
 				<h2>
 					Welcome to the FOAF builder. 
 				</h2>
+				<form method='post' action='/ajax/load-extractor'>
 				<p>
+					If you'd like to load in publicly available information, please fill in the fields below.
+				</p>
+
+				<p>
+				<input id='urlField' name='flickr' value='Your flickr username'>
+				<input id='urlField' name='lastfmUser' value='Your lastfm username'>
+				<input id='urlField' name='delicious' value='Your delicious username'>
+
 					If you already have a foaf file, please put the url in below and click edit.
 				</p>
-				<form method='get' action='/builder'>
 					<input id='url' name='url' value='Your Foaf Url' onfocus="if(this.value == 'Your Foaf Url'){this.value = '';this.style.color='#000000';}"/>
 					<input id='button' type='submit' value='Edit'/>
 				</form>

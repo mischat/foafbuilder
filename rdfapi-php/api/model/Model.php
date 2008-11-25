@@ -89,6 +89,8 @@ class Model extends Object
     */
     function load($filename, $type = NULL, $stream=false)
     {
+	echo("OI OI OI");
+
         if ((isset($type)) && (($type =='n3') OR ($type =='nt') OR ($type == 'ttl'))) {
             // Import Package Syntax
             include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_N3);
@@ -120,8 +122,11 @@ class Model extends Object
             }else{
                 // TODO MISCHA Import Package Syntax
 		$resp = $this->check_start_of_file($filename);		
-		error_log("[foaf_editor] File type guess: $resp");
 
+		//XXX LUKE - I've hacked this to make it fail more quietly 
+		if($resp==1){ return 1;}
+
+		error_log("[foaf_editor] File type guess: $resp");
 		switch ($resp) {
 			case 'n3':
 				include_once(RDFAPI_INCLUDE_DIR.PACKAGE_SYNTAX_N3);
@@ -150,6 +155,7 @@ class Model extends Object
         $this->addModel($temp);
         if($this->getBaseURI()== null)
             $this->setBaseURI($temp->getBaseURI());
+
     }
 	
 	/**
@@ -160,7 +166,13 @@ class Model extends Object
 	* @access	public
 	*/
 	function check_start_of_file($filename) {
-	        $input = fopen($filename,'r') or die("RDF Parser: Could not open File: $filename. Stopped parsing.");
+		//XXX LUKE - changed this to make it fail more quietly
+	        //$input = fopen($filename,'r') or die("RDF Parser: Could not open File: $filename. Stopped parsing.");
+	        
+		$input = @fopen($filename,'r');
+
+		if(!$input){ return 1;}
+		
 		$text = fread($input, 1024);
 		fclose($input); 
 
