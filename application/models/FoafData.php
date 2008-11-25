@@ -24,25 +24,21 @@ class FoafData {
     	 */
         if(!$this->isPublic){
         	//create a skeleton empty document
-        	
-        	$graphset = ModelFactory::getDatasetMem('GarlikDataset');
-			$model = new NamedGraphMem($uri);
-			$graphset->addNamedGraph($model);
-			$this->model = $model;
-			
-			$primaryResource = new Resource("http://".md5($uri."#me"));
-			$personalProfileDocumentTriple = new Statement(new Resource($uri), new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/PersonalProfileDocument"));
-			$primaryTopicTriple = new Statement(new Resource($uri), new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),$primaryResource);
-			
-			$this->model->add($personalProfileDocumentTriple);
-			$this->model->add($primaryTopicTriple);
-			
-			$this->primaryTopic = $primaryResource->uri;
-			$this->graphset = $graphset;
-			$this->uri = $uri;
-			
+        	$this->getEmptyDocument($uri);
 			$this->putInSession(true);
-		
+			return;
+    	}
+    	
+    	/*
+    	 * LUKE if the uri does not exist then create an empty skeleton
+    	 * XXX is this uri right?
+    	 */
+    	if($uri=='' || !$uri){
+    		//create a skeleton empty document
+    		$uri = sha1(microtime()*microtime());
+    		$uri = '';
+    		$this->getEmptyDocument($uri);
+			$this->putInSession();
 			return;
     	}
     	
@@ -164,6 +160,26 @@ class FoafData {
     
     public function setGraphset($graphset) {
     	$this->graphset= $graphset;
+    }
+    public function getEmptyDocument($uri){
+    	
+       	$graphset = ModelFactory::getDatasetMem('GarlikDataset');
+		$model = new NamedGraphMem($uri);
+		$graphset->addNamedGraph($model);
+		$this->model = $model;
+		
+		$primaryResource = new Resource("http://".md5($uri."#me"));
+		$personalProfileDocumentTriple = new Statement(new Resource($uri), new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/PersonalProfileDocument"));
+		$primaryTopicTriple = new Statement(new Resource($uri), new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),$primaryResource);
+		
+		$this->model->add($personalProfileDocumentTriple);
+		$this->model->add($primaryTopicTriple);
+		
+		$this->primaryTopic = $primaryResource->uri;
+		$this->graphset = $graphset;
+		$this->uri = $uri;
+			
+    	return;
     }
 }
 /* vi:set expandtab sts=4 sw=4: */
