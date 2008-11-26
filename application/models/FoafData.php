@@ -9,8 +9,13 @@ class FoafData {
     private $model;
     private $graphset;
     private $primaryTopic;
-    private $randomStringToBnodeArray;
+    private $randomStringToBnodeArray = array();
     public $isPublic;
+    
+    /*stuff to say whether we've imported from the various reflectors or not*/
+    var $flickrFound = false;
+	var $deliciousFound = false;
+	var $lastfmFound = false;
     
     /*New from uri if uri present. if not just new.*/
     public function FoafData ($uri = "",$isPublic = true) {
@@ -31,7 +36,7 @@ class FoafData {
     	
     	/*
     	 * LUKE if the uri does not exist then create an empty skeleton
-    	 * XXX is this uri right?
+    	 * TODO: change this uri to fit the oauth server
     	 */
     	if($uri=='' || !$uri){
     		//create a skeleton empty document
@@ -46,45 +51,18 @@ class FoafData {
         	error_log("Foaf data called with no uri\n");
         	return;
     	}
-        
-	    //XXX This name shouldnt be hardcoded.
+
 		$graphset = ModelFactory::getDatasetMem('GarlikDataset');
 		$model = new NamedGraphMem($uri);
 		$model->load($uri);
-		$graphset->addNamedGraph($model);
-		        
+		
+		$graphset->addNamedGraph($model);     
 		if (!($graphset->containsNamedGraph($uri))) {
 		    print "Triples model not added to the modelfactory\n";
 		}
 	        
-	   	/*get primary topic*/
-        $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
-        $result = $model->sparqlQuery($query);
-
-        //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
-        //TODO must make sure that we handle having a non "#me" foaf:Person URI
-        if (isset($result[0]['?prim'])) {
-            $oldUri = $result[0]['?prim']->uri;
-            error_log("[foaf_editor] PrimaryTopic: $oldUri");
-         } else {
-            //TODO MISCHA should do some error reporting here
-            error_log("[foaf_editor] Error no primaryTopic");
-            return null;
-        }
+        $this->replacePrimaryTopic($uri,$model);
 		
-        /*replace the old resource with some new ones*/
-        $oldUriRes = new Resource($oldUri);
-        $newUri = "http://".md5($oldUri);
-        $newUriRes = new Resource($newUri);
-        $model->replace($oldUriRes,NULL,NULL,$newUriRes);
-        $model->replace(NULL,NULL,$oldUriRes,$newUriRes);
-        $this->primaryTopic = $newUri;
-        $this->randomStringToBnodeArray = array();
-            
-        if (!preg_match("/#me$/",$oldUri,$patterns)) {
-        	$model->add(new Statement($newUriRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldUriRes));
-        }
-          
 		if ($model!=null) { 
 			$this->model = $model;
 		 	$this->uri = $uri;
@@ -92,6 +70,48 @@ class FoafData {
 		}
 		
 	   	$this->putInSession();
+    }
+    
+    //replace the existing primary topic (olduri) with the new one (newUri or a sha1 of the old one) in the model
+    public function replacePrimaryTopic($uri, $model, $newUri = false){
+    	
+    	
+     	/*get primary topic*/
+        $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
+        $result = $model->sparqlQuery($query);
+		
+        //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
+        //TODO must make sure that we handle having a non "#me" foaf:Person URI
+         if (isset($result[0]['?prim'])) {
+            $oldUri = $result[0]['?prim']->uri;
+            error_log("[foaf_editor] PrimaryTopic: $oldUri");
+         } else {
+            //TODO MISCHA should do some error reporting here
+            error_log("[foaf_editor] Error no primaryTopic");
+            return null;
+        }      
+        
+        //if no new uri has been passed in then just set it as the existing primary topic or, if that isn't set then the hash of the uri
+    	if(!$newUri){
+    		$primaryTopic = $this->getPrimaryTopic();
+    			
+    		if(!$primaryTopic){
+    			$newUri = "http://".md5($oldUri); 
+    		}
+    	}
+       
+    	/*replace the old resource with some new ones*/
+        $oldUriRes = new Resource($oldUri);
+        $newUriRes = new Resource($newUri);
+        $model->replace($oldUriRes,NULL,NULL,$newUriRes);
+        $model->replace(NULL,NULL,$oldUriRes,$newUriRes);
+        $this->primaryTopic = $newUri;
+        
+        if (!preg_match("/#me$/",$oldUri,$patterns)) {
+        	$model->add(new Statement($newUriRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldUriRes));
+        }
+        
+        return $model;
     }
     
     public static function getFromSession($isPublic = true) {

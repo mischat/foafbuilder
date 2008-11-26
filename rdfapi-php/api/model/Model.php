@@ -45,7 +45,6 @@ class Model extends Object
     var $queryParser = null;
 
 
-
     /**
     * Notice for people who are used to work with older versions of RAP.
     *
@@ -89,7 +88,6 @@ class Model extends Object
     */
     function load($filename, $type = NULL, $stream=false)
     {
-	echo("OI OI OI");
 
         if ((isset($type)) && (($type =='n3') OR ($type =='nt') OR ($type == 'ttl'))) {
             // Import Package Syntax
