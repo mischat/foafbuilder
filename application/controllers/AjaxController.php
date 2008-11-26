@@ -22,19 +22,19 @@ class AjaxController extends Zend_Controller_Action {
         $delicious = $_GET['delicious'];
         $lastfm = $_GET['lastfmUser'];
         
-        //results
-		$this->view->results = array();
-		$this->view->results['flickrFound'] = false;
-		$this->view->results['deliciousFound'] = false;
-		$this->view->results['lastfmFound'] = false;
-		
 		//load the foaf file in the session (if there is one)
         if($uri){
         	$this->loadFoaf($uri);
         } else {
         	$this->loadFoaf();
         }
-        
+		        
+        //results
+		$this->view->results = array();
+		$this->view->results['flickrFound'] = false;
+		$this->view->results['deliciousFound'] = false;
+		$this->view->results['lastfmFound'] = false;
+		
         //these results
         $this->view->results['flickrFound'] = $this->foafData->flickrFound;
         $this->view->results['deliciousFound'] = $this->foafData->deliciousFound;
@@ -74,9 +74,6 @@ class AjaxController extends Zend_Controller_Action {
 				$this->foafData->lastfmFound = true;
 			}
         } 
-        
-        
-        var_dump($this->foafData->getModel());
 	}
 
 
@@ -136,6 +133,9 @@ class AjaxController extends Zend_Controller_Action {
     }
 	public function loadBlogsAction() {
     	$this->loadAnyPage('blogs');
+    }
+	public function loadFriendsAction() {
+    	$this->loadAnyPage('friends');
     }
 	public function loadAccountsAction() {
     	$this->loadAnyPage('accounts');
@@ -302,8 +302,10 @@ class AjaxController extends Zend_Controller_Action {
         
     	/*loop through all the rows in the sparql results style 'almost model'*/
         foreach($privateOrPublicModel as $key => $value) {
-            /*get rid of 'fields at the end of the name'*/
+            
+			/*get rid of 'fields at the end of the name'*/
             if(isset($allFieldNames[substr($key,0,-6)])) {
+            	
                 /*get some details about the fields we're dealing with*/
                 $field = $allFieldNames[substr($key,0,-6)];
                 

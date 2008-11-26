@@ -72,8 +72,6 @@ function loadFoaf(name,url){
   	document.getElementById('load-accounts').style.backgroundImage = 'url(/images/pink_background.gif)';
   	document.getElementById('load-locations').style.backgroundImage = 'url(/images/pink_background.gif)';
   	document.getElementById('load-friends').style.backgroundImage = 'url(/images/pink_background.gif)';
-  	document.getElementById('load-blogs').style.backgroundImage = 'url(/images/pink_background.gif)';
-  	document.getElementById('load-interests').style.backgroundImage = 'url(/images/pink_background.gif)';
   	document.getElementById('load-other').style.backgroundImage = 'url(/images/pink_background.gif)';
   	
   	document.getElementById(name).style.backgroundImage='url(/images/blue_background.gif)';
