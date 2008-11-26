@@ -15,44 +15,68 @@ class AjaxController extends Zend_Controller_Action {
     private $privateFoafData;
 	
 	public function loadExtractorAction(){
-                $url = @$_POST['uri'];
-                $flickr = @$_POST['flickr'];
-                $delicious = @$_POST['delicious'];
-                $lastfm = @$_POST['lastfmUser'];
-                $uri = @$_POST['uri'];
 		
+		//some details
+        $uri = @$_GET['uri'];
+        $flickr = $_GET['flickr'];
+        $delicious = $_GET['delicious'];
+        $lastfm = $_GET['lastfmUser'];
+        
+        //results
 		$this->view->results = array();
 		$this->view->results['flickrFound'] = false;
 		$this->view->results['deliciousFound'] = false;
 		$this->view->results['lastfmFound'] = false;
 		
 		//load the foaf file in the session (if there is one)
-                if($uri){
-                	$this->loadFoaf($uri);
-                } else {
-                        $this->loadFoaf();
-                }
-
-		//TODO: need to convert uid to flickr id
-                if($flickr){
-                        $flickr = $this->foafData->getModel()->load('http://foaf.qdos.com/flickr/people/'.$flickr);
-			if($flickr != 1){
+        if($uri){
+        	$this->loadFoaf($uri);
+        } else {
+        	$this->loadFoaf();
+        }
+        
+        //these results
+        $this->view->results['flickrFound'] = $this->foafData->flickrFound;
+        $this->view->results['deliciousFound'] = $this->foafData->deliciousFound;
+        $this->view->results['lastfmFound'] = $this->foafData->lastfmFound;
+        
+		//grab the appropriate things if we haven't already
+        if($flickr && !$this->foafData->flickrFound){
+        	
+        	$flickrUri = 'http://foaf.qdos.com/flickr/people/'.$flickr;
+        	$flickr = $this->foafData->getModel()->load($flickrUri);
+        	$this->foafData->replacePrimaryTopic($flickrUri);
+			
+        	if($flickr != 1){
 				$this->view->results['flickrFound'] = true;
+				$this->foafData->flickrFound = true;
 			}
-		}
-                if($delicious){
-                        $delicious = $this->foafData->getModel()->load('http://foaf.qdos.com/delicious/people/'.$delicious);
-			if($delicious != 1){
+		} 
+        if($delicious && !$this->foafData->deliciousFound){
+            
+        	$deliciousUri = 'http://foaf.qdos.com/delicious/people/'.$delicious;
+        	$delicious = $this->foafData->getModel()->load($deliciousUri);
+			$this->foafData->replacePrimaryTopic($flickrUri);
+			
+            if($delicious != 1){
 				$this->view->results['deliciousFound'] = true;
+				$this->foafData->deliciousFound = true;
 			}
-		}
-                if($lastfm){
-                        $lastfm = $this->foafData->getModel()->load('http://foaf.qdos.com/lastfm/people/'.$lastfm);
-			if($lastfm != 1){
+		} 
+        if($lastfm && !$this->foafData->lastfmFound){
+            
+        	$lastfmUri = 'http://foaf.qdos.com/delicious/people/'.$lastfm; 
+        	$lastfm = $this->foafData->getModel()->load($lastfmUri);
+            $this->foafData->replacePrimaryTopic($lastfmUri);
+		
+            if($lastfm != 1){
 				$this->view->results['lastfmFound'] = true;
+				$this->foafData->lastfmFound = true;
 			}
-                } 
-
+        } 
+        
+        
+        var_dump($this->foafData->getModel());
 	}
 
 
@@ -65,7 +89,7 @@ class AjaxController extends Zend_Controller_Action {
                         SELECT ?serv ?patt WHERE 
                         { ?serv rdfs:subPropertyOf gs:serviceProperty ; gs:canonicalUriPattern ?patt .
                         FILTER(";
-                //we only want to get canonical patterns of things that are passed in
+        //we only want to get canonical patterns of things that are passed in
 		foreach($_POST as $key => $value){
 			$query.='?serv = <http://qdos.com/schema#'.$key.'> || ';			
 		}
@@ -110,39 +134,14 @@ class AjaxController extends Zend_Controller_Action {
 	public function loadLocationsAction() {
     	$this->loadAnyPage('locations');
     }
+	public function loadBlogsAction() {
+    	$this->loadAnyPage('blogs');
+    }
 	public function loadAccountsAction() {
     	$this->loadAnyPage('accounts');
     }
-    
-  
- 
-    
-    public function loadBlogsAction() {
-        /*build up a sparql query to get the values of all the fields we need*/
-        if($this->loadFoaf()) {   
-            $this->fieldNamesObject = new FieldNames('blogs',$this->foafData);  	
-            $this->view->results = array();
-           	foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
-            	
-            	//need to cope with multiple fields of the same type
-            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
-          
-            }
-        } 
-    }
-    
-    public function loadInterestsAction() {
-        /*build up a sparql query to get the values of all the fields we need*/
-        if($this->loadFoaf()) {   
-            $this->fieldNamesObject = new FieldNames('interests',$this->foafData);  	
-            $this->view->results = array();
-           foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
-            	
-            	//need to cope with multiple fields of the same type
-            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
-          
-            }
-        } 
+	public function loadInterestsAction() {
+    	$this->loadAnyPage('interests');
     }
     
     public function loadOtherAction() {
@@ -195,10 +194,6 @@ class AjaxController extends Zend_Controller_Action {
         /* This returns a null if nothing in session! */
         $this->foafData = FoafData::getFromSession(true);
 		$this->privateFoafData = FoafData::getFromSession(false);
-		//echo("foafData primary topic: ".$this->foafData->getPrimaryTopic());
-		//echo("privateFoafData primary topic: ".$this->privateFoafData->getPrimaryTopic());
-		//var_dump($this->privateFoafData);
-		//var_dump(privateFoafData);
 		
         if (!$this->foafData) {
             //print "First time !\n";
@@ -210,8 +205,6 @@ class AjaxController extends Zend_Controller_Action {
             $uri = @$_POST['uri'];
             $this->privateFoafData = new FoafData($uri,false);	
         }
-        
- //       	var_dump($this->privateFoafData); 
     }
     
     private function putResultsIntoView() {
@@ -268,16 +261,12 @@ class AjaxController extends Zend_Controller_Action {
         if ($changes_model) {
             $publicFoafData = FoafData::getFromSession(true);	
             $privateFoafData = FoafData::getFromSession(false);
-            //echo($privateFoafData->getPrimaryTopic()."Hmmm");
-            //echo($publicFoafData->getPrimaryTopic()."Hmmm"); 
             
             if($publicFoafData) {
-          //  	echo("Saving public");
                 $this->applyChangesToModel($publicFoafData,$changes_model);	
                 $this->view->isSuccess = 1;
             }
             if($privateFoafData) {
-       //     	echo("Saving private");
             	$this->applyChangesToModel($privateFoafData,$changes_model);
             	$this->view->isSuccess = 1;
             }
@@ -325,7 +314,7 @@ class AjaxController extends Zend_Controller_Action {
                 
             } else if($key == 'fields'){
             	//we need to look inside the simplefield array to do the right kind of save
-            	//XXX: is the level of abstraction right here? 
+ 
             	foreach($value as $fieldName => $fieldValue){
             		 if(isset($allFieldNames[$fieldName])) {
             		 	/*get some details about the fields we're dealing with*/

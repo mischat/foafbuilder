@@ -10,55 +10,7 @@ class IndexController extends Zend_Controller_Action
     
     public function indexAction(){
     	
-    	$url = @$_GET['url'];
-    	
-    	if($url){
-    		$this->view->onload = "loadFoaf('load-the-basics');";
-    	}
-    }
-    //TODO: worry about what sort of validation to do + possibly seed the view here.
-	public function loadTheBasicsAction(){
-		
-	}
-	
-	public function loadContactDetailsAction(){
-		
-	}
     
-	public function loadPicturesAction(){
-		
-	}
-	
-    public function displayfoafAction()
-    {
-        require_once 'FoafData.php';
-        $form = $this->getForm();
-		
-        if ($this->getRequest()->isPost()) {
-            if (!$form->isValid($_POST)) {
-                //FIXME: there ought to be a Zendy way of doing this and keeping validation errors etc.
-            	header("Location: /");
-            } else {
-                $values = $form->getValues();
-                    
-                //One from the uri
-                $foafData = new FoafData($values['foafUri']);
-
-//TODO Am not sure here: foafData2 ? and model2? and model one ?                    
-                //One from the session
-//                $foafData2 = new FoafData();
-                    
-                $this->view->model = $foafData->getModel();
- //               $this->view->model2 = $foafData->getModel();
-                    
-                //do some sparql queries on the one in the session
-//                $querystring = "SELECT * WHERE {?x ?y ?z};";
-                $querystring = "SELECT * WHERE {?g {?x ?y ?z}};";
-//                $result = $this->view->model2->sparqlQuery($querystring);
-                $result = $this->view->model->sparqlQuery($querystring);
-                var_dump($result);
-            }
-   	}
     }
 	
 }

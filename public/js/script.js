@@ -55,6 +55,7 @@ function loadFoaf(name,url){
 	if(!url || typeof(url) == 'undefined'){
 		foafUrl = document.getElementById('foafUri').value;
 	}
+	
 	/*so we can track which page the person is on*/
 	currentPage = name;
 	
@@ -3716,8 +3717,7 @@ function createMapElement(container){
 			mapDiv.appendChild(innerMapDiv);
 			*/
        		return mapDiv;
-     	}
-     	
+     	} 
    
 }
 

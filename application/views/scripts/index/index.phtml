@@ -1,38 +1,31 @@
+<?	
+	//We don't want to laod all the scripts
+	$this->layout()->setLayout('minimal');
+?>
 <div id="content">
 			<div class="">
 				<h2>
 					Welcome to the FOAF builder. 
 				</h2>
-				<form method='post' action='/ajax/load-extractor'>
-				<p>
-					If you'd like to load in publicly available information, please fill in the fields below.
-				</p>
-
-				<p>
-				<input id='urlField' name='flickr' value='Your flickr username'>
-				<input id='urlField' name='lastfmUser' value='Your lastfm username'>
-				<input id='urlField' name='delicious' value='Your delicious username'>
-
-					If you already have a foaf file, please put the url in below and click edit.
-				</p>
-					<input id='url' name='url' value='Your Foaf Url' onfocus="if(this.value == 'Your Foaf Url'){this.value = '';this.style.color='#000000';}"/>
-					<input id='button' type='submit' value='Edit'/>
+				<form method='get' id='importForm' action='javascript:importFoaf()'>
+					<p>
+						If you'd like to load in publicly available information, please fill in the fields below and click 'import'.
+					</p>
+					<span>Flickr username:    </span><input id='flickr' class='urlField' name='flickr' value=''><br/>
+						<span id='flickr_error' style='display:none'>Could not get foaf from Flickr.</span><br/>
+					<span>Last FM username:   </span><input id='lastfmUser' class='urlField' name='lastfmUser' value=''><br/>
+						<span id='lastfm_error' style='display:none'>Could not get foaf from Last FM.</span><br/>
+					<span>Delicious username: </span><input id='delicious' class='urlField' name='delicious' value=''><br/>
+						<span id='delicious_error' style='display:none'>Could not get foaf from delicous.</span><br/>
+					<input id='button' type='submit' value='Import'/><br/>
 				</form>
-				<p>
-					If you don't have one then click build below.
-				</p>
 				<form method='get' action='/builder'>
-					<input id='button' type='submit' value='Build'>
+					<p>
+						If you already have a foaf file, please put the url in below.  If not, just click Build.
+					</p>
+					<span>Your FOAF URL:      </span><input id='url' name='url' value='Your Foaf Url' onfocus="if(this.value == 'Your Foaf Url'){this.value = '';this.style.color='#000000';}"/><br/><br/>
+					<input id='button' type='submit' value='Build'/>
 				</form>
-			</div>
-			<div id="right_col">
-			
-			</div>
-			<div id="right_col">
-			
-			</div>
-			<div id="right_col">
-			
 			</div>
 </div><!-- end content -->
 
