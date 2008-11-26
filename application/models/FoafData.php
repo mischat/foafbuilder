@@ -47,38 +47,29 @@ class FoafData {
 			return;
     	}
     	
-    	if (!$uri) {
-        	error_log("Foaf data called with no uri\n");
-        	return;
-    	}
-
-		$graphset = ModelFactory::getDatasetMem('GarlikDataset');
-		$model = new NamedGraphMem($uri);
-		$model->load($uri);
+    	/*set some parameters*/
+    	//XXX - this graphset is never used - is it necessary, and is uri necessary?
+    	$this->uri = $uri;
+		$this->graphset = ModelFactory::getDatasetMem('GarlikDataset');
+		$this->model = new NamedGraphMem($uri);
 		
-		$graphset->addNamedGraph($model);     
-		if (!($graphset->containsNamedGraph($uri))) {
-		    print "Triples model not added to the modelfactory\n";
+		/*load the passed foaf file and generate a new primary topic for it*/
+		$loadValue = $this->model->load($uri);		
+		if(!$loadValue){
+			return;		
 		}
-	        
-        $this->replacePrimaryTopic($uri,$model);
 		
-		if ($model!=null) { 
-			$this->model = $model;
-		 	$this->uri = $uri;
-		    $this->graphset = $graphset;
-		}
+        $this->replacePrimaryTopic($uri);
 		
 	   	$this->putInSession();
     }
     
-    //replace the existing primary topic (olduri) with the new one (newUri or a sha1 of the old one) in the model
-    public function replacePrimaryTopic($uri, $model, $newUri = false){
-    	
+    //replace the existing primary topic with either newPrimaryTopic or a hash of the uri
+    public function replacePrimaryTopic($uri){
     	
      	/*get primary topic*/
         $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
-        $result = $model->sparqlQuery($query);
+        $result = $this->model->sparqlQuery($query);
 		
         //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
         //TODO must make sure that we handle having a non "#me" foaf:Person URI
@@ -92,26 +83,22 @@ class FoafData {
         }      
         
         //if no new uri has been passed in then just set it as the existing primary topic or, if that isn't set then the hash of the uri
+    	$newUri = $this->primaryTopic;			
     	if(!$newUri){
-    		$primaryTopic = $this->getPrimaryTopic();
-    			
-    		if(!$primaryTopic){
-    			$newUri = "http://".md5($oldUri); 
-    		}
+    		$newUri = "http://".md5($oldUri); 
     	}
+    	
        
     	/*replace the old resource with some new ones*/
         $oldUriRes = new Resource($oldUri);
         $newUriRes = new Resource($newUri);
-        $model->replace($oldUriRes,NULL,NULL,$newUriRes);
-        $model->replace(NULL,NULL,$oldUriRes,$newUriRes);
+        $this->model->replace($oldUriRes,NULL,NULL,$newUriRes);
+        $this->model->replace(NULL,NULL,$oldUriRes,$newUriRes);
         $this->primaryTopic = $newUri;
         
         if (!preg_match("/#me$/",$oldUri,$patterns)) {
-        	$model->add(new Statement($newUriRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldUriRes));
+        	 $this->model->add(new Statement($newUriRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldUriRes));
         }
-        
-        return $model;
     }
     
     public static function getFromSession($isPublic = true) {

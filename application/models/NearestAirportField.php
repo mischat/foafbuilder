@@ -97,7 +97,7 @@ class NearestAirportField extends Field {
     	$airportBnode = false;
     	if($existingAirports1 && !empty($existingAirports1->triples)){
     		$airportBnode = $existingAirports1->triples[0]->obj;
-			$this->removeAirports(&$foaf,$existingAirports1,$existingAirports1->triples[0]->obj);
+			$this->removeAirports($foaf,$existingAirports1,$existingAirports1->triples[0]->obj);
 		} 
 				
     	/*if there is no airport already there then add one*/

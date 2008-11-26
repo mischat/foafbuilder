@@ -17,13 +17,11 @@
 						<span id='lastfm_error' style='display:none'>Could not get foaf from Last FM.</span><br/>
 					<span>Delicious username: </span><input id='delicious' class='urlField' name='delicious' value=''><br/>
 						<span id='delicious_error' style='display:none'>Could not get foaf from delicous.</span><br/>
-					<input id='button' type='submit' value='Import'/><br/>
+					<span>Your foaf file URL:      </span><input id='url' name='url' value='Your Foaf Url' onfocus="if(this.value == 'Your Foaf Url'){this.value = '';this.style.color='#000000';}"/><br/><br/>
+					<input id='button' type='submit' value='Import'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
 				</form>
-				<form method='get' action='/builder'>
-					<p>
-						If you already have a foaf file, please put the url in below.  If not, just click Build.
-					</p>
-					<span>Your FOAF URL:      </span><input id='url' name='url' value='Your Foaf Url' onfocus="if(this.value == 'Your Foaf Url'){this.value = '';this.style.color='#000000';}"/><br/><br/>
+					<p>Hit Build below to get started...</p>
+				<form method='get' id='importForm' action='/builder/'>
 					<input id='button' type='submit' value='Build'/>
 				</form>
 			</div>
