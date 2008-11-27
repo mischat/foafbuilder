@@ -210,13 +210,15 @@ function genericObjectsToDisplay(data){
 	nearestAirportFieldsObjectsToDisplay(data);
 	basedNearFieldsObjectsToDisplay(data);
 	accountsObjectsToDisplay(data);
+	homepageObjectsToDisplay(data);
+	//renderHomepageFields(data);
 	
-	/*friends stuff does not have pricacy settings*/
+	/*friends stuff does not have privacy settings*/
 	renderKnowsFields(data);
 	
 	/*render the various fields*/
 	//renderBirthdayFields(data);
-	//renderHomepageFields(data);
+
 
 }
 
@@ -326,6 +328,17 @@ function accountsObjectsToDisplay(data){
 	}
 	if(data.public){
 		renderAccountFields(data.public,true);
+	}
+}
+function homepageObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderHomepageFields(data.private,false);
+	}
+	if(data.public){
+		renderHomepageFields(data.public,true);
 	}
 }
 
@@ -548,36 +561,46 @@ function renderBirthdayFields(data){
 }
 
 /*Render the HomepageField*/
-function renderHomepageFields(data){
-
+function renderHomepageFields(data,isPublic){
+	
+	log('trying to render homepages');
+	
+	//XXX this is just like renderMboxFields
 	if(!data || !data.foafHomepageFields || typeof(data.foafHomepageFields) == 'undefined'){
 		return;
 	}
 	
-	/*build the container*/
 	var name = data.foafHomepageFields.name;
 	var label = data.foafHomepageFields.displayLabel;
-	var containerElement = createFieldContainer(name, label);
+	var name = data.foafHomepageFields.name;
 	
-	/*Get the values for the date*/
-	//var values = data.foafHomepageFields['values'];
-
-	/*render each individual phone element*/	
-	var i =0;
-	if(typeof(data.foafHomepageFields.values) != 'undefined' && data.foafHomepageFields.values){
-		for(phoneNumber in data.foafHomepageFields.values){
-			createGenericInputElement(name, data.foafHomepageFields.values[phoneNumber], i);	
-			i++;
-		}
-		
-		if(i==0){
-			//TODO: add the grey text with an onclick thing to make it disappear
-			createGenericInputElement(name, 'http://www.myexamplepage.com', 0,false,true);	
-		}
+	/*build the container if it isn't there already*/
+	var containerElement = document.getElementById(name+"_container");
+	if(!containerElement){
+		containerElement = createFieldContainer(name, label);
 	}
 
-	/*create an add link*/
-	createGenericAddElement(containerElement,name,label);
+	/*render each individual homepage element*/	
+	var i = containerElement.childNodes.length;
+	if(typeof(data.foafHomepageFields.values) != 'undefined' && data.foafHomepageFields.values && typeof(data.foafHomepageFields.values[0])!='undefined'){
+		for(homepage in data.foafHomepageFields.values){
+			log(data.foafHomepageFields.values[homepage]);
+			createGenericInputElement(name, data.foafHomepageFields.values[homepage], i,false,false,false,!isPublic);	
+			i++;
+			log('in for loop for homepages');
+		}
+	} else {
+		
+		/*create an empty field but only if this is the first one XXX this depends on this function being called in the public sense initially*/
+		if(isPublic){
+			createGenericInputElement(name, 'My Homepage Here', i,false,true,false,!isPublic);
+		}
+	}	
+	
+	/*create an add link XXX this means we have to display public fields before private ones*/
+	if(isPublic){
+		createGenericAddElement(containerElement,name,label);
+	}
 
 }
 
@@ -1444,7 +1467,7 @@ function displayToObjects(name){
 			//XXX: these are only commented out for development purposes
 			//birthdayDisplayToObjects();
 			simpleFieldsDisplayToObjects();
-			//homepageDisplayToObjects();
+			homepageDisplayToObjects();
 			break;
 		case 'load-contact-details':
 			addressDisplayToObjects();
@@ -1491,24 +1514,51 @@ function birthdayDisplayToObjects(){
 }
 
 function homepageDisplayToObjects() {
-	var containerElement = document.getElementById('foafHomepage_container');	
-
-	if(containerElement && typeof(globalFieldData.foafHomepageFields != 'undefined') && globalFieldData.foafHomepageFields) {
-		if(typeof(globalFieldData.foafHomepageFields.values) != 'undefined'){
-			
-			/*remove the existing values*/
-			globalFieldData.foafHomepageFields.values = new Array();
-			
-			/*add the elements that are present in the display again*/
-			for(i=0 ; i <containerElement.childNodes.length ; i++){
-				
-				var element = containerElement.childNodes[i];
+	log('in homepage display to objects');
+	var containerElement = document.getElementById('foafHomepage_container');
+	
+	if(!containerElement){
+		return
+	}
+	if(typeof(globalFieldData.foafHomepageFields) == 'undefined' || !globalFieldData.foafHomepageFields){
+		log('homepages - returning');
+		return;
+	}
+	if(typeof(globalPrivateFieldData.foafHomepageFields) == 'undefined' || !globalPrivateFieldData.foafHomepageFields){
+		log('homepages - returning');
+		return;
+	}
+	
+	/*remove the existing values*/
+	globalFieldData.foafHomepageFields.values = new Array();
+	globalPrivateFieldData.foafHomepageFields.values = new Array();
+		
+	/*add the elements that are present in the display again*/
+	for(i=0 ; i <containerElement.childNodes.length ; i++){
+		
+		log('in for loop for homepages');
+		
+		var element = containerElement.childNodes[i];
 					
-				if(element.className == 'fieldInput'){	
-					globalFieldData.foafHomepageFields.values.push(element.value);
-				}//end if
-			}//end for	
-		}//end if	
+		//we only want input elements
+		if(element.className != 'fieldInput'){	
+			continue;
+		}
+		
+		var privacyBox = document.getElementById('privacycheckbox_'+element.id);
+		
+		/*no privacy checkbox, so skip to next childNode*/
+		if(typeof(privacyBox) == 'undefined' || !privacyBox){
+			log("Privacy box not found for homepage");
+			continue;
+		}	
+		
+		/*put it into the appropriate field data object, private or not private*/
+		if(!privacyBox.checked){	
+			globalFieldData.foafHomepageFields.values.push(element.value);
+		} else {
+			globalPrivateFieldData.foafHomepageFields.values.push(element.value);
+		}		
 	}
 }
 
