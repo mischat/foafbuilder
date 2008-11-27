@@ -195,7 +195,7 @@ class AjaxController extends Zend_Controller_Action {
         $this->foafData = FoafData::getFromSession(true);
 		$this->privateFoafData = FoafData::getFromSession(false);
 		
-        if (!$this->foafData) {
+        if (!$this->foafData){
             //print "First time !\n";
             $uri = @$_POST['uri'];
             $this->foafData = new FoafData($uri);	  

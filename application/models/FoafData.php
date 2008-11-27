@@ -22,7 +22,6 @@ class FoafData {
         
     	//either a private foafData object or a public one
         $this->isPublic = $isPublic;
-        
     	/*
     	 * TODO MISCHA this empty instantiation stuff is for new private models.  In future it should try to fetch	
     	 * the private model from an oauth server or similar.
@@ -44,6 +43,7 @@ class FoafData {
     		$uri = '';
     		$this->getEmptyDocument($uri);
 			$this->putInSession();
+			echo('getting empty');
 			return;
     	}
     	
@@ -54,8 +54,10 @@ class FoafData {
 		$this->model = new NamedGraphMem($uri);
 		
 		/*load the passed foaf file and generate a new primary topic for it*/
-		$loadValue = $this->model->load($uri);		
-		if(!$loadValue){
+		$loadValue = $this->model->load($uri);
+				
+		if($loadValue==1){
+			echo('no passed foaf file');
 			return;		
 		}
 		

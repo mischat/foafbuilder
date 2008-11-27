@@ -14,4 +14,3 @@ class IndexController extends Zend_Controller_Action
     }
 	
 }
-/* vi:set expandtab sts=4 sw=4: */

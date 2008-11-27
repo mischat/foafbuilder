@@ -6,26 +6,9 @@
 <table cellspacing="10">
 	<tr>
 		<td>
-			<form action = "javascript:loadFoaf(currentPage);">
-				<input type = 'text' id= 'foafUri' name = 'foafUri'/>
-				<input type = 'submit' value = 'Load'/>
-			</form>
-		</td>
-		<td>
 			<form action = "javascript:renderOther();">
 				<input type = 'text' id= 'writeUri' name = 'writeUri'/>
 				<input type = 'submit' value = "Write" />
-			</form>
-		</td>
-		<td>
-			<? //FIXME: sort this out so that it saves whichever page you're on ?>
-			<form action = "javascript:saveFoaf();">
-				<input type = 'submit' value = 'Save'/>
-			</form>
-		</td>
-		<td>
-			<form action = "javascript:clearFoaf();">
-				<input type = 'submit' value = 'Clear'/>
 			</form>
 		</td>
 		<td>
@@ -34,7 +17,7 @@
 	</tr>
 </table>
 <div id="leftCol">
-<form action="javascript:alert('TODO: implement this Luke!');">
+<form action="#">
 	<? //TODO: perhaps the load-the-basics name should be generated somehow ?>
 		<div onclick="loadFoaf('load-the-basics');" class="editorElement">
 			<div id="load-the-basics" class="editorTitle">
@@ -158,4 +141,5 @@
 	
 <script type='text/javascript'>
 	loadFoaf('load-the-basics','<? echo($this->uri); ?>');
+	document.getElementById('writeUri').value ='<? echo($this->uri); ?>';
 </script>

@@ -50,11 +50,12 @@ function turnOnLoading(){
 /*loads all the foaf data from the given file (or the session if there is no uri) into the editor.*/
 function loadFoaf(name,url){
 	
-	var foafUrl = url;
+	var foafUrl = null;
 	
+	/*
 	if(!url || typeof(url) == 'undefined'){
 		foafUrl = document.getElementById('foafUri').value;
-	}
+	}*/
 	
 	/*so we can track which page the person is on*/
 	currentPage = name;
@@ -62,7 +63,7 @@ function loadFoaf(name,url){
   	//TODO use jquery event handler to deal with errors on requests
   	if(name != 'load-other'){
   		turnOnLoading();
-  		$.post("/ajax/"+name, { uri: foafUrl}, function(data){genericObjectsToDisplay(data);turnOffLoading();}, "json");
+  		$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);turnOffLoading();}, "json");
   	} else {
   		renderOther();
   	}
@@ -145,9 +146,36 @@ function renderFoundFriend(data){
 /*Writes FOAF to screen*/
 function renderOther() {
 		turnOnLoading();
-		url = document.getElementById('writeUri').value;
+		
+		var url = document.getElementById('writeUri').value;
         $.post("/writer/write-foafn3", {uri: url }, function(data){drawOtherTextarea(data);turnOffLoading();},'json');
         
+}
+
+/*writes foaf to oauth server or similar*/
+function write(privacy){
+
+	if(typeof(privacy) == 'undefined' || !privacy){
+		log('privacy not passed in');
+		return;
+	} 
+	
+	var textArea = document.getElementById('otherTextArea'+privacy);
+
+	if(typeof(textArea) == 'undefined' || !textArea){
+		log('textarea not found');
+		return;
+	}
+	
+	var value = textArea.value;
+	
+	if(typeof(value) == 'undefined' || !value){
+		log('value of text area not defined');
+		return;
+	}
+	
+    $.post("/writer/write-foafn3-"+privacy, {data: value}, function(data){turnOffLoading();},null);
+     
 }
 
 
@@ -2427,6 +2455,7 @@ function phoneDisplayToObjects(){
 		newElement.id = name+'_'+thisElementCount;
 		newElement.setAttribute('value',value);
 		newElement.setAttribute('onchange','saveFoaf()');
+		newElement.setAttribute('onfocus','saveFoaf()');
 		
 		//if the contname does not specify the container to put it in
 		if(!contname){
@@ -2819,44 +2848,38 @@ function phoneDisplayToObjects(){
 		var name = 'other';
 		var label = 'Geek View';
 		var containerElement = createFieldContainer(name, label);
+	
 		
-		/*build another container*/
-		var rdfContainerDiv = document.createElement('div');
-		rdfContainerDiv.id='rdfContainer';
-		containerElement.appendChild(rdfContainerDiv);
-		
-		/*build a form*/
-		var rdfForm = document.createElement('form');
-		rdfForm.setAttribute('action','javascript:saveFoaf()');//TODO: need to have a good name for this
-		rdfForm.id = 'otherForm';
-		rdfContainerDiv.appendChild(rdfForm);
-		log('here');
 		/*build a textarea for private & public*/
 		if(typeof(data.private) != 'undefined' && data.private){
 			log('creating one container');
-			createOtherTextArea(data.private,'Private',rdfForm,rdfContainerDiv,'private');
+			createOtherTextArea(data.private,'Private',containerElement,'private');
 		}
 		if(typeof(data.public) != 'undefined' && data.public){
 			log('creating another container');
-			createOtherTextArea(data.public,'Public',rdfForm,rdfContainerDiv,'public');
+			createOtherTextArea(data.public,'Public',containerElement,'public');
 		}
 		log('and now here');
 		
-		/*add a submit button*/
-		var rdfButton = document.createElement('input');
-		rdfButton.value = 'save';
-		rdfButton.setAttribute('type','submit');
-		rdfButton.id = 'otherButton';
-		rdfButton.className = 'otherButton';
-		rdfForm.appendChild(rdfButton);
 	}
 	
-	function createOtherTextArea(data,header,rdfForm,container,privacy){
+	function createOtherTextArea(data,header,containerElement,privacy){
 		
 		if(typeof(data) == 'undefined' || !data){
 			log('no data');
 			return;
 		}
+		
+		/*build another container*/
+		var container = document.createElement('div');
+		container.id='rdfContainer'+privacy;
+		containerElement.appendChild(container);
+		
+		/*build a form*/
+		var rdfForm = document.createElement('form');	
+		rdfForm.setAttribute('action','javascript:write("'+privacy+'")');
+		rdfForm.id = 'otherForm'+privacy;
+		container.appendChild(rdfForm);
 		
 		/*render the header*/
 		var headerDiv = document.createElement('div');
@@ -2867,12 +2890,20 @@ function phoneDisplayToObjects(){
 		/*render the textarea*/
 		var rdfTextArea = document.createElement('textarea');
 		rdfTextArea.name = privacy;
-		rdfTextArea.id = ('otherTextArea_'+privacy);
+		rdfTextArea.id = 'otherTextArea'+privacy;
 		rdfTextArea.setAttribute('cols','1000');
 		rdfTextArea.setAttribute('rows','50000'); 
 		rdfTextArea.className = ('otherTextArea');
 		rdfTextArea.appendChild(document.createTextNode(data));
 		rdfForm.appendChild(rdfTextArea);
+		
+		/*add a submit button*/
+		var rdfButton = document.createElement('input');
+		rdfButton.value = 'save';
+		rdfButton.setAttribute('type','submit');
+		rdfButton.id = 'otherButton';
+		rdfButton.className = 'otherButton';
+		rdfForm.appendChild(rdfButton);
 		
 	}
 
@@ -3336,8 +3367,12 @@ function updateCodesFromAirportName(value){
 	var iataCode = document.getElementById('iataCode');
 	var icaoCode = document.getElementById('icaoCode');
 	
-		log('this is value: '+value);
-		
+	//XXX I think that there is a bug where sometimes this is undefined
+	if(autocomplete_airportData[value] == 'undefined'){
+		log('Airport data is sometimes undefined');
+		return;
+	}
+	
 	if(iataCode && typeof(autocomplete_airportData[value]['iata']) != 'undefined'){
 		//set the iata value
 		iataCode.childNodes[0].nodeValue ='IATA Code: '+autocomplete_airportData[value]['iata'];	
