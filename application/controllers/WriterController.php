@@ -56,8 +56,7 @@ class WriterController extends Zend_Controller_Action
     			return;
     		}
 
-    		/*put some stuff in the view*/
-    		//XXX is this really necessary
+	/*
     	    $this->view->model = $foafData->getModel();
             $this->view->uri = $foafData->getURI();
             $this->view->graphset= $foafData->getGraphset();
@@ -67,7 +66,7 @@ class WriterController extends Zend_Controller_Action
                 $newDocUri = $this->view->uri;
             }
 			
-            /*do some mangling with the primary topic to set it to the passed uri*/
+            //do some mangling with the primary topic to set it to the passed uri
             $newDocUriRes = new Resource($newDocUri);
             $newPersonUriRes = new Resource($newDocUri."#me");
             $oldPersonUriRes = new Resource($this->view->primaryTopic);
@@ -78,9 +77,28 @@ class WriterController extends Zend_Controller_Action
             $this->view->model->replace(NULL,NULL,$oldPersonUriRes,$newPersonUriRes);
             $this->view->model->setBaseUri(NULL);
             
-            /*get everything and put it in the view*/
+            /*get everything and put it in the view
             $result = $this->view->model->find(NULL, NULL, NULL);
+
+	*/
+	    //TODO MISCHA ... use the __clone() Magic Method instead, this is not optimum
+	    $tempmodel = unserialize(serialize($foafData->getModel()));
+            $tempuri = $foafData->getURI();
+            $tempgraph= $foafData->getGraphset();
+            $tempprimaryTopic = $foafData->getPrimaryTopic();
+	    
+            $newDocUriRes = new Resource($tempuri);
+            $newPersonUriRes = new Resource($tempuri."#me");
+            $oldPersonUriRes = new Resource($tempprimaryTopic);
+            $oldDocUriRes = new Resource($tempuri);
+	    
+            $tempmodel->replace($oldDocUriRes,new Resource("<http://xmlns.com/foaf/0.1/primaryTopic>"),NULL,$newDocUriRes);
+            $tempmodel->replace($oldPersonUriRes,NULL,NULL,$newPersonUriRes);
+            $tempmodel->replace(NULL,NULL,$oldPersonUriRes,$newPersonUriRes);
+            $tempmodel->setBaseUri(NULL);
             
+            $result = $tempmodel->find(NULL, NULL, NULL);
+	
             if($foafData->isPublic){
             	if($writeNtriples){
             		$this->view->data->public = $result->writeRdfToString('nt');
@@ -95,7 +113,4 @@ class WriterController extends Zend_Controller_Action
             	}	
             }    	
     }
-
-
-
 }
