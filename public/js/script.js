@@ -1467,7 +1467,6 @@ function displayToObjects(name){
 			//XXX: these are only commented out for development purposes
 			//birthdayDisplayToObjects();
 			simpleFieldsDisplayToObjects();
-			homepageDisplayToObjects();
 			break;
 		case 'load-contact-details':
 			addressDisplayToObjects();
@@ -1476,6 +1475,7 @@ function displayToObjects(name){
 			break;
 		case 'load-accounts':
 			accountsDisplayToObjects();
+			homepageDisplayToObjects();
 			break;
 		case 'load-locations':
 			nearestAirportDisplayToObjects();
