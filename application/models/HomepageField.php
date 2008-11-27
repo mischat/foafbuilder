@@ -17,7 +17,6 @@ class HomepageField extends Field {
         $this->data['foafHomepageFields']['name'] = $this->name;
         $this->data['foafHomepageFields']['values'] = array();    
 */
-        error_log("THis is lame");
         $this->data['public']['foafHomepageFields'] = array();
         $this->data['public']['foafHomepageFields']['values'] = array();
         $this->data['public']['foafHomepageFields']['displayLabel'] = $this->label;
