@@ -74,7 +74,6 @@ class FieldNames {
 	
 	/*instantiates arrays of fields for all the items on the basics page*/
 	private function instantiateTheBasicsFields($fullInstantiation = true){
-	
 		//var_dump($this->privateFoafData);
 		//FIXME: homepage and birthday temporarily commented out for dev purposes
 		$this->allFieldNames['foafBirthday'] = new BirthdayField($this->foafData,$this->privateFoafData,$fullInstantiation);
@@ -89,7 +88,6 @@ class FieldNames {
 
 		$this->allFieldNames['foafNick'] = 
 			new SimpleField('foafNick', 'Nickname', 'http://xmlns.com/foaf/0.1/nick',$this->foafData, $this->privateFoafData,'literal',$fullInstantiation);
-		
 	}
 	
 	private function instantiateContactDetailsFields($fullInstantiation = true){

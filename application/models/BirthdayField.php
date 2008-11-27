@@ -246,7 +246,7 @@ class BirthdayField extends Field {
 
     /*try and parse a short date for Event:Bio or dateOfBirth*/
     private function isLongDateValid($date) {
-        if (preg_match('/(\d{4}?)[-|:|\/](\d{1,2}?)[-|:|\/](\d{1,2}?)/',$date,$matches)) {
+        if (preg_match('/(\d{4}?)[-|:|\/](\d{1,2}?)[-|:|\/](\d{1,2}?)$/',$date,$matches)) {
             if (((int) $matches[2] <= 12) && ((int) $matches[2] > 0)) {
                 if (((int) $matches[3] <= 31) && ((int) $matches[3] > 0)) {
                     error_log("[foaf_editor] long date valid");
@@ -260,7 +260,7 @@ class BirthdayField extends Field {
 
     /*try and parse a short date for foaf:birthday */
     private function isShortDateValid($date) {
-        if (preg_match('/(\d{1,2}?)[-|:|\/](\d{1,2}?)/',$date,$matches)) {
+        if (preg_match('/(\d{1,2}?)[-|:|\/](\d{1,2}?)$/',$date,$matches)) {
             if (((int) $matches[1] <= 12) && ((int) $matches[1] > 0)) {
                 if (((int) $matches[2] <= 31) && ((int) $matches[2] > 0)) {
                     error_log("[foaf_editor] short date valid");
