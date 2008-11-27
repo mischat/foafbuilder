@@ -49,9 +49,7 @@ class SimpleField extends Field{
 		
 		$queryString = "SELECT ?".$this->name." WHERE {<".$foafData->getPrimaryTopic()."> <".$this->predicateUri."> ?".$this->name." }";
 		$results = $foafData->getModel()->SparqlQuery($queryString);		
-		//var_dump($results);
 
-		//var_dump($results);
 		/*make sure that we populate the public or the private bit*/
 		$privacy;
 		if($foafData->isPublic){
@@ -59,8 +57,6 @@ class SimpleField extends Field{
 		} else {
 			$privacy = 'private';
 		}
-		
-		//var_dump($privacy);
 		
 		/*mangle the results so that they can be easily rendered*/
 		if(isset($results[0])){
@@ -76,7 +72,6 @@ class SimpleField extends Field{
 				     
 				}
 		    }
-		
 		}	
 	}
 

@@ -207,23 +207,23 @@ width:100%;
 	font-size:12px;
 	color:#999999;
 	font-weight:600;
-	width:60px;
+	width:100px;
 	padding-left:20px;
 	height:20px;
-	float:left;
 }
 .fieldValueContainer{
 	position:relative;
 	left:140px;
 	width:330px;
-	padding-top:20px;
+	margin-top:-22px;
+	/*padding-top:20px;*/
 	/*to counteract the size of the fieldLabelContainer*/
 	/*top:-20px;*/
 	
 }
 .fieldContainer{
 	padding-top: 20px;
-	padding-bottom:20px;
+	padding-bottom:25px;
 	border-bottom: 1px solid #dddddd;
 	margin-left:20px;
 	margin-right:20px;
@@ -248,12 +248,13 @@ width:100%;
 
 /*-------left col-------*/
 #leftCol{
-	width:280px;
+	width:221px;
 	height:1000px;
 	float: left;
 	border: 1px solid #eeeeee;
 }
 .editorElement{
+	width:220px;
 	background-color: #eeeeee;
 }
 .editorTitle{
@@ -275,7 +276,7 @@ width:100%;
 }
 .editorSubTitleEven{
 	height:20px;
-	width:230px;
+	width:180px;
 	margin-left:40px;
 	margin-right:10px;
 	margin-top:2px;
@@ -290,7 +291,7 @@ width:100%;
 }
 .editorSubTitleOdd{
 	height:20px;
-	width:230px;
+	width:180px;
 	margin-left:40px;
 	margin-right:10px;
 	margin-top:2px;
@@ -393,28 +394,33 @@ width:100%;
 	font-family:Arial,Helvetica,sans-serif;
 	font-size:12px;	
 	border-bottom:1px solid #EEEEEE;
-	height:200px;
+	height:220px;
 	color: #999999;		
+	margin-top:20px;
 }
 .officeAddress{
 	font-family:Arial,Helvetica,sans-serif;
 	font-size:12px;	
 	border-bottom:1px solid #EEEEEE;
-	height:200px;
-	color: #999999;		
+	height:220px;
+	color: #999999;	
+	margin-top:-15px;	
 }
 .airportCode{
 	float:right;
 	margin-top:-10px;	
 }
 .addressTitle{
+	margin-bottom:5px;
 	font-weight:600;
+	position:relative;
+	top:0px;
+	left:0px;
 }
 .streetLabel{
 	margin-top:5px;	
 	float:left;
-	width:100px;
-	
+	width:100px;	
 }
 .street2Label{
 	margin-top:5px;	
@@ -499,9 +505,10 @@ width:100%;
 /*geek view stuff*/
 .otherTextArea{
 	font-size:10px;
-	height:400px;
+	height:300px;
 	margin-left:-120px;
-	width:440px;	
+	width:440px;
+	color:#444444;	
 }
 .otherButton{
 }
