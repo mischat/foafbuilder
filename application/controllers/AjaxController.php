@@ -31,6 +31,11 @@ class AjaxController extends Zend_Controller_Action {
 		        
         //results
 		$this->view->results = array();
+		$this->view->results['flickrFound'] = false;
+		$this->view->results['deliciousFound'] = false;
+		$this->view->results['lastfmFound'] = false;
+		
+        //these results
         $this->view->results['flickrFound'] = $this->foafData->flickrFound;
         $this->view->results['deliciousFound'] = $this->foafData->deliciousFound;
         $this->view->results['lastfmFound'] = $this->foafData->lastfmFound;
@@ -60,7 +65,7 @@ class AjaxController extends Zend_Controller_Action {
 		} 
         if($lastfm && !$this->foafData->lastfmFound){
             
-        	$lastfmUri = 'http://foaf.qdos.com/lastfm/people/'.$lastfm; 
+        	$lastfmUri = 'http://foaf.qdos.com/delicious/people/'.$lastfm; 
         	$lastfm = $this->foafData->getModel()->load($lastfmUri);
             $this->foafData->replacePrimaryTopic($lastfmUri);
 		
@@ -69,10 +74,6 @@ class AjaxController extends Zend_Controller_Action {
 				$this->foafData->lastfmFound = true;
 			}
         } 
-        
-        
-        $result = $this->foafData->getModel()->find(NULL, NULL, NULL);
-        echo($result->writeRdfToString('nt'));
 	}
 
 
