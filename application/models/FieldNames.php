@@ -86,8 +86,7 @@ class FieldNames {
 			new SimpleField('foafFamilyName', 'Family Name', 'http://xmlns.com/foaf/0.1/family_name',$this->foafData, $this->privateFoafData,'literal',$fullInstantiation);
 		$this->allFieldNames['foafName'] = 
 			new SimpleField('foafName', 'Real Name', 'http://xmlns.com/foaf/0.1/name',$this->foafData, $this->privateFoafData,'literal',$fullInstantiation);
-		$this->allFieldNames['foafHomepage'] =  
-			new HomepageField($this->foafData,$this->privateFoafData,$fullInstantiation);
+
 		$this->allFieldNames['foafNick'] = 
 			new SimpleField('foafNick', 'Nickname', 'http://xmlns.com/foaf/0.1/nick',$this->foafData, $this->privateFoafData,'literal',$fullInstantiation);
 		
@@ -106,6 +105,7 @@ class FieldNames {
 	
 	private function instantiateAccountsFields($fullInstantiation = true){
 		$this->allFieldNames['foafHoldsAccount'] = new HoldsAccountField($this->foafData,$this->privateFoafData,$fullInstantiation);
+		$this->allFieldNames['foafHomepage'] = new HomepageField($this->foafData,$this->privateFoafData,$fullInstantiation);
 	}
 	
 	private function instantiateFriendsFields($fullInstantiation = true){
