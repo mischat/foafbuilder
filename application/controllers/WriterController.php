@@ -28,6 +28,77 @@ class WriterController extends Zend_Controller_Action
         	$this->doWrite($publicFoafData,$newDocUri,true);
         }
     }
+
+  public function writeFoafn3PublicAction() {
+        require_once 'FoafData.php';
+	//this is inside an action in one of your controllers:
+    	$publicFoafData = FoafData::getFromSession(true);
+
+	$this->view->model = $publicFoafData->getModel();
+	$result = $this->view->model->find(NULL, NULL, NULL);
+        
+	$data = $result->writeRdfToString();
+
+    $response = $this->getResponse();
+        $response->setHeader('Cache-Control', 'public', true)
+            ->setHeader('Content-Description', 'File Transfer', true)
+            ->setHeader('Content-Type', 'application/rdf+xml', true)
+            ->setHeader('Content-Disposition', 'attachment;filename=foaf.rdf', true);
+        
+        $this->_helper->layout->disableLayout();
+        $this->_helper->viewRenderer->setNoRender(true) ;
+
+	echo $data;
+/*
+        Zend_Layout::getMvcInstance()->disableLayout(true);
+        $this->_helper->viewRenderer->setNoRender();
+        $this->getResponse()->setHeader("Cache-Control","no-cache, must-revalidate");
+        $this->getResponse()->setHeader("Content-Type","application/force-download");
+        $this->getResponse()->setHeader("Content-Disposition","attachment; filename='foaf.rdf'");
+//    	$this->getResponse()->appendBody("LAME LAME ");
+	echo "FUCK FUCK";
+
+/*
+// Within an action controller action:
+// Set a header
+$this->getResponse()
+    ->setHeader('Content-Type', 'application/zip')
+*/
+
+
+/*
+	$this->view->model = $publicFoafData->getModel();
+	$result = $this->view->model->find(NULL, NULL, NULL);
+        
+	$file = $result->writeRdfToString();
+ 
+	$this->getResponse()->setBody($file);
+	$this->getResponse()->setHeader('Content-Type', 'application/zip');
+	$this->getResponse()->setHeader('Content-Disposition', 'attachment; filename="foaf.rdf"');
+	$this->getResponse()->setHeader('Content-Length', strlen($file));
+ 
+	//If using Zend_Layout, we need to disable it:
+	//$this->_helper->layout->disableLayout();
+	 
+	//Disable ViewRenderer:
+	//$this->_helper->viewRenderer->setNoRender(true);
+        
+    	$publicFoafData = FoafData::getFromSession(true);
+	$this->view->model = $publicFoafData->getModel();
+	$result = $this->view->model->find(NULL, NULL, NULL);
+        
+	//$result->writeRdfToString();
+
+        header("Content-type: application/octet-stream");
+        header("Content-Disposition: attachment; filename=\"foaf.rdf\"");
+	echo $result->writeRdfToString();
+	exit();
+
+	header("Content-type: application/octet-stream");
+	header("Content-Disposition: attachment; filename=\"my-data.csv\"");
+	echo $result->writeRdfToString();
+*/
+    }
     
   public function writeFoafAction() {
         require_once 'FoafData.php';
