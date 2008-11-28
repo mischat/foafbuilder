@@ -1,5 +1,5 @@
 /*for logging purposes*/
-var loggingOn = true;
+var loggingOn = false;
 
 /*--------------------------global variables--------------------------*/
 
@@ -1183,6 +1183,7 @@ function renderKnowsFields(data){
 		var viewOnMapDiv = document.createElement('div');
 		viewOnMapDiv.className = 'viewOnMapContainer';
 		viewOnMapLink = document.createElement('a');
+		viewOnMapLink = makeCursorAPointer(viewOnMapLink);
 		viewOnMapLink.className = 'viewOnMapLink';
 		viewOnMapLink.appendChild(document.createTextNode('view on map'));
 		viewOnMapLink.setAttribute('onclick',"displayMap('"+bNodeKey+"')");
@@ -2461,6 +2462,7 @@ function phoneDisplayToObjects(){
 		addDiv.id = name+"_addLinkContainer";
 		addDiv.className = "addLinkContainer";
 		var addLink = document.createElement('a');
+		addLink = makeCursorAPointer(addLink);
 		addLink.appendChild(document.createTextNode("+Add another "+displayLabel));
 		addLink.className="addLink";
 		
@@ -2499,6 +2501,7 @@ function phoneDisplayToObjects(){
 			removeDiv.id = removeId+"removeLinkContainer";
 			removeDiv.className = "removeLinkContainer";
 			var removeLink = document.createElement('a');
+			removeLink = makeCursorAPointer(removeLink);
 			removeLink.appendChild(document.createTextNode("- Remove"));
 			removeLink.id="_removeLink";
 			removeLink.className="removeLink";
@@ -2528,6 +2531,7 @@ function phoneDisplayToObjects(){
 			privacyDiv.appendChild(lineBreak);
 			
 			var privacyCheckbox = document.createElement('input');
+			privacyCheckbox.setAttribute('onchange','saveFoaf()');
 			privacyCheckbox.setAttribute('type','checkbox');
 			privacyCheckbox.id = "privacycheckbox_"+elementId;
 			privacyCheckbox.checked = isPrivate;
@@ -2628,6 +2632,7 @@ function phoneDisplayToObjects(){
 		addDiv.id = "addLinkContainer";
 		addDiv.className = "addLinkContainer";
 		var addLink = document.createElement('a');
+		addLink = makeCursorAPointer(addLink);
 		addLink.appendChild(document.createTextNode("+Add an Account"));
 		addLink.className="addLink";
 		addLink.setAttribute("onclick" , "createEmptyHoldsAccountElement(this.parentNode.parentNode,null)");
@@ -2654,6 +2659,7 @@ function phoneDisplayToObjects(){
 		removeDiv.id = "removeLinkContainer";
 		removeDiv.className = "removeLinkContainer";
 		var removeLink = document.createElement('a');
+		removeLink = makeCursorAPointer(removeLink);
 		removeLink.appendChild(document.createTextNode("- Remove this account"));
 		removeLink.id="removeLink";
 		removeLink.className="removeLink";
@@ -2720,6 +2726,7 @@ function phoneDisplayToObjects(){
 		addDiv.id = "basedNearAddLinkContainer";
 		addDiv.className = "addLinkContainer";
 		var addLink = document.createElement('a');
+		addLink = makeCursorAPointer(addLink);
 		addLink.appendChild(document.createTextNode("+Add a point I'm based near"));
 		addLink.className="addLink";
 		addLink.setAttribute("onclick" , "createBasedNearElementAboveAddLink('"+container.id+"',this.parentNode.id)");
@@ -2766,6 +2773,7 @@ function phoneDisplayToObjects(){
 			removeDiv.id = removeId+"removeLinkContainer";
 			removeDiv.className = "friendRemoveLinkContainer";
 			var removeLink = document.createElement('a');
+			removeLink = makeCursorAPointer(removeLink);
 			removeLink.appendChild(document.createTextNode("- Remove"));
 			removeLink.id="_removeLink";
 			removeLink.className="removeLink";
@@ -2790,6 +2798,7 @@ function phoneDisplayToObjects(){
 			makeFriendDiv.className = "friendRemoveLinkContainer";
 			
 			var makeFriendLink = document.createElement('a');
+			makeFriendLink = makeCursorAPointer(makeFriendLink);
 			makeFriendLink.appendChild(document.createTextNode("-Confirm"));
 			makeFriendLink.className="removeLink";
 	
@@ -2809,6 +2818,7 @@ function phoneDisplayToObjects(){
 			makeFriendDiv.className = "friendRemoveLinkContainer";
 			
 			var makeFriendLink = document.createElement('a');
+			makeFriendLink = makeCursorAPointer(makeFriendLink);
 			makeFriendLink.appendChild(document.createTextNode("-Add"));
 			makeFriendLink.className="removeLink";
 	
@@ -2863,6 +2873,7 @@ function phoneDisplayToObjects(){
 			nameDiv.className = 'friendName';
 			
 			var nameLink = document.createElement('a');
+			nameLink = makeCursorAPointer(nameLink);
 			nameLink.appendChild(document.createTextNode(name));
 			nameLink.href = 'http://foaf.qdos.com/find/?q='+ifp;
 			
@@ -2903,6 +2914,7 @@ function phoneDisplayToObjects(){
 		removeDiv.id = "removeLinkContainer";
 		removeDiv.className = "removeLinkContainer";
 		var removeLink = document.createElement('a');
+		removeLink = makeCursorAPointer(removeLink);
 	
 		if(!softRemove){
 			removeLink.appendChild(document.createTextNode("- Remove this location"));
@@ -3825,6 +3837,18 @@ function createMapElement(container){
        		return mapDiv;
      	} 
    
+}
+
+function makeCursorAPointer(element){
+
+	if(!element || typeof(element) == 'undefined'){
+		return;
+	}
+	
+	element.setAttribute('onmouseover','this.style.cursor="pointer";');
+	element.setAttribute('onmouseout','this.style.cursor="default";');
+	
+	return element;
 }
 
 	   	

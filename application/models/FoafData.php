@@ -22,6 +22,13 @@ class FoafData {
         
     	//either a private foafData object or a public one
         $this->isPublic = $isPublic;
+        
+    	//only set the uri if it isn't already set
+		//TODO: this uri needs to be the actual one we're writing out to, since it is described on the screen.
+		if(!$this->uri){
+			$this->uri = 'http://foaf.qdos.com/people/'.sha1(microtime()*microtime());
+		}
+		
     	/*
     	 * TODO MISCHA this empty instantiation stuff is for new private models.  In future it should try to fetch	
     	 * the private model from an oauth server or similar.
@@ -41,15 +48,8 @@ class FoafData {
     		//create a skeleton empty document
     		$this->getEmptyDocument();
 			$this->putInSession();
-			echo('getting empty');
 			return;
     	}
-		
-		//only set the uri if it isn't already set
-		//TODO: this uri needs to be the actual one we're writing out to, since it is described on the screen.
-		if(!$this->uri){
-			$this->uri = 'http://foaf.qdos.com/people/'.sha1(microtime()*microtime());
-		}
 		
         /*create a model if there isn't one already*/
 		if(!$this->model){
@@ -72,7 +72,7 @@ class FoafData {
     	//TODO: probably need to do some de duping at some point
     	
      	/*get primary topics*/
-        $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
+        $query = "SELECT ?prim WHERE {?anything <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
         $results = $this->model->sparqlQuery($query);
         
         if (!$results || empty($results)) {
@@ -129,11 +129,6 @@ class FoafData {
 	    		$this->model->replace(NULL,NULL,$triple->subj,$replacementUriRes);
 	       	}
 	    }
-
-	   //var_dump($replacementUriRes);
-	   //and add the correct one, from the uri set in foafData
-	   //$profileStatement = new Statement(new Resource($this->getUri()),$predicate,$object); 
-	   //$this->model->addWithoutDuplicates($profileStatement);
     }
     
     public static function getFromSession($isPublic = true) {
@@ -204,9 +199,6 @@ class FoafData {
     	$this->graphset= $graphset;
     }
     public function getEmptyDocument(){
-    	if(!$this->uri){
-			$this->uri = 'http://foaf.qdos.com/people/'.sha1(microtime()*microtime());
-		}
     	
        	$graphset = ModelFactory::getDatasetMem('GarlikDataset');
 		$model = new NamedGraphMem($this->uri);
