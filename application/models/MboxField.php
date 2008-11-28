@@ -34,7 +34,6 @@ class MboxField extends Field {
     }
     
     private function doFullLoad(&$foafData){
-    	
 	    $queryString = 
 	                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 	                PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
@@ -42,9 +41,7 @@ class MboxField extends Field {
 	                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 	                SELECT ?foafMbox
 	                WHERE{
-	                ?z foaf:primaryTopic <".$foafData->getPrimaryTopic().">
-	                ?z foaf:primaryTopic ?primaryTopic
-	                ?primaryTopic foaf:mbox ?foafMbox .
+	                <".$foafData->getPrimaryTopic()."> foaf:mbox ?foafMbox .
 	                 
 	                };";
 	
@@ -96,9 +93,13 @@ class MboxField extends Field {
 			
 			//find existing triples
 			$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
-			
+			//echo($primary_topic_resource->uri);
+			//var_dump($foundModel);
+			//var_dump($foafData->getModel());
+			//echo("------------------------------HERE------------------------------");
 			//remove existing triples
 			foreach($foundModel->triples as $triple){
+				//echo('removing mbox triples');
 				$foafData->getModel()->remove($triple);
 			}
 			
@@ -114,8 +115,8 @@ class MboxField extends Field {
 				$mboxStatement = new Statement($primary_topic_resource,$predicate_resource,$resourceValue);	
 				$mbox_Sha1Statement = new Statement($primary_topic_resource,$sha1Sum_resource,$literalValue);	
 				
-				$foafData->getModel()->add($mboxStatement);
-				$foafData->getModel()->add($mbox_Sha1Statement);
+				$foafData->getModel()->addWithoutDuplicates($mboxStatement);
+				$foafData->getModel()->addWithoutDuplicates($mbox_Sha1Statement);
 			}
 			
 

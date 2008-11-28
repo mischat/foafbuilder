@@ -15,19 +15,14 @@ class AjaxController extends Zend_Controller_Action {
     private $privateFoafData;
 	
 	public function loadExtractorAction(){
+	
+		$this->loadFoaf();
 		
 		//some details
         $uri = @$_GET['uri'];
         $flickr = $_GET['flickr'];
         $delicious = $_GET['delicious'];
         $lastfm = $_GET['lastfmUser'];
-        
-		//load the foaf file in the session (if there is one)
-        if($uri){
-        	$this->loadFoaf($uri);
-        } else {
-        	$this->loadFoaf();
-        }
 		        
         //results
 		$this->view->results = array();
@@ -204,15 +199,14 @@ class AjaxController extends Zend_Controller_Action {
         $this->foafData = FoafData::getFromSession(true);
 		$this->privateFoafData = FoafData::getFromSession(false);
 		
+		/* Instantiate objects */
         if (!$this->foafData){
-            //print "First time !\n";
-            $uri = @$_POST['uri'];
-            $this->foafData = new FoafData($uri);	  
+        	//echo('new object 1');
+            $this->foafData = new FoafData(false,true);	  
         }
     	if (!$this->privateFoafData) {
-            //print "First time !\n";
-            $uri = @$_POST['uri'];
-            $this->privateFoafData = new FoafData($uri,false);	
+            //echo('new object 2');
+    		$this->privateFoafData = new FoafData(false,false);	
         }
     }
     
@@ -318,11 +312,9 @@ class AjaxController extends Zend_Controller_Action {
                 /*get some details about the fields we're dealing with*/
                 $field = $allFieldNames[substr($key,0,-6)];
                 
-                echo("before save");
                 /*save them using the appropriate method*/
                 $field->saveToModel($foafData, $value);
-                echo("after save");
-                
+
             } else if($key == 'fields'){
             	//we need to look inside the simplefield array to do the right kind of save
  

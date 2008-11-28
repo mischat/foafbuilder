@@ -42,10 +42,7 @@ class PhoneField extends Field {
 	                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 	                SELECT ?foafPhone
 	                WHERE{
-	                ?z foaf:primaryTopic <".$foafData->getPrimaryTopic().">
-	                ?z foaf:primaryTopic ?primaryTopic
-	                ?primaryTopic foaf:phone ?foafPhone .
-	                 
+	                <".$foafData->getPrimaryTopic()."> foaf:phone ?foafPhone .   
 	                };";
 	
 	    $results = $foafData->getModel()->SparqlQuery($queryString);		

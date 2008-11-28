@@ -11,12 +11,7 @@ class HomepageField extends Field {
     	
         $this->name = 'foafHomepage';
         $this->label = 'Homepage';
-/*
-        $this->data['foafHomepageFields'] = array();
-        $this->data['foafHomepageFields']['displayLabel'] = $this->label;
-        $this->data['foafHomepageFields']['name'] = $this->name;
-        $this->data['foafHomepageFields']['values'] = array();    
-*/
+
         $this->data['public']['foafHomepageFields'] = array();
         $this->data['public']['foafHomepageFields']['values'] = array();
         $this->data['public']['foafHomepageFields']['displayLabel'] = $this->label;
@@ -29,7 +24,7 @@ class HomepageField extends Field {
 
         /*don't sparql query the model etc if a full instantiation is not required*/
         if (!$fullInstantiation){
-                        return;
+                    return;
         }
 
         if ($foafDataPublic) {

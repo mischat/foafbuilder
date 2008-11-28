@@ -15,7 +15,7 @@ function importFoaf(){
 	var uri = document.getElementById('uri').value;
 			
 	var errorConsole = document.getElementById('uri').value;
-			alert(errorConsole);
+
 	$.get("/ajax/load-extractor",{flickr: flickr, lastfmUser: lastfmUser, delicious: delicious, uri: uri} , function(data){
 			
 			if(typeof(data) == 'undefined' || !data){
