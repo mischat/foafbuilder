@@ -26,8 +26,7 @@ class KnowsField extends Field {
 			$query  = 	"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 						 	SELECT DISTINCT ?knowsResource ?ifp_predicate WHERE {
 						 		<".$foafData->getPrimaryTopic()."> foaf:knows ?knowsResource";
-			
-			
+					
 			foreach($friend->ifps as $ifp){
 				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate <".$ifp.">  }";
 				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate \"".$ifp."\" }";
@@ -92,13 +91,12 @@ class KnowsField extends Field {
     /*predicateUri is only appropriate for simple ones (one triple only)*/
     public function KnowsField($foafData, $fullInstantiation = true) {
         
-			/*TODO MISCHA dump test to check if empty */
-			
+		/*TODO MISCHA dump test to check if empty */
         	$this->data['foafKnowsFields'] = array();
-            $this->name = 'foafKnows';
-            $this->label = 'Friends';
+            	$this->name = 'foafKnows';
+            	$this->label = 'Friends';
         	$this->data['foafKnowsFields']['displayLabel'] = $this->label;
-            $this->data['foafKnowsFields']['name'] = $this->name;
+            	$this->data['foafKnowsFields']['name'] = $this->name;
             
            	if(!$fullInstantiation || !$foafData || !$foafData->getPrimaryTopic()){
 				return;	
@@ -120,6 +118,7 @@ class KnowsField extends Field {
         	$this->data['foafKnowsFields']['mutualFriends'] = $mutualFriendsDetails;
         	$this->data['foafKnowsFields']['userKnows'] = $userKnowsDetails;
         	$this->data['foafKnowsFields']['knowsUser'] = $knowsUserDetails; 	
+    		
     }
     
     /*returns an array of arrays of ifps for each friend that the user knows who knows the user as well.  
@@ -456,24 +455,26 @@ class KnowsField extends Field {
 						PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX ya: <http://blogs.yandex.ru/schema/foaf/>
 						SELECT DISTINCT ?infriend ?infriend_predicate ?infriend_ifp
 						WHERE {
-						 	OPTIONAL{
 							  	?uri ?ifp_predicate ?ifp .
 						 		?infriend foaf:knows ?uri .						 	
 							  	?infriend ?infriend_predicate ?infriend_ifp .
 							  	FILTER(?ifp_predicate = foaf:homepage || ?ifp_predicate = foaf:weblog || ?ifp_predicate = foaf:mbox  || ?ifp_predicate = foaf:mbox_sha1sum) .
 								FILTER(?infriend_predicate = foaf:homepage || ?infriend_predicate = foaf:weblog || ?infriend_predicate = foaf:mbox  || ?infriend_predicate = foaf:mbox_sha1sum) .				
-						    	FILTER(".substr($inquery,0,-2).")
-						    }						
+						    	FILTER(".substr($inquery,0,-3).")				
                 		}";
                         //TODO: continue where I left off.  I just added the optional and I want
                         //to use the infriend uri to get some of the details in order to make sure libby knows dan as she should
                 }//need to allow people who just know by uri to enter stuff here
                 
-				
+				//echo($inquery);
                 $inquery_array = sparql_query(FOAF_EP, $inquery);
             	$knows = array();
-			
+            	//var_dump($inquery_array);
                  foreach ($inquery_array as $row) {
+                 	if(!isset($row['?infriend']) || !isset($row['?infriend_ifp'])){
+				continue;	
+                 	} 
+                
                     $value = sparql_strip($row['?infriend']);
                  	if (substr($value, 0, 2) == '_:'){
                     	$value = 'bnode:'.substr($value, 2);
@@ -495,7 +496,7 @@ class KnowsField extends Field {
         		
         		//echo("KNOWS USER IFPS:");
         		//var_dump($knowsUserIfps);
-        		
+        		//var_dump($knowsUserIfps);
 
                 return $knowsUserIfps;
     }

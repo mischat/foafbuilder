@@ -138,27 +138,42 @@ class AjaxController extends Zend_Controller_Action {
 	public function loadBlogsAction() {
     	$this->loadAnyPage('blogs');
     }
-	public function loadFriendsAction() {
-    	$this->loadAnyPage('friends');
-    }
 	public function loadAccountsAction() {
     	$this->loadAnyPage('accounts');
     }
 	public function loadInterestsAction() {
     	$this->loadAnyPage('interests');
     }
+    public function loadFriendsAction() {
+
+    	/*build up a sparql query to get the values of all the fields we need*/
+	$this->loadFoaf();
+    	if(!$this->foafData) {   
+	    return;
+	}
+        
+	$this->fieldNamesObject = new FieldNames('friends',$this->foafData);  	
+        $this->view->results = array();
+          
+	foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
+            	//need to cope with multiple fields of the same type
+            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
+       	}
+    } 
     
     public function loadOtherAction() {
     	/*build up a sparql query to get the values of all the fields we need*/
     	if($this->loadFoaf()) {   
-            $this->fieldNamesObject = new FieldNames('other',$this->foafData);  	
-            $this->view->results = array();
-           foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
-            	
+	if(!$this->foafData){
+		return;
+	}
+        $this->fieldNamesObject = new FieldNames('other',$this->foafData);  	
+        $this->view->results = array();
+
+        foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
             	//need to cope with multiple fields of the same type
             	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
-          
-            }
+        }
         } 
     } 
     
