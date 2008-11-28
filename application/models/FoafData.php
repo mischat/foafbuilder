@@ -65,7 +65,7 @@ class FoafData {
 		}
 		
         $this->replacePrimaryTopic($uri);	
-        var_dump($this);
+        //var_dump($this);
 	   	$this->putInSession();
     }
     
@@ -107,7 +107,7 @@ class FoafData {
 	        $this->model->replace(NULL,NULL,$oldPrimaryTopicRes,$newPrimaryTopicRes);
 	        
 	        /*just to make sure we have the right primary topic down*/
-	        $this->primaryTopic = $newPrimaryTopicRes;
+	        $this->primaryTopic = $newPrimaryTopic;
 	        
 	        if (!preg_match("/#me$/",$oldPrimaryTopic,$patterns)) {
 	        	 $this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));

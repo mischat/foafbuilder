@@ -72,7 +72,7 @@ class SimpleField extends Field{
 				     
 				}
 		    }
-		}	
+		}
 	}
 
 	/*saves the appropriate triples in the model at the appropriate index and replace them with $value*/
