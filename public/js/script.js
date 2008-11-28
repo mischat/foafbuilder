@@ -3762,10 +3762,6 @@ function createMapElement(container){
 		mapMarkers = new Array();
   		map = null;
   		
-  		//if(document.getElementById('mapDiv')){
-  		//	document.getElementById('mapDiv').parentNode.removeChild(document.getElementById('mapDiv'));	
-  		//}
-  		
 
      	if (GBrowserIsCompatible()) {
      		
@@ -3787,18 +3783,6 @@ function createMapElement(container){
        		var mapControl = new GSmallMapControl();
 			map.addControl(mapControl);
 			
-			//a link to close the map window
-			/*
-			var closeLink = document.createElement('div');
-			closeLink.setAttribute('onclick',"this.parentNode.style.display='none'");
-			closeLink.appendChild(document.createTextNode('close [X]'));
-			closeLink.id='mapCloseLink';
-     		
-     		//append the close link at the top of the map container
-			mapDiv.removeChild(innerMapDiv);
-			mapDiv.appendChild(closeLink);
-			mapDiv.appendChild(innerMapDiv);
-			*/
        		return mapDiv;
      	} 
    
