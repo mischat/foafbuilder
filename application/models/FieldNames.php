@@ -64,7 +64,7 @@ class FieldNames {
 				$this->instantiateContactDetailsFields(false);
 				$this->instantiatePicturesFields(false);
 				$this->instantiateAccountsFields(false);
-				//$this->instantiateFriendsFields(false);
+				$this->instantiateFriendsFields(false);
 				//$this->instantiateBlogsFields(false);
 				//$this->instantiateInterestsFields(false);
 				//$this->instantiateOtherFields(false);

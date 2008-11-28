@@ -820,6 +820,10 @@ function renderKnowsFields(data){
 	if(!data || !data.foafKnowsFields || typeof(data.foafKnowsFields) == 'undefined'){
 		return;
 	}
+	
+	//friends is slightly different to all the other fields
+	globalFieldData = data;
+
 	renderSearchUI();
 	renderMutualFriends(data.foafKnowsFields);
 	renderKnowsUserFields(data.foafKnowsFields);//like incoming friend requests
@@ -1514,7 +1518,8 @@ function displayToObjects(name){
 			imgDisplayToObjects();
 			break;
 		case 'load-friends':
-			knowsDisplayToObjects();
+			//Friends keeps itself up to date so should not need saving
+			//knowsDisplayToObjects();
 			break;
 		case 'load-other':
 			otherDisplayToObjects();
