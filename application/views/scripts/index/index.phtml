@@ -12,17 +12,17 @@
 						If you'd like to load in publicly available information, please fill in the fields below and click 'import'.
 					</p>
 					<span>Flickr username:    </span><input id='flickr' class='urlField' name='flickr' value=''><br/>
-						<span id='flickr_error' style='display:none'>Could not get foaf from Flickr.</span><br/>
+						<span id='flickr_error' style='display:none'>Could not get FOAF from Flickr.</span><br/>
 					<span>Last FM username:   </span><input id='lastfmUser' class='urlField' name='lastfmUser' value=''><br/>
-						<span id='lastfm_error' style='display:none'>Could not get foaf from Last FM.</span><br/>
+						<span id='lastfm_error' style='display:none'>Could not get FOAF from Last FM.</span><br/>
 					<span>Delicious username: </span><input id='delicious' class='urlField' name='delicious' value=''><br/>
-						<span id='delicious_error' style='display:none'>Could not get foaf from delicous.</span><br/>
-					<span>Your foaf file URL:      </span><input id='url' name='url' value='Your Foaf Url' onfocus="if(this.value == 'Your Foaf Url'){this.value = '';this.style.color='#000000';}"/><br/><br/>
+						<span id='delicious_error' style='display:none'>Could not get FOAF from delicous.</span><br/>
+					<span>Your foaf file URL:      </span><input id='uri' name='uri' value='Your Foaf Url' onfocus="if(this.value == 'Your Foaf Url'){this.value = '';this.style.color='#000000';}"/><br/><br/>
+						<span id='uri_error' style='display:none'>Could not get FOAF from the url specified.</span><br/>
 					<input id='button' type='submit' value='Import'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
 				</form>
 					<p>Hit Build below to get started...</p>
 				<form method='get' id='importForm' action='/builder/'>
-				<span>Your foaf file URL:      </span><input id='url' name='url' value='Your Foaf Url' onfocus="if(this.value == 'Your Foaf Url'){this.value = '';this.style.color='#000000';}"/><br/><br/>
 					<input id='button' type='submit' value='Build'/>
 				</form>
 			</div>

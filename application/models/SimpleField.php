@@ -59,20 +59,21 @@ class SimpleField extends Field{
 		}
 		
 		/*mangle the results so that they can be easily rendered*/
-		if(isset($results[0])){
-			foreach($results as $row){
-				foreach($row as $key => $value){	
-					$key = str_replace('?','',$key);
-					
-					if(property_exists($value,'label')){
-				       	array_push($this->data[$privacy]['fields'][$this->name]['values'],$value->label);
-				    } else if(property_exists($value,'uri')){
-				    	array_push($this->data[$privacy]['fields'][$this->name]['values'],$value->uri);
-				    }
-				     
-				}
-		    }
+		if(!isset($results[0])){
+			return;
 		}
+		foreach($results as $row){
+			foreach($row as $key => $value){	
+				$key = str_replace('?','',$key);
+								
+				if(property_exists($value,'label')){
+			       	array_push($this->data[$privacy]['fields'][$this->name]['values'],$value->label);
+			    } else if(property_exists($value,'uri')){
+			    	array_push($this->data[$privacy]['fields'][$this->name]['values'],$value->uri);
+			    }
+			     
+			}
+	    }
 	}
 
 	/*saves the appropriate triples in the model at the appropriate index and replace them with $value*/

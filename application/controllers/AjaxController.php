@@ -34,7 +34,17 @@ class AjaxController extends Zend_Controller_Action {
         $this->view->results['flickrFound'] = $this->foafData->flickrFound;
         $this->view->results['deliciousFound'] = $this->foafData->deliciousFound;
         $this->view->results['lastfmFound'] = $this->foafData->lastfmFound;
-        
+        $this->view->results['uriFound'] = false;
+         
+        //grab the foaf from the uri passed
+        if($uri){
+        	$uriLoadOk = $this->foafData->getModel()->load($uri);
+        	$this->foafData->replacePrimaryTopic($uri);
+			
+        	if($uriLoadOk != 1){
+				$this->view->results['uriFound'] = true;
+			}
+		} 
 		//grab the appropriate things if we haven't already
         if($flickr && !$this->foafData->flickrFound){
         	
@@ -71,8 +81,8 @@ class AjaxController extends Zend_Controller_Action {
         } 
         
         
-        $result = $this->foafData->getModel()->find(NULL, NULL, NULL);
-        echo($result->writeRdfToString('nt'));
+        //$result = $this->foafData->getModel()->find(NULL, NULL, NULL);
+        //echo($result->writeRdfToString('nt'));
 	}
 
 
