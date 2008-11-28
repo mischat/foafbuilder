@@ -35,17 +35,20 @@ class WriterController extends Zend_Controller_Action
     	$publicFoafData = FoafData::getFromSession(true);
 
 	$this->view->model = $publicFoafData->getModel();
+	$this->view->model->setBaseUri(NULL);
 	$result = $this->view->model->find(NULL, NULL, NULL);
 	$data = $result->writeRdfToString();
+	$hash = $publicFoafData->getURI();
 
+ 	//very dirty !
+	$data = str_replace($hash,"",$data);
 
 	$this->_helper->layout->disableLayout();
 	$response = $this->getResponse();
-        $response->setHeader('Content-Type', 'application/rdf+xml', true)
+        $response->setHeader('Content-Type', 'text/plain', true)
             ->setHeader('Content-Disposition', 'attachment;filename=foaf.rdf', true)
 	    ->setHeader('Content-Length', strlen($data), true)
 	    ->appendBody($data);
-        
     }
     
   public function writeFoafAction() {
