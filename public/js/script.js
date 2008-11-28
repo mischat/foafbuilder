@@ -167,11 +167,10 @@ function write(privacy){
 		log('value of text area not defined');
 		return;
 	}
-
 //TODO MISCHA ... is this how we should do it, with a post request ?	
 //    $.post("/writer/write-foafn3-"+privacy, {data: value}, function(data){turnOffLoading();},null);
-      $.post("/writer/write-foafn3-"+privacy, {}, function(data){});
-
+ //     $.post("/writer/write-foafn3-"+privacy, {}, function(data){});
+	window.location = "/writer/write-foafn3-"+privacy;
      
 }
 
