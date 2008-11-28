@@ -39,47 +39,45 @@ class FoafData {
     	 */
     	if($uri=='' || !$uri){
     		//create a skeleton empty document
-    		$uri = sha1(microtime()*microtime());
-    		$uri = '';
-    		$this->getEmptyDocument($uri);
+    		$this->getEmptyDocument();
 			$this->putInSession();
 			echo('getting empty');
 			return;
     	}
-    	
-    	/*set some parameters*/
-    	//XXX - this graphset is never used - is it necessary, and is uri necessary?
-		$this->graphset = ModelFactory::getDatasetMem('GarlikDataset');
-		$this->model = new NamedGraphMem($uri);
 		
-		/*load the passed foaf file and generate a new primary topic for it*/
+		//only set the uri if it isn't already set
+		//TODO: this uri needs to be the actual one we're writing out to, since it is described on the screen.
+		if(!$this->uri){
+			$this->uri = 'http://foaf.qdos.com/people/'.sha1(microtime()*microtime());
+		}
+		
+        /*create a model if there isn't one already*/
+		if(!$this->model){
+    		$this->model = new NamedGraphMem($this->uri);
+		}
+		
+    	/*load the rdf from the passed in uri into the model*/
 		$loadValue = $this->model->load($uri);		
 		if($loadValue==1){
-			echo('no passed foaf file');
 			return;		
 		}
 		
-		//only set the uri if it isn't already set
-		if(!$this->uri){
-			$this->uri = $uri;
-		}
-		
+		/*make sure that the uri and primary topic of the document is consistent*/
         $this->replacePrimaryTopic($uri);	
-        //var_dump($this);
 	   	$this->putInSession();
     }
     
     //replace the existing primary topic with either newPrimaryTopic or a hash of the uri
     public function replacePrimaryTopic($uri){
+    	//TODO: probably need to do some de duping at some point
     	
-     	/*get primary topic*/
+     	/*get primary topics*/
         $query = "SELECT ?prim WHERE {<$uri> <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
         $results = $this->model->sparqlQuery($query);
         
         if (!$results || empty($results)) {
         	//TODO MISCHA should do some error reporting here
             error_log("[foaf_editor] Error no primaryTopic");
-            echo('no primary topic');
             return null;
         }
         //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
@@ -87,7 +85,6 @@ class FoafData {
         foreach($results as $row){
         
         	if(!isset($row['?prim'])){
-        		echo('Primary Topic Is Not Set');
         		error_log('[foaf_editor] primary topic not set');
         		continue;
         	}
@@ -97,7 +94,7 @@ class FoafData {
 	        //if no new uri has been passed in then just set it as the existing primary topic or, if that isn't set then the hash of the uri
 	    	$newPrimaryTopic = $this->primaryTopic;			
 	    	if(!$newPrimaryTopic){
-	    		$newPrimaryTopic = "http://".md5($oldPrimaryTopic); 
+	    		$newPrimaryTopic = $this->uri."#me"; 
 	    	}  	
 	       
 	    	/*replace the old primary topics with the new one*/
@@ -109,28 +106,34 @@ class FoafData {
 	        /*just to make sure we have the right primary topic down*/
 	        $this->primaryTopic = $newPrimaryTopic;
 	        
+	        //XXX speak to mischa about this one
 	        if (!preg_match("/#me$/",$oldPrimaryTopic,$patterns)) {
 	        	 $this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
 	        }
         } 
         
-        /*make sure that the document has the correct uri*/
+        /*make sure that the document has only one uri*/
         
 	    //find the triples containing document uris
 	    $predicate = new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type');
 	    $object = new Resource('http://xmlns.com/foaf/0.1/PersonalProfileDocument');  
 	    $foundDocTriples = $this->model->find(NULL,$predicate,$object); 
-	            
-	   	//remove them
+	    $replacementUriRes = new Resource($this->getUri());
+	    
+	    
+	 	//and replace them
 	    if($foundDocTriples && property_exists($foundDocTriples,'triples') && !empty($foundDocTriples->triples)){
+	    
 	    	foreach($foundDocTriples->triples as $triple){
-	       		$this->model->remove($triple);
+	    		$this->model->replace($triple->subj,NULL,NULL,$replacementUriRes);
+	    		$this->model->replace(NULL,NULL,$triple->subj,$replacementUriRes);
 	       	}
 	    }
-	        
-	    //and add the correct one, from the uri set in foafData
-	    $profileStatement = new Statement(new Resource($this->getUri()),$predicate,$object); 
-	    $this->model->addWithoutDuplicates($profileStatement);
+
+	   //var_dump($replacementUriRes);
+	   //and add the correct one, from the uri set in foafData
+	   //$profileStatement = new Statement(new Resource($this->getUri()),$predicate,$object); 
+	   //$this->model->addWithoutDuplicates($profileStatement);
     }
     
     public static function getFromSession($isPublic = true) {
@@ -200,23 +203,24 @@ class FoafData {
     public function setGraphset($graphset) {
     	$this->graphset= $graphset;
     }
-    public function getEmptyDocument($uri){
+    public function getEmptyDocument(){
+    	if(!$this->uri){
+			$this->uri = 'http://foaf.qdos.com/people/'.sha1(microtime()*microtime());
+		}
     	
        	$graphset = ModelFactory::getDatasetMem('GarlikDataset');
-		$model = new NamedGraphMem($uri);
-		$graphset->addNamedGraph($model);
+		$model = new NamedGraphMem($this->uri);
 		$this->model = $model;
 		
-		$primaryResource = new Resource("http://".md5($uri."#me"));
-		$personalProfileDocumentTriple = new Statement(new Resource($uri), new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/PersonalProfileDocument"));
-		$primaryTopicTriple = new Statement(new Resource($uri), new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),$primaryResource);
+		$primaryResource = new Resource($this->uri."#me");
+		$personalProfileDocumentTriple = new Statement(new Resource($this->uri), new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/PersonalProfileDocument"));
+		$primaryTopicTriple = new Statement(new Resource($this->uri), new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),$primaryResource);
 		
 		$this->model->add($personalProfileDocumentTriple);
 		$this->model->add($primaryTopicTriple);
 		
 		$this->primaryTopic = $primaryResource->uri;
 		$this->graphset = $graphset;
-		$this->uri = $uri;
 			
     	return;
     }
