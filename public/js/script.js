@@ -52,11 +52,6 @@ function loadFoaf(name,url){
 	
 	var foafUrl = null;
 	
-	/*
-	if(!url || typeof(url) == 'undefined'){
-		foafUrl = document.getElementById('foafUri').value;
-	}*/
-	
 	/*so we can track which page the person is on*/
 	currentPage = name;
 	
@@ -73,8 +68,7 @@ function loadFoaf(name,url){
   	document.getElementById('load-accounts').style.backgroundImage = 'url(/images/pink_background.gif)';
   	document.getElementById('load-locations').style.backgroundImage = 'url(/images/pink_background.gif)';
   	document.getElementById('load-friends').style.backgroundImage = 'url(/images/pink_background.gif)';
-  	document.getElementById('load-other').style.backgroundImage = 'url(/images/pink_background.gif)';
-  	
+  	document.getElementById('load-other').style.backgroundImage = 'url(/images/pink_background.gif)'; 	
   	document.getElementById(name).style.backgroundImage='url(/images/blue_background.gif)';
 }
 
@@ -211,6 +205,7 @@ function genericObjectsToDisplay(data){
 	basedNearFieldsObjectsToDisplay(data);
 	accountsObjectsToDisplay(data);
 	homepageObjectsToDisplay(data);
+	birthdayFieldsObjectsToDisplay(data);
 	//renderHomepageFields(data);
 	
 	/*friends stuff does not have privacy settings*/
@@ -339,6 +334,17 @@ function homepageObjectsToDisplay(data){
 	}
 	if(data.public){
 		renderHomepageFields(data.public,true);
+	}
+}
+function birthdayFieldsObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderBirthdayFields(data.private,false);
+	}
+	if(data.public){
+		renderBirthdayFields(data.public,true);
 	}
 }
 
@@ -541,23 +547,41 @@ function renderDepictionFields(data, isPublic){
 }
 
 /*Render the birthday dropdown (assumes only one birthday)*/
-function renderBirthdayFields(data){
+function renderBirthdayFields(data,isPublic){
 
-	if(!data || !data.birthdayFields || typeof(data.birthdayFields) == 'undefined'){
+	log('rendering birthday fields');
+	if(!data || !data.foafBirthdayFields || typeof(data.foafBirthdayFields) == 'undefined'){
+		log('Couldnt find foaf birthday fields');
 		return;
 	}
 	
-	/*build the container*/
-	var name = data.birthdayFields.name;
-	var label =	data.birthdayFields.displayLabel;
-	var containerElement = createFieldContainer(name, label);
+	/*build the container if it isn't already there*/
+	var name = data.foafBirthdayFields.name;
+	var label =	data.foafBirthdayFields.displayLabel;
+	var containerElement = document.getElementById(name+'_container');
 	
-	/*build the date selector dropdown*/
-	var day = data.birthdayFields['day'];
-	var month = data.birthdayFields['month'];
-	var year = data.birthdayFields['year'];	
+	/*day, month and year*/
+	var day = data.foafBirthdayFields['day'];
+	var month = data.foafBirthdayFields['month'];
+	var year = data.foafBirthdayFields['year'];	
+	
+	/*if nothing is set and we're not on the public one then do nothing*/
+	//XXX this relies on rendering the public part second
+	var allUndefined = typeof(day) == 'undefined' && typeof(month) == 'undefined' && typeof(year) == 'undefined';
+	var allNull = !day && !month && !year;
+	if((allNull || allUndefined) && !isPublic){
+		return;	
+	}
+	
+	//only build it if there isn't one already there, since there can't be two birthdays.
+	if(!containerElement){
+		containerElement = createFieldContainer(name, label);
+		log('day: '+day);
 
-	createFoafDateOfBirthElement(containerElement, day, month, year);
+		/*create the element which shows the date of birth*/
+		createFoafDateOfBirthElement(containerElement, day, month, year);	
+		createGenericInputElementPrivacyBox(containerElement.id, containerElement.id,!isPublic);
+	}
 }
 
 /*Render the HomepageField*/
@@ -1465,7 +1489,7 @@ function displayToObjects(name){
 	switch(name){
 		case 'load-the-basics':
 			//XXX: these are only commented out for development purposes
-			//birthdayDisplayToObjects();
+			birthdayDisplayToObjects();
 			simpleFieldsDisplayToObjects();
 			break;
 		case 'load-contact-details':
@@ -1501,16 +1525,31 @@ function displayToObjects(name){
 
 function birthdayDisplayToObjects(){
 	
+	var foafBirthdayFields = new Object();
+	var privacyCheckbox = document.getElementById('privacycheckbox_foafBirthday_container');	
+	if(typeof(privacyCheckbox) == 'undefined' || !privacyCheckbox){
+		log('couldnt find birthday fields checkbox');
+		return;
+	}
+	
 	if(document.getElementById('yearDropdown').value){
-		globalFieldData.birthdayFields['year'] = document.getElementById('yearDropdown').value; 
+		foafBirthdayFields['year'] = document.getElementById('yearDropdown').value; 
 	} 
 	if(document.getElementById('monthDropdown').value){
-		globalFieldData.birthdayFields['month'] = document.getElementById('monthDropdown').value; 
+		foafBirthdayFields['month'] = document.getElementById('monthDropdown').value; 
 	}
 	if(document.getElementById('dayDropdown').value){
-		globalFieldData.birthdayFields['day'] = document.getElementById('dayDropdown').value; 
+		foafBirthdayFields['day'] = document.getElementById('dayDropdown').value; 
 	}
-
+	
+	if(privacyCheckbox.checked){
+		log('saving checked');
+		globalPrivateFieldData.foafBirthdayFields = foafBirthdayFields;
+	} else {
+		log('saving unchecked');
+		globalFieldData.foafBirthdayFields = foafBirthdayFields;
+	}
+	
 }
 
 function homepageDisplayToObjects() {
