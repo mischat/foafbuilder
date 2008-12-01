@@ -1,5 +1,5 @@
 /*for logging purposes*/
-var loggingOn = false;
+var loggingOn = true;
 
 /*--------------------------global variables--------------------------*/
 
@@ -167,10 +167,14 @@ function write(privacy){
 		log('value of text area not defined');
 		return;
 	}
+
 //TODO MISCHA ... is this how we should do it, with a post request ?	
 //    $.post("/writer/write-foafn3-"+privacy, {data: value}, function(data){turnOffLoading();},null);
- //     $.post("/writer/write-foafn3-"+privacy, {}, function(data){});
-	window.location = "/writer/write-foafn3-"+privacy;
+       if(privacy == 'private'){
+		$.post("/writer/write-foafn3-"+privacy, {}, function(data){});
+	} else {
+		window.location = '/writer/write-foafn3-'+privacy;
+	}
      
 }
 
@@ -819,10 +823,6 @@ function renderKnowsFields(data){
 	if(!data || !data.foafKnowsFields || typeof(data.foafKnowsFields) == 'undefined'){
 		return;
 	}
-	
-	//friends is slightly different to all the other fields
-	globalFieldData = data;
-
 	renderSearchUI();
 	renderMutualFriends(data.foafKnowsFields);
 	renderKnowsUserFields(data.foafKnowsFields);//like incoming friend requests
@@ -1517,8 +1517,7 @@ function displayToObjects(name){
 			imgDisplayToObjects();
 			break;
 		case 'load-friends':
-			//Friends keeps itself up to date so should not need saving
-			//knowsDisplayToObjects();
+			knowsDisplayToObjects();
 			break;
 		case 'load-other':
 			otherDisplayToObjects();
@@ -2226,7 +2225,6 @@ function getIFPsFromGlobalDataObject(friendInfo){
 
 function otherDisplayToObjects(){
 	//TODO: do this
-	alert("Saving rdf text... do this!!!");
 }
 
 
@@ -2939,10 +2937,12 @@ function phoneDisplayToObjects(){
 	/*---------------------------other (geek view)---------------------------*/
 	//renders the geek view
 	function drawOtherTextarea(data){
+		log('drawing other');
 		if(!data || typeof(data) == 'undefined'){
 			log('no data for geek view!');
 			return;
 		}
+		log('drawing other1');
 		if(typeof(data.private) == 'undefined' && !data.private &&
 			typeof(data.public) == 'undefined' && !data.public){
 			
@@ -2950,6 +2950,7 @@ function phoneDisplayToObjects(){
 			return;
 		}
 		
+		log('drawing other2');
 		document.getElementById('personal').innerHTML = '';	
 		
 		/*build the container*/
@@ -2958,11 +2959,13 @@ function phoneDisplayToObjects(){
 		var containerElement = createFieldContainer(name, label);
 	
 		
+		log('drawing other3');
 		/*build a textarea for private & public*/
 		if(typeof(data.private) != 'undefined' && data.private){
 			log('creating one container');
 			createOtherTextArea(data.private,'Private',containerElement,'private');
 		}
+		log('drawing other4');
 		if(typeof(data.public) != 'undefined' && data.public){
 			log('creating another container');
 			createOtherTextArea(data.public,'Public',containerElement,'public');
@@ -3005,15 +3008,44 @@ function phoneDisplayToObjects(){
 		rdfTextArea.appendChild(document.createTextNode(data));
 		rdfForm.appendChild(rdfTextArea);
 		
-		/*add a submit button*/
+		/*add a few submit buttons*/
+		//XXX some of these will not eventually be in the 'Geek View'
 		var rdfButton = document.createElement('input');
-		rdfButton.value = 'save';
-		rdfButton.setAttribute('type','submit');
-		rdfButton.id = 'otherButton';
-		rdfButton.className = 'otherButton';
-		rdfForm.appendChild(rdfButton);
-		
+
+                if(privacy == 'private'){
+                        rdfButton.value = 'Write private RDF to our oauth';
+                } else {
+                        rdfButton.value = 'Download public RDF'
+
+                        var rdfButton2 = document.createElement('input');
+                        rdfButton2.setAttribute('onclick','writePublic()');
+			rdfButton2.setAttribute('type','button');
+                        rdfButton2.value = 'Write public RDF to our server';
+                        rdfButton2.className = 'otherButton';
+                        rdfForm.appendChild(rdfButton2);
+                }
+                rdfButton.setAttribute('type','submit');
+                rdfButton.className = 'otherButton';
+                rdfForm.appendChild(rdfButton);
 	}
+	
+	//write stuff to public oauth server		
+	function writePublic(){
+		log('doing write public');
+		var publicTextArea = document.getElementById('otherTextAreapublic');
+		
+		if(!publicTextArea || typeof(publicTextArea) == 'undefined'){
+			log('public textarea not found');
+			return
+		}
+		if(publicTextArea.childNodes[0] == 'undefined' || publicTextArea.childNodes[0].nodeValue == 'undefined'){
+			return;
+		}
+		
+		var data = publicTextArea.childNodes[0].nodeValue;
+		$.post("/writer/write-foafn3-nodownload", {data :data}, function(data){});
+		
+	}	
 
 	/*---------------------------other (geek view)---------------------------*/
 
