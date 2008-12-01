@@ -3,6 +3,7 @@ require_once 'Zend/Controller/Action.php';
 require_once("helpers/JSON.php");
 require_once("helpers/sparql.php");
 require_once("helpers/settings.php");
+require_once("helpers/Utils.php");
 
 class AjaxController extends Zend_Controller_Action {
     public function init() {
@@ -23,7 +24,7 @@ class AjaxController extends Zend_Controller_Action {
         $flickr = $_GET['flickr'];
         $delicious = $_GET['delicious'];
         $lastfm = $_GET['lastfmUser'];
-		        
+        
         //results
 		$this->view->results = array();
         $this->view->results['flickrFound'] = $this->foafData->flickrFound;
@@ -43,15 +44,22 @@ class AjaxController extends Zend_Controller_Action {
 		//grab the appropriate things if we haven't already
         if($flickr && !$this->foafData->flickrFound){
         	
-        	$flickrUri = 'http://foaf.qdos.com/flickr/people/'.$flickr;
-        	$flickr = $this->foafData->getModel()->load($flickrUri);
-        	$this->foafData->replacePrimaryTopic($flickrUri);
+        	//scrape the page to get the NSID
+        	$flickr = Utils::getFlickrNsid($flickr);
+       
+        	//echo($flickr);
+        	if($flickr!=0){
+        		$flickrUri = 'http://foaf.qdos.com/flickr/people/'.$flickr;
+        		//echo($flickrUri);
+        		$flickr = $this->foafData->getModel()->load($flickrUri);
+        		$this->foafData->replacePrimaryTopic($flickrUri);
 			
-        	if($flickr != 1){
-				$this->view->results['flickrFound'] = true;
-				$this->foafData->flickrFound = true;
-			}
-		} 
+        		if($flickr != 1){
+					$this->view->results['flickrFound'] = true;
+					$this->foafData->flickrFound = true;
+				}
+        	}
+        } 
         if($delicious && !$this->foafData->deliciousFound){
             
         	$deliciousUri = 'http://foaf.qdos.com/delicious/people/'.$delicious;
