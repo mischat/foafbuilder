@@ -1,0 +1,20 @@
+<?	
+	//We don't want to laod all the scripts
+	$this->layout()->setLayout('logon');
+?>
+<div id="content">
+			<div class="">
+				<h2>
+					Welcome to the FOAF builder. 
+				</h2>
+				<form method='post' id='openidForm' action='javascript:doOpenid()'>
+					<p>
+						If you'd like to load in publicly available information, please fill in the fields below and click 'import'.
+					</p>
+					<span>Openid username:    </span><input id='openid_identifier' class='urlField' name='openid_identifier' value=''><br/>
+					<input id='openid_action' name='openid_action' type='submit' value='login'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
+				</form>
+			</div>
+</div><!-- end content -->
+
+			<!-- footer -->
