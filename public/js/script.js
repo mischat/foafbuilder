@@ -171,7 +171,7 @@ function write(privacy){
 //TODO MISCHA ... is this how we should do it, with a post request ?	
 //    $.post("/writer/write-foafn3-"+privacy, {data: value}, function(data){turnOffLoading();},null);
        if(privacy == 'private'){
-		$.post("/writer/write-foafn3-"+privacy, {}, function(data){});
+		$.post("/writer/write-foaf-"+privacy, {}, function(data){});
 	} else {
 		window.location = '/writer/write-foafn3-'+privacy;
 	}
@@ -3043,7 +3043,7 @@ function phoneDisplayToObjects(){
 		}
 		
 		var data = publicTextArea.childNodes[0].nodeValue;
-		$.post("/writer/write-foafn3-nodownload", {data :data}, function(data){});
+		$.post("/writer/write-foaf-nodownload", {data :data}, function(data){});
 		
 	}	
 

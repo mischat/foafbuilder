@@ -72,6 +72,14 @@ class WriterController extends Zend_Controller_Action
         }
     }
     
+    public function writeFoafPrivateAction() {
+	echo("Writing private triples to oauth");
+    }
+
+    public function writeFoafNodownloadAction(){
+	echo("Saving public triples to our server");
+    }
+    
     private function doWrite($foafData,$newDocUri,$writeNtriples){
   
     		if(!$foafData){
