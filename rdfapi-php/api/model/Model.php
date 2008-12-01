@@ -119,8 +119,8 @@ class Model extends Object
                     $parser = new GRDDLParser();
             }else{
                 // TODO MISCHA Import Package Syntax
-		$resp = $this->check_start_of_file($filename);		
-
+		$resp = $this->check_start_of_file($filename);
+				
 		//XXX LUKE - I've hacked this to make it fail more quietly 
 		if($resp==1){ return 1;}
 
