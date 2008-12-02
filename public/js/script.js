@@ -3654,7 +3654,6 @@ function togglePrivateUI(fieldContainer){
 /*object storing online account urls (e.g. www.skype.com) and keying them against their names (e.g. skype)*/
 //TODO this should integrate with QDOS
 
-<<<<<<< HEAD:public/js/script.js
 function populateAllAccountsDropdowns(){
 
 	var accountsContainer = document.getElementById('foafHoldsAccount_container');
