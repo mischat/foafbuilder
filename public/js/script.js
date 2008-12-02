@@ -408,8 +408,24 @@ function getAccountsAndRender(data,isPublic,response){
 			continue;
 		}
 		
+
+
 		var thisAccount = data.foafHoldsAccountFields[accountBnodeId];
 		
+		createSingleAccount(thisAccount, accountBnodeId, containerElement,isPublic);
+		
+			
+	}
+	
+	//add a link to add another account. We only want to do this once. XXX this relies on the public bit being rendered second
+	if(isPublic){
+		createAccountsAddElement(containerElement);
+	}
+}
+
+//creates one account container, puts it in containerElement, gives it ID accountBnodeId and puts in it the info from thisAccount.
+function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPublic){
+
 		//create a remove link
 		createGenericInputElementRemoveLink(accountBnodeId,containerElement.id,false);
 		
@@ -457,7 +473,11 @@ function getAccountsAndRender(data,isPublic,response){
 		log('this account name::::'+thisAccount['foafAccountName']);
 		if(typeof(thisAccount['foafAccountName']) != 'undefined' && thisAccount['foafAccountName']){
 			userNameElement.value = thisAccount['foafAccountName'];
+		} else {
+			userNameElement.value = 'Username';
+			userNameElement.style.color = '#dddddd';
 		}
+		userNameElement.setAttribute('onfocus',"if(this.value == 'Username'){this.value='';this.style.color='#000000';}");
 		accountDiv.appendChild(userNameElement);
 
 		//create an input element for the account service type (for display if it isn't in the dropdown)
@@ -468,8 +488,12 @@ function getAccountsAndRender(data,isPublic,response){
 			accountServiceTypeInput.style.display='inline';
 		}
 		if(typeof(thisAccount['foafAccountServiceHomepage']) != 'undefined' && thisAccount['foafAccountServiceHomepage']){
-                          accountServiceTypeInput.value = thisAccount['foafAccountServiceHomepage'];
-                }
+                        accountServiceTypeInput.value = thisAccount['foafAccountServiceHomepage'];	
+                } else {
+			accountServiceTypeInput.value = 'Account service homepage';
+			accountServiceTypeInput.style.color = '#dddddd';
+		}
+		accountServiceTypeInput.setAttribute('onfocus',"if(this.value == 'Account service homepage'){this.value='';this.style.color='#000000';}");
 		accountDiv.appendChild(accountServiceTypeInput);
 			
 		//create an input element for the account profile page (for display if the type isn't in the dropdown)
@@ -481,17 +505,14 @@ function getAccountsAndRender(data,isPublic,response){
 		}
 		if(typeof(thisAccount['foafAccountProfilePage']) != 'undefined' && thisAccount['foafAccountProfilePage']){
                           accountProfileElem.value = thisAccount['foafAccountProfilePage'];
-		}
-		accountDiv.appendChild(accountProfileElem);
-			
-	}
-	
-	//add a link to add another account. We only want to do this once. XXX this relies on the public bit being rendered second
-	if(isPublic){
-		createAccountsAddElement(containerElement);
-	}
-}
+		} else {
+			accountProfileElem.value = 'Account profile page';
+			accountProfileElem.style.color = '#dddddd';
 
+		}
+		accountProfileElem.setAttribute('onfocus',"if(this.value == 'Account profile page'){this.value='';this.style.color='#000000';}");
+		accountDiv.appendChild(accountProfileElem);
+}
 
 function toggleAccountFields(id,value){
 	
@@ -511,7 +532,12 @@ function toggleAccountFields(id,value){
 	//i.e. other was selected
 	if(!value || typeof(value) == 'undefined'){
 		field1.style.display = 'inline';
+		field1.value = 'Account service homepage';
+		field1.style.color = '#dddddd';		
+
 		field2.style.display = 'inline';
+		field2.value = 'Account profile page';
+                field2.style.color = '#dddddd';
 	} else {
 		field1.style.display = 'none';
 		field2.style.display = 'none';
@@ -1984,8 +2010,10 @@ function accountsDisplayToObjects(){
   				//don't save if there is no value here
   				continue;
   			}	
-  			
-  			var id = holdsAccountElement.childNodes[k].id;
+		
+			if(holdsAccountElement.childNodes[k].style.display == 'none'){
+				continue;
+			}
   			
 	  		//do the right thing for the right element, and miss any elements we don't care about.
 	  		if (holdsAccountElement.childNodes[k].className == 'accountUsername'){
@@ -2882,18 +2910,16 @@ function phoneDisplayToObjects(){
 	/*creates a holds account element and fills it with empty fields*/
 	function createEmptyHoldsAccountElement(container){
 		
-		/*create a new holdsaccount div*/
-		var holdsAccountElement = createHoldsAccountElement(container, '',true);
-		
-		/*generate fields to fill it up*/
-		createFoafAccountServiceHomepageInputElement('', holdsAccountElement);
-		createAccountsInputElement('foafAccountName', '', holdsAccountElement);
-		createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);
+		var thisAccount = new Array();
+		var accountBnodeId = createRandomString(50);
+		createSingleAccount(thisAccount, accountBnodeId, container,true);
 		
 		/*remove the add element and re add it (to make sure it's at the bottom)*/
 		var addElement = document.getElementById('addLinkContainer');
 		addElement.parentNode.removeChild(addElement);
 		createAccountsAddElement(container);
+
+
 	}
 			
 	/*---------------------------Homepage---------------------------*/
