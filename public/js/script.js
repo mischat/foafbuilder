@@ -373,23 +373,12 @@ function birthdayFieldsObjectsToDisplay(data){
 /*--------------------------second level functions to convert globalFieldData into HTML elements--------------------------*/
 function renderAccountFields(data,isPublic){
 	log('rendering accounts');
+	
+	//if(!data.foafHoldsAccountFields || typeof(data.foafHoldsAccountFields) == 'undefined'){
 	if(!data || !data.foafHoldsAccountFields 
 		|| typeof(data.foafHoldsAccountFields) == 'undefined'){
 		log('returning from render accounts');
-		return;
-	}
-	
-	/*some details*/
-	var name = data.foafHoldsAccountFields.name;
-	var label =	data.foafHoldsAccountFields.displayLabel;
-
-	/*build the container if it isn't already there*/
-	var containerElement = document.getElementById(name+'_container');
-	if(!containerElement){
-		containerElement = createFieldContainer(name, label);
-	}
-
-	/*fill it up with accounts*/
+		
 	for(accountBnodeId in data.foafHoldsAccountFields){
 		log('In loop accounts:'+accountBnodeId);
 		
@@ -2810,7 +2799,6 @@ function phoneDisplayToObjects(){
 	function createFoafAccountServiceHomepageInputElement(value,container){
 		selectElement = document.createElement("select");
 		//XXX get this so that it is populated asynchronously
-		
 		/*
 		var allAccounts = getAllOnlineAccounts();
 		
@@ -2828,6 +2816,7 @@ function phoneDisplayToObjects(){
 		selectElement.id = 'foafAccountServiceHomepage';
 		selectElement.className = 'fieldInputSelect';
 		selectElement.value = value;
+		*/
 		
 		
 		/*show the hidden input elements if there is no option matching this id here*/
@@ -3665,6 +3654,7 @@ function togglePrivateUI(fieldContainer){
 /*object storing online account urls (e.g. www.skype.com) and keying them against their names (e.g. skype)*/
 //TODO this should integrate with QDOS
 
+<<<<<<< HEAD:public/js/script.js
 function populateAllAccountsDropdowns(){
 
 	var accountsContainer = document.getElementById('foafHoldsAccount_container');
