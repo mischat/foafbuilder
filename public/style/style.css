@@ -361,8 +361,8 @@ width:100%;
 	margin-bottom:5px;
 }
 .holdsAccount{
-	border-bottom: 1px solid #EEEEEE;
-	height:100px;
+	padding-bottom:5px;
+	border-bottom: 1px solid #EEEEEE;	
 }
 #addLinkContainer{
 	margin-top:10px;
