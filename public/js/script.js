@@ -378,7 +378,18 @@ function renderAccountFields(data,isPublic){
 	if(!data || !data.foafHoldsAccountFields 
 		|| typeof(data.foafHoldsAccountFields) == 'undefined'){
 		log('returning from render accounts');
-		
+	}
+	
+	/*some details*/
+	var name = data.foafHoldsAccountFields.name;
+	var label =	data.foafHoldsAccountFields.displayLabel;
+
+	/*build the container if it isn't already there*/
+	var containerElement = document.getElementById(name+'_container');
+	if(!containerElement){
+		containerElement = createFieldContainer(name, label);
+	}
+	
 	for(accountBnodeId in data.foafHoldsAccountFields){
 		log('In loop accounts:'+accountBnodeId);
 		
