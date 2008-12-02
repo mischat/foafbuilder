@@ -84,8 +84,8 @@ class AccountsController extends Zend_Controller_Action {
 				continue;
 			}	
 			
-			$thisArray['name'] = $row['?name'];
-			$thisArray['page'] = $row['?page'];
+			$thisArray['name'] = sparql_strip($row['?name']);
+			$thisArray['page'] = sparql_strip($row['?page']);
 			array_push($retArray,$thisArray);
 		}
 		

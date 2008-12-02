@@ -238,24 +238,31 @@ class AjaxController extends Zend_Controller_Action {
     }
 	
     public function saveFoafAction() {
+	echo(1);
         $this->view->isSuccess = 0;
         require_once 'FoafData.php';
         $changes_model = @$_POST['model'];
         
+	echo(2);
         if ($changes_model) {
+	    echo(3);
             $publicFoafData = FoafData::getFromSession(true);	
+	echo(4);
             $privateFoafData = FoafData::getFromSession(false);
             
+	echo(5);
             if($publicFoafData) {
                 $this->applyChangesToModel($publicFoafData,$changes_model);	
                 $this->view->isSuccess = 1;
             }
+	echo(6);
             if($privateFoafData) {
             	$this->applyChangesToModel($privateFoafData,$changes_model);
             	$this->view->isSuccess = 1;
             }
-               
+	echo(7);
         }
+	echo(8);
     }
 	
     /*saves stuff to the model*/
@@ -263,7 +270,8 @@ class AjaxController extends Zend_Controller_Action {
         require_once 'Field.php';
         require_once 'SimpleField.php';
         require_once 'FieldNames.php';
-
+	
+	echo('a');
         //json representing stuff that is to be saved
         $json = new Services_JSON();
         $almost_model = $json->decode(stripslashes($changes_model));      
@@ -271,49 +279,54 @@ class AjaxController extends Zend_Controller_Action {
         $fieldNames = new FieldNames('all');
         $allFieldNames = $fieldNames->getAllFieldNames();
        
+	echo('b');
         //var_dump($almost_model);
         //save private and public 
         if(!$foafData->isPublic && property_exists($almost_model,'private') && $almost_model->private){
         	$this->saveAllFields($almost_model->private,$allFieldNames,$foafData);   
   			     
+	echo('c');
         } else if($foafData->isPublic && property_exists($almost_model,'public') && $almost_model->public){
         	$this->saveAllFields($almost_model->public,$allFieldNames,$foafData);
+	echo('d');
         } 
+	echo('e');
 
     }
     
     private function saveAllFields($privateOrPublicModel,$allFieldNames,&$foafData){
-        
+     echo('alpha');   
     	/*loop through all the rows in the sparql results style 'almost model'*/
         foreach($privateOrPublicModel as $key => $value) {
             
-			/*get rid of 'fields at the end of the name'*/
+	echo('what?');		/*get rid of 'fields at the end of the name'*/
             if(isset($allFieldNames[substr($key,0,-6)])) {
-            	
+            
+	echo('whatid going on?');		/*get rid of 'fields at the end of the name'*/
                 /*get some details about the fields we're dealing with*/
                 $field = $allFieldNames[substr($key,0,-6)];
                 
-                /*save them using the appropriate method*/
+             echo('hmmmm'.$key);   /*save them using the appropriate method*/
                 $field->saveToModel($foafData, $value);
-
+echo('beta');
             } else if($key == 'fields'){
             	//we need to look inside the simplefield array to do the right kind of save
- 
+ 		echo('midway through the for loop');
             	foreach($value as $fieldName => $fieldValue){
-            		 if(isset($allFieldNames[$fieldName])) {
+            		 if(isset($allFieldNames[$fieldName])){
             		 	/*get some details about the fields we're dealing with*/
                	 		$field = $allFieldNames[$fieldName];
           
 						/*save them using the appropriate method (notice that the save process
 						 is different depending on whether it is public or private*/
                			$field->saveToModel($foafData, $value);
-               		
             		 }            	 
             	}
-            }else{
+            } else {
                 echo("unrecognised fields:".$key."\n");	
             }//end if
         }//end foreach 	
+	echo('end');
     }
 	
     //TODO really dirty	MISCHA not sure why this isnt working properly !

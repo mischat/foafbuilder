@@ -80,7 +80,7 @@ class NearestAirportField extends Field {
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
     public function saveToModel(&$foafData, $value) {
 	    
-    	if(!property_exists($value,'nearestAirport')|| !$value->nearestAirport){
+    	if(!property_exists($value,'nearestAirport') || !$value->nearestAirport){
     		return;
     	}
     	
@@ -97,7 +97,7 @@ class NearestAirportField extends Field {
     	$airportBnode = false;
     	if($existingAirports1 && !empty($existingAirports1->triples)){
     		$airportBnode = $existingAirports1->triples[0]->obj;
-			$this->removeAirports($foaf,$existingAirports1,$existingAirports1->triples[0]->obj);
+			$this->removeAirports($foafData,$existingAirports1,$existingAirports1->triples[0]->obj);
 		} 
 				
     	/*if there is no airport already there then add one*/

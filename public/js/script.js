@@ -375,14 +375,25 @@ function renderAccountFields(data,isPublic){
 	log('rendering accounts');
 	
 	//if(!data.foafHoldsAccountFields || typeof(data.foafHoldsAccountFields) == 'undefined'){
-	if(!data || !data.foafHoldsAccountFields 
-		|| typeof(data.foafHoldsAccountFields) == 'undefined'){
+	if(!data || typeof(data.foafHoldsAccountFields) == 'undefined' || !data.foafHoldsAccountFields){
 		log('returning from render accounts');
+		return;
 	}
+	/**/
+	if(typeof(allAccounts) == 'undefined' || !allAccounts){
+		$.post("/accounts/get-all-account-types", {}, function(response){ getAccountsAndRender(data,isPublic,response);},'json');
+	} else {
+		getAccountsAndRender(data,isPublic,allAccounts);
+	}
+}
+
+function getAccountsAndRender(data,isPublic,response){
 	
+	allAccounts = response;
+
 	/*some details*/
 	var name = data.foafHoldsAccountFields.name;
-	var label =	data.foafHoldsAccountFields.displayLabel;
+	var label = data.foafHoldsAccountFields.displayLabel;
 
 	/*build the container if it isn't already there*/
 	var containerElement = document.getElementById(name+'_container');
@@ -392,6 +403,12 @@ function renderAccountFields(data,isPublic){
 	
 	for(accountBnodeId in data.foafHoldsAccountFields){
 		log('In loop accounts:'+accountBnodeId);
+
+		if(accountBnodeId == 'displayLabel' || accountBnodeId == 'name'){
+			continue;
+		}
+		
+		var thisAccount = data.foafHoldsAccountFields[accountBnodeId];
 		
 		//create a remove link
 		createGenericInputElementRemoveLink(accountBnodeId,containerElement.id,false);
@@ -403,27 +420,69 @@ function renderAccountFields(data,isPublic){
 		var accountDiv = document.createElement('div');
 		accountDiv.id = accountBnodeId;
 		containerElement.appendChild(accountDiv);
+		accountDiv.className = 'holdsAccount';
 		
 		//create a select element for the account type
 		var selectElement = document.createElement("select");
 		selectElement.className = 'accountTypeSelect';
-		accountDiv.appendChild(selectElement);
+		selectElement.setAttribute('onchange','toggleAccountFields("'+accountDiv.id+'",this.value)');
+		accountDiv.appendChild(selectElement);		
+		
+		//whether we'll need to show the extra boxes (if the accountservicehomepage isn't in the dropsown)
+		var needExtraBoxes = true;
+
+		selectElement[0] = new Option('Other','',false,false);
+		var y=1;                         
+                //loop through all online accounts and create options from them
+                for(key in allAccounts){
+			log('value:'+key);
+			log('key:'+allAccounts[key]);
+
+                         if(key != 'dedup'){
+                                 selectElement[y] = new Option(allAccounts[key]['name'],allAccounts[key]['page'],false,false);
+				 if(thisAccount.foafAccountServiceHomepage == allAccounts[key]['page']
+					|| thisAccount.foafAccountServiceHomepage==allAccounts[key]['page']+'/'
+					|| thisAccount.foafAccountServiceHomepage+'/'==allAccounts[key]['page']){
+					selectElement[y].selected = true;
+					needExtraBoxes = false;
+				 }
+                                 y++;
+			}
+                }
+
 		
 		//create an input element for the username
 		var userNameElement = document.createElement('input');
 		userNameElement.className = 'accountUsername';
+		log('this account name::::'+thisAccount['foafAccountName']);
+		if(typeof(thisAccount['foafAccountName']) != 'undefined' && thisAccount['foafAccountName']){
+			userNameElement.value = thisAccount['foafAccountName'];
+		}
 		accountDiv.appendChild(userNameElement);
-		
+
 		//create an input element for the account service type (for display if it isn't in the dropdown)
 		var accountServiceTypeInput = document.createElement('input');
 		accountServiceTypeInput.className = 'accountTypeInput';
+		accountServiceTypeInput.id = 'accountTypeInput_'+accountDiv.id;
+		if(needExtraBoxes){
+			accountServiceTypeInput.style.display='inline';
+		}
+		if(typeof(thisAccount['foafAccountServiceHomepage']) != 'undefined' && thisAccount['foafAccountServiceHomepage']){
+                          accountServiceTypeInput.value = thisAccount['foafAccountServiceHomepage'];
+                }
 		accountDiv.appendChild(accountServiceTypeInput);
-		
+			
 		//create an input element for the account profile page (for display if the type isn't in the dropdown)
 		var accountProfileElem = document.createElement('input');
 		accountProfileElem.className = 'accountProfile';
+		accountProfileElem.id = 'accountProfile_'+accountDiv.id;
+		if(needExtraBoxes){
+			accountProfileElem.style.display='inline';
+		}
+		if(typeof(thisAccount['foafAccountProfilePage']) != 'undefined' && thisAccount['foafAccountProfilePage']){
+                          accountProfileElem.value = thisAccount['foafAccountProfilePage'];
+		}
 		accountDiv.appendChild(accountProfileElem);
-		
 			
 	}
 	
@@ -432,6 +491,35 @@ function renderAccountFields(data,isPublic){
 		createAccountsAddElement(containerElement);
 	}
 }
+
+
+function toggleAccountFields(id,value){
+	
+	if(!id || typeof(id) == 'undefined'){
+		log('id undefined in toggling accounts');
+		return;
+	}
+	
+	var field1 = document.getElementById('accountTypeInput_'+id);
+	var field2 = document.getElementById('accountProfile_'+id);
+
+	if(typeof(field1) == 'undefined' || !field1 || typeof(field2) == 'undefined' || !field2){
+		log('field undefined in toggling accounts');
+		return;
+	}
+
+	//i.e. other was selected
+	if(!value || typeof(value) == 'undefined'){
+		field1.style.display = 'inline';
+		field2.style.display = 'inline';
+	} else {
+		field1.style.display = 'none';
+		field2.style.display = 'none';
+	}
+}
+
+
+
 
 /*renders either the private or the public fields*/
 function renderSimpleFields(data,isPublic){
@@ -1841,7 +1929,9 @@ function mboxDisplayToObjects(){
 }
 
 function accountsDisplayToObjects(){
+
 	//XXX we no longer preserve things across models because of the privacy implementation.
+	log('in accounts display to objects');	
 	
 	/*get the countainer of all the accounts*/
 	var containerElement = document.getElementById('foafHoldsAccount_container');
@@ -1850,10 +1940,11 @@ function accountsDisplayToObjects(){
 		log('[ACCOUNTS] no container elem');
 		return
 	}
-	
+
 	/*reset the accounts bit of the globalPrivateFieldData/globalFieldData object*/
-	globalPrivateFieldData.foafHoldsAccountFields = new Object();
-	globalFieldData.foafHoldsAccountFields = new Object();
+        globalPrivateFieldData.foafHoldsAccountFields = new Object();
+        globalFieldData.foafHoldsAccountFields = new Object();
+
  	
   	for(i=0; i < containerElement.childNodes.length; i++){
   		
@@ -1866,8 +1957,6 @@ function accountsDisplayToObjects(){
   		
   		var bNodeId = holdsAccountElement.id;
   		
-		/*some mangling to autogenerate profilePage uris*/
-  		updateProfilePageUrl(holdsAccountElement);
   		
   		/*ignore all elements that don't contain accounts (such as add/remove links)*/
   		if(holdsAccountElement.className != "holdsAccount"){	
@@ -1887,8 +1976,11 @@ function accountsDisplayToObjects(){
 		/*loop through the child nodes of this box and add to the appropriate place*/	
   		for(k=0; k < containerElement.childNodes[i].childNodes.length; k++){
   			
-  			if(holdsAccountElement.childNodes[k].value == ''){
-  				log('ACCOUNTS empty value');
+  			if(typeof(holdsAccountElement) == 'undefined' || 
+				!holdsAccountElement.childNodes[k].value || 
+				holdsAccountElement.childNodes[k].value == ''){
+  				
+				log('ACCOUNTS empty value');
   				//don't save if there is no value here
   				continue;
   			}	
@@ -1896,16 +1988,16 @@ function accountsDisplayToObjects(){
   			var id = holdsAccountElement.childNodes[k].id;
   			
 	  		//do the right thing for the right element, and miss any elements we don't care about.
-	  		if (holdsAccountElement.childNodes[k].id == 'foafAccountName'){
+	  		if (holdsAccountElement.childNodes[k].className == 'accountUsername'){
 	  			
 	  			thisAccount['foafAccountName'] = holdsAccountElement.childNodes[k].value;
-	  					
-	  		} else if(holdsAccountElement.childNodes[k].id == 'foafAccountProfilePage'){
+	  					log('saving account name');
+	  		} else if(holdsAccountElement.childNodes[k].className == 'accountProfile'){
 	  			
 	  			thisAccount['foafAccountProfilePage'] = holdsAccountElement.childNodes[k].value;
-	  		
-	  		} else if (holdsAccountElement.childNodes[k].id == 'foafAccountServiceHomepage'){		
-	  				
+	  				log('saving foaf account profile page');
+	  		} else if (holdsAccountElement.childNodes[k].className == 'accountTypeSelect' || holdsAccountElement.childNodes[k].className == 'accountTypeInput'){		
+	  				log('saving account service homepage');
 	  			thisAccount['foafAccountServiceHomepage'] = holdsAccountElement.childNodes[k].value;
 	  		} 	
 	  	} 	
@@ -2764,7 +2856,7 @@ function phoneDisplayToObjects(){
 		
 		/*create holdsAccount div and attach it to the element given*/
 		var holdsAccountElement = document.createElement("div");
-		holdsAccountElement.setAttribute('class','holdsAccount');
+		holdsAccountElement.className = 'holdsAccount';
 		holdsAccountElement.id = bnodeId;
 		attachElement.appendChild(holdsAccountElement);
 		
@@ -2823,7 +2915,7 @@ function phoneDisplayToObjects(){
 				y++;
 			}
 		}
-		*/
+		/*
 		selectElement.id = 'foafAccountServiceHomepage';
 		selectElement.className = 'fieldInputSelect';
 		selectElement.value = value;

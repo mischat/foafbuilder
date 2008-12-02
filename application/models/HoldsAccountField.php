@@ -72,7 +72,6 @@ class HoldsAccountField extends Field {
 		if(!$results || empty($results)){
 			return;
 		}
-				
 		/*mangle the results so that they can be easily rendered*/
 		foreach($results as $row){	
 			/*key them on the account*/
@@ -81,20 +80,15 @@ class HoldsAccountField extends Field {
 			}
 			
 			/*create an array for each of the properties we care about*/
-			if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'])){
-				 $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'] = array();
+			if(isset($row['?foafAccountProfilePage']) && $row['?foafAccountProfilePage']){
+				 $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'] = $row['?foafAccountProfilePage']->uri;
 			}
-			if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'])){
-				 $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'] = array();
+			if(isset($row['?foafAccountServiceHomepage']) && $row['?foafAccountServiceHomepage']){
+				 $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'] = $row['?foafAccountServiceHomepage']->uri;
 			}
-			if(!isset( $this->data['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'])){
-				 $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'] = array();
+			if(isset($row['?foafAccountName']) && $row['?foafAccountName']){
+				 $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'] = $row['?foafAccountName']->label;
 			}
-			
-			/*fill the array we've created*/
-			array_push( $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountProfilePage'], $row['?foafAccountProfilePage']);
-			array_push( $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountServiceHomepage'], $row['?foafAccountServiceHomepage']);
-			array_push( $this->data[$privacy]['foafHoldsAccountFields'][$row['?a']->uri]['foafAccountName'], $row['?foafAccountName']);
 		}
 	}
 
