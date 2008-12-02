@@ -63,6 +63,7 @@ class AccountsController extends Zend_Controller_Action {
 	/*get all of the various types of account*/
 	public function getAllAccountTypesAction(){
 		
+		/*query to get account homepages and names*/
 		$query = "PREFIX gs: <http://qdos.com/schema#> 
     					PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
         				SELECT ?page ?name WHERE {	
@@ -70,12 +71,26 @@ class AccountsController extends Zend_Controller_Action {
         				    ?serv gs:serviceHomepage ?page .
         					?serv gs:serviceName ?name .
 						} LIMIT 200";
-		echo($query);
 		$res = sparql_query(QDOS_EP,$query);
 		
-		var_dump($res);
-
-	
+		
+		/*loop through the results and create ones that are easier to work with in javascript*/
+		$retArray = array();
+		foreach($res as $row){
+			
+			$thisArray = array();
+			
+			if(!isset($row['?page']) || !isset($row['?name'])){
+				continue;
+			}	
+			
+			$thisArray['name'] = $row['?name'];
+			$thisArray['page'] = $row['?page'];
+			array_push($retArray,$thisArray);
+		}
+		
+		/*add the results to the view*/
+		$this->view->results = $retArray;
 	}
 }
 	

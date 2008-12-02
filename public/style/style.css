@@ -368,6 +368,34 @@ width:100%;
 	margin-top:10px;
 }
 
+
+
+/*new accounts stuff*/
+
+.accountTypeSelect{
+	width:120px;
+	margin-bottom:5px;
+	margin-top:10px;
+}
+.accountUsername{
+	width:120px;
+	margin-left:5px;
+	margin-bottom:5px;	
+	margin-top:10px;
+}
+.accountTypeInput{
+	width:245px;
+	margin-bottom:5px;
+	display:none;
+}
+.accountProfile{
+	width:245px;	
+	margin-bottom:10px;
+	display:none;
+}
+
+
+
 /*the date stuff below is a bit hacked.  Might have to come back to this*/
 .dateSelector{
 	margin-bottom:5px;
