@@ -104,6 +104,7 @@ class FieldNames {
 	private function instantiateAccountsFields($fullInstantiation = true){
 		$this->allFieldNames['foafHoldsAccount'] = new HoldsAccountField($this->foafData,$this->privateFoafData,$fullInstantiation);
 		$this->allFieldNames['foafHomepage'] = new HomepageField($this->foafData,$this->privateFoafData,$fullInstantiation);
+		$this->allFieldNames['foafWeblog'] = new BlogField($this->foafData,$this->privateFoafData,$fullInstantiation);
 	}
 	
 	private function instantiateFriendsFields($fullInstantiation = true){

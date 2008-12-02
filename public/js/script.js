@@ -3,10 +3,6 @@ var loggingOn = true;
 
 /*--------------------------global variables--------------------------*/
 
-//TODO: namespacing!!!
-
-/*load the data that is required for the airport autocomplete.  This will take a while.*/
-//window.onload = include_dom('/js/loadData.js');
 
 /*global variable for storing data*/
 var globalFieldData = new Object();
@@ -35,6 +31,9 @@ var autocomplete_autocompleteDiv;
 /*google maps data*/
 var mapMarkers = new Array();
 var map;
+
+/*variable to hold all the accounts data*/
+var allAccounts;
 
 
 /*--------------------------functions which make ajax calls to control the whole model - load, save, clear, write(TODO: implement this properly)--------------------------*/
@@ -212,6 +211,7 @@ function genericObjectsToDisplay(data){
 	accountsObjectsToDisplay(data);
 	homepageObjectsToDisplay(data);
 	birthdayFieldsObjectsToDisplay(data);
+	weblogObjectsToDisplay(data);
 	//renderHomepageFields(data);
 	
 	/*friends stuff does not have privacy settings*/
@@ -330,6 +330,9 @@ function accountsObjectsToDisplay(data){
 	if(data.public){
 		renderAccountFields(data.public,true);
 	}
+	
+	//populate all the dropdown boxes
+	//populateAllAccountsDropdowns();
 }
 function homepageObjectsToDisplay(data){
 	if(!data){
@@ -340,6 +343,17 @@ function homepageObjectsToDisplay(data){
 	}
 	if(data.public){
 		renderHomepageFields(data.public,true);
+	}
+}
+function weblogObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderWeblogFields(data.private,false);
+	}
+	if(data.public){
+		renderWeblogFields(data.public,true);
 	}
 }
 function birthdayFieldsObjectsToDisplay(data){
@@ -358,9 +372,10 @@ function birthdayFieldsObjectsToDisplay(data){
 
 /*--------------------------second level functions to convert globalFieldData into HTML elements--------------------------*/
 function renderAccountFields(data,isPublic){
-	
-	//if(!data.foafHoldsAccountFields || typeof(data.foafHoldsAccountFields) == 'undefined'){
-	if(!data || !data.foafHoldsAccountFields || typeof(data.foafHoldsAccountFields) == 'undefined'){
+	log('rendering accounts');
+	if(!data || !data.foafHoldsAccountFields 
+		|| typeof(data.foafHoldsAccountFields) == 'undefined'){
+		log('returning from render accounts');
 		return;
 	}
 	
@@ -376,41 +391,40 @@ function renderAccountFields(data,isPublic){
 
 	/*fill it up with accounts*/
 	for(accountBnodeId in data.foafHoldsAccountFields){
-		if(accountBnodeId == "displayLabel" || accountBnodeId == "name"){
-			continue;
-		}
+		log('In loop accounts:'+accountBnodeId);
 		
-	 	/*create a container for this account. E.g. a Skype account represented by accountBnodeId=bNode3*/
-		var holdsAccountElement = createHoldsAccountElement(containerElement,accountBnodeId,isPublic);
+		//create a remove link
+		createGenericInputElementRemoveLink(accountBnodeId,containerElement.id,false);
+		
+		//create a privacy checkbox
+		createGenericInputElementPrivacyBox(accountBnodeId, containerElement.id,!isPublic);
+		
+		//create a div to hold this account
+		var accountDiv = document.createElement('div');
+		accountDiv.id = accountBnodeId;
+		containerElement.appendChild(accountDiv);
+		
+		//create a select element for the account type
+		var selectElement = document.createElement("select");
+		selectElement.className = 'accountTypeSelect';
+		accountDiv.appendChild(selectElement);
+		
+		//create an input element for the username
+		var userNameElement = document.createElement('input');
+		userNameElement.className = 'accountUsername';
+		accountDiv.appendChild(userNameElement);
+		
+		//create an input element for the account service type (for display if it isn't in the dropdown)
+		var accountServiceTypeInput = document.createElement('input');
+		accountServiceTypeInput.className = 'accountTypeInput';
+		accountDiv.appendChild(accountServiceTypeInput);
+		
+		//create an input element for the account profile page (for display if the type isn't in the dropdown)
+		var accountProfileElem = document.createElement('input');
+		accountProfileElem.className = 'accountProfile';
+		accountDiv.appendChild(accountProfileElem);
+		
 			
-		/*create an element for the foafAccountServiceHomepage*/
-		if(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0]){
-			createFoafAccountServiceHomepageInputElement(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri, holdsAccountElement);	
-		} else {
-			/*create an empty element*/
-			createFoafAccountServiceHomepageInputElement('', holdsAccountElement);	
-		}
-		
-		/*create an element for the foafAccountName*/
-		if(data.foafHoldsAccountFields[accountBnodeId].foafAccountName[0]){
-			createAccountsInputElement('foafAccountName', data.foafHoldsAccountFields[accountBnodeId].foafAccountName[0].label, holdsAccountElement);	
-		} else {
-			/*create an empty element*/
-			createAccountsInputElement('foafAccountName', '', holdsAccountElement);	
-		}
-		
-		/*create an element for the foafAccountProfilePage*/
-		if(data.foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0]){
-			createAccountsInputElement('foafAccountProfilePage', data.foafHoldsAccountFields[accountBnodeId].foafAccountProfilePage[0].uri, holdsAccountElement);	
-		} else {
-			/*create an empty element*/
-			createAccountsInputElement('foafAccountProfilePage', '', holdsAccountElement);	
-		}
-			
-		/*hide/show the profilePage url as appropriate*/	
-		if(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri){
-			toggleHiddenAccountInputElements(data.foafHoldsAccountFields[accountBnodeId].foafAccountServiceHomepage[0].uri,holdsAccountElement,'');
-		}
 	}
 	
 	//add a link to add another account. We only want to do this once. XXX this relies on the public bit being rendered second
@@ -616,6 +630,51 @@ function renderHomepageFields(data,isPublic){
 		for(homepage in data.foafHomepageFields.values){
 			log(data.foafHomepageFields.values[homepage]);
 			createGenericInputElement(name, data.foafHomepageFields.values[homepage], i,false,false,false,!isPublic);	
+			i++;
+			log('in for loop for homepages');
+		}
+	} else {
+		
+		/*create an empty field but only if this is the first one XXX this depends on this function being called in the public sense initially*/
+		if(isPublic){
+			createGenericInputElement(name, 'My Homepage Here', i,false,true,false,!isPublic);
+		}
+	}	
+	
+	/*create an add link XXX this means we have to display public fields before private ones*/
+	if(isPublic){
+		createGenericAddElement(containerElement,name,label);
+	}
+
+}
+
+
+/*Render the HomepageField*/
+function renderWeblogFields(data,isPublic){
+	
+	log('trying to render homepages');
+	
+	//XXX this is just like renderMboxFields
+	if(!data || !data.foafWeblogFields || typeof(data.foafWeblogFields) == 'undefined'){
+		return;
+	}
+	
+	var name = data.foafWeblogFields.name;
+	var label = data.foafWeblogFields.displayLabel;
+	var name = data.foafWeblogFields.name;
+	
+	/*build the container if it isn't there already*/
+	var containerElement = document.getElementById(name+"_container");
+	if(!containerElement){
+		containerElement = createFieldContainer(name, label);
+	}
+
+	/*render each individual homepage element*/	
+	var i = containerElement.childNodes.length;
+	if(typeof(data.foafWeblogFields.values) != 'undefined' && data.foafWeblogFields.values && typeof(data.foafWeblogFields.values[0])!='undefined'){
+		for(homepage in data.foafWeblogFields.values){
+			log(data.foafWeblogFields.values[homepage]);
+			createGenericInputElement(name, data.foafWeblogFields.values[homepage], i,false,false,false,!isPublic);	
 			i++;
 			log('in for loop for homepages');
 		}
@@ -1507,6 +1566,7 @@ function displayToObjects(name){
 		case 'load-accounts':
 			accountsDisplayToObjects();
 			homepageDisplayToObjects();
+			blogsDisplayToObjects();
 			break;
 		case 'load-locations':
 			nearestAirportDisplayToObjects();
@@ -1557,6 +1617,55 @@ function birthdayDisplayToObjects(){
 		globalFieldData.foafBirthdayFields = foafBirthdayFields;
 	}
 	
+}
+
+function blogsDisplayToObjects() {
+	log('in weblog display to objects');
+	var containerElement = document.getElementById('foafWeblog_container');
+	
+	if(!containerElement){
+		return
+	}
+	if(typeof(globalFieldData.foafWeblogFields) == 'undefined' || !globalFieldData.foafWeblogFields){
+		log('homepages - returning');
+		return;
+	}
+	if(typeof(globalPrivateFieldData.foafWeblogFields) == 'undefined' || !globalPrivateFieldData.foafWeblogFields){
+		log('homepages - returning');
+		return;
+	}
+	
+	/*remove the existing values*/
+	globalFieldData.foafWeblogFields.values = new Array();
+	globalPrivateFieldData.foafWeblogFields.values = new Array();
+		
+	/*add the elements that are present in the display again*/
+	for(i=0 ; i <containerElement.childNodes.length ; i++){
+		
+		log('in for loop for homepages');
+		
+		var element = containerElement.childNodes[i];
+					
+		//we only want input elements
+		if(element.className != 'fieldInput'){	
+			continue;
+		}
+		
+		var privacyBox = document.getElementById('privacycheckbox_'+element.id);
+		
+		/*no privacy checkbox, so skip to next childNode*/
+		if(typeof(privacyBox) == 'undefined' || !privacyBox){
+			log("Privacy box not found for homepage");
+			continue;
+		}	
+		
+		/*put it into the appropriate field data object, private or not private*/
+		if(!privacyBox.checked){	
+			globalFieldData.foafWeblogFields.values.push(element.value);
+		} else {
+			globalPrivateFieldData.foafWeblogFields.values.push(element.value);
+		}		
+	}
 }
 
 function homepageDisplayToObjects() {
@@ -2700,22 +2809,26 @@ function phoneDisplayToObjects(){
 	/*renders a dropdown box with a list of possible accountServiceHomepages in it (e.g. skype, msn etc)*/
 	function createFoafAccountServiceHomepageInputElement(value,container){
 		selectElement = document.createElement("select");
-	
+		//XXX get this so that it is populated asynchronously
+		
+		/*
 		var allAccounts = getAllOnlineAccounts();
 		
 		selectElement[0] = new Option('Other','',false,false);
 		var y=1;
 					
-		/*loop through all online accounts and create options from them*/
+		//loop through all online accounts and create options from them
 		for(key in allAccounts){
 			if(key != 'dedup'){
 				selectElement[y] = new Option(key,allAccounts[key],false,false);
 				y++;
 			}
 		}
+		*/
 		selectElement.id = 'foafAccountServiceHomepage';
-		selectElement.className = 'fieldInput';
+		selectElement.className = 'fieldInputSelect';
 		selectElement.value = value;
+		
 		
 		/*show the hidden input elements if there is no option matching this id here*/
 		selectElement.setAttribute('onchange',"toggleHiddenAccountInputElements(this.value,this.parentNode, '');saveFoaf();");
@@ -3552,17 +3665,51 @@ function togglePrivateUI(fieldContainer){
 /*object storing online account urls (e.g. www.skype.com) and keying them against their names (e.g. skype)*/
 //TODO this should integrate with QDOS
 
-function getAllOnlineAccounts(){
-	//TODO: need to increase this list.  See allAccountServiceurls file.
-	var oA = new Array();
-	oA['Skype'] = 'http://www.skype.com/';
-	oA['Yahoo'] = 'http://messenger.yahoo.com/';
-	oA['MSN'] = 'http://messenger.msn.com/';
-	oA['Delicious'] = 'http://del.icio.us';
-	oA['Flickr'] = 'http://www.flickr.com/';
-	oA['Livejournal'] = 'http://www.livejournal.com/';
+function populateAllAccountsDropdowns(){
+
+	var accountsContainer = document.getElementById('foafHoldsAccount_container');
 	
-	return oA;
+	if(typeof(accountsContainer) == 'undefined' || !accountsContainer){
+		return;
+	}
+	
+	for(accountKey in accountsContainer.childNodes){
+	
+		log('first id: '+accountsContainer.childNodes[accountKey].id);
+				
+		for(childKey in accountsContainer.childNodes[accountKey]){
+		
+			log('second id: '+accountsContainer.childNodes[accountKey].id);
+			
+			if(typeof(accountsContainer.childNodes[accountKey][childKey]) != 'undefined' &&
+				accountsContainer.childNodes[accountKey][childKey].className == 'fieldInputSelect'){				
+				
+				log('third id');
+				alert('found!');
+		
+			} else {
+				log('fourth id');
+				log('not found!');
+			}
+		}
+	}
+}
+
+function setAllOnlineAccounts(){
+	/*set the allAccounts object*/
+	$.post("/accounts/get-all-account-types", {}, function(data){ allAccounts = data;});
+}
+
+
+function getAllOnlineAccounts(){
+
+	/*if the variable is already set then return it*/
+	if(typeof(allAccounts) != 'undefined' && allAccounts){
+		return allAccounts;
+	
+	} else {
+		return;
+	}
 }
 function getUrlFromOnlineAccounts(username,type){
 	
