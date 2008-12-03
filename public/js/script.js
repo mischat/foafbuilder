@@ -3598,7 +3598,7 @@ function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
 		privacyDiv.parentNode.removeChild(privacyDiv);
 	}
 	
-	
+	saveFoaf();
 }
 
 
