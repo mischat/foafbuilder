@@ -106,7 +106,7 @@ class HoldsAccountField extends Field {
 		//It would be nice to get it working again so we don't lose people's valuable triples. 		
 		
 		$this->removeAllAccounts($foafData);
-		
+		$patterns = $this->getCanonicalPatterns();
 		
 		foreach($value as $holdsAccountName => $holdsAccountContents){
 			
@@ -120,25 +120,83 @@ class HoldsAccountField extends Field {
 			//create an account triple here and add it to the model.
 			$accountStatement = new Statement(new Resource($foafData->getPrimaryTopic()),new Resource('http://xmlns.com/foaf/0.1/holdsAccount'),$holdsAccountBnode);
 			$bNodeStatement = new Statement($holdsAccountBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource('http://xmlns.com/foaf/0.1/OnlineAccount'));			
-			$foafData->getModel()->add($accountStatement); 
-			$foafData->getModel()->add($bNodeStatement); 
-			
-			if(property_exists($holdsAccountContents,'foafAccountProfilePage') && $holdsAccountContents->foafAccountProfilePage){
-				echo('saving pp');
-				$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($holdsAccountContents->foafAccountProfilePage));
-				$foafData->getModel()->add($newStatement);
-			}	
+			$foafData->getModel()->addWithoutDuplicates($accountStatement); 
+			$foafData->getModel()->addWithoutDuplicates($bNodeStatement); 
+				
+			if(empty($holdsAccountContents)){
+				continue;
+			}			
+
 			if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage){
 				echo('saving A_service_homepage');
 				$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountServiceHomepage'), new Resource($holdsAccountContents->foafAccountServiceHomepage));
-				$foafData->getModel()->add($newStatement);
+				$foafData->getModel()->addWithoutDuplicates($newStatement);
 			}		
 			if(property_exists($holdsAccountContents,'foafAccountName') && $holdsAccountContents->foafAccountName){
 				echo('saving name');
 				$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountName'), new Literal($holdsAccountContents->foafAccountName));
-				$foafData->getModel()->add($newStatement);
+				$foafData->getModel()->addWithoutDuplicates($newStatement);
+			}
+
+
+			if(property_exists($holdsAccountContents,'foafAccountProfilePage') && $holdsAccountContents->foafAccountProfilePage){
+                                echo('saving pp');
+                                $newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($holdsAccountContents->foafAccountProfilePage));
+                                $foafData->getModel()->addWithoutDuplicates($newStatement);
+                        } else if(property_exists($holdsAccountContents,'foafAccountName') && $holdsAccountContents->foafAccountName){
+
+				if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage){
+
+					
+					$myPage = $this->usernameToUri($holdsAccountContents->foafAccountName,$holdsAccountContents->foafAccountServiceHomepage,$patterns); 
+					echo("MY PAGE".$myPage);
+					$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($myPage));
+                                	$foafData->getModel()->addWithoutDuplicates($newStatement);
+
+
+				}
+				
 			}
 		}
+	}
+
+
+	private function getCanonicalPatterns(){
+		//build a query from to get all the patterns
+                $query = "PREFIX gs: <http://qdos.com/schema#> 
+                        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+                        SELECT ?patt ?homepage WHERE 
+                        { ?serv rdfs:subPropertyOf gs:serviceProperty . 
+			  ?serv gs:canonicalUriPattern ?patt . 
+			  ?serv gs:serviceHomepage ?homepage }";
+
+                //execute the query to get the patterns
+                $res = sparql_query(QDOS_EP,$query);
+		
+		$ret = array();
+		foreach($res as $result){
+			if(!isset($result['?homepage'])){
+				continue;
+			}
+			$ret[sparql_strip($result['?homepage'])] = $result['?patt'];
+		}
+		
+		return $ret;
+	}
+
+
+	private function usernameToUri($username,$serviceHomepage,$patterns){
+		
+		if(!$username || !$serviceHomepage){
+			return;
+		}
+		if(!isset($patterns[$serviceHomepage])){
+			return;
+		}
+		
+                $ret =  str_replace('@USER@',$username,$patterns[$serviceHomepage]);
+
+		return($ret);
 	}
 	
 	private function removeAllAccounts($foafData){

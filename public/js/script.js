@@ -996,6 +996,7 @@ function renderKnowsFields(data){
 	if(!data || !data.foafKnowsFields || typeof(data.foafKnowsFields) == 'undefined'){
 		return;
 	}
+	globalFieldData = data;
 	renderSearchUI();
 	renderMutualFriends(data.foafKnowsFields);
 	renderKnowsUserFields(data.foafKnowsFields);//like incoming friend requests
@@ -2367,6 +2368,9 @@ function imgDisplayToObjects(){
 
 function knowsDisplayToObjects(){
 
+	if(typeof(globalFieldData) == 'undefined' || !globalFieldData){
+		return;
+	}
 	if(typeof(globalFieldData.foafKnowsFields) == 'undefined' || !globalFieldData.foafKnowsFields){
 		return;
 	}
@@ -3559,15 +3563,15 @@ function makeMutualFriend(friendDivId){
 	var containerElement = document.getElementById('mutualFriends_container');
 
 	/*create the new element*/
-	if(containerElement){
-		 insertFriendInRightPlace(containerElement, "mutualFriend", friend);
-	}
+	$.post("/friend/add-friend", {friend : JSON.serialize(friend)}, function(data){
+				insertFriendInRightPlace(containerElement, 'mutualFriend', friend);
+				removeGenericInputElement(friendDivId,'id');
+				knowsDisplayToObjects();
+			});
 
 	/*remove the old one*/
-	removeGenericInputElement(friendDivId,'id');
 
 	/*update the global object but don't save*/
-	knowsDisplayToObjects();
 }
 
 /*removes the input element with the given id as well as its corresponding remove element*/
