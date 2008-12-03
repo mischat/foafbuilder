@@ -11,11 +11,7 @@ class BirthdayField extends Field {
  	    
         $this->name = 'foafBirthday';
         $this->label = 'Birthday';
-/*
-    	$this->data['birthdayFields'] = array();  	
-    	$this->data['birthdayFields']['displayLabel'] = 'Birthday';
-        $this->data['birthdayFields']['name'] = 'birthday';
-*/
+
         $this->data['public']['foafBirthdayFields'] = array();
         $this->data['public']['foafBirthdayFields']['values'] = array();
         $this->data['public']['foafBirthdayFields']['displayLabel'] = $this->label;
