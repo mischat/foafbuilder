@@ -16,13 +16,13 @@ class FileController extends Zend_Controller_Action {
     	 * which will depend on the oauth server.
     	 */
     	$this->view->isSuccess = 0;
-		$maximumSizeInBytes = 500000;
+	$maximumSizeInBytes = 500000;
         $foafData = FoafData::getFromSession();	
         $allowedMimeTypesArray = array('jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif', 'png' => 'image/png');
         		
     	if($foafData){
     		
-    	   $dirname = $_SERVER['DOCUMENT_ROOT']."/images/".substr($foafData->getPrimaryTopic(),-32);
+    	   $dirname = $_SERVER['DOCUMENT_ROOT']."/images/".substr($foafData->getPrimaryTopic(),-32,-5);
 
     	   /*create a new directory for this person if necessary*/
     	   if(!file_exists($dirname)){
@@ -60,7 +60,7 @@ class FileController extends Zend_Controller_Action {
     	   
     	   $new_filename = sha1(microtime()."_".rand(0,99999)).".gif";   
     	   $new_name = $dirname."/".$new_filename;
-    	   $url = "/images/".substr($foafData->getPrimaryTopic(),-32)."/".$new_filename;
+    	   $url = "/images/".substr($foafData->getPrimaryTopic(),-32,-5)."/".$new_filename;
     	   
     	   if(move_uploaded_file($_FILES['uploadedImage']['tmp_name'], $new_name)){
     			$this->view->isSuccess  = $url;
