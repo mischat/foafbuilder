@@ -88,16 +88,18 @@ function saveFoaf(){
 
 /*Clears FOAF model from session*/
 function clearFoaf() {
+		/*destroy the session and go back to the start page*/
         turnOnLoading();
-        $.post("/ajax/clear-Foaf", { }, function(){turnOffLoading();},null);
+        $.post("/ajax/clear-Foaf", { }, function(){turnOffLoading();window.location='/'},null);
         
         /*empty all the text inputs*/
+        /*
         var inputs = document.getElementsByTagName('input'); 
         for(i=0 ; i<inputs.length ; i++){
         	if(inputs[i].type=='text'){
         		document.getElementById(inputs[i].id).value = null;
         	}
-        }
+        }*/
 }
 
 /*saves all the foaf data*/

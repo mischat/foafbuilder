@@ -82,10 +82,7 @@ class AddressField extends Field {
 			$homeLocationStatement = new Statement($homeBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource("http://www.w3.org/2000/10/swap/pim/contact#ContactLocation"));
 	                	
 			$foafData->getModel()->add($homeStatement);
-			$foafData->getModel()->add($homeLocationStatement);
-								
-			/*so that we can keep track of which bNode belongs to which random string*/
-			$randomStringToBnodeArray[$bNodeName] = $homeBnode->uri;					
+			$foafData->getModel()->add($homeLocationStatement);				
 			
 			/*add new triples*/
 			$this->addNewAddressTriples($foafData,$homeBnode,$value,$type);	
