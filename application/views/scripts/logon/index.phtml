@@ -8,11 +8,11 @@
 					Welcome to the FOAF builder. 
 				</h2>
 				<!--<form method='post' id='openidForm' action='javascript:doOpenid()'>-->
-				<form method='post' id='openidForm' action='logon/do-openid'>
+				<form method='post' id='openidForm' action='/logon/do-openid'>
 					<p>
-						If you'd like to load in publicly available information, please fill in the fields below and click 'import'.
+						Please enter your openId below.  If you don't have an openId, click <a href='http://openid.net/get/'>here</a> to find out how.
 					</p>
-					<span>Openid username:    </span><input id='openid_identifier' class='urlField' name='openid_identifier' value=''><br/>
+					<span>Openid:    </span><input id='openid_identifier' class='urlField' name='openid_identifier' value=''><br/><br/>
 					<input id='openid_action' name='openid_action' type='submit' value='login'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
 				</form>
 			</div>

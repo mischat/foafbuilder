@@ -16,14 +16,14 @@ class LogonController extends Zend_Controller_Action
     //TODO MISCHA DIRTY
     public function doOpenidAction() {
 
+	$defaultNamespace = new Zend_Session_Namespace('Garlik');
+	$defaultNamespace->authenticated = false;
+
 	if (isset($_POST['openid_action']) && $_POST['openid_action'] == "login" && !empty($_POST['openid_identifier'])) {
     		$openid = $_POST['openid_identifier'];	
     		error_log("Please say something is happening here $openid");
-
 		$consumer = new Zend_OpenId_Consumer();
 
-		var_dump($consumer);
-		//if (!$consumer->login($_POST['openid_identifier'])) {
 		if (!$consumer->login($openid)) {
 			error_log("OpenID login failed.");
 		} 
@@ -32,11 +32,7 @@ class LogonController extends Zend_Controller_Action
 	       if ($_GET['openid_mode'] == "id_res") {
 			$consumer = new Zend_OpenId_Consumer();
 			if ($consumer->verify($_GET, $id)) {
-			    error_log("VALID " . htmlspecialchars($id));
-				//ADD Authenicated to the Session!
-			} else {
-			    error_log("INVALID " . htmlspecialchars($id));
-				//REMOVE from session
+				$defaultNamespace->authenticated = true;
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
 			error_log("CANCELED");
