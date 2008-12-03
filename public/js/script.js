@@ -84,6 +84,8 @@ function saveFoaf(){
 	
 	//TODO use jquery event handler to deal with errors on this request
   	$.post("/ajax/save-Foaf", {model : jsonString}, function(data){turnOffLoading();});
+	
+	
 }
 
 /*Clears FOAF model from session*/
@@ -210,18 +212,13 @@ function genericObjectsToDisplay(data){
 	depictionFieldsObjectsToDisplay(data);
 	nearestAirportFieldsObjectsToDisplay(data);
 	basedNearFieldsObjectsToDisplay(data);
-	accountsObjectsToDisplay(data);
 	homepageObjectsToDisplay(data);
 	birthdayFieldsObjectsToDisplay(data);
 	weblogObjectsToDisplay(data);
-	//renderHomepageFields(data);
+	accountsObjectsToDisplay(data);
 	
 	/*friends stuff does not have privacy settings*/
 	renderKnowsFields(data);
-	
-	/*render the various fields*/
-	//renderBirthdayFields(data);
-
 
 }
 
@@ -1681,9 +1678,9 @@ function displayToObjects(name){
 			phoneDisplayToObjects();
 			break;
 		case 'load-accounts':
-			accountsDisplayToObjects();
 			homepageDisplayToObjects();
 			blogsDisplayToObjects();
+			accountsDisplayToObjects();
 			break;
 		case 'load-locations':
 			nearestAirportDisplayToObjects();
@@ -1971,8 +1968,17 @@ function accountsDisplayToObjects(){
 	}
 
 	/*reset the accounts bit of the globalPrivateFieldData/globalFieldData object*/
-        globalPrivateFieldData.foafHoldsAccountFields = new Object();
-        globalFieldData.foafHoldsAccountFields = new Object();
+	if(typeof(globalPrivateFieldData.foafHoldsAccountFields) == 'undefined' || !globalPrivateFieldData.foafHoldsAccount){
+        	globalPrivateFieldData.foafHoldsAccountFields = new Object();
+		globalPrivateFieldData.displayLabel = 'Accounts';//XXX this is messy
+		globalPrivateFieldData.name = 'foafHoldsAccount';//XXX this is messy
+	}
+
+	if(typeof(globalFieldData.foafHoldsAccountFields) == 'undefined' || !globalFieldData.foafHoldsAccount){
+        	globalFieldData.foafHoldsAccountFields = new Object();
+		globalFieldData.displayLabel = 'Accounts';//XXX this is messy
+		globalFieldData.name = 'foafHoldsAccount';//XXX this is messy
+	}
 
  	
   	for(i=0; i < containerElement.childNodes.length; i++){
