@@ -1,5 +1,5 @@
 /*for logging purposes*/
-var loggingOn = true;
+var loggingOn = false;
 
 /*--------------------------global variables--------------------------*/
 
@@ -1113,7 +1113,7 @@ function renderKnowsFields(data){
 		uploadLabel.className = 'uploadLabel';
 		menuForm.appendChild(uploadLabel);
 		menuForm.setAttribute('method','post');
-		menuForm.setAttribute('action','file/upload-image');
+		menuForm.setAttribute('action','/file/upload-image');
 		menuForm.setAttribute('enctype','multipart/form-data');
 		
 		/*create and append upload input field*/
