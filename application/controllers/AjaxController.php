@@ -329,12 +329,11 @@ echo('beta');
 	echo('end');
     }
 	
-    //TODO really dirty	MISCHA not sure why this isnt working properly !
     public function clearFoafAction() {
         if(@Zend_Session::destroy()) {
-            echo("Session destroyed properly");
+            echo(1);
         } else {
-            echo("Session not destroyed properly");
+            echo(0);
         }
     }
 }
