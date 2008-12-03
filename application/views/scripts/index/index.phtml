@@ -17,12 +17,18 @@
         <span id='flickr_error' style='display:none'>Could not get FOAF from Flickr.</span><br/>
       <div class="formfield">Last FM username:</div><input id='lastfmUser' class='urlField' name='lastfmUser' value=''><br/>
         <span id='lastfm_error' style='display:none'>Could not get FOAF from Last FM.</span><br/>
-      <div class="formfield">Livejournal username:</div><input id='ljUser' class='urlField' name='ljUser' value=''><br/>
+      <div class="formfield">Livejournal username:</div><input id='lj' class='urlField' name='lj' value=''><br/>
         <span id='lj_error' style='display:none'>Could not get FOAF from Livejournal.</span><br/>
       <div class="formfield">Your foaf file URL:</div><input id='uri' name='uri' size="80"/><br/><br/>
         <span id='uri_error' style='display:none'>Could not get FOAF from the url specified.</span><br/>
       <input id='button' type='submit' value='Build'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
     </form>
   </div>
+<?php
+$foafData = FoafData::getFromSession();
+if (@$foafData) {
+var_dump($foafData->getModel()->triples);
+}
+?>
 </div><!-- end content -->
 <!-- footer -->
