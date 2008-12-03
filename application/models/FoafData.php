@@ -14,8 +14,9 @@ class FoafData {
     
     /*stuff to say whether we've imported from the various reflectors or not*/
     var $flickrFound = false;
-	var $deliciousFound = false;
-	var $lastfmFound = false;
+    var $deliciousFound = false;
+    var $lastfmFound = false;
+    var $ljFound = false;
     
     /*New from uri if uri present. if not just new.*/
     public function FoafData ($uri = "",$isPublic = true) {

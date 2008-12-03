@@ -21,27 +21,54 @@ class AjaxController extends Zend_Controller_Action {
 		
 		//some details
         $uri = @$_GET['uri'];
-        $flickr = $_GET['flickr'];
-        $delicious = $_GET['delicious'];
-        $lastfm = $_GET['lastfmUser'];
+        $flickr = @$_GET['flickr'];
+        $delicious = @$_GET['delicious'];
+        $lastfm = @$_GET['lastfmUser'];
+        $lj = @$_GET['ljUser'];
         
         //results
-		$this->view->results = array();
+	$this->view->results = array();
         $this->view->results['flickrFound'] = $this->foafData->flickrFound;
         $this->view->results['deliciousFound'] = $this->foafData->deliciousFound;
         $this->view->results['lastfmFound'] = $this->foafData->lastfmFound;
+        $this->view->results['ljFound'] = $this->foafData->ljFound;
         $this->view->results['uriFound'] = false;
          
         //grab the foaf from the uri passed
         if($uri){
-        	$uriLoadOk = $this->foafData->getModel()->load($uri);
-        	$this->foafData->replacePrimaryTopic($uri);
-			
-        	if($uriLoadOk != 1){
+		$ok = 1;
+		if (substr($uri, 0, 7) != "http://") {
+			$ok = 0;
+		}
+		if (preg_match("(//(localhost|127\.0\.0\.1))", $uri)) {
+			$ok = 0;
+		}
+		if (preg_match("(//[^.]*/)", $uri)) {
+			$ok = 0;
+		}
+		if ($ok) {
+			$uriLoadOk = $this->foafData->getModel()->load($uri);
+			$this->foafData->replacePrimaryTopic($uri);
+				
+			if($uriLoadOk != 1){
 				$this->view->results['uriFound'] = true;
 			}
-		} 
-		//grab the appropriate things if we haven't already
+		}
+	}
+	//grab the appropriate things if we haven't already
+        if($lj && !$this->foafData->ljFound){
+        	
+		$ljUri = 'http://'.$lj.'.livejournal.com/data/foaf';
+		echo($ljUri);
+		$lj = $this->foafData->getModel()->load($ljUri);
+		$this->foafData->replacePrimaryTopic($ljUri);
+		
+		if($lj != 1){
+				$this->view->results['ljFound'] = true;
+				$this->foafData->ljFound = true;
+			}
+        } 
+	//grab the appropriate things if we haven't already
         if($flickr && !$this->foafData->flickrFound){
         	
         	//scrape the page to get the NSID

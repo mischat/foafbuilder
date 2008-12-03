@@ -138,6 +138,10 @@ span  {
 	font-family:Arial,Helvetica,sans-serif;
 	font-size: 12px;
 }
+div  {
+	font-family:Arial,Helvetica,sans-serif;
+	font-size: 12px;
+}
 
 #search_box_top{
 position:absolute;
@@ -645,4 +649,9 @@ width:100%;
 
 .foafUrl{
 	color:#888888;
+}
+
+.formfield{
+	float:left;
+	width:20ex;
 }

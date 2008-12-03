@@ -1,31 +1,28 @@
-<?	
-	//We don't want to laod all the scripts
-	$this->layout()->setLayout('minimal');
+<?  
+  //We don't want to laod all the scripts
+  $this->layout()->setLayout('minimal');
 ?>
 <div id="content">
-			<div class="">
-				<h2>
-					Welcome to the FOAF builder. 
-				</h2>
-				<form method='get' id='importForm' action='javascript:importFoaf()'>
-					<p>
-						If you'd like to load in publicly available information, please fill in the fields below and click 'import'.
-					</p>
-					<span>Flickr username:    </span><input id='flickr' class='urlField' name='flickr' value=''><br/>
-						<span id='flickr_error' style='display:none'>Could not get FOAF from Flickr.</span><br/>
-					<span>Last FM username:   </span><input id='lastfmUser' class='urlField' name='lastfmUser' value=''><br/>
-						<span id='lastfm_error' style='display:none'>Could not get FOAF from Last FM.</span><br/>
-					<span>Delicious username: </span><input id='delicious' class='urlField' name='delicious' value=''><br/>
-						<span id='delicious_error' style='display:none'>Could not get FOAF from delicous.</span><br/>
-					<span>Your foaf file URL:      </span><input id='uri' name='uri' value='Your Foaf Url' onfocus="if(this.value == 'Your Foaf Url'){this.value = '';this.style.color='#000000';}"/><br/><br/>
-						<span id='uri_error' style='display:none'>Could not get FOAF from the url specified.</span><br/>
-					<input id='button' type='submit' value='Import'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
-				</form>
-					<p>Hit Build below to get started...</p>
-				<form method='get' id='importForm' action='/builder/'>
-					<input id='button' type='submit' value='Build'/>
-				</form>
-			</div>
+  <div class="">
+    <h2>
+      Welcome to the FOAF builder. 
+    </h2>
+    <form method='get' id='importForm' action='javascript:importFoaf()'>
+      <p>
+        If you'd like to load in publicly available information, please fill in the fields below. Click 'Build' to continue to the FOAF Builder.
+      </p>
+      <div class="formfield">Delicious username:</div><input id='delicious' class='urlField' name='delicious' value=''><br/>
+        <span id='delicious_error' style='display:none'>Could not get FOAF from delicous.</span><br/>
+      <div class="formfield">Flickr username:</div><input id='flickr' class='urlField' name='flickr' value=''><br/>
+        <span id='flickr_error' style='display:none'>Could not get FOAF from Flickr.</span><br/>
+      <div class="formfield">Last FM username:</div><input id='lastfmUser' class='urlField' name='lastfmUser' value=''><br/>
+        <span id='lastfm_error' style='display:none'>Could not get FOAF from Last FM.</span><br/>
+      <div class="formfield">Livejournal username:</div><input id='ljUser' class='urlField' name='ljUser' value=''><br/>
+        <span id='lj_error' style='display:none'>Could not get FOAF from Livejournal.</span><br/>
+      <div class="formfield">Your foaf file URL:</div><input id='uri' name='uri' size="80"/><br/><br/>
+        <span id='uri_error' style='display:none'>Could not get FOAF from the url specified.</span><br/>
+      <input id='button' type='submit' value='Build'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
+    </form>
+  </div>
 </div><!-- end content -->
-
-			<!-- footer -->
+<!-- footer -->
