@@ -1655,7 +1655,7 @@ function renderKnowsFields(data){
 		    });
 		    
 		    //TODO: have some sort of sensible thing like this
-		    map.setCenter(point);	
+		    map.setCenter(point,1);	
 	}
 	
 	
@@ -3143,7 +3143,7 @@ function phoneDisplayToObjects(){
 		locationDiv.setAttribute('class',optionalClassName);
 		locationDiv.id = bnodeId;
 		if(bnodeId!='nearestAirport'){
-			locationDiv.setAttribute("onclick","map.panTo(mapMarkers['"+bnodeId+"'].getLatLng());");
+			locationDiv.setAttribute("onclick","map.panTo(mapMarkers['"+bnodeId+"'].getLatLng());map.setZoom(0);");
 		}
 		attachElement.appendChild(locationDiv);
 		

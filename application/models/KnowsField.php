@@ -102,7 +102,7 @@ class KnowsField extends Field {
 				return;	
     		}
     		
-			/*get all known ifps of this person by making use of the foaf.qdos.com KB*/
+		/*get all known ifps of this person by making use of the foaf.qdos.com KB*/
         	$ifps = $this->getTriangulatedIfps($foafData);              
         	
         	$knowsUserIfps = $this->getKnowsUserIfps($ifps,$foafData);
@@ -462,6 +462,9 @@ class KnowsField extends Field {
 								FILTER(?infriend_predicate = foaf:homepage || ?infriend_predicate = foaf:weblog || ?infriend_predicate = foaf:mbox  || ?infriend_predicate = foaf:mbox_sha1sum) .				
 						    	FILTER(".substr($inquery,0,-3).")				
                 		}";
+
+
+			error_log('[INFRIEND QUERY]'.$inquery);
                         //TODO: continue where I left off.  I just added the optional and I want
                         //to use the infriend uri to get some of the details in order to make sure libby knows dan as she should
                 }//need to allow people who just know by uri to enter stuff here
