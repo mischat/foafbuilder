@@ -106,7 +106,6 @@ class BlogField extends Field {
             
             //remove existing triples
             foreach($foundModel->triples as $triple){
-                    //echo("KKKKKKKKKKKKKKKKKKKKKKKK\n".var_dump($triple)."\n");
                     $foafData->getModel()->remove($triple);
             }
             
