@@ -24,7 +24,7 @@ class AjaxController extends Zend_Controller_Action {
         $flickr = @$_GET['flickr'];
         $delicious = @$_GET['delicious'];
         $lastfm = @$_GET['lastfmUser'];
-        $lj = @$_GET['ljUser'];
+        $lj = @$_GET['lj'];
         
         //results
 	$this->view->results = array();
@@ -59,9 +59,10 @@ class AjaxController extends Zend_Controller_Action {
         if($lj && !$this->foafData->ljFound){
         	
 		$ljUri = 'http://'.$lj.'.livejournal.com/data/foaf';
-		echo($ljUri);
+		//echo($ljUri);
 		$lj = $this->foafData->getModel()->load($ljUri);
-		$this->foafData->replacePrimaryTopic($ljUri);
+		// LJ are lame and don't set foaf:primaryTopic
+		$this->foafData->replaceKnowsSubject();
 		
 		if($lj != 1){
 				$this->view->results['ljFound'] = true;

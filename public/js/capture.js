@@ -12,9 +12,10 @@ function importFoaf(){
 	var flickr = document.getElementById('flickr').value;
 	var lastfmUser = document.getElementById('lastfmUser').value;
 	var delicious = document.getElementById('delicious').value;
+	var lj = document.getElementById('lj').value;
 	var uri = document.getElementById('uri').value;
 
-	$.get("/ajax/load-extractor",{flickr: flickr, lastfmUser: lastfmUser, delicious: delicious, uri: uri} , function(data){
+	$.get("/ajax/load-extractor",{flickr: flickr, lastfmUser: lastfmUser, delicious: delicious, lj: lj, uri: uri} , function(data){
 			
 		if(typeof(data) == 'undefined' || !data){
 			return;
@@ -24,6 +25,7 @@ function importFoaf(){
 		document.getElementById('flickr_error').style.display = 'none';
 		document.getElementById('delicious_error').style.display = 'none';
 		document.getElementById('lastfm_error').style.display = 'none';
+		document.getElementById('lj_error').style.display = 'none';
 		document.getElementById('uri_error').style.display = 'none';
 		
 		if(flickr && (typeof(data.flickrFound)=='undefined' || !data.flickrFound)){
@@ -36,6 +38,10 @@ function importFoaf(){
 		} 
 		if(lastfmUser && (typeof(data.lastfmFound)=='undefined' || !data.lastfmFound)){
 			document.getElementById('lastfm_error').style.display = 'inline';
+			errors++;
+		} 
+		if(lj && (typeof(data.ljFound)=='undefined' || !data.ljFound)){
+			document.getElementById('lj_error').style.display = 'inline';
 			errors++;
 		} 
 		if(uri && (typeof(data.uriFound)=='undefined' || !data.uriFound)){
