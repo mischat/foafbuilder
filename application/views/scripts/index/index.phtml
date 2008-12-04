@@ -24,11 +24,5 @@
       <input id='button' type='submit' value='Build'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
     </form>
   </div>
-<?php
-$foafData = FoafData::getFromSession();
-if (@$foafData) {
-var_dump($foafData->getModel()->triples);
-}
-?>
 </div><!-- end content -->
 <!-- footer -->
