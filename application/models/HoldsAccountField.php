@@ -116,6 +116,10 @@ class HoldsAccountField extends Field {
 			} else {
 				$holdsAccountBnode = new Resource($holdsAccountName);				
 			}
+				
+			 if(empty($holdsAccountContents) || is_string($holdsAccountContents)){
+                                continue;
+                        }
 
 			//create an account triple here and add it to the model.
 			$accountStatement = new Statement(new Resource($foafData->getPrimaryTopic()),new Resource('http://xmlns.com/foaf/0.1/holdsAccount'),$holdsAccountBnode);
@@ -123,10 +127,7 @@ class HoldsAccountField extends Field {
 			$foafData->getModel()->addWithoutDuplicates($accountStatement); 
 			$foafData->getModel()->addWithoutDuplicates($bNodeStatement); 
 				
-			if(empty($holdsAccountContents)){
-				continue;
-			}			
-
+			var_dump($holdsAccountContents);
 			if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage){
 				echo('saving A_service_homepage');
 				$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountServiceHomepage'), new Resource($holdsAccountContents->foafAccountServiceHomepage));

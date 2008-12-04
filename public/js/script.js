@@ -84,6 +84,8 @@ function saveFoaf(){
 	
 	//TODO use jquery event handler to deal with errors on this request
   	$.post("/ajax/save-Foaf", {model : jsonString}, function(data){turnOffLoading();});
+	
+	
 }
 
 /*Clears FOAF model from session*/
@@ -210,18 +212,13 @@ function genericObjectsToDisplay(data){
 	depictionFieldsObjectsToDisplay(data);
 	nearestAirportFieldsObjectsToDisplay(data);
 	basedNearFieldsObjectsToDisplay(data);
-	accountsObjectsToDisplay(data);
 	homepageObjectsToDisplay(data);
 	birthdayFieldsObjectsToDisplay(data);
 	weblogObjectsToDisplay(data);
-	//renderHomepageFields(data);
+	accountsObjectsToDisplay(data);
 	
 	/*friends stuff does not have privacy settings*/
 	renderKnowsFields(data);
-	
-	/*render the various fields*/
-	//renderBirthdayFields(data);
-
 
 }
 
@@ -443,7 +440,7 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 		//create a select element for the account type
 		var selectElement = document.createElement("select");
 		selectElement.className = 'accountTypeSelect';
-		selectElement.setAttribute('onchange','toggleAccountFields("'+accountDiv.id+'",this.value)');
+		selectElement.setAttribute('onchange','toggleAccountFields("'+accountDiv.id+'",this.value);saveFoaf();');
 		accountDiv.appendChild(selectElement);		
 		
 		//whether we'll need to show the extra boxes (if the accountservicehomepage isn't in the dropsown)
@@ -480,12 +477,14 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 			userNameElement.style.color = '#dddddd';
 		}
 		userNameElement.setAttribute('onfocus',"if(this.value == 'Username'){this.value='';this.style.color='#000000';}");
+		userNameElement.setAttribute('onchange','saveFoaf()');
 		accountDiv.appendChild(userNameElement);
 
 		//create an input element for the account service type (for display if it isn't in the dropdown)
 		var accountServiceTypeInput = document.createElement('input');
 		accountServiceTypeInput.className = 'accountTypeInput';
 		accountServiceTypeInput.id = 'accountTypeInput_'+accountDiv.id;
+		accountServiceTypeInput.setAttribute('onchange','saveFoaf()');
 		if(needExtraBoxes){
 			accountServiceTypeInput.style.display='inline';
 		}
@@ -502,6 +501,7 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 		var accountProfileElem = document.createElement('input');
 		accountProfileElem.className = 'accountProfile';
 		accountProfileElem.id = 'accountProfile_'+accountDiv.id;
+		accountProfileElem.setAttribute('onchange','saveFoaf()');
 		if(needExtraBoxes){
 			accountProfileElem.style.display='inline';
 		}
@@ -798,7 +798,7 @@ function renderWeblogFields(data,isPublic){
 		
 		/*create an empty field but only if this is the first one XXX this depends on this function being called in the public sense initially*/
 		if(isPublic){
-			createGenericInputElement(name, 'My Homepage Here', i,false,true,false,!isPublic);
+			createGenericInputElement(name, 'My Blog Here', i,false,true,false,!isPublic);
 		}
 	}	
 	
@@ -1681,9 +1681,9 @@ function displayToObjects(name){
 			phoneDisplayToObjects();
 			break;
 		case 'load-accounts':
-			accountsDisplayToObjects();
 			homepageDisplayToObjects();
 			blogsDisplayToObjects();
+			accountsDisplayToObjects();
 			break;
 		case 'load-locations':
 			nearestAirportDisplayToObjects();
@@ -1762,7 +1762,12 @@ function blogsDisplayToObjects() {
 		log('in for loop for homepages');
 		
 		var element = containerElement.childNodes[i];
-					
+		
+		//XXX naughty
+		if(element.style.color != '#000000'){
+			continue;
+		}
+
 		//we only want input elements
 		if(element.className != 'fieldInput'){	
 			continue;
@@ -1811,7 +1816,11 @@ function homepageDisplayToObjects() {
 		log('in for loop for homepages');
 		
 		var element = containerElement.childNodes[i];
-					
+				//XXX naughty
+                if(element.style.color != '#000000'){
+                        continue;
+                }
+	
 		//we only want input elements
 		if(element.className != 'fieldInput'){	
 			continue;
@@ -1889,6 +1898,10 @@ function simpleFieldsDisplayToObjects(){
 		for(i=0 ; i <containerElement.childNodes.length ; i++){
 
 			var element = containerElement.childNodes[i];	
+			//XXX naughty
+	                if(element.style.color != '#000000'){
+	                        continue;
+	                }
 							
 			/*if it isn't an input field then skip it (it could be a remove link or something else)*/
 			if(element.className != 'fieldInput' || element.value == null){
@@ -1934,8 +1947,12 @@ function mboxDisplayToObjects(){
 	/*add the elements that are present in the display again*/
 	for(i=0 ; i <containerElement.childNodes.length ; i++){
 				
-		var element = containerElement.childNodes[i];
-					
+			var element = containerElement.childNodes[i];
+	//XXX naughty
+                if(element.style.color != '#000000'){
+                        continue;
+                }
+				
 		//we only want input elements
 		if(element.className != 'fieldInput'){	
 			continue;
@@ -1970,11 +1987,9 @@ function accountsDisplayToObjects(){
 		return
 	}
 
-	/*reset the accounts bit of the globalPrivateFieldData/globalFieldData object*/
-        globalPrivateFieldData.foafHoldsAccountFields = new Object();
-        globalFieldData.foafHoldsAccountFields = new Object();
+ 	globalFieldData.foafHoldsAccountFields = new Object();
+ 	globalPrivateFieldData.foafHoldsAccountFields = new Object();
 
- 	
   	for(i=0; i < containerElement.childNodes.length; i++){
   		
   		var holdsAccountElement = containerElement.childNodes[i];
@@ -2020,22 +2035,27 @@ function accountsDisplayToObjects(){
   			
 	  		//do the right thing for the right element, and miss any elements we don't care about.
 	  		if (holdsAccountElement.childNodes[k].className == 'accountUsername'){
-	  			
-	  			thisAccount['foafAccountName'] = holdsAccountElement.childNodes[k].value;
+	  			//XXX naughty
+				if(holdsAccountElement.childNodes[k].style.color == '#000000'){
+	  				thisAccount['foafAccountName'] = holdsAccountElement.childNodes[k].value;
+				}
 	  					log('saving account name');
 	  		} else if(holdsAccountElement.childNodes[k].className == 'accountProfile'){
-	  			
-	  			thisAccount['foafAccountProfilePage'] = holdsAccountElement.childNodes[k].value;
-	  				log('saving foaf account profile page');
+	  			//XXX naughty
+				if(holdsAccountElement.childNodes[k].style.color == '#000000'){
+	  				thisAccount['foafAccountProfilePage'] = holdsAccountElement.childNodes[k].value;
+				}
 	  		} else if (holdsAccountElement.childNodes[k].className == 'accountTypeSelect' || holdsAccountElement.childNodes[k].className == 'accountTypeInput'){		
-	  				log('saving account service homepage');
-	  			thisAccount['foafAccountServiceHomepage'] = holdsAccountElement.childNodes[k].value;
-	  		} 	
+				//XXX naughty	
+				if(holdsAccountElement.childNodes[k].style.color == '#000000'){
+	  				thisAccount['foafAccountServiceHomepage'] = holdsAccountElement.childNodes[k].value;
+	  			}
+			} 	
 	  	} 	
 	  	
 	  	/*add to the appropriate global data object*/
   		if(privacyBox.checked){
-  			log('SAVING private ACCOUNT INFO');
+  			leg('SAVING private ACCOUNT INFO');
   			globalPrivateFieldData.foafHoldsAccountFields[bNodeId] = thisAccount;
   		} else {
   			log('SAVING public ACCOUNT INFO');
@@ -2286,7 +2306,10 @@ function mboxDisplayToObjects(){
 		if(element.className != 'fieldInput'){	
 			continue;
 		}
-		
+	    	//XXX naughty
+                if(element.style.color != '#000000'){
+                        continue;
+		}
 		var privacyBox = document.getElementById('privacycheckbox_'+element.id);
 		
 		/*no privacy checkbox, so skip to next childNode*/
@@ -2492,7 +2515,11 @@ function phoneDisplayToObjects(){
 		if(element.className != 'fieldInput'){	
 			continue;
 		}
-		
+		    //XXX naughty
+                if(element.style.color != '#000000'){
+                        continue;
+                }
+
 		var privacyBox = document.getElementById('privacycheckbox_'+element.id);
 		
 		/*no privacy checkbox, so skip to next childNode*/
