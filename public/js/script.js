@@ -1,5 +1,5 @@
 /*for logging purposes*/
-var loggingOn = false;
+var loggingOn = true;
 
 /*--------------------------global variables--------------------------*/
 
@@ -1764,7 +1764,7 @@ function blogsDisplayToObjects() {
 		var element = containerElement.childNodes[i];
 		
 		//XXX naughty
-		if(element.style.color != '#000000'){
+		if(element.style.color != '#000000' || element.style.color != 'rgb(0, 0, 0)'){
 			continue;
 		}
 
@@ -1817,7 +1817,7 @@ function homepageDisplayToObjects() {
 		
 		var element = containerElement.childNodes[i];
 				//XXX naughty
-                if(element.style.color != '#000000'){
+                if(element.style.color != '#000000' || element.style.color != 'rgb(0, 0, 0)'){
                         continue;
                 }
 	
@@ -1898,10 +1898,6 @@ function simpleFieldsDisplayToObjects(){
 		for(i=0 ; i <containerElement.childNodes.length ; i++){
 
 			var element = containerElement.childNodes[i];	
-			//XXX naughty
-	                if(element.style.color != '#000000'){
-	                        continue;
-	                }
 							
 			/*if it isn't an input field then skip it (it could be a remove link or something else)*/
 			if(element.className != 'fieldInput' || element.value == null){
@@ -1914,6 +1910,11 @@ function simpleFieldsDisplayToObjects(){
 			if(typeof(privacyBox) == 'undefined' || !privacyBox){
 				continue;
 			}
+			
+			 //XXX naughty
+                        if(element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
+                                continue;
+                        }
 			
 			/*put it into the appropriate field data object, private or not private*/
 			if(!privacyBox.checked){	
@@ -1949,7 +1950,7 @@ function mboxDisplayToObjects(){
 				
 			var element = containerElement.childNodes[i];
 	//XXX naughty
-                if(element.style.color != '#000000'){
+                if(element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
                         continue;
                 }
 				
@@ -2036,19 +2037,21 @@ function accountsDisplayToObjects(){
 	  		//do the right thing for the right element, and miss any elements we don't care about.
 	  		if (holdsAccountElement.childNodes[k].className == 'accountUsername'){
 	  			//XXX naughty
-				if(holdsAccountElement.childNodes[k].style.color == '#000000'){
+				if(holdsAccountElement.childNodes[k].style.color == '#000000' || holdsAccountElement.childNodes[k].style.color == 'rgb(0, 0, 0)'){
 	  				thisAccount['foafAccountName'] = holdsAccountElement.childNodes[k].value;
 				}
 	  					log('saving account name');
-	  		} else if(holdsAccountElement.childNodes[k].className == 'accountProfile'){
+	  		} else if(holdsAccountElement.childNodes[k].className == 'accountProfile'  || holdsAccountElement.childNodes[k].style.color == 'rgb(0, 0, 0)'){
 	  			//XXX naughty
-				if(holdsAccountElement.childNodes[k].style.color == '#000000'){
+				if(holdsAccountElement.childNodes[k].style.color == '#000000' || holdsAccountElement.childNodes[k].style.color == 'rgb(0, 0, 0)'){
 	  				thisAccount['foafAccountProfilePage'] = holdsAccountElement.childNodes[k].value;
 				}
 	  		} else if (holdsAccountElement.childNodes[k].className == 'accountTypeSelect' || holdsAccountElement.childNodes[k].className == 'accountTypeInput'){		
 				//XXX naughty	
-				if(holdsAccountElement.childNodes[k].style.color == '#000000' || holdsAccountElement.childNodes[k].className == 'accountTypeSelect'){
-	  				thisAccount['foafAccountServiceHomepage'] = holdsAccountElement.childNodes[k].value;
+				if(holdsAccountElement.childNodes[k].style.color == '#000000' || holdsAccountElement.childNodes[k].style.color == 'rgb(0, 0, 0)' 
+					|| holdsAccountElement.childNodes[k].className == 'accountTypeSelect'){
+	  				
+				thisAccount['foafAccountServiceHomepage'] = holdsAccountElement.childNodes[k].value;
 	  			}
 			} 	
 	  	} 	
@@ -2307,7 +2310,7 @@ function mboxDisplayToObjects(){
 			continue;
 		}
 	    	//XXX naughty
-                if(element.style.color != '#000000'){
+                if(element.style.color != '#000000' || element.style.color != 'rgb(0, 0, 0)'){
                         continue;
 		}
 		var privacyBox = document.getElementById('privacycheckbox_'+element.id);
@@ -2516,7 +2519,7 @@ function phoneDisplayToObjects(){
 			continue;
 		}
 		    //XXX naughty
-                if(element.style.color != '#000000'){
+                if(element.style.color != '#000000' || element.style.color != 'rgb(0, 0, 0)'){
                         continue;
                 }
 
