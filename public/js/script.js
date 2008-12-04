@@ -1,5 +1,5 @@
 /*for logging purposes*/
-var loggingOn = true;
+var loggingOn = false;
 
 /*--------------------------global variables--------------------------*/
 
@@ -1764,7 +1764,7 @@ function blogsDisplayToObjects() {
 		var element = containerElement.childNodes[i];
 		
 		//XXX naughty
-		if(element.style.color != '#000000' || element.style.color != 'rgb(0, 0, 0)'){
+		if(element.style.color && element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
 			continue;
 		}
 
@@ -1817,7 +1817,7 @@ function homepageDisplayToObjects() {
 		
 		var element = containerElement.childNodes[i];
 				//XXX naughty
-                if(element.style.color != '#000000' || element.style.color != 'rgb(0, 0, 0)'){
+                if(element.style.color && element.style.color && element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
                         continue;
                 }
 	
@@ -1912,7 +1912,7 @@ function simpleFieldsDisplayToObjects(){
 			}
 			
 			 //XXX naughty
-                        if(element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
+                        if(element.style.color && element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
                                 continue;
                         }
 			
@@ -1950,7 +1950,7 @@ function mboxDisplayToObjects(){
 				
 			var element = containerElement.childNodes[i];
 	//XXX naughty
-                if(element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
+                if(element.style.color && element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
                         continue;
                 }
 				
@@ -2033,32 +2033,34 @@ function accountsDisplayToObjects(){
 			if(holdsAccountElement.childNodes[k].style.display == 'none'){
 				continue;
 			}
-  			
-	  		//do the right thing for the right element, and miss any elements we don't care about.
-	  		if (holdsAccountElement.childNodes[k].className == 'accountUsername'){
-	  			//XXX naughty
-				if(holdsAccountElement.childNodes[k].style.color == '#000000' || holdsAccountElement.childNodes[k].style.color == 'rgb(0, 0, 0)'){
-	  				thisAccount['foafAccountName'] = holdsAccountElement.childNodes[k].value;
-				}
-	  					log('saving account name');
-	  		} else if(holdsAccountElement.childNodes[k].className == 'accountProfile'  || holdsAccountElement.childNodes[k].style.color == 'rgb(0, 0, 0)'){
-	  			//XXX naughty
-				if(holdsAccountElement.childNodes[k].style.color == '#000000' || holdsAccountElement.childNodes[k].style.color == 'rgb(0, 0, 0)'){
-	  				thisAccount['foafAccountProfilePage'] = holdsAccountElement.childNodes[k].value;
-				}
-	  		} else if (holdsAccountElement.childNodes[k].className == 'accountTypeSelect' || holdsAccountElement.childNodes[k].className == 'accountTypeInput'){		
-				//XXX naughty	
-				if(holdsAccountElement.childNodes[k].style.color == '#000000' || holdsAccountElement.childNodes[k].style.color == 'rgb(0, 0, 0)' 
-					|| holdsAccountElement.childNodes[k].className == 'accountTypeSelect'){
-	  				
-				thisAccount['foafAccountServiceHomepage'] = holdsAccountElement.childNodes[k].value;
-	  			}
-			} 	
-	  	} 	
+
+
+			if(holdsAccountElement.childNodes[k].style.color != '#000000' 
+				&& holdsAccountElement.childNodes[k].style.color != 'rgb(0, 0, 0)'
+				&& holdsAccountElement.childNodes[k].className != 'accountTypeSelect'
+				&& holdsACcountElement.childNodes[k].style.color){
+				continue;
+			}
+			
+
+			 //do the right thing for the right element, and miss any elements we don't care about.
+                        if (holdsAccountElement.childNodes[k].className == 'accountUsername'){
+
+                                thisAccount['foafAccountName'] = holdsAccountElement.childNodes[k].value;
+                                                log('saving account name');
+                        } else if(holdsAccountElement.childNodes[k].className == 'accountProfile'){
+
+                                thisAccount['foafAccountProfilePage'] = holdsAccountElement.childNodes[k].value;
+                                        log('saving foaf account profile page');
+                        } else if (holdsAccountElement.childNodes[k].className == 'accountTypeSelect' || holdsAccountElement.childNodes[k].className == 'accountTypeInput'){
+                                        log('saving account service homepage');
+                                thisAccount['foafAccountServiceHomepage'] = holdsAccountElement.childNodes[k].value;
+	  		}
+		} 	
 	  	
 	  	/*add to the appropriate global data object*/
   		if(privacyBox.checked){
-  			leg('SAVING private ACCOUNT INFO');
+  			log('SAVING private ACCOUNT INFO');
   			globalPrivateFieldData.foafHoldsAccountFields[bNodeId] = thisAccount;
   		} else {
   			log('SAVING public ACCOUNT INFO');
@@ -2310,7 +2312,7 @@ function mboxDisplayToObjects(){
 			continue;
 		}
 	    	//XXX naughty
-                if(element.style.color != '#000000' || element.style.color != 'rgb(0, 0, 0)'){
+                if(element.style.color && element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
                         continue;
 		}
 		var privacyBox = document.getElementById('privacycheckbox_'+element.id);
@@ -2519,7 +2521,8 @@ function phoneDisplayToObjects(){
 			continue;
 		}
 		    //XXX naughty
-                if(element.style.color != '#000000' || element.style.color != 'rgb(0, 0, 0)'){
+                if(element.style.color && element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
+			log('phone didnt save'+element.style.color+'|');
                         continue;
                 }
 
