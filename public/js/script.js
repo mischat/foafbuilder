@@ -440,7 +440,7 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 		//create a select element for the account type
 		var selectElement = document.createElement("select");
 		selectElement.className = 'accountTypeSelect';
-		selectElement.setAttribute('onchange','toggleAccountFields("'+accountDiv.id+'",this.value)');
+		selectElement.setAttribute('onchange','toggleAccountFields("'+accountDiv.id+'",this.value);saveFoaf();');
 		accountDiv.appendChild(selectElement);		
 		
 		//whether we'll need to show the extra boxes (if the accountservicehomepage isn't in the dropsown)
@@ -477,12 +477,14 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 			userNameElement.style.color = '#dddddd';
 		}
 		userNameElement.setAttribute('onfocus',"if(this.value == 'Username'){this.value='';this.style.color='#000000';}");
+		userNameElement.setAttribute('onchange','saveFoaf()');
 		accountDiv.appendChild(userNameElement);
 
 		//create an input element for the account service type (for display if it isn't in the dropdown)
 		var accountServiceTypeInput = document.createElement('input');
 		accountServiceTypeInput.className = 'accountTypeInput';
 		accountServiceTypeInput.id = 'accountTypeInput_'+accountDiv.id;
+		accountServiceTypeInput.setAttribute('onchange','saveFoaf()');
 		if(needExtraBoxes){
 			accountServiceTypeInput.style.display='inline';
 		}
@@ -499,6 +501,7 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 		var accountProfileElem = document.createElement('input');
 		accountProfileElem.className = 'accountProfile';
 		accountProfileElem.id = 'accountProfile_'+accountDiv.id;
+		accountProfileElem.setAttribute('onchange','saveFoaf()');
 		if(needExtraBoxes){
 			accountProfileElem.style.display='inline';
 		}
@@ -795,7 +798,7 @@ function renderWeblogFields(data,isPublic){
 		
 		/*create an empty field but only if this is the first one XXX this depends on this function being called in the public sense initially*/
 		if(isPublic){
-			createGenericInputElement(name, 'My Homepage Here', i,false,true,false,!isPublic);
+			createGenericInputElement(name, 'My Blog Here', i,false,true,false,!isPublic);
 		}
 	}	
 	
@@ -1967,7 +1970,9 @@ function accountsDisplayToObjects(){
 		return
 	}
 
- 	
+ 	globalFieldData.foafHoldsAccountFields = new Object();
+ 	globalPrivateFieldData.foafHoldsAccountFields = new Object();
+
   	for(i=0; i < containerElement.childNodes.length; i++){
   		
   		var holdsAccountElement = containerElement.childNodes[i];
@@ -2028,7 +2033,7 @@ function accountsDisplayToObjects(){
 	  	
 	  	/*add to the appropriate global data object*/
   		if(privacyBox.checked){
-  			log('SAVING private ACCOUNT INFO');
+  			leg('SAVING private ACCOUNT INFO');
   			globalPrivateFieldData.foafHoldsAccountFields[bNodeId] = thisAccount;
   		} else {
   			log('SAVING public ACCOUNT INFO');
