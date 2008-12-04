@@ -1,3 +1,45 @@
-RewriteEngine on 
-RewriteRule !\.(js|ico|gif|jpg|png|css)$ index.php 
+RewriteEngine on
+RewriteRule !\.(js|ico|gif|jpg|png|css)$ index.php
 php_value session.auto_start 0
+
+Options -Indexes
+AddDefaultCharset utf-8
+
+AddOutputFilterByType DEFLATE text/html text/plain text/css application/x-javascript
+ErrorDocument 404 /page_not_found.html
+<ifmodule mod_expires.c>
+  <filesmatch "\.(jpg|gif|png|css|js)$">
+       ExpiresActive on
+       ExpiresDefault "access plus 1 year"
+   </filesmatch>
+</ifmodule>
+
+Order Deny,Allow
+Deny from all
+Allow from 127.0.0.1		# Loopback
+Allow from 192.168.31.254	# Localhost
+Allow from 193.203.246.177	# Garlik Richmond
+Allow from 82.69.171.88/29	# Garlik Southampton
+Allow from 82.118.119.193	# Neil P home
+Allow from 82.118.102.229	# Neil P
+Allow from 77.76.99.114		# Neil P
+Allow from 88.97.6.240          # Steve's house
+Allow from 152.78.64.253	# Mischa
+Allow from 213.120.124.213	# Pynk and Fluffy
+Allow from 86.149.165.75	# Dan H home
+Allow from 193.203.244.32	# Shez
+Allow from 80.3.251.85          # Rob Myers
+Allow from 91.103.130.144	# Andy
+Allow from 212.134.185.133      # Marsha at Band & Brown
+Allow from 195.137.4.24 	# Luke's house
+
+<Files fbui616537a4130>
+  Allow from all
+</Files>
+
+#Everything is PHP...
+ForceType application/x-httpd-php
+#... unless the filename has an extension
+<FilesMatch "\.">
+  ForceType none
+</FilesMatch>
