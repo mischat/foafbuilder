@@ -2047,7 +2047,7 @@ function accountsDisplayToObjects(){
 				}
 	  		} else if (holdsAccountElement.childNodes[k].className == 'accountTypeSelect' || holdsAccountElement.childNodes[k].className == 'accountTypeInput'){		
 				//XXX naughty	
-				if(holdsAccountElement.childNodes[k].style.color == '#000000'){
+				if(holdsAccountElement.childNodes[k].style.color == '#000000' || holdsAccountElement.childNodes[k].className == 'accountTypeSelect'){
 	  				thisAccount['foafAccountServiceHomepage'] = holdsAccountElement.childNodes[k].value;
 	  			}
 			} 	
