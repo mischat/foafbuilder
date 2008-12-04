@@ -34,7 +34,7 @@ class BirthdayField extends Field {
         }
     }
 
-    private function doFullLoad(&$foafData) {
+    private function doFullLoad(&$foafData){
         if ($foafData->getPrimaryTopic()) {
             $queryString = 
                 "PREFIX foaf: <http://xmlns.com/foaf/0.1/>

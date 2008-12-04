@@ -100,13 +100,11 @@ class NearestAirportField extends Field {
 			$this->removeAirports($foafData,$existingAirports1,$existingAirports1->triples[0]->obj);
 		} 
 				
-    	/*if there is no airport already there then add one*/
-    	if(!$airportBnode){
-    		$airportBnode = Utils::GenerateUniqueBnode($foafData->getModel());
-    		$foafData->getModel()->add(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource('http://www.w3.org/2000/10/swap/pim/contact#nearestAirport'),$airportBnode));
-    		$foafData->getModel()->add(new Statement($airportBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource('http://xmlns.com/wordnet/1.6/Airport')));
-    	}
-    	
+    	/*generate a new airport bnode*/
+    	$airportBnode = Utils::GenerateUniqueBnode($foafData->getModel());
+    	$foafData->getModel()->add(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource('http://www.w3.org/2000/10/swap/pim/contact#nearestAirport'),$airportBnode));
+    	$foafData->getModel()->add(new Statement($airportBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource('http://xmlns.com/wordnet/1.6/Airport')));
+   
     	/*remove the existing icao and iata codes*/
     	$removeTriples1 = $foafData->getModel()->find($airportBnode,new Resource('http://dig.csail.mit.edu/TAMI/2007/amord/air#iata'),NULL);
     	$removeTriples2 = $foafData->getModel()->find($airportBnode,new Resource('http://dig.csail.mit.edu/TAMI/2007/amord/air#icao'),NULL);
