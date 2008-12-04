@@ -126,7 +126,8 @@ class HoldsAccountField extends Field {
 			if(empty($holdsAccountContents)){
 				continue;
 			}			
-
+				
+			var_dump($holdsAccountContents);
 			if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage){
 				echo('saving A_service_homepage');
 				$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountServiceHomepage'), new Resource($holdsAccountContents->foafAccountServiceHomepage));
