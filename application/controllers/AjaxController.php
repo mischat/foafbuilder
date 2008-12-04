@@ -34,6 +34,14 @@ class AjaxController extends Zend_Controller_Action {
         $this->view->results['ljFound'] = $this->foafData->ljFound;
         $this->view->results['uriFound'] = false;
          
+	//if they are logged in then get our stuff
+	$defaultNamespace = new Zend_Session_Namespace('Garlik');
+	if($defaultNamespace->authenticated && $defaultNamespace->uri){
+		//TODO MISCHA, public and private load
+		//$this->foafData->getModel()->load($uri);
+		//$this->foafData->replacePrimaryTopic($uri);
+	}	
+
         //grab the foaf from the uri passed
         if($uri){
 		$ok = 1;
@@ -47,6 +55,7 @@ class AjaxController extends Zend_Controller_Action {
 			$ok = 0;
 		}
 		if ($ok) {
+			//TODO MISCHA, public and private load
 			$uriLoadOk = $this->foafData->getModel()->load($uri);
 			$this->foafData->replacePrimaryTopic($uri);
 				

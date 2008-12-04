@@ -18,6 +18,10 @@ class LogonController extends Zend_Controller_Action
 
 	$defaultNamespace = new Zend_Session_Namespace('Garlik');
 	$defaultNamespace->authenticated = false;
+	
+	if(isset($_POST['openid_action'])){
+		$defaultNamespace->url = $this->makeOpenIdUrl($_POST['openid_identifier']);
+	}
 
 	if (isset($_POST['openid_action']) && $_POST['openid_action'] == "login" && !empty($_POST['openid_identifier'])) {
     		$openid = $_POST['openid_identifier'];	
@@ -33,6 +37,7 @@ class LogonController extends Zend_Controller_Action
 			$consumer = new Zend_OpenId_Consumer();
 			if ($consumer->verify($_GET, $id)) {
 				$defaultNamespace->authenticated = true;
+				
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
 			error_log("CANCELED");
@@ -41,4 +46,11 @@ class LogonController extends Zend_Controller_Action
 		error_log("Openid login attempt with no value");
 	}
     } //end openid
+
+    private function makeOpenIDUrl ($url) { 
+	$url = preg_replace('/^https{0,1}:\/\//','',$url); 
+	$url = urlencode ($url); 
+	$url = preg_replace('/%2F/',"/",$url); return $url;  
+    }
+
 }
