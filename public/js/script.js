@@ -1967,19 +1967,6 @@ function accountsDisplayToObjects(){
 		return
 	}
 
-	/*reset the accounts bit of the globalPrivateFieldData/globalFieldData object*/
-	if(typeof(globalPrivateFieldData.foafHoldsAccountFields) == 'undefined' || !globalPrivateFieldData.foafHoldsAccount){
-        	globalPrivateFieldData.foafHoldsAccountFields = new Object();
-		globalPrivateFieldData.displayLabel = 'Accounts';//XXX this is messy
-		globalPrivateFieldData.name = 'foafHoldsAccount';//XXX this is messy
-	}
-
-	if(typeof(globalFieldData.foafHoldsAccountFields) == 'undefined' || !globalFieldData.foafHoldsAccount){
-        	globalFieldData.foafHoldsAccountFields = new Object();
-		globalFieldData.displayLabel = 'Accounts';//XXX this is messy
-		globalFieldData.name = 'foafHoldsAccount';//XXX this is messy
-	}
-
  	
   	for(i=0; i < containerElement.childNodes.length; i++){
   		
