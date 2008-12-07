@@ -131,8 +131,6 @@ class WriterController extends Zend_Controller_Action
 
 	file_put_contents($this->cache_filename($uri),$data);	
 	error_log('FILE WRITTEN YAY!');
-	error_log('FILE WRITTEN YAY!');
-	error_log('FILE WRITTEN YAY!');
     }
 
     //Create the filename used for the hashing of rdf
