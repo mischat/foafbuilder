@@ -91,7 +91,6 @@ class BirthdayField extends Field {
                             // error_log("[foaf_editor] couldn't parse date");
                         } 
                     } else if (isset($row['?foafBirthday']->label) && $this->isShortDateValid($row['?foafBirthday']->label)) {
-                        error_log("['foaf_editor] found short date");
                         $birthdayArray = split("-",$row['?foafBirthday']->label);
                         /* spliting with 3 different values : / - */
                         if (empty($birthdayArray)) {
@@ -180,7 +179,7 @@ class BirthdayField extends Field {
 
             /*Now to write out triples after cleaning them*/
             /*If NO year presented then fit the most appropriate foaf:birthday*/
-            if ($valueArray['year'] == '' && ($valueArray['month'] != '' || $valueArray['day'] != '')) {
+            if (!isset($valueArray['year']) || $valueArray['year'] == '' && ($valueArray['month'] != '' || $valueArray['day'] != '')) {
                  /*Now we use the foaf:birthday*/
                 $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
                 if (strlen($valueArray['month']) == 1) {
