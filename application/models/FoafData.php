@@ -26,22 +26,35 @@ class FoafData {
 	$this->openid = "mmt.me.uk/blog";
         
     	//only set the uri if it isn't already set
-		//TODO: this uri needs to be the actual one we're writing out to, since it is described on the screen.
-		if(!$this->uri){
+	//TODO MISCHA Need to get OpenID from the SESSION HERE
+	if(!$this->uri){
+		if ($this->isPublic) {
 			//TODO MISCHA
-			//$this->uri = 'http://foaf.qdos.com/people/'.sha1(microtime()*microtime());
 			$this->uri = 'http://mischa-foafeditor.qdos.com/people/'.$this->openid.'/foaf.rdf';
+		} else {
+			$this->uri = 'http://private-dev.qdos.com/oauth/'.$this->openid.'/data/foaf.rdf';
 		}
-		
-    	/*
-    	 * TODO MISCHA this empty instantiation stuff is for new private models.  In future it should try to fetch	
-    	 * the private model from an oauth server or similar.
-    	 */
+	}	
+	error_log('URI is '.$this->uri);
+	
         if(!$this->isPublic){
-        	//create a skeleton empty document
-        	$this->getEmptyDocument($uri);
-			$this->putInSession(true);
-			return;
+		$openid = 'http://private-dev.qdos.com/oauth/mmt.me.uk/blog/data/foaf.rdf';
+		$data_dir = '/usr/local/data/private/oauth';
+
+		//If match then one of ours ...
+		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/oauth/',$openid)) {
+			$cachename = $this->cache_filename($openid);
+			error_log($cachename);
+			if (file_exists($data_dir.$cachename)) {
+				$uri = 'file://'.$data_dir.$cachename;
+				error_log($uri);	
+			} else {
+				echo('This openid doesnt have a private file');
+			}
+		} else {
+			//TODO MISCHA
+			//In future make OAuth dance here ...
+		}
     	}
     	
     	/*
@@ -51,24 +64,24 @@ class FoafData {
     	if($uri=='' || !$uri){
     		//create a skeleton empty document
     		$this->getEmptyDocument();
-			$this->putInSession();
-			return;
+		$this->putInSession();
+		return;
     	}
 		
         /*create a model if there isn't one already*/
-		if(!$this->model){
-    		$this->model = new NamedGraphMem($this->uri);
-		}
-		
-    	/*load the rdf from the passed in uri into the model*/
+	if (!$this->model){
+    		$this->model = new NamedGraphMem($uri);
+
+	    	/*load the rdf from the passed in uri into the model*/
 		$loadValue = $this->model->load($uri);		
 		if($loadValue==1){
 			return;		
 		}
+	}
 		
-		/*make sure that the uri and primary topic of the document is consistent*/
-        $this->replacePrimaryTopic($uri);	
-	   	$this->putInSession();
+	/*make sure that the uri and primary topic of the document is consistent*/
+        $this->replacePrimaryTopic($this->uri);	
+	$this->putInSession();
     }
     
     //replace the existing primary topic with either newPrimaryTopic or a hash of the uri
@@ -285,4 +298,28 @@ error_log("replacing $oldPrimaryTopic with $newPrimaryTopic");
 			
     	return;
     }
+
+    //Create the filename used for the hashing of rdf
+    function cache_filename($uri) {
+        $hash = md5($uri);
+        preg_match('/(..)(..)(.*)/', $hash, $matches);
+        return '/'.$matches[1].'/'.$matches[2].'/'.$matches[3];
+    } //end cache filename
+    
+    //Create the cache file directory structure needed
+    function create_cache($filename,$datadir) {
+            if (preg_match('/\/(..)\/(..)\/(.*)/',$filename,$matches)) {
+                    if (!(file_exists("$datadir/$matches[1]"))) {
+                            mkdir("$datadir/$matches[1]");
+                    }
+                    if (!(file_exists("$datadir/$matches[1]/$matches[2]"))) {
+                            mkdir("$datadir/$matches[1]/$matches[2]");
+                    }
+                    return true;
+            } else {
+                    //Incorrect cache filestructure passed
+                    return false;
+            }
+    }
+
 }

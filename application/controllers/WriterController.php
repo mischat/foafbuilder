@@ -108,35 +108,57 @@ class WriterController extends Zend_Controller_Action
     }
     
     public function writeFoafPrivateAction() {
+	//TODO MISCHA, need to fix this! 
 	echo("Writing private triples to oauth");
+	error_log("Writing private triples to oauth");
+	$uri = 'http://private-dev.qdos.com/oauth/mmt.me.uk/blog/data/foaf.rdf';
+	$data_dir = '/usr/local/data/public';
+
+    	$privateFoafData = FoafData::getFromSession(true);
+	 //TODO MISCHA get private URI
+        if (!$privateFoafData->isPublic) {
+		error_log("THIS SHOULDNT HAPPEN! public data written as private");
+		exit(0);
+	}
+
+	$this->view->model = $privateFoafData->getModel();
+	$this->view->model->setBaseUri(NULL);
+	$result = $this->view->model->find(NULL, NULL, NULL);
+
+	$result = $this->removeLanguageTags($result);
+
+	$data = $result->writeRdfToString();
+
+	file_put_contents($this->cache_filename($uri),$data);	
+	error_log('FILE WRITTEN YAY!');
+	error_log('FILE WRITTEN YAY!');
+	error_log('FILE WRITTEN YAY!');
     }
 
-//Create the filename used for the hashing of rdf
-function cache_filename($uri) {
-    $hash = md5($uri);
-    preg_match('/(..)(..)(.*)/', $hash, $matches);
-    return '/'.$matches[1].'/'.$matches[2].'/'.$matches[3];
-} //end cache filename
-
-//Create the cache file directory structure needed
-function create_cache($filename,$datadir) {
-        if (preg_match('/\/(..)\/(..)\/(.*)/',$filename,$matches)) {
-                if (!(file_exists("$datadir/$matches[1]"))) {
-                        mkdir("$datadir/$matches[1]");
-                }
-                if (!(file_exists("$datadir/$matches[1]/$matches[2]"))) {
-                        mkdir("$datadir/$matches[1]/$matches[2]");
-                }
-                return true;
-        } else {
-                //Incorrect cache filestructure passed
-                return false;
-        }
-}
+    //Create the filename used for the hashing of rdf
+    function cache_filename($uri) {
+        $hash = md5($uri);
+        preg_match('/(..)(..)(.*)/', $hash, $matches);
+        return '/'.$matches[1].'/'.$matches[2].'/'.$matches[3];
+    } //end cache filename
+    
+    //Create the cache file directory structure needed
+    function create_cache($filename,$datadir) {
+            if (preg_match('/\/(..)\/(..)\/(.*)/',$filename,$matches)) {
+                    if (!(file_exists("$datadir/$matches[1]"))) {
+                            mkdir("$datadir/$matches[1]");
+                    }
+                    if (!(file_exists("$datadir/$matches[1]/$matches[2]"))) {
+                            mkdir("$datadir/$matches[1]/$matches[2]");
+                    }
+                    return true;
+            } else {
+                    //Incorrect cache filestructure passed
+                    return false;
+            }
+    }
 
     public function writeFoafNodownloadAction(){
-	echo("Saving public triples to our server");
-
 	//this is inside an action in one of your controllers:
     	$publicFoafData = FoafData::getFromSession(true);
     	$tempmodel = unserialize(serialize($publicFoafData->getModel()));
@@ -170,14 +192,17 @@ function create_cache($filename,$datadir) {
     }
     
     private function doWrite($foafData,$newDocUri,$writeNtriples){
-  
 	    if (!$foafData) {
 		return;
 	    }
-
-	    //TODO MISCHA ... use the __clone() Magic Method instead, this is not optimum
 	    $tempmodel = unserialize(serialize($foafData->getModel()));
-            $tempuri = $foafData->getURI();
+
+	    //TODO MISCHA get private URI
+	    if (!$foafData->isPublic) {
+		$tempuri = "http://private-dev.qdos.com/oauth/mmt.me.uk/blog/data/foaf.rdf";
+	    } else {
+            	$tempuri = $foafData->getURI();
+	    }
             $tempgraph= $foafData->getGraphset();
             $tempprimaryTopic = $foafData->getPrimaryTopic();
 	    
@@ -207,4 +232,5 @@ function create_cache($filename,$datadir) {
             	}	
             }    	
     }
+
 }
