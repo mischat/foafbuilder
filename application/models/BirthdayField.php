@@ -72,7 +72,6 @@ class BirthdayField extends Field {
             if (!(empty($results))) {
             /*mangle the results so that they can be easily rendered*/
                 foreach ($results as $row) {	
-                    error_log("[foaf_editor] For a birthday checking type...");
                     if (isset($row['?foafDateOfBirth']->label) && $this->isLongDateValid($row['?foafDateOfBirth']->label)) {
                         error_log("[foaf_editor] found complete dateOfBirth");
                         /* spliting with 3 different values : / - */
@@ -89,7 +88,7 @@ class BirthdayField extends Field {
                             $this->data[$privacy]['foafBirthdayFields']['month']= $birthdayArray[1];
                             $this->data[$privacy]['foafBirthdayFields']['year']= $birthdayArray[0];
                         } else {
-                            error_log("[foaf_editor] couldn't parse date");
+                            // error_log("[foaf_editor] couldn't parse date");
                         } 
                     } else if (isset($row['?foafBirthday']->label) && $this->isShortDateValid($row['?foafBirthday']->label)) {
                         error_log("['foaf_editor] found short date");
@@ -142,7 +141,7 @@ class BirthdayField extends Field {
             /*If foaf:dateOfBirth remove it*/
             $foundModel2 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/dateOfBirth"),NULL);
             if (!$foundModel2->isEmpty()) {
-                error_log('[foaf_editor] So here we have foaf:dateOfBirth');
+                //error_log('[foaf_editor] So here we have foaf:dateOfBirth');
                 foreach($foundModel2->triples as $triple) {
                     $foafData->getModel()->remove($triple);
                 }
@@ -233,10 +232,10 @@ class BirthdayField extends Field {
                 $add_statement = new Statement($new_bnode, new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), new Resource("http://purl.org/vocab/bio/0.1/Birth"));
                 $foafData->getModel()->add($add_statement);
             } else {
-                error_log('[foaf_editor] The user selected a useless combination of date information');
+                //error_log('[foaf_editor] The user selected a useless combination of date information');
             }        
         } else {
-            error_log('[foaf_editor] There is no birthday to process');
+            //error_log('[foaf_editor] There is no birthday to process');
         }
     }
 
@@ -245,12 +244,12 @@ class BirthdayField extends Field {
         if (preg_match('/(\d{4}?)[-|:|\/](\d{1,2}?)[-|:|\/](\d{1,2}?)$/',$date,$matches)) {
             if (((int) $matches[2] <= 12) && ((int) $matches[2] > 0)) {
                 if (((int) $matches[3] <= 31) && ((int) $matches[3] > 0)) {
-                    error_log("[foaf_editor] long date valid");
+                    //error_log("[foaf_editor] long date valid");
                     return true;
                 }  
             }
         }
-        error_log("[foaf_editor] long date invalid");
+        //error_log("[foaf_editor] long date invalid");
         return false;
     }
 
@@ -259,12 +258,12 @@ class BirthdayField extends Field {
         if (preg_match('/(\d{1,2}?)[-|:|\/](\d{1,2}?)$/',$date,$matches)) {
             if (((int) $matches[1] <= 12) && ((int) $matches[1] > 0)) {
                 if (((int) $matches[2] <= 31) && ((int) $matches[2] > 0)) {
-                    error_log("[foaf_editor] short date valid");
+                    //error_log("[foaf_editor] short date valid");
                     return true;
                 }  
             }
         }
-        error_log("[foaf_editor] short date invalid");
+        //error_log("[foaf_editor] short date invalid");
         return false;
     }
 
