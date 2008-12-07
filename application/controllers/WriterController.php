@@ -80,7 +80,7 @@ class WriterController extends Zend_Controller_Action
 
 	$this->_helper->layout->disableLayout();
 	$response = $this->getResponse();
-        $response->setHeader('Content-Type', 'text/plain', true)
+        $response->setHeader('Content-Type', 'application/rdf+xml', true)
             ->setHeader('Content-Disposition', 'attachment;filename=foaf.rdf', true)
 	    ->setHeader('Content-Length', strlen($data), true)
 	    ->appendBody($data);
