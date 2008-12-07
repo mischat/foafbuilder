@@ -11,7 +11,7 @@ class PeopleController extends Zend_Controller_Action
 		$this->uri = $_SERVER['SCRIPT_URI'];
 		$this->url = $_SERVER['SCRIPT_URL'];
 		
-		 if (preg_match('/^\/people\/(.*?)$/',$this->url,$matches)) {
+		 if (preg_match('/^\/people\/(.+?)$/',$this->url,$matches)) {
 			$cachename = $this->cache_filename($this->uri);
 			if (file_exists($this->data_dir.$cachename)) {
 				if (preg_match('/\.rdf$/',$this->uri)) {
@@ -26,12 +26,12 @@ class PeopleController extends Zend_Controller_Action
 					header('Content-Type: text/plain');
 				}
 				echo file_get_contents($this->data_dir.$cachename);   
+				exit(0);
 			} 
-		} else {
-			header('HTTP/1.1 404 Internal Server Error');
-			header('Content-Type: text/plain');
-			echo "Error 404: this file does not exist ".$this->uri."\n";
 		} 
+		header('HTTP/1.1 404 Internal Server Error');
+		header('Content-Type: text/plain');
+		echo "Error 404: this file does not exist ".$this->uri."\n";
 		exit(0);
 	}
 
