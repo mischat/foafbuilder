@@ -111,8 +111,62 @@ class WriterController extends Zend_Controller_Action
 	echo("Writing private triples to oauth");
     }
 
+//Create the filename used for the hashing of rdf
+function cache_filename($uri) {
+    $hash = md5($uri);
+    preg_match('/(..)(..)(.*)/', $hash, $matches);
+    return '/'.$matches[1].'/'.$matches[2].'/'.$matches[3];
+} //end cache filename
+
+//Create the cache file directory structure needed
+function create_cache($filename,$datadir) {
+        if (preg_match('/\/(..)\/(..)\/(.*)/',$filename,$matches)) {
+                if (!(file_exists("$datadir/$matches[1]"))) {
+                        mkdir("$datadir/$matches[1]");
+                }
+                if (!(file_exists("$datadir/$matches[1]/$matches[2]"))) {
+                        mkdir("$datadir/$matches[1]/$matches[2]");
+                }
+                return true;
+        } else {
+                //Incorrect cache filestructure passed
+                return false;
+        }
+}
+
     public function writeFoafNodownloadAction(){
 	echo("Saving public triples to our server");
+
+	//this is inside an action in one of your controllers:
+    	$publicFoafData = FoafData::getFromSession(true);
+    	$tempmodel = unserialize(serialize($publicFoafData->getModel()));
+
+    	$tempuri = $publicFoafData->getURI();
+    	$tempprimaryTopic = $publicFoafData->getPrimaryTopic();
+        $newDocUriRes = new Resource($tempuri);
+        $newPersonUriRes = new Resource($tempuri."#me");
+        $oldPersonUriRes = new Resource($tempprimaryTopic);
+        $oldDocUriRes = new Resource($tempuri);
+        
+        $tempmodel->replace($oldDocUriRes,new Resource("<http://xmlns.com/foaf/0.1/primaryTopic>"),NULL,$newDocUriRes);
+        $tempmodel->replace($oldPersonUriRes,NULL,NULL,$newPersonUriRes);
+        $tempmodel->replace(NULL,NULL,$oldPersonUriRes,$newPersonUriRes);
+	$result = $tempmodel->find(NULL, NULL, NULL);
+
+	$data = $result->writeRdfToString();
+
+	if (strlen($data) > 0 ) {
+		//TODO MISCHA
+		$data_dir = '/usr/local/data/public';
+		$cachefilename = $this->cache_filename($tempuri);
+		error_log($cachefilename);
+
+		$this->create_cache($cachefilename,$data_dir);
+		file_put_contents($data_dir.$cachefilename, $data);
+		error_log('[foafeditor] We have created a new file at the following url:'.$tempuri);
+	} else {
+		error_log('[foafeditor] rdf stream empty nothing to write to:'.$tempuri);
+	}
     }
     
     private function doWrite($foafData,$newDocUri,$writeNtriples){

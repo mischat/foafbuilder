@@ -23,11 +23,14 @@ class FoafData {
         
     	//either a private foafData object or a public one
         $this->isPublic = $isPublic;
+	$this->openid = "mmt.me.uk/blog";
         
     	//only set the uri if it isn't already set
 		//TODO: this uri needs to be the actual one we're writing out to, since it is described on the screen.
 		if(!$this->uri){
-			$this->uri = 'http://foaf.qdos.com/people/'.sha1(microtime()*microtime());
+			//TODO MISCHA
+			//$this->uri = 'http://foaf.qdos.com/people/'.sha1(microtime()*microtime());
+			$this->uri = 'http://mischa-foafeditor.qdos.com/people/'.$this->openid.'/foaf.rdf';
 		}
 		
     	/*
