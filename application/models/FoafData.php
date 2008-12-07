@@ -27,17 +27,15 @@ class FoafData {
         
     	//only set the uri if it isn't already set
 	//TODO MISCHA Need to get OpenID from the SESSION HERE
-	if(!$this->uri){
-		if ($this->isPublic) {
-			//TODO MISCHA
-			$this->uri = 'http://mischa-foafeditor.qdos.com/people/'.$this->openid.'/foaf.rdf';
-		} else {
-			$this->uri = 'http://private-dev.qdos.com/oauth/'.$this->openid.'/data/foaf.rdf';
-		}
-	}	
+	if ($this->isPublic) {
+		//TODO MISCHA
+		$this->uri = 'http://mischa-foafeditor.qdos.com/people/'.$this->openid.'/foaf.rdf';
+	} else {
+		$this->uri = 'http://private-dev.qdos.com/oauth/'.$this->openid.'/data/foaf.rdf';
+	}
 	error_log('URI is '.$this->uri);
 	
-        if(!$this->isPublic){
+        if (!$this->isPublic) {
 		$openid = 'http://private-dev.qdos.com/oauth/mmt.me.uk/blog/data/foaf.rdf';
 		$data_dir = '/usr/local/data/private/oauth';
 
@@ -55,7 +53,7 @@ class FoafData {
 			//TODO MISCHA
 			//In future make OAuth dance here ...
 		}
-    	}
+    	} 
     	
     	/*
     	 * LUKE if the uri does not exist then create an empty skeleton
@@ -63,6 +61,7 @@ class FoafData {
     	 */
     	if($uri=='' || !$uri){
     		//create a skeleton empty document
+		error_log("Creating an empty document");
     		$this->getEmptyDocument();
 		$this->putInSession();
 		return;
@@ -70,17 +69,18 @@ class FoafData {
 		
         /*create a model if there isn't one already*/
 	if (!$this->model){
-    		$this->model = new NamedGraphMem($uri);
+    		$this->model = new NamedGraphMem($this->uri);
 
 	    	/*load the rdf from the passed in uri into the model*/
 		$loadValue = $this->model->load($uri);		
-		if($loadValue==1){
+		if ($loadValue==1) {
 			return;		
 		}
 	}
 		
 	/*make sure that the uri and primary topic of the document is consistent*/
         $this->replacePrimaryTopic($this->uri);	
+
 	$this->putInSession();
     }
     
@@ -100,13 +100,11 @@ class FoafData {
         //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
         //TODO must make sure that we handle having a non "#me" foaf:Person URI
         foreach($results as $row){
-        
         	if(!isset($row['?prim'])){
         		error_log('[foaf_editor] primary topic not set');
         		continue;
         	}
-        	
-            $oldPrimaryTopic = $row['?prim']->uri;
+            	$oldPrimaryTopic = $row['?prim']->uri;
              
 	        //if no new uri has been passed in then just set it as the existing primary topic or, if that isn't set then the hash of the uri
 	    	$newPrimaryTopic = $this->primaryTopic;			
@@ -135,21 +133,20 @@ class FoafData {
         
         /*make sure that the document has only one uri*/
         
-	    //find the triples containing document uris
-	    $predicate = new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type');
-	    $object = new Resource('http://xmlns.com/foaf/0.1/PersonalProfileDocument');  
-	    $foundDocTriples = $this->model->find(NULL,$predicate,$object); 
-	    $replacementUriRes = new Resource($this->getUri());
+	//find the triples containing document uris
+	$predicate = new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type');
+	$object = new Resource('http://xmlns.com/foaf/0.1/PersonalProfileDocument');  
+	$foundDocTriples = $this->model->find(NULL,$predicate,$object); 
+	$replacementUriRes = new Resource($this->getUri());
 	    
 	    
-	 	//and replace them
-	    if($foundDocTriples && property_exists($foundDocTriples,'triples') && !empty($foundDocTriples->triples)){
-	    
+	//and replace them
+	if($foundDocTriples && property_exists($foundDocTriples,'triples') && !empty($foundDocTriples->triples)){
 	    	foreach($foundDocTriples->triples as $triple){
 	    		$this->model->replace($triple->subj,NULL,NULL,$replacementUriRes);
 	    		$this->model->replace(NULL,NULL,$triple->subj,$replacementUriRes);
 	       	}
-	    }
+	 }
     }
     
     public function replaceKnowsSubject(){
