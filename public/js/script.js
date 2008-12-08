@@ -3301,14 +3301,12 @@ function phoneDisplayToObjects(){
 	//write stuff to public oauth server		
 	function writePublic(){
 		log('doing write public');
-
 		$.post("/writer/write-foaf-nodownload", {}, function(data){});
 	}	
 	
 	function writePrivate(){
 		log('doing write private');
-		
-		$.post("/writer/write-foaf-"+privacy, {}, function(data){});
+		$.post("/writer/write-foaf-private", {}, function(data){});
 	}
 
 	/*---------------------------other (geek view)---------------------------*/
