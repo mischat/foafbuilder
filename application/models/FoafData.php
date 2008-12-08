@@ -111,7 +111,7 @@ class FoafData {
         }
         //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
         //TODO must make sure that we handle having a non "#me" foaf:Person URI
-        foreach($results as $row){
+        foreach ($results as $row) {
         	if(!isset($row['?prim'])){
         		error_log('[foaf_editor] primary topic not set');
         		continue;
@@ -138,9 +138,9 @@ class FoafData {
 	        $this->primaryTopic = $newPrimaryTopic;
 	        
 	        //XXX speak to mischa about this one
-	        if (!preg_match("/#me$/",$oldPrimaryTopic,$patterns)) {
-//TODO MISCHA  I had to remove these, perhaps we should put in RDFs:SeeAlso's
-//	        	 $this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
+	        //if (!preg_match("/#me$/",$oldPrimaryTopic,$patterns)) {
+	        if ($oldPrimaryTopic != $newPrimaryTopic) {
+	        	$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
 	        }
         } 
         
@@ -151,7 +151,6 @@ class FoafData {
 	$object = new Resource('http://xmlns.com/foaf/0.1/PersonalProfileDocument');  
 	$foundDocTriples = $this->model->find(NULL,$predicate,$object); 
 	$replacementUriRes = new Resource($this->getUri());
-	    
 	    
 	//and replace them
 	if($foundDocTriples && property_exists($foundDocTriples,'triples') && !empty($foundDocTriples->triples)){
@@ -183,7 +182,7 @@ class FoafData {
 	    	if(!$newPrimaryTopic){
 	    		$newPrimaryTopic = $this->uri."#me"; 
 	    	}  	
-error_log("replacing $oldPrimaryTopic with $newPrimaryTopic");
+		error_log("replacing $oldPrimaryTopic with $newPrimaryTopic");
 	       
 	    	/*replace the old primary topics with the new one*/
 		if (substr($oldPrimaryTopic, 0, 5) == 'bNode') {
@@ -199,12 +198,10 @@ error_log("replacing $oldPrimaryTopic with $newPrimaryTopic");
 	        $this->primaryTopic = $newPrimaryTopic;
 	        
 	        //XXX speak to mischa about this one
-	        if (!preg_match("/#me$/",$oldPrimaryTopic,$patterns)) {
-				//TODO MISCHA  I had to remove these, perhaps we should put in RDFs:SeeAlso's
-				//$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
+	        if ($oldPrimaryTopic != $newPrimaryTopic) {
+			$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
 	        }
         } 
-        
         /*make sure that the document has only one uri*/
         
 	    //find the triples containing document uris
