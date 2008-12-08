@@ -200,8 +200,8 @@ error_log("replacing $oldPrimaryTopic with $newPrimaryTopic");
 	        
 	        //XXX speak to mischa about this one
 	        if (!preg_match("/#me$/",$oldPrimaryTopic,$patterns)) {
-//TODO MISCHA  I had to remove these, perhaps we should put in RDFs:SeeAlso's
-//	        	 $this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
+				//TODO MISCHA  I had to remove these, perhaps we should put in RDFs:SeeAlso's
+				//$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
 	        }
         } 
         

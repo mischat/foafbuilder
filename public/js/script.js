@@ -1,5 +1,5 @@
 /*for logging purposes*/
-var loggingOn = false;
+var loggingOn = true;
 
 /*--------------------------global variables--------------------------*/
 
@@ -157,7 +157,7 @@ function write(privacy){
 		return;
 	} 
 	
-	var textArea = document.getElementById('otherTextArea'+privacy);
+	/*var textArea = document.getElementById('otherTextArea'+privacy);
 
 	if(typeof(textArea) == 'undefined' || !textArea){
 		log('textarea not found');
@@ -169,11 +169,10 @@ function write(privacy){
 	if(typeof(value) == 'undefined' || !value){
 		log('value of text area not defined');
 		return;
-	}
+	}*/
 
-//TODO MISCHA ... is this how we should do it, with a post request ?	
 //    $.post("/writer/write-foafn3-"+privacy, {data: value}, function(data){turnOffLoading();},null);
-       if(privacy == 'private'){
+    if(privacy == 'private'){
 		$.post("/writer/write-foaf-"+privacy, {}, function(data){});
 	} else {
 		window.location = '/writer/write-foafn3-'+privacy;
@@ -1700,7 +1699,7 @@ function displayToObjects(name){
 			knowsDisplayToObjects();
 			break;
 		case 'load-other':
-			otherDisplayToObjects();
+			//otherDisplayToObjects();
 			break;
 		default:
 			return null;
@@ -2489,8 +2488,33 @@ function getIFPsFromGlobalDataObject(friendInfo){
 	return ifps;
 }
 
-function otherDisplayToObjects(){
+function saveOther(){
 	//TODO: do this
+	var publicTextArea = document.getElementById('otherTextAreapublic');
+	var privateTextArea = document.getElementById('otherTextAreaprivate');
+	
+	if(!publicTextArea || typeof(publicTextArea) == 'undefined'){
+		log('public textarea not found');
+		return
+	}
+	if(!privateTextArea || typeof(privateTextArea) == 'undefined'){
+		log('private textarea not found');
+		return;
+	}
+	
+	if(publicTextArea.childNodes[0] == 'undefined' || publicTextArea.childNodes[0].nodeValue == 'undefined'){
+		return;
+	}
+	if(privateTextArea.childNodes[0] == 'undefined' || privateTextArea.childNodes[0].nodeValue == 'undefined'){
+		return;
+	}
+	
+	var publicRdf = publicTextArea.form.public.value;
+	var privateRdf = privateTextArea.form.private.value;
+	
+	//TODO use jquery event handler to deal with errors on this request
+	turnOnLoading();
+  	$.post("/ajax/save-other", {public: publicRdf, private: privateRdf}, function(data){turnOffLoading();});
 }
 
 
@@ -3261,7 +3285,7 @@ function phoneDisplayToObjects(){
 		
 		/*build a form*/
 		var rdfForm = document.createElement('form');	
-		rdfForm.setAttribute('action','javascript:write("'+privacy+'")');
+		rdfForm.setAttribute('action','javascript:saveOther()');
 		rdfForm.id = 'otherForm'+privacy;
 		container.appendChild(rdfForm);
 		
@@ -3281,30 +3305,22 @@ function phoneDisplayToObjects(){
 		rdfTextArea.appendChild(document.createTextNode(data));
 		rdfForm.appendChild(rdfTextArea);
 		
-		/*add a few submit buttons*/
-		//XXX some of these will not eventually be in the 'Geek View'
-		var rdfButton = document.createElement('input');
-
-                if(privacy == 'private'){
-                        rdfButton.value = 'Write private RDF to our oauth';
-                } else {
-                        rdfButton.value = 'Download public RDF'
-
-                        var rdfButton2 = document.createElement('input');
-                        rdfButton2.setAttribute('onclick','writePublic()');
-			rdfButton2.setAttribute('type','button');
-                        rdfButton2.value = 'Write public RDF to our server';
-                        rdfButton2.className = 'otherButton';
-                        rdfForm.appendChild(rdfButton2);
-                }
-                rdfButton.setAttribute('type','submit');
-                rdfButton.className = 'otherButton';
-                rdfForm.appendChild(rdfButton);
+		/*only build the save button once*/
+		if(privacy=='public'){
+			var rdfButton = document.createElement('input');
+			rdfButton.setAttribute('type','submit');
+			rdfButton.value = 'Save Changes';
+			rdfButton.className = 'otherButton';
+			rdfForm.appendChild(rdfButton);
+		}
+	
+		
 	}
 	
 	//write stuff to public oauth server		
 	function writePublic(){
 		log('doing write public');
+		/*
 		var publicTextArea = document.getElementById('otherTextAreapublic');
 		
 		if(!publicTextArea || typeof(publicTextArea) == 'undefined'){
@@ -3316,7 +3332,8 @@ function phoneDisplayToObjects(){
 		}
 		
 		var data = publicTextArea.childNodes[0].nodeValue;
-		$.post("/writer/write-foaf-nodownload", {data :data}, function(data){});
+		*/
+		$.post("/writer/write-foaf-nodownload", {}, function(data){});
 		
 	}	
 
