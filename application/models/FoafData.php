@@ -3,6 +3,8 @@
 require_once 'RdfAPI.php';
 require_once 'dataset/DatasetMem.php';
 require_once 'sparql/SparqlParser.php';
+require_once 'helpers/settings.php';
+require_once 'helpers/write-utils.php';
 
 class FoafData {
     private $uri;
@@ -22,37 +24,45 @@ class FoafData {
     public function FoafData ($uri = "",$isPublic = true) {
         
     	//either a private foafData object or a public one
+
+	//Check if authenticated
+	$defaultNamespace = new Zend_Session_Namespace('Garlik');
+
+	//Check if authenicated
+	if($defaultNamespace->authenticated == true) {
+		error_log("AUTHENICATED! ");
+		$this->openid = $defaultNamespace->url;
+	} else {
+		error_log("NOT AUTHENICATED! ");
+		$this->openid = "example.com/myopenid";
+	}
+
         $this->isPublic = $isPublic;
-	$this->openid = "mmt.me.uk/blog";
         
     	//only set the uri if it isn't already set
 	//TODO MISCHA Need to get OpenID from the SESSION HERE
 	if ($this->isPublic) {
 		//TODO MISCHA
-		$this->uri = 'http://mischa-foafeditor.qdos.com/people/'.$this->openid.'/foaf.rdf';
+		$this->uri = PUBLIC_URL.$this->openid.'/foaf.rdf';
+		//$this->uri = 'http://mischa-foafeditor.qdos.com/people/'.$this->openid.'/foaf.rdf';
 	} else {
-		$this->uri = 'http://private-dev.qdos.com/oauth/'.$this->openid.'/data/foaf.rdf';
+		//$this->uri = 'http://private-dev.qdos.com/oauth/'.$this->openid.'/data/foaf.rdf';
+		$this->uri = PRIVATE_URL.$this->openid.'/data/foaf.rdf';
 	}
 	error_log('URI is '.$this->uri);
 	
         if (!$this->isPublic) {
-		$openid = 'http://private-dev.qdos.com/oauth/mmt.me.uk/blog/data/foaf.rdf';
-		$data_dir = '/usr/local/data/private/oauth';
-
 		//If match then one of ours ...
-		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/oauth/',$openid)) {
-			$cachename = $this->cache_filename($openid);
+		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/oauth/',$this->uri) && $this->uri != PRIVATE_URL.'example/myopenid/data/foaf.rdf') {
+			$cachename = cache_filename($this->uri);
 			error_log($cachename);
-			if (file_exists($data_dir.$cachename)) {
-				$uri = 'file://'.$data_dir.$cachename;
+			if (file_exists(PRIVATE_DATA_DIR.$cachename)) {
+				$uri = 'file://'.PRIVATE_DATA_DIR.$cachename;
 				error_log($uri);	
-			} else {
-				echo('This openid doesnt have a private file');
-			}
-		} else {
-			//TODO MISCHA
-			//In future make OAuth dance here ...
+			} 
 		}
+		//TODO MISCHA
+		//In future make OAuth dance here ...
     	} 
     	
     	/*
@@ -296,29 +306,6 @@ error_log("replacing $oldPrimaryTopic with $newPrimaryTopic");
 		$this->graphset = $graphset;
 			
     	return;
-    }
-
-    //Create the filename used for the hashing of rdf
-    function cache_filename($uri) {
-        $hash = md5($uri);
-        preg_match('/(..)(..)(.*)/', $hash, $matches);
-        return '/'.$matches[1].'/'.$matches[2].'/'.$matches[3];
-    } //end cache filename
-    
-    //Create the cache file directory structure needed
-    function create_cache($filename,$datadir) {
-            if (preg_match('/\/(..)\/(..)\/(.*)/',$filename,$matches)) {
-                    if (!(file_exists("$datadir/$matches[1]"))) {
-                            mkdir("$datadir/$matches[1]");
-                    }
-                    if (!(file_exists("$datadir/$matches[1]/$matches[2]"))) {
-                            mkdir("$datadir/$matches[1]/$matches[2]");
-                    }
-                    return true;
-            } else {
-                    //Incorrect cache filestructure passed
-                    return false;
-            }
     }
 
 }
