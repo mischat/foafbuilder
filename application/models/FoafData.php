@@ -59,6 +59,8 @@ class FoafData {
 			if (file_exists(PRIVATE_DATA_DIR.$cachename)) {
 				$uri = 'file://'.PRIVATE_DATA_DIR.$cachename;
 				error_log($uri);	
+			} else {
+				$uri = "";
 			} 
 		}
 		//TODO MISCHA
