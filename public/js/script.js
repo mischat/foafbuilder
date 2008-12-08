@@ -157,26 +157,7 @@ function write(privacy){
 		return;
 	} 
 	
-	/*var textArea = document.getElementById('otherTextArea'+privacy);
-
-	if(typeof(textArea) == 'undefined' || !textArea){
-		log('textarea not found');
-		return;
-	}
-	
-	var value = textArea.value;
-	
-	if(typeof(value) == 'undefined' || !value){
-		log('value of text area not defined');
-		return;
-	}*/
-
-//    $.post("/writer/write-foafn3-"+privacy, {data: value}, function(data){turnOffLoading();},null);
-    if(privacy == 'private'){
-		$.post("/writer/write-foaf-"+privacy, {}, function(data){});
-	} else {
-		window.location = '/writer/write-foafn3-'+privacy;
-	}
+	window.location = '/writer/write-foafn3-'+privacy;
      
 }
 
@@ -3320,22 +3301,15 @@ function phoneDisplayToObjects(){
 	//write stuff to public oauth server		
 	function writePublic(){
 		log('doing write public');
-		/*
-		var publicTextArea = document.getElementById('otherTextAreapublic');
-		
-		if(!publicTextArea || typeof(publicTextArea) == 'undefined'){
-			log('public textarea not found');
-			return
-		}
-		if(publicTextArea.childNodes[0] == 'undefined' || publicTextArea.childNodes[0].nodeValue == 'undefined'){
-			return;
-		}
-		
-		var data = publicTextArea.childNodes[0].nodeValue;
-		*/
+
 		$.post("/writer/write-foaf-nodownload", {}, function(data){});
-		
 	}	
+	
+	function writePrivate(){
+		log('doing write private');
+		
+		$.post("/writer/write-foaf-"+privacy, {}, function(data){});
+	}
 
 	/*---------------------------other (geek view)---------------------------*/
 
