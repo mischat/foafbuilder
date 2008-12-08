@@ -927,7 +927,7 @@ function renderMboxFields(data,isPublic){
 	
 	/*create an add link XXX this means we have to display public fields before private ones*/
 	if(isPublic){
-		createGenericAddElement(containerElement,name,label);
+		createGenericAddElement(containerElement,name,label,true);
 	}
 }
 
@@ -2731,7 +2731,7 @@ function phoneDisplayToObjects(){
 			return newFieldValueContainer;
 	}
 	
-	function createGenericAddElement(container,name,displayLabel){
+	function createGenericAddElement(container,name,displayLabel,defaultIsPrivate){
 	
 		/*create add link and attach it to the container*/
 		var addDiv = document.createElement("div");
@@ -2742,14 +2742,14 @@ function phoneDisplayToObjects(){
 		addLink.appendChild(document.createTextNode("+Add another "+displayLabel));
 		addLink.className="addLink";
 		
-		addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id,'"+displayLabel+"');");
+		addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id,'"+displayLabel+"','"+defaultIsPrivate+"');");
 		
 		addDiv.appendChild(addLink);
 		container.appendChild(addDiv);
 	
 	}
 	//TODO: can we get rid of thisElementCount?
-	function createGenericInputElementAboveAddLink(name,thisElementCount,containerId,addElementId,displayLabel){
+	function createGenericInputElementAboveAddLink(name,thisElementCount,containerId,addElementId,displayLabel,defaultIsPrivate){
 		
 		/*remove the add element*/
 		var addElement = document.getElementById(addElementId);
@@ -2761,7 +2761,7 @@ function phoneDisplayToObjects(){
 			value = 'Enter '+displayLabel+' here';
 		}
 		
-		createGenericInputElement(name,value,thisElementCount,containerId,true);
+		createGenericInputElement(name,value,thisElementCount,containerId,true,false,defaultIsPrivate);
 		
 		/*re add the add element*/
 		document.getElementById(containerId).appendChild(addElement);
