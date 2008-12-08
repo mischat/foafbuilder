@@ -275,31 +275,25 @@ class AjaxController extends Zend_Controller_Action {
     }
 	
     public function saveFoafAction() {
-	echo(1);
+
         $this->view->isSuccess = 0;
         require_once 'FoafData.php';
         $changes_model = @$_POST['model'];
         
-	echo(2);
         if ($changes_model) {
-	    echo(3);
+
             $publicFoafData = FoafData::getFromSession(true);	
-	echo(4);
             $privateFoafData = FoafData::getFromSession(false);
             
-	echo(5);
             if($publicFoafData) {
                 $this->applyChangesToModel($publicFoafData,$changes_model);	
                 $this->view->isSuccess = 1;
             }
-	echo(6);
             if($privateFoafData) {
             	$this->applyChangesToModel($privateFoafData,$changes_model);
             	$this->view->isSuccess = 1;
             }
-	echo(7);
         }
-	echo(8);
     }
 	
     /*saves stuff to the model*/
@@ -308,7 +302,6 @@ class AjaxController extends Zend_Controller_Action {
         require_once 'SimpleField.php';
         require_once 'FieldNames.php';
 	
-	echo('a');
         //json representing stuff that is to be saved
         $json = new Services_JSON();
         $almost_model = $json->decode(stripslashes($changes_model));      
@@ -316,18 +309,14 @@ class AjaxController extends Zend_Controller_Action {
         $fieldNames = new FieldNames('all');
         $allFieldNames = $fieldNames->getAllFieldNames();
        
-	echo('b');
         //var_dump($almost_model);
         //save private and public 
         if(!$foafData->isPublic && property_exists($almost_model,'private') && $almost_model->private){
         	$this->saveAllFields($almost_model->private,$allFieldNames,$foafData);   
   			     
-	echo('c');
         } else if($foafData->isPublic && property_exists($almost_model,'public') && $almost_model->public){
         	$this->saveAllFields($almost_model->public,$allFieldNames,$foafData);
-	echo('d');
         } 
-	echo('e');
 
     }
     
@@ -366,6 +355,63 @@ echo('beta');
 	echo('end');
     }
 	
+    //saves other stuff
+    public function saveOtherAction() {
+     	$this->view->isSuccess = 0;
+        require_once 'FoafData.php';
+        
+        $publicRdf = @$_POST['public'];
+	   	$privateRdf = @$_POST['private'];
+
+        if ($publicRdf && $privateRdf) {
+		
+         	$publicRdf = urldecode($publicRdf);
+        	$privateRdf = urldecode($privateRdf);
+         
+            $publicFoafData = FoafData::getFromSession(true);	
+            $privateFoafData = FoafData::getFromSession(false);	
+           
+            //XXX FIXME the directory here shouldn't be hardcoded
+            if($publicFoafData){
+            	echo('doing public stuff');
+            	$newPublicModel = new MemModel();
+            	
+            	//shove the data into a file
+            	$filename_1 = '/tmp/foafbuilder_temporary_file'.md5(microtime() * microtime());
+                $filehandle_1 = fopen($filename_1,'w+');
+                fwrite($filehandle_1,$publicRdf);
+                
+                $newPublicModel->load($filename_1);
+                $publicFoafData->replacePrimaryTopic($publicFoafData->getUri());
+                $publicFoafData->setModel($newPublicModel);
+          		
+                unlink($filename_1);
+                $publicFoafData->putInSession();
+                
+                
+            }
+            if($privateFoafData){
+            	echo('doing private stuff');
+            	$newPrivateModel = new MemModel();
+            	
+            	$privateFoafData->setModel(new MemModel());
+            	
+            	$filename_2 = '/tmp/foafbuilder_temporary_file'.md5(microtime() * microtime());
+            	$filehandle_2 = fopen($filename_2,'w+');
+            	fwrite($filehandle_2,$privateRdf);
+            	
+            	$newPrivateModel->load($filename_2);
+            	$privateFoafData->replacePrimaryTopic($privateFoafData->getUri());
+                $privateFoafData->setModel($newPrivateModel);
+                 
+               	unlink($filename_2);
+            	$privateFoafData->putInSession();
+            }
+        }
+    	
+    }
+    
+    
     public function clearFoafAction() {
         if(@Zend_Session::destroy()) {
             echo(1);
