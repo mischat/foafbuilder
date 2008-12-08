@@ -2038,7 +2038,7 @@ function accountsDisplayToObjects(){
 			if(holdsAccountElement.childNodes[k].style.color != '#000000' 
 				&& holdsAccountElement.childNodes[k].style.color != 'rgb(0, 0, 0)'
 				&& holdsAccountElement.childNodes[k].className != 'accountTypeSelect'
-				&& holdsACcountElement.childNodes[k].style.color){
+				&& holdsAccountElement.childNodes[k].style.color){
 				continue;
 			}
 			
