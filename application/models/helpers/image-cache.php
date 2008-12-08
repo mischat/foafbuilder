@@ -9,7 +9,7 @@ function mk_cache_path($id) {
 	}
 }
 
-function cache_filename($id) {
+function image_cache_filename($id) {
 	return FOAF_PATH.'/cache/'.preg_replace('/(..)(..)(.*)/', '$1/$2/$3', md5($id));
 }
 
@@ -29,7 +29,7 @@ function cache_get($ifps, $inimages = array(), $size = 'sml') {
 	$somemissing = 0;
 	$retval = array();
 	foreach ($ifps as $ifp) {
-		$cache_ptr = cache_filename($ifp).".ifp";
+		$cache_ptr = image_cache_filename($ifp).".ifp";
 		if (file_exists($cache_ptr)) {
 			if (!$retval) {
 				$uris = file($cache_ptr, FILE_IGNORE_NEW_LINES);
@@ -70,7 +70,7 @@ function cache_get($ifps, $inimages = array(), $size = 'sml') {
 			}
 			$cacheuris[$key] = cache_uri($image).$ext;
 			mk_cache_path($image);
-			$cachebase = cache_filename($image);
+			$cachebase = image_cache_filename($image);
 			$cachefn = $cachebase.$ext;
 			$cachefh = fopen($cachefn, 'w');
 			if ($cachefh) {
@@ -97,7 +97,7 @@ function cache_get($ifps, $inimages = array(), $size = 'sml') {
 	$created = "";
 	foreach ($ifps as $ifp) {
 		mk_cache_path($ifp);
-		$cache_ptr = cache_filename($ifp).'.ifp';
+		$cache_ptr = image_cache_filename($ifp).'.ifp';
 		if (!$created) {
 			$fh = fopen($cache_ptr, 'w');
 			if ($fh) {

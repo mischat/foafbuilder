@@ -50,7 +50,9 @@ class LogonController extends Zend_Controller_Action
     private function makeOpenIDUrl ($url) { 
 	$url = preg_replace('/^https{0,1}:\/\//','',$url); 
 	$url = urlencode ($url); 
-	$url = preg_replace('/%2F/',"/",$url); return $url;  
+	$url = preg_replace('/%2F/',"/",$url); 
+	error_log("DOES THIS HAPPEN! $url");
+	return $url;  
     }
 
 }
