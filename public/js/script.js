@@ -873,7 +873,8 @@ function renderNearestAirportFields(data,isPublic){
 		containerDiv.appendChild(mapElement);
 		mapElement.className = 'embeddedMapDiv';
 		map.checkResize();
-		
+		map.setZoom(1);
+
 		//change the class of the map inside this one
 		mapElement.childNodes[0].className = 'embeddedMapDiv';
 	} 
@@ -890,6 +891,7 @@ function renderNearestAirportFields(data,isPublic){
 	if(map){
 		/*render the markers on the map and add divs containing the information below*/
 		addNearestAirportMarker(data.nearestAirportFields['nearestAirport'],containerElement,map,isPublic);			
+		map.checkResize();
 	}
 }
 
@@ -971,10 +973,11 @@ function renderBasedNearFields(data,isPublic){
 		var containerDiv = document.getElementById('personal');
 		containerDiv.appendChild(mapElement);
 		mapElement.className = 'embeddedMapDiv';
-		map.checkResize();
+		map.setZoom(1);
 		
 		//change the class of the map inside this one
 		mapElement.childNodes[0].className = 'embeddedMapDiv';
+		map.checkResize();
 	} else {
 		//perhaps we should do something here?
 	}
@@ -3178,7 +3181,7 @@ function phoneDisplayToObjects(){
 		locationDiv.setAttribute('class',optionalClassName);
 		locationDiv.id = bnodeId;
 		if(bnodeId!='nearestAirport'){
-			locationDiv.setAttribute("onclick","map.panTo(mapMarkers['"+bnodeId+"'].getLatLng());map.setZoom(0);");
+			locationDiv.setAttribute("onclick","map.panTo(mapMarkers['"+bnodeId+"'].getLatLng());");
 		}
 		attachElement.appendChild(locationDiv);
 		
@@ -4102,7 +4105,7 @@ function anyPrefixDisplayToObjectsGeoCode(prefix,point){
 
 /*displays the map level with the element shown*/
 function displayMap(anchorElementId){
-
+	
 	//A container for the pop up map window
 	var mapDiv = document.getElementById('mapDiv');
 	
@@ -4129,18 +4132,24 @@ function displayMap(anchorElementId){
 			mapDiv.removeChild(innerMapDiv);
 			mapDiv.appendChild(closeLink);
 			mapDiv.appendChild(innerMapDiv);
-     	}
+     		}
+		map.setZoom(13);
+		map.checkResize();
 	
 	}
 }
 
+/*
 function displayEmbeddedMap(){
 	var mapDiv = document.getElementById('mapDiv');
 	if(mapDiv && typeof(mapDiv) != 'undefined'){
 		document.getElementById('mapDiv').parentNode.removeChild(document.getElementById('mapDiv'));
 		map.checkResize();
 	}
+	alert('setting map zoo1m');
+	map.setZoom(0);
 }
+8?
 
 /*creates and returns a google map element if there isn't one already there*/
 function createMapElement(container){
@@ -4175,9 +4184,11 @@ function createMapElement(container){
        		map.setCenter(new GLatLng(37.4419, -122.1419), 13);
        
        		var mapControl = new GSmallMapControl();
-			map.addControl(mapControl);
-			
-       		return mapDiv;
+		map.addControl(mapControl);
+		map.setZoom(13);	
+		map.checkResize();
+       		
+		return mapDiv;
      	} 
    
 }
