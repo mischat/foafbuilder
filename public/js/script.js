@@ -1,5 +1,5 @@
 /*for logging purposes*/
-var loggingOn = true;
+var loggingOn = false;
 
 /*--------------------------global variables--------------------------*/
 
