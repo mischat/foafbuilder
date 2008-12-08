@@ -7,4 +7,11 @@ define('QDOS_EP', 'http://luma:8080/sparql/');
 define('QDOS_EXT', 'http://extractor.qdos.com:8081/');
 define('FOAF_PATH', '/usr/local/src/qdos-dev/foaf');
 define('QDOS_ROOT', 'http://qdos.com/');
+
+//TODO MISCHA
+define('PUBLIC_URL','http://mischa-foafeditor.qdos.com/people/');
+define('PRIVATE_URL','http://private-dev.qdos.com/oauth/');
+define('PRIVATE_DATA_DIR', '/usr/local/data/private/oauth');
+define('PUBLIC_DATA_DIR','/usr/local/data/public');
+
 ?>
