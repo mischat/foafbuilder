@@ -63,6 +63,32 @@ class WriterController extends Zend_Controller_Action
   }
 
   /* This function should be used to download a FOAF file to your desktop */
+  public function writeFoafn3PrivateAction() {
+        require_once 'FoafData.php';
+	//this is inside an action in one of your controllers:
+    	$publicFoafData = FoafData::getFromSession(false);
+
+	$this->view->model = $publicFoafData->getModel();
+	$this->view->model->setBaseUri(NULL);
+	$result = $this->view->model->find(NULL, NULL, NULL);
+
+	$result = $this->removeLanguageTags($result);
+
+	$data = $result->writeRdfToString();
+	$hash = $publicFoafData->getURI();
+
+ 	//very dirty !
+	$data = str_replace($hash,"",$data);
+
+	$this->_helper->layout->disableLayout();
+	$response = $this->getResponse();
+        $response->setHeader('Content-Type', 'application/rdf+xml', true)
+            ->setHeader('Content-Disposition', 'attachment;filename=private_foaf.rdf', true)
+	    ->setHeader('Content-Length', strlen($data), true)
+	    ->appendBody($data);
+    }
+
+  /* This function should be used to download a FOAF file to your desktop */
   public function writeFoafn3PublicAction() {
         require_once 'FoafData.php';
 	//this is inside an action in one of your controllers:
@@ -82,8 +108,8 @@ class WriterController extends Zend_Controller_Action
 
 	$this->_helper->layout->disableLayout();
 	$response = $this->getResponse();
-        $response->setHeader('Content-Type', 'text/plain', true)
-            ->setHeader('Content-Disposition', 'attachment;filename=foaf.rdf', true)
+        $response->setHeader('Content-Type', 'application/rdf+xml', true)
+            ->setHeader('Content-Disposition', 'attachment;filename=public_foaf.rdf', true)
 	    ->setHeader('Content-Length', strlen($data), true)
 	    ->appendBody($data);
     }
