@@ -1,6 +1,8 @@
 <?php
 
 require_once 'Zend/Controller/Action.php';
+require_once("helpers/settings.php");
+require_once("helpers/write-utils.php");
 
 class WriterController extends Zend_Controller_Action
 {
@@ -108,52 +110,25 @@ class WriterController extends Zend_Controller_Action
     }
     
     public function writeFoafPrivateAction() {
-	//TODO MISCHA, need to fix this! 
-	echo("Writing private triples to oauth");
+    	$privateFoafData = FoafData::getFromSession(false);
+    	
 	error_log("Writing private triples to oauth");
 	$uri = 'http://private-dev.qdos.com/oauth/mmt.me.uk/blog/data/foaf.rdf';
-	$data_dir = '/usr/local/data/public';
-
-    	$privateFoafData = FoafData::getFromSession(true);
-	 //TODO MISCHA get private URI
-        if (!$privateFoafData->isPublic) {
-		error_log("THIS SHOULDNT HAPPEN! public data written as private");
-		exit(0);
-	}
-
-	$this->view->model = $privateFoafData->getModel();
-	$this->view->model->setBaseUri(NULL);
-	$result = $this->view->model->find(NULL, NULL, NULL);
-
-	$result = $this->removeLanguageTags($result);
+	$tempmodel = unserialize(serialize($privateFoafData->getModel()));
+	$tempmodel->setBaseUri(NULL);
+	$result = $tempmodel->find(NULL, NULL, NULL);
 
 	$data = $result->writeRdfToString();
-
-	file_put_contents($this->cache_filename($uri),$data);	
-	error_log('FILE WRITTEN YAY!');
-    }
-
-    //Create the filename used for the hashing of rdf
-    function cache_filename($uri) {
-        $hash = md5($uri);
-        preg_match('/(..)(..)(.*)/', $hash, $matches);
-        return '/'.$matches[1].'/'.$matches[2].'/'.$matches[3];
-    } //end cache filename
-    
-    //Create the cache file directory structure needed
-    function create_cache($filename,$datadir) {
-            if (preg_match('/\/(..)\/(..)\/(.*)/',$filename,$matches)) {
-                    if (!(file_exists("$datadir/$matches[1]"))) {
-                            mkdir("$datadir/$matches[1]");
-                    }
-                    if (!(file_exists("$datadir/$matches[1]/$matches[2]"))) {
-                            mkdir("$datadir/$matches[1]/$matches[2]");
-                    }
-                    return true;
-            } else {
-                    //Incorrect cache filestructure passed
-                    return false;
-            }
+	if (strlen($data) > 0 ) {
+		$cachename = cache_filename($uri);
+		if (!file_exists(PRIVATE_DATA_DIR.$cachename)) {
+			create_cache($cachename,PRIVATE_DATA_DIR);
+		}
+		file_put_contents(PRIVATE_DATA_DIR.$cachename,$data);	
+		error_log('[foafeditor] We have created a new private file at the following url:'.$uri);
+	} else {
+		error_log('[foafeditor] rdf stream empty for the private data nothing to write to:'.$uri);
+	}
     }
 
     public function writeFoafNodownloadAction(){
@@ -176,13 +151,12 @@ class WriterController extends Zend_Controller_Action
 	$data = $result->writeRdfToString();
 
 	if (strlen($data) > 0 ) {
-		//TODO MISCHA
-		$data_dir = '/usr/local/data/public';
-		$cachefilename = $this->cache_filename($tempuri);
+		$cachefilename = cache_filename($tempuri);
 		error_log($cachefilename);
-
-		$this->create_cache($cachefilename,$data_dir);
-		file_put_contents($data_dir.$cachefilename, $data);
+		if (!file_exists(PUBLIC_DATA_DIR.$cachefilename)) {
+			create_cache($cachefilename,PUBLIC_DATA_DIR);
+		}
+		file_put_contents(PUBLIC_DATA_DIR.$cachefilename, $data);
 		error_log('[foafeditor] We have created a new file at the following url:'.$tempuri);
 	} else {
 		error_log('[foafeditor] rdf stream empty nothing to write to:'.$tempuri);
