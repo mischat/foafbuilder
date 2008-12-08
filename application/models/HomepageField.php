@@ -153,7 +153,8 @@ class HomepageField extends Field {
                 fclose($input); 
                 if (preg_match('/<title>([^<]*?)<\/title>/',$text,$matches)) {
                         error_log('[foaf_editor] Grabbed the users title');
-                        return $matches[1];
+                        $temp = str_replace("\n","",$matches[1]); 
+                        return $temp;
                 } 
             }
             return 0;
