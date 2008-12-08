@@ -130,12 +130,9 @@ class BlogField extends Field {
             }
     }
 
-
     /* Check if the HomepageValid */
     private function isHomepageValid($value) {
-        //if(preg_match('/^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)*/',$value))
-        //if(preg_match('/^https?:\/\//',$value)) 
-        if (preg_match('/^https?:\/\/(?:[a-z\-]+\.)+[a-z]{2,6}(?:\/[^\/#?]+)*/',$value)) {
+        if (preg_match('/^https?:\/\/(?:[a-z0-9A-Z\-]+\.)+[a-zA-Z0-9]{2,6}(?:\/[^\/#?]+)*/',$value)) {
 		error_log('[foaf_editor] weblog is valid');
         	return true;
         } else {
