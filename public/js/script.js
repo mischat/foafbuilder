@@ -74,6 +74,12 @@ function loadFoaf(name,url){
 
 /*saves all the foaf data*/
 function saveFoaf(){
+	
+	//we don't want to save friends stuff
+	if(currentPage == 'load-friends'){
+		return;
+	}
+
 	displayToObjects(currentPage);
 	
 	var totalFieldData = new Object();
@@ -2380,7 +2386,7 @@ function imgDisplayToObjects(){
 }
 
 function knowsDisplayToObjects(){
-
+	
 	if(typeof(globalFieldData) == 'undefined' || !globalFieldData){
 		return;
 	}
