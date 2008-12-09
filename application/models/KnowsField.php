@@ -59,30 +59,39 @@ class KnowsField extends Field {
                         //TODO: add just the  uri here
 			echo('ADDING URI HERE!!!');
                 } else {
-			
 			$bNode = Utils::GenerateUniqueBnode($foafData->getModel());
                 	
 			$foafData->getModel()->add(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource("http://xmlns.com/foaf/0.1/knows"), $bNode));
-                	$foafData->getModel()->add(new Statement($bNode,new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person")));
+                	$foafData->getModel()->add(new Statement($bNode,new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/Person")));
 			
 			if(!property_exists($friend,'ifp_type') || !$friend->ifp_type){
-				setIfpType($friend);
+				$ifpType = $this->getIfpType($friend);
+			} else {
+				$ifpType = $friend->ifp_type;
 			}		
 
-			if($friend->ifp_type=="mbox"){
+			if($ifpType == "mbox"){
 				if(substr($friend->ifps[0],0,7) != 'mailto:'){ 
 					$friend->ifps[0] = "mailto:".$friend->ifps[0];
 				}
+				
+				echo('adding mbox');
+				
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal(sha1($friend->ifps[0]))));
 				$successfulAdd = 1;
 	
-			} else if($friend->ifp_type=="mbox_sha1sum"){
+			} else if($ifpType == "mbox_sha1sum"){
+				
+				echo('adding mbox sha1');
 
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal($friend->ifps[0])));
 				$successfulAdd = 1;
 	
-			} else{
-				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$friend->ifp_type),new Resource($friend->ifps[0])));
+			} else {
+				//XXX make sure the correct homepage/weblog is added here
+				echo('adding homepage or weblog'.$bNode->uri);
+				
+				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$ifpType),new Resource($friend->ifps[0])));
 				$successfulAdd = 1;
 			}
                 }
@@ -90,22 +99,37 @@ class KnowsField extends Field {
                 return $successfulAdd;
         }
 
-	private function setIfpType(&$friend){
+	private function getIfpType(&$friend){
 		
-		if (preg_match("/(mailto:)?([^\s]+@[a-zA-Z0-9\.-]+)/", $val, $matches)) {
+		if(!property_exists($friend,'ifps') || !isset($friend->ifps[0]) || !$friend->ifps[0]){
+			error_log('illegal IFP entered');
+			echo('illegal IFP entered');
+			return;
+		}
 
-			$friend->ifp_type = 'mbox';
-         	
+		$val = $friend->ifps[0];
+		$ret;
+
+		if (preg_match("/(mailto:)?([^\s]+@[a-zA-Z0-9\.-]+)/", $val, $matches)) {
+			
+			$ret = 'mbox';
+         		echo('setting ifp type as mbox');
 		} else if (preg_match("/(((http|ftp|mailto)+:\\/\\/)[a-zA-Z0-9\.-]+.*)/", $val, $matches)) {
 
-			$friend->ifp_type = 'homepage';
+			$ret = 'homepage';
+         		echo('setting ifp type as homepage');
 
         	} else if (preg_match("/^[a-f0-9]{40}$/i", $val)) {
 			
-			$friend->ifp_type = 'mbox_sha1Sum';
+			$ret = 'mbox_sha1sum';
+         		echo('setting ifp type as sha1sum');
                	} else {
 			echo('Illegal IFP entered');
+			error_log('Illegal IFP entered');
+			$ret = 'homepage';
 		}
+		
+		return $ret;
         }
 
 

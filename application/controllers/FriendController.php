@@ -51,7 +51,8 @@ class FriendController extends Zend_Controller_Action {
         $friendString = @$_POST['friend'];
         
         if ($friendString) {
-            $foafData = FoafData::getFromSession();	
+	 	//put friends stuff in the public bit
+            $foafData = FoafData::getFromSession(true);	
             
             if($foafData) {
             	
