@@ -57,12 +57,17 @@ class KnowsField extends Field {
 
                 if(property_exists($friend,'uri')){
                         //TODO: add just the  uri here
+			echo('ADDING URI HERE!!!');
                 } else {
 			
 			$bNode = Utils::GenerateUniqueBnode($foafData->getModel());
-			echo($bNode);
-                	$foafData->getModel()->add(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource("http://xmlns.com/foaf/0.1/knows"), $bNode));
+                	
+			$foafData->getModel()->add(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource("http://xmlns.com/foaf/0.1/knows"), $bNode));
                 	$foafData->getModel()->add(new Statement($bNode,new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#Person")));
+			
+			if(!property_exists($friend,'ifp_type') || !$friend->ifp_type){
+				setIfpType($friend);
+			}		
 
 			if($friend->ifp_type=="mbox"){
 				if(substr($friend->ifps[0],0,7) != 'mailto:'){ 
@@ -83,6 +88,24 @@ class KnowsField extends Field {
                 }
 
                 return $successfulAdd;
+        }
+
+	private function setIfpType(&$friend){
+		
+		if (preg_match("/(mailto:)?([^\s]+@[a-zA-Z0-9\.-]+)/", $val, $matches)) {
+
+			$friend->ifp_type = 'mbox';
+         	
+		} else if (preg_match("/(((http|ftp|mailto)+:\\/\\/)[a-zA-Z0-9\.-]+.*)/", $val, $matches)) {
+
+			$friend->ifp_type = 'homepage';
+
+        	} else if (preg_match("/^[a-f0-9]{40}$/i", $val)) {
+			
+			$friend->ifp_type = 'mbox_sha1Sum';
+               	} else {
+			echo('Illegal IFP entered');
+		}
         }
 
 
