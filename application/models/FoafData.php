@@ -92,14 +92,11 @@ class FoafData {
 		
 	/*make sure that the uri and primary topic of the document is consistent*/
         $this->replacePrimaryTopic($this->uri);	
-
 	$this->putInSession();
     }
     
     //replace the existing primary topic with either newPrimaryTopic or a hash of the uri
     public function replacePrimaryTopic($uri){
-	//TODO: probably need to do some de duping at some point
-    	
 	/*get primary topics*/
 	$query = "SELECT ?prim WHERE {?anything <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
 	$results = $this->model->sparqlQuery($query);
@@ -122,14 +119,7 @@ class FoafData {
 			error_log($fragment);
 		}
         	//TODO must make sure that we handle having a non "#me" foaf:Person URI
-		error_log("The old primary Topic is : $oldPrimaryTopic");	
-	        //if no new uri has been passed in then just set it as the existing primary topic or, if that isn't set then the hash of the uri
-		//$newPrimaryTopic = $this->primaryTopic;			
-		//if(!$newPrimaryTopic){
-	    		$newPrimaryTopic = $this->uri.$fragment;
-			error_log("THe old primaryTopic is".$oldPrimaryTopic);
-			error_log("The new primary Topic is".$this->uri.$fragment);	
-		//}  	
+	    	$newPrimaryTopic = $this->uri.$fragment;
 	       
 	    	/*replace the old primary topics with the new one*/
 		if (substr($oldPrimaryTopic, 0, 5) == 'bNode') {
@@ -146,13 +136,10 @@ class FoafData {
 	        $this->model->replace(NULL,NULL,$foafDataRes,$newPrimaryTopicRes);
 
 	        /*just to make sure we have the right primary topic down*/
-	        //$this->primaryTopic = $newPrimaryTopic;
 	        $this->setPrimaryTopic($newPrimaryTopic);
 	        
 	        //XXX speak to mischa about this one
-	        //if (!preg_match("/#me$/",$oldPrimaryTopic,$patterns)) {
 	        if ($oldPrimaryTopic != $newPrimaryTopic) {
-	        	//$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
 	        	$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
 	        }
         } 
@@ -186,9 +173,8 @@ class FoafData {
             return null;
         }
         //TODO must make sure that we handle having a non "#me" foaf:Person URI
-        foreach($results as $row){
-        
-            $oldPrimaryTopic = $row['?prim']->uri;
+        foreach ($results as $row) {
+                $oldPrimaryTopic = $row['?prim']->uri;
              
 	        //if no new uri has been passed in then just set it as the existing primary topic or, if that isn't set then the hash of the uri
 	    	$newPrimaryTopic = $this->primaryTopic;			
@@ -210,28 +196,25 @@ class FoafData {
 	        /*just to make sure we have the right primary topic down*/
 	        $this->primaryTopic = $newPrimaryTopic;
 	        
-	        //XXX speak to mischa about this one
 	        if ($oldPrimaryTopic != $newPrimaryTopic) {
 			$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
 	        }
         } 
         /*make sure that the document has only one uri*/
         
-	    //find the triples containing document uris
-	    $predicate = new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type');
-	    $object = new Resource('http://xmlns.com/foaf/0.1/PersonalProfileDocument');  
-	    $foundDocTriples = $this->model->find(NULL,$predicate,$object); 
-	    $replacementUriRes = new Resource($this->getUri());
+	//find the triples containing document uris
+	$predicate = new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type');
+	$object = new Resource('http://xmlns.com/foaf/0.1/PersonalProfileDocument');  
+	$foundDocTriples = $this->model->find(NULL,$predicate,$object); 
+	$replacementUriRes = new Resource($this->getUri());
 	    
-	    
-	 	//and replace them
-	    if($foundDocTriples && property_exists($foundDocTriples,'triples') && !empty($foundDocTriples->triples)){
-	    
-	    	foreach($foundDocTriples->triples as $triple){
+	//and replace them
+	if($foundDocTriples && property_exists($foundDocTriples,'triples') && !empty($foundDocTriples->triples)) {
+		foreach($foundDocTriples->triples as $triple) {
 	    		$this->model->replace($triple->subj,NULL,NULL,$replacementUriRes);
 	    		$this->model->replace(NULL,NULL,$triple->subj,$replacementUriRes);
 	       	}
-	    }
+	}
     }
 
     public static function getFromSession($isPublic = true) {
@@ -253,8 +236,6 @@ class FoafData {
     public function putInSession() {
     	//TODO: use auth session for particular users
     	$defaultNamespace = new Zend_Session_Namespace('Garlik');
-    	//XXX This probably ought to be changed for production
-    	//$defaultNamespace->setExpirationSeconds(9999999999);
     	if($this->isPublic){	
     		$defaultNamespace->foafData = $this; 
     	} else{
@@ -303,19 +284,19 @@ class FoafData {
     }
     public function getEmptyDocument(){
     	
-       		$graphset = ModelFactory::getDatasetMem('GarlikDataset');
-		$model = new NamedGraphMem($this->uri);
-		$this->model = $model;
-		
-		$primaryResource = new Resource($this->uri."#me");
-		$personalProfileDocumentTriple = new Statement(new Resource($this->uri), new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/PersonalProfileDocument"));
-		$primaryTopicTriple = new Statement(new Resource($this->uri), new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),$primaryResource);
-		
-		$this->model->addWithoutDuplicates($personalProfileDocumentTriple);
-		$this->model->addWithoutDuplicates($primaryTopicTriple);
-		
-		$this->primaryTopic = $primaryResource->uri;
-		$this->graphset = $graphset;
+	$graphset = ModelFactory::getDatasetMem('GarlikDataset');
+	$model = new NamedGraphMem($this->uri);
+	$this->model = $model;
+	
+	$primaryResource = new Resource($this->uri."#me");
+	$personalProfileDocumentTriple = new Statement(new Resource($this->uri), new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/PersonalProfileDocument"));
+	$primaryTopicTriple = new Statement(new Resource($this->uri), new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),$primaryResource);
+	
+	$this->model->addWithoutDuplicates($personalProfileDocumentTriple);
+	$this->model->addWithoutDuplicates($primaryTopicTriple);
+	
+	$this->primaryTopic = $primaryResource->uri;
+	$this->graphset = $graphset;
 			
     	return;
     }
