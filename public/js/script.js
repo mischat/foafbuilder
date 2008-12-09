@@ -143,10 +143,8 @@ function renderFoundFriend(data){
 
 /*Writes FOAF to screen*/
 function renderOther() {
-		turnOnLoading();
-		
-		var url = document.getElementById('writeUri').value;
-        $.post("/writer/write-foafn3", {uri: url }, function(data){drawOtherTextarea(data);turnOffLoading();},'json');
+	turnOnLoading();
+        $.post("/writer/write-foafn3", {}, function(data){drawOtherTextarea(data);turnOffLoading();},'json');
         
 }
 
