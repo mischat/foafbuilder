@@ -30,6 +30,8 @@ class LogonController extends Zend_Controller_Action
 
 		if (!$consumer->login($openid)) {
 			error_log("OpenID login failed.");
+			$this->_helper->redirector('index?status=fail');
+
 		} 
 	} else if (isset($_GET['openid_mode'])) {
     		error_log("Please say something is happening here: ".$_GET['openid_mode']);
@@ -37,10 +39,11 @@ class LogonController extends Zend_Controller_Action
 			$consumer = new Zend_OpenId_Consumer();
 			if ($consumer->verify($_GET, $id)) {
 				$defaultNamespace->authenticated = true;
-				
+				$this->_helper->redirector('../index');
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
 			error_log("CANCELED");
+			$this->_helper->redirector('index?status=cancelled');
 		}
 	} else {
 		error_log("Openid login attempt with no value");
