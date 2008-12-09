@@ -23,7 +23,7 @@ class FoafData {
     /*New from uri if uri present. if not just new.*/
     public function FoafData ($uri = "",$isPublic = true) {
         
-    	//either a private foafData object or a public one
+	//either a private foafData object or a public one
 
 	//Check if authenticated
 	$defaultNamespace = new Zend_Session_Namespace('Garlik');
@@ -98,31 +98,38 @@ class FoafData {
     
     //replace the existing primary topic with either newPrimaryTopic or a hash of the uri
     public function replacePrimaryTopic($uri){
-    	//TODO: probably need to do some de duping at some point
+	//TODO: probably need to do some de duping at some point
     	
-     	/*get primary topics*/
-        $query = "SELECT ?prim WHERE {?anything <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
-        $results = $this->model->sparqlQuery($query);
-        
-        if (!$results || empty($results)) {
-        	//TODO MISCHA should do some error reporting here
-            error_log("[foaf_editor] Error no primaryTopic");
-            return null;
-        }
+	/*get primary topics*/
+	$query = "SELECT ?prim WHERE {?anything <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
+	$results = $this->model->sparqlQuery($query);
+		
+	if (!$results || empty($results)) {
+		//TODO MISCHA should do some error reporting here
+		error_log("[foaf_editor] Error no primaryTopic");
+		return null;
+	}
         //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
-        //TODO must make sure that we handle having a non "#me" foaf:Person URI
         foreach ($results as $row) {
         	if(!isset($row['?prim'])){
         		error_log('[foaf_editor] primary topic not set');
         		continue;
         	}
             	$oldPrimaryTopic = $row['?prim']->uri;
-             
+		$fragment = "#me";
+		if (preg_match('/#(.*?)$/',$oldPrimaryTopic,$fragmatches)) {
+			$fragment = "#".$fragmatches[1];
+			error_log($fragment);
+		}
+        	//TODO must make sure that we handle having a non "#me" foaf:Person URI
+		error_log("The old primary Topic is : $oldPrimaryTopic");	
 	        //if no new uri has been passed in then just set it as the existing primary topic or, if that isn't set then the hash of the uri
-	    	$newPrimaryTopic = $this->primaryTopic;			
-	    	if(!$newPrimaryTopic){
-	    		$newPrimaryTopic = $this->uri."#me"; 
-	    	}  	
+		//$newPrimaryTopic = $this->primaryTopic;			
+		//if(!$newPrimaryTopic){
+	    		$newPrimaryTopic = $this->uri.$fragment;
+			error_log("THe old primaryTopic is".$oldPrimaryTopic);
+			error_log("The new primary Topic is".$this->uri.$fragment);	
+		//}  	
 	       
 	    	/*replace the old primary topics with the new one*/
 		if (substr($oldPrimaryTopic, 0, 5) == 'bNode') {
@@ -131,17 +138,26 @@ class FoafData {
 			$oldPrimaryTopicRes = new Resource($oldPrimaryTopic);
 		}
 	        $newPrimaryTopicRes = new Resource($newPrimaryTopic);
+		$foafDataRes = new Resource($this->uri."#me");
+		
 	        $this->model->replace($oldPrimaryTopicRes,NULL,NULL,$newPrimaryTopicRes);
 	        $this->model->replace(NULL,NULL,$oldPrimaryTopicRes,$newPrimaryTopicRes);
+	        $this->model->replace(NULL,NULL,$foafDataRes,$newPrimaryTopicRes);
+	        $this->model->replace(NULL,NULL,$foafDataRes,$newPrimaryTopicRes);
+
 	        
 	        /*just to make sure we have the right primary topic down*/
-	        $this->primaryTopic = $newPrimaryTopic;
+	        //$this->primaryTopic = $newPrimaryTopic;
+	        $this->setPrimaryTopic($newPrimaryTopic);
 	        
 	        //XXX speak to mischa about this one
 	        //if (!preg_match("/#me$/",$oldPrimaryTopic,$patterns)) {
 	        if ($oldPrimaryTopic != $newPrimaryTopic) {
-	        	$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
+	        	//$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
+	        	$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
 	        }
+
+//		var_dump($this);
         } 
         
         /*make sure that the document has only one uri*/
@@ -199,7 +215,7 @@ class FoafData {
 	        
 	        //XXX speak to mischa about this one
 	        if ($oldPrimaryTopic != $newPrimaryTopic) {
-			$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
+			$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
 	        }
         } 
         /*make sure that the document has only one uri*/
@@ -290,7 +306,7 @@ class FoafData {
     }
     public function getEmptyDocument(){
     	
-       	$graphset = ModelFactory::getDatasetMem('GarlikDataset');
+       		$graphset = ModelFactory::getDatasetMem('GarlikDataset');
 		$model = new NamedGraphMem($this->uri);
 		$this->model = $model;
 		
