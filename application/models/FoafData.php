@@ -145,7 +145,6 @@ class FoafData {
 	        $this->model->replace(NULL,NULL,$foafDataRes,$newPrimaryTopicRes);
 	        $this->model->replace(NULL,NULL,$foafDataRes,$newPrimaryTopicRes);
 
-	        
 	        /*just to make sure we have the right primary topic down*/
 	        //$this->primaryTopic = $newPrimaryTopic;
 	        $this->setPrimaryTopic($newPrimaryTopic);
@@ -156,8 +155,6 @@ class FoafData {
 	        	//$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
 	        	$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
 	        }
-
-//		var_dump($this);
         } 
         
         /*make sure that the document has only one uri*/
@@ -314,8 +311,8 @@ class FoafData {
 		$personalProfileDocumentTriple = new Statement(new Resource($this->uri), new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/PersonalProfileDocument"));
 		$primaryTopicTriple = new Statement(new Resource($this->uri), new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),$primaryResource);
 		
-		$this->model->add($personalProfileDocumentTriple);
-		$this->model->add($primaryTopicTriple);
+		$this->model->addWithoutDuplicates($personalProfileDocumentTriple);
+		$this->model->addWithoutDuplicates($primaryTopicTriple);
 		
 		$this->primaryTopic = $primaryResource->uri;
 		$this->graphset = $graphset;
