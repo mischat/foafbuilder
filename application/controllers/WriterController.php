@@ -167,7 +167,7 @@ class WriterController extends Zend_Controller_Action
 	} 
     }
 
-    public function writeFoafNodownloadAction(){
+    public function writeFoafNodownloadAction() {
     	$publicFoafData = FoafData::getFromSession(true);
         $defaultNamespace = new Zend_Session_Namespace('Garlik');
 
@@ -211,17 +211,12 @@ class WriterController extends Zend_Controller_Action
 	    }
 	    $tempmodel = unserialize(serialize($foafData->getModel()));
 
-	    //TODO MISCHA get private URI
-//	    if (!$foafData->isPublic) {
-//		$tempuri = "
-//	    } else {
 	    $tempuri = $foafData->getURI();
-//	    }
             $tempgraph= $foafData->getGraphset();
             $tempprimaryTopic = $foafData->getPrimaryTopic();
 	    
             $newDocUriRes = new Resource($tempuri);
-            $newPersonUriRes = new Resource($tempuri."#me");
+            $newPersonUriRes = new Resource($foafData->getPrimaryTopic());
             $oldPersonUriRes = new Resource($tempprimaryTopic);
             $oldDocUriRes = new Resource($tempuri);
 	    
