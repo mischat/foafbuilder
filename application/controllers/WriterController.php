@@ -82,7 +82,9 @@ class WriterController extends Zend_Controller_Action
 
 	$this->_helper->layout->disableLayout();
 	$response = $this->getResponse();
-        $response->setHeader('Content-Type', 'application/rdf+xml', true)
+	//TODO MISCHA ... fix when tabulator is fixed
+        //$response->setHeader('Content-Type', 'application/rdf+xml', true)
+        $response->setHeader('Content-Type', 'application/xml', true)
             ->setHeader('Content-Disposition', 'attachment;filename=private_foaf.rdf', true)
 	    ->setHeader('Content-Length', strlen($data), true)
 	    ->appendBody($data);
@@ -108,7 +110,9 @@ class WriterController extends Zend_Controller_Action
 
 	$this->_helper->layout->disableLayout();
 	$response = $this->getResponse();
-        $response->setHeader('Content-Type', 'application/rdf+xml', true)
+	//TODO MISCHA ... fix when tabulator is fixed
+        //$response->setHeader('Content-Type', 'application/rdf+xml', true)
+        $response->setHeader('Content-Type', 'application/xml', true)
             ->setHeader('Content-Disposition', 'attachment;filename=public_foaf.rdf', true)
 	    ->setHeader('Content-Length', strlen($data), true)
 	    ->appendBody($data);
