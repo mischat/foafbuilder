@@ -3,6 +3,7 @@ var loggingOn = false;
 
 /*--------------------------global variables--------------------------*/
 
+var awaitingKnowsResponse = false;
 
 /*global variable for storing data*/
 var globalFieldData = new Object();
@@ -1152,7 +1153,7 @@ function renderKnowsFields(data){
 		var findForm = document.createElement('form');
 		findForm.id='findForm';
 		containerElement.appendChild(findForm);
-		var inputElement = createGenericInputElement('searchInputField', 'Enter search IFP here', 0,findForm.id,true,true);
+		var inputElement = createGenericInputElement('searchInputField', 'Enter search IFP here', 0,findForm.id,true,true,false,true);
 		
 		findForm.setAttribute('action',"javascript:findFriend(document.getElementById('"+inputElement.id+"').value);");
 		
@@ -1202,13 +1203,14 @@ function renderKnowsFields(data){
 		if(!foafKnowsFields || !foafKnowsFields.knowsUser || typeof(foafKnowsFields.knowsUser) == 'undefined'){
 			return;
 		}
+
 		/*build the container*/
 		var containerElement = createFieldContainer('knowsUser', 'Knows user');
 	
 		for(friend in foafKnowsFields.knowsUser){
 			
 			var friendDiv = createFriendElement('knowsUser',foafKnowsFields.knowsUser[friend],containerElement.childNodes.length,containerElement);
-			//TODO: there should be an ignore link (I don't know this person) but not sure how this would be implemented in rdf
+			
 			createMakeMutualFriendLink(friendDiv);
 		}
 		
@@ -2824,7 +2826,8 @@ function phoneDisplayToObjects(){
 	
 	
 	/*creates and appends a generic input element to the appropriate field container*/
-	function createGenericInputElement(name, value, thisElementCount, contname,isNew,softRemove,isPrivate){
+	function createGenericInputElement(name, value, thisElementCount, contname,isNew,softRemove,isPrivate,doNotRenderPrivacy){
+		log('creating generic input element');
 		var newElement = document.createElement('input');
 		newElement.id = name+'_'+thisElementCount;
 		newElement.setAttribute('value',value);
@@ -2844,8 +2847,10 @@ function phoneDisplayToObjects(){
 		if(!softRemove){
 			createGenericInputElementRemoveLink(newElement.id,contname);
 		}
-		createGenericInputElementPrivacyBox(newElement.id,contname,isPrivate);	
-		
+		if(!doNotRenderPrivacy){
+			createGenericInputElementPrivacyBox(newElement.id,contname,isPrivate);	
+		}
+
 		document.getElementById(contname).appendChild(newElement);
 		newElement.setAttribute('class','fieldInput');
 		
@@ -3301,12 +3306,14 @@ function phoneDisplayToObjects(){
 	//write stuff to public oauth server		
 	function writePublic(){
 		log('doing write public');
+
 		$.post("/writer/write-foaf-nodownload", {}, function(data){});
 	}	
 	
 	function writePrivate(){
 		log('doing write private');
-		$.post("/writer/write-foaf-private", {}, function(data){});
+		
+		$.post("/writer/write-foaf-"+privacy, {}, function(data){});
 	}
 
 	/*---------------------------other (geek view)---------------------------*/
@@ -3343,8 +3350,15 @@ function phoneDisplayToObjects(){
 
 /*remove the mutual friend whose div is given by the id removeId*/
 function removeMutualFriendElement(removeId,removeDivId){
+
+	if(awaitingKnowsResponse){
+                return;
+        }
+
+        awaitingKnowsResponse = true;
+
 	var friend = getFriendInfoFromElement(removeId);
-	
+
 	/*the container that we want to stick it in*/
 	var containerElement = document.getElementById('knowsUser_container');
 	
@@ -3354,6 +3368,7 @@ function removeMutualFriendElement(removeId,removeDivId){
 		friend.ifps = getIFPsFromGlobalDataObject(friend);
 		$.post("/friend/remove-friend", {friend : JSON.serialize(friend)}, function(data){
 			insertFriendInRightPlace(containerElement, 'knowsUser', friend);
+			awaitingKnowsResponse = false;
 		});
 	}
 	
@@ -3581,8 +3596,16 @@ function insertFriendInRightPlace(containerElement, name, friend){
 	
 }
 
+
 /*converts a user that knows you to one that you know*/
 function makeMutualFriend(friendDivId){
+	
+	if(awaitingKnowsResponse){
+		return;	
+	} 
+
+	awaitingKnowsResponse = true;
+
 
 	var friend = getFriendInfoFromElement(friendDivId);
 	
@@ -3593,12 +3616,10 @@ function makeMutualFriend(friendDivId){
 	$.post("/friend/add-friend", {friend : JSON.serialize(friend)}, function(data){
 				insertFriendInRightPlace(containerElement, 'mutualFriend', friend);
 				removeGenericInputElement(friendDivId,'id');
-				knowsDisplayToObjects();
+				knowsDisplayToObjects();//XXX do I need this?
+				awaitingKnowsResponse = false;
 			});
-
-	/*remove the old one*/
-
-	/*update the global object but don't save*/
+	
 }
 
 /*removes the input element with the given id as well as its corresponding remove element*/
