@@ -62,14 +62,44 @@ function loadFoaf(name,url){
   	} else {
   		renderOther();
   	}
-  	document.getElementById('load-contact-details').style.backgroundImage = 'url(/images/pink_background.gif)';
-  	document.getElementById('load-the-basics').style.backgroundImage = 'url(/images/pink_background.gif)';
-  	document.getElementById('load-pictures').style.backgroundImage = 'url(/images/pink_background.gif)';
-  	document.getElementById('load-accounts').style.backgroundImage = 'url(/images/pink_background.gif)';
-  	document.getElementById('load-locations').style.backgroundImage = 'url(/images/pink_background.gif)';
-  	document.getElementById('load-friends').style.backgroundImage = 'url(/images/pink_background.gif)';
-  	document.getElementById('load-other').style.backgroundImage = 'url(/images/pink_background.gif)'; 	
-  	document.getElementById(name).style.backgroundImage='url(/images/blue_background.gif)';
+  	document.getElementById('load-contact-details').style.backgroundImage = 'url(/images/contact-pink.gif)';
+  	document.getElementById('load-the-basics').style.backgroundImage = 'url(/images/basic-pink.gif)';
+  	document.getElementById('load-pictures').style.backgroundImage = 'url(/images/pictures-pink.gif)';
+  	document.getElementById('load-accounts').style.backgroundImage = 'url(/images/accounts-pink.gif)';
+  	document.getElementById('load-locations').style.backgroundImage = 'url(/images/accounts-pink.gif)';
+  	document.getElementById('load-friends').style.backgroundImage = 'url(/images/friends-pink.gif)';
+  	document.getElementById('load-other').style.backgroundImage = 'url(/images/other-pink.gif)';
+  	
+  	//XXX verbose and messy
+  	switch(name){
+		case 'load-the-basics':
+			imageType = 'basic';
+			break;
+		case 'load-contact-details':
+			imageType = 'contact';
+			break;
+		case 'load-accounts':
+			imageType = 'accounts';
+			break;
+		case 'load-locations':
+			imageType = 'accounts';
+			break;
+		case 'load-pictures':
+			imageType = 'pictures';
+			break;
+		case 'load-friends':
+			imageType = 'friends';
+			break;
+		case 'load-other':
+			imageType = 'other';
+			break;
+		default:
+			return null;
+			break;
+	}
+	
+	document.getElementById(name).style.backgroundImage='url(/images/'+imageType+'-blue.gif)';
+  	
 }
 
 /*saves all the foaf data*/
@@ -3317,7 +3347,7 @@ function phoneDisplayToObjects(){
 	function writePrivate(){
 		log('doing write private');
 		
-		$.post("/writer/write-foaf-"+privacy, {}, function(data){});
+		$.post("/writer/write-foaf-private", {}, function(data){});
 	}
 
 	/*---------------------------other (geek view)---------------------------*/
