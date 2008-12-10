@@ -2,7 +2,12 @@ a{
 	color:#CF0072;
 	text-decoration:none;
 }
-
+#foafBirthday_container{
+	margin-bottom: 25px;	
+}
+#privacydiv_foafBirthday_container{
+	margin-top:	-35px;
+}
 #main_container{
 	width:850px;
 	margin:0 auto;
@@ -450,6 +455,7 @@ width:100%;
 	margin-top:-10px;	
 }
 .addressTitle{
+	width:150px;
 	margin-top:8px;
 	margin-bottom:5px;
 	font-weight:600;
