@@ -7,6 +7,7 @@ require_once 'helpers/settings.php';
 require_once 'helpers/write-utils.php';
 
 class FoafData {
+    private $bNodeNumber = 0;
     private $uri;
     private $model;
     private $graphset;
@@ -159,6 +160,58 @@ class FoafData {
 	    		$this->model->replace(NULL,NULL,$triple->subj,$replacementUriRes);
 	       	}
 	 }
+    }
+
+	//replaces bNodes (to be called in between loading models into this) to make sure they're unique.
+    public function mangleBnodes(){
+	
+	if(!$this->model || !property_exists($this->model,'triples') || !$this->model->triples || empty($this->model->triples)){
+		return;
+	}
+	
+	$firstLoop = true;
+	$additionalNumber = false;
+
+	foreach($this->model->triples as $triple){
+		
+		if($triple->subj instanceof BlankNode){
+			$uriArray = explode('_',$triple->subj->uri);
+			if(!$additionalNumber){
+				$additionalNumber = 0;
+				if(isset($uriArray[1])){
+					$additionalNumber = $uriArray[1];	
+				}
+			}
+			if(isset($uriArray[0])){
+				$triple->subj->uri = $uriArray[0].'_'.$additionalNumber;
+			}
+		}
+		if($triple->pred instanceof BlankNode){
+			$uriArray = explode('_',$triple->pred->uri);
+			if(!$additionalNumber){
+				$additionalNumber = 0;
+				if(isset($uriArray[1])){
+					$additionalNumber = $uriArray[1];	
+				}
+			}
+			if(isset($uriArray[0])){
+				$triple->pred->uri = $uriArray[0].'_'.$additionalNumber;
+			}
+		}
+		if($triple->obj instanceof BlankNode){
+			$uriArray = explode('_',$triple->obj->uri);
+			if(!$additionalNumber){
+				$additionalNumber = 0;
+				if(isset($uriArray[1])){
+					$additionalNumber = $uriArray[1];	
+				}
+			}
+			if(isset($uriArray[0])){
+				$triple->obj->uri = $uriArray[0].'_'.$additionalNumber;
+			}
+		}
+	}
+
     }
     
     public function replaceKnowsSubject(){
