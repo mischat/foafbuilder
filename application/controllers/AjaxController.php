@@ -88,6 +88,9 @@ class AjaxController extends Zend_Controller_Action {
         	//scrape the page to get the NSID
         	$flickr = Utils::getFlickrNsid($flickr);
        
+		error_log("FLICKR the is the return $flickr");
+
+
         	//echo($flickr);
         	if($flickr!=0){
         		$flickrUri = 'http://foaf.qdos.com/flickr/people/'.$flickr;
@@ -118,7 +121,7 @@ class AjaxController extends Zend_Controller_Action {
             	
         	$lastfmUri = 'http://foaf.qdos.com/lastfm/people/'.$lastfm; 
         	$lastfm = $this->foafData->getModel()->load($lastfmUri);
-            $this->foafData->replacePrimaryTopic($lastfmUri);
+	        $this->foafData->replacePrimaryTopic($lastfmUri);
 		
             if($lastfm != 1){
 				$this->view->results['lastfmFound'] = true;
@@ -395,7 +398,6 @@ echo('beta');
           		
                 unlink($filename_1);
                 $publicFoafData->putInSession();
-                
                 
             }
             if($privateFoafData){
