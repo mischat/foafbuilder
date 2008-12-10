@@ -3337,6 +3337,11 @@ function phoneDisplayToObjects(){
 		
 	}
 	
+	function writePublicAndPrivate(){
+		writePublic();
+		writePrivate();
+	}
+	
 	//write stuff to public oauth server		
 	function writePublic(){
 		log('doing write public');

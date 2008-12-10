@@ -157,6 +157,9 @@ color:#ffffff;
 font-family:Arial,Helvetica,sans-serif;
 
 }
+.builderLogo{
+	margin-top:15px;	
+}
 #find_button{
 	position:absolute;
 	left:528px;
@@ -263,7 +266,7 @@ width:100%;
 }
 .editorElement{
 	width:220px;
-	background-color: #eeeeee;
+	background-color: #efefef;
 }
 .editorTitle{
 	padding-right:20px;
@@ -310,7 +313,7 @@ width:100%;
 	font-size:12px;
 	color:#000000;
 	font-weight:600;
-	background-color:#eeeeee;
+	background-color:#efefef;
 }
 
 .editorSubOptionsText{
@@ -447,6 +450,7 @@ width:100%;
 	margin-top:-10px;	
 }
 .addressTitle{
+	margin-top:8px;
 	margin-bottom:5px;
 	font-weight:600;
 	position:relative;
