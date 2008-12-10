@@ -1453,7 +1453,21 @@ function renderKnowsFields(data){
 		if(address[prefix+'Street3']){
 			street3InputElement.value = address[prefix+'Street3'];
 		}
-			
+		
+		/*city*/
+                var cityLabelDiv = document.createElement('div');
+                cityLabelDiv.appendChild(document.createTextNode('City:'));
+                cityLabelDiv.className='cityLabel';
+                locationDiv.appendChild(cityLabelDiv);
+                var cityInputElement = document.createElement('input');
+                cityInputElement.id = 'city';
+                cityInputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
+                locationDiv.appendChild(cityInputElement);
+                //populate it
+                if(address[prefix+'City']){
+                        cityInputElement.value = address[prefix+'City'];
+                }
+	
 		/*postalCode*/
 		var postalCodeLabelDiv = document.createElement('div');
 		postalCodeLabelDiv.appendChild(document.createTextNode('Postal Code:'));
@@ -1466,20 +1480,6 @@ function renderKnowsFields(data){
 		//populate it
 		if(address[prefix+'PostalCode']){
 			postalCodeInputElement.value = address[prefix+'PostalCode'];
-		}
-		
-		/*city*/
-		var cityLabelDiv = document.createElement('div');
-		cityLabelDiv.appendChild(document.createTextNode('City:'));
-		cityLabelDiv.className='cityLabel';
-		locationDiv.appendChild(cityLabelDiv);
-		var cityInputElement = document.createElement('input');
-		cityInputElement.id = 'city';
-		cityInputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
-		locationDiv.appendChild(cityInputElement);
-		//populate it
-		if(address[prefix+'City']){
-			cityInputElement.value = address[prefix+'City'];
 		}
 		
 		/*country*/
