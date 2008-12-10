@@ -3338,25 +3338,11 @@ function phoneDisplayToObjects(){
 	}
 	
 	function writePublicAndPrivate(){
-		//writePublic();
-		//writePrivate();
 		log('doing write public');
 
 		$.post("/writer/write-foaf-garlik-servers", {}, function(data){if(data=='null'){window.location='/continue';}});
 	}
 	
-	//write stuff to public oauth server		
-	function writePublic(){
-		log('doing write public');
-
-		$.post("/writer/write-foaf-nodownload", {}, function(data){if(data=='null'){window.location='/continue';}});
-	}	
-	
-	function writePrivate(){
-		log('doing write private');
-		
-		$.post("/writer/write-foaf-private", {}, function(data){if(data=='null'){window.location='/continue';}});
-	}
 
 	/*---------------------------other (geek view)---------------------------*/
 
