@@ -506,7 +506,7 @@ class KnowsField extends Field {
                 		}";
 
 
-			error_log('[INFRIEND QUERY]'.$inquery);
+			//error_log('[INFRIEND QUERY]'.$inquery);
                         //TODO: continue where I left off.  I just added the optional and I want
                         //to use the infriend uri to get some of the details in order to make sure libby knows dan as she should
                 }//need to allow people who just know by uri to enter stuff here
