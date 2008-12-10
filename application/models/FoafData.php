@@ -25,7 +25,6 @@ class FoafData {
     public function FoafData ($uri = "",$isPublic = true) {
         
 	//either a private foafData object or a public one
-
 	//Check if authenticated
 	$defaultNamespace = new Zend_Session_Namespace('Garlik');
 
@@ -89,12 +88,28 @@ class FoafData {
 		if ($loadValue==1) {
 			return;		
 		}
+		//TODO MISCHA catch fail ... from load
 	}
-		
 	/*make sure that the uri and primary topic of the document is consistent*/
         $this->replacePrimaryTopic($this->uri);	
 	$this->putInSession();
     }
+
+    //Remove the generator agent and add our own
+    public function removeGeneratorAgent($uri) {
+	error_log('[foafeditor] Trying to remove generator ');
+	$predicate_resource = new Resource('http://webns.net/mvcb/generatorAgent');
+	$primary_topic_resource = new Resource($uri);
+	
+	//find existing triples
+	$foundModel = $this->model->find($primary_topic_resource,$predicate_resource,NULL);
+	
+	//remove existing triples
+	foreach($foundModel->triples as $triple){
+		error_log('[foafeditor] found generator agent triple');
+		$this->model->remove($triple);
+	}
+    }	
     
     //replace the existing primary topic with either newPrimaryTopic or a hash of the uri
     public function replacePrimaryTopic($uri){
