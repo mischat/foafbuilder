@@ -72,6 +72,7 @@ class BirthdayField extends Field {
             if (!(empty($results))) {
             /*mangle the results so that they can be easily rendered*/
                 foreach ($results as $row) {	
+                    //if (isset($row['?foafDateOfBirth']->label) && $this->isLongDateValid($row['?foafDateOfBirth']->label)) {
                     if (isset($row['?foafDateOfBirth']->label) && $this->isLongDateValid($row['?foafDateOfBirth']->label)) {
                         error_log("[foaf_editor] found complete dateOfBirth");
                         /* spliting with 3 different values : / - */
@@ -79,9 +80,6 @@ class BirthdayField extends Field {
                         if (empty($birthdayArray)) {
                             $birthdayArray = split("/",$row['?foafDateOfBirth']->label);
                         } 
-                        if (empty($birthdayArray)) {
-                            $birthdayArray = split(":",$row['?foafDateOfBirth']->label);
-                        }
                         /*If the birthdayArray is nice and easy to parse!*/
                         if (count($birthdayArray == 3)) {
                             $this->data[$privacy]['foafBirthdayFields']['day']= $birthdayArray[2];
@@ -110,12 +108,23 @@ class BirthdayField extends Field {
                         } else {
                             $this->data[$privacy]['foafBirthdayFields']['month']= $birthdayArray[0];
                         }
-                    } else if (isset($row['?bioBirthday']->label) && $this->isLongDateValid($row['?bioBirthday']->label)) {
+                    //} else if (isset($row['?bioBirthday']->label) && $this->isLongDateValid($row['?bioBirthday']->label)) {
+                    } else if (isset($row['?bioBirthday']->label)) {
                         /* This one is actually well specified */
                         $birthdayArray = split("-",$row['?bioBirthday']->label);
-                        $this->data[$privacy]['foafBirthdayFields']['day']= $birthdayArray[2];
-                        $this->data[$privacy]['foafBirthdayFields']['month']= $birthdayArray[1];
-                        $this->data[$privacy]['foafBirthdayFields']['year']= $birthdayArray[0];
+                        if (sizeof($birthdayArray) == 3) {
+                            $this->data[$privacy]['foafBirthdayFields']['day']= $birthdayArray[2];
+                            $this->data[$privacy]['foafBirthdayFields']['month']= $birthdayArray[1];
+                            $this->data[$privacy]['foafBirthdayFields']['year']= $birthdayArray[0];
+                        } else if (sizeof($birthdayArray) == 2) {
+                            $this->data[$privacy]['foafBirthdayFields']['day']= "";
+                            $this->data[$privacy]['foafBirthdayFields']['month']= $birthdayArray[1];
+                            $this->data[$privacy]['foafBirthdayFields']['year']= $birthdayArray[0];
+                        } else if (sizeof($birthdayArray) == 1) {
+                            $this->data[$privacy]['foafBirthdayFields']['day']= "";
+                            $this->data[$privacy]['foafBirthdayFields']['month']= "";
+                            $this->data[$privacy]['foafBirthdayFields']['year']= $birthdayArray[0];
+                        }
                     }
                 }	
             }
@@ -179,22 +188,30 @@ class BirthdayField extends Field {
 
             /*Now to write out triples after cleaning them*/
             /*If NO year presented then fit the most appropriate foaf:birthday*/
-            if (!isset($valueArray['year']) || $valueArray['year'] == '' && ($valueArray['month'] != '' || $valueArray['day'] != '')) {
-                 /*Now we use the foaf:birthday*/
+            if (!isset($valueArray['year']) || $valueArray['year'] == '' && ((isset($valueArray['month']) && $valueArray['month'] != '') || (isset($valueArray['day']) && $valueArray['day'] != ''))) {
+                /*Now we use the foaf:birthday*/
                 $foafBirthdayResource = new Resource("http://xmlns.com/foaf/0.1/birthday");
-                if (strlen($valueArray['month']) == 1) {
-                    $month = "0".$valueArray['month'];
-                } else if (strlen($valueArray['month']) == 0) {
-                    $month = "00";
+                if (isset($valueArray['month'])) {
+                    if (strlen($valueArray['month']) == 1) {
+                        $month = "0".$valueArray['month'];
+                    } else if (strlen($valueArray['month']) == 0) {
+                        $month = "00";
+                    } else {
+                        $month = $valueArray['month'];
+                    }
                 } else {
-                    $month = $valueArray['month'];
+                    $month = "00";
                 }
-                if (strlen($valueArray['day']) == 1) {
-                    $day = "0".$valueArray['day'];
-                } else if (strlen($valueArray['day']) == 0) {
-                    $month = "00";
+                if (isset($valueArray['day'])) {
+                    if (strlen($valueArray['day']) == 1) {
+                        $day = "0".$valueArray['day'];
+                    } else if (strlen($valueArray['day']) == 0) {
+                        $month = "00";
+                    } else {
+                        $day = $valueArray['day'];
+                    }
                 } else {
-                    $day = $valueArray['day'];
+                    $day = "00";
                 }
 
                 $newFoafBirthday = new Statement(new Resource($foafData->getPrimaryTopic()),$foafBirthdayResource,new Literal($month."-".$day));
@@ -206,21 +223,20 @@ class BirthdayField extends Field {
            
                 //Build up the literal value for bio:date 
                 $dateString = $valueArray['year'];
-                if ($valueArray['month'] != '') {
+                if (isset($valueArray['month']) && $valueArray['month'] != '') {
                     $dateString .= "-";
                     if (strlen($valueArray['month']) == 1) {
                         $dateString .= "0";
                     }
                     $dateString .= $valueArray['month'];
-                    if ($valueArray['day'] != '') {
+                    if (isset($valueArray['day']) && $valueArray['day'] != '') {
                         $dateString .= "-";
                         if (strlen($valueArray['month']) == 1) {
                             $dateString .= "0";
                         }
                         $dateString .= $valueArray['day'];
                     }
-                
-                }
+                } 
 
                 $dateLiteral = new Literal($dateString);
                 $new_bnode = new BlankNode($foafData->getModel());
