@@ -367,11 +367,12 @@ echo('beta');
         
         $publicRdf = @$_POST['public'];
 	   	$privateRdf = @$_POST['private'];
-
+		$publicRdf = str_replace('\n','',$publicRdf);
+		$publicRdf = str_replace('+','',$publicRdf);
+		$privateRdf = str_replace('\n','',$privateRdf);
+		$privateRdf = str_replace('+','',$privateRdf);
+	   	
         if ($publicRdf && $privateRdf) {
-		
-         	$publicRdf = urldecode($publicRdf);
-        	$privateRdf = urldecode($privateRdf);
          
             $publicFoafData = FoafData::getFromSession(true);	
             $privateFoafData = FoafData::getFromSession(false);	
