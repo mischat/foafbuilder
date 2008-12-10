@@ -66,7 +66,7 @@ function loadFoaf(name,url){
   	document.getElementById('load-the-basics').style.backgroundImage = 'url(/images/basic-pink.gif)';
   	document.getElementById('load-pictures').style.backgroundImage = 'url(/images/pictures-pink.gif)';
   	document.getElementById('load-accounts').style.backgroundImage = 'url(/images/accounts-pink.gif)';
-  	document.getElementById('load-locations').style.backgroundImage = 'url(/images/accounts-pink.gif)';
+  	document.getElementById('load-locations').style.backgroundImage = 'url(/images/locations-pink.gif)';
   	document.getElementById('load-friends').style.backgroundImage = 'url(/images/friends-pink.gif)';
   	document.getElementById('load-other').style.backgroundImage = 'url(/images/other-pink.gif)';
   	
@@ -82,7 +82,7 @@ function loadFoaf(name,url){
 			imageType = 'accounts';
 			break;
 		case 'load-locations':
-			imageType = 'accounts';
+			imageType = 'locations';
 			break;
 		case 'load-pictures':
 			imageType = 'pictures';
