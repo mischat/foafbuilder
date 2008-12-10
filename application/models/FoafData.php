@@ -149,9 +149,11 @@ class FoafData {
         	}
             	$oldPrimaryTopic = $row['?prim']->uri;
 		$fragment = "#me";
-		if (preg_match('/#(.*?)$/',$oldPrimaryTopic,$fragmatches)) {
-			$fragment = "#".$fragmatches[1];
-			error_log($fragment);
+		if (preg_match('/#me$/',$this->getPrimaryTopic())) {
+			if (preg_match('/#(.*?)$/',$oldPrimaryTopic,$fragmatches)) {
+				$fragment = "#".$fragmatches[1];
+				error_log("The fragment is $fragment: from this oldPrimaryTopic $oldPrimaryTopic and the primaryTopic is".$this->getPrimaryTopic());
+			}
 		}
         	//TODO must make sure that we handle having a non "#me" foaf:Person URI
 	    	$newPrimaryTopic = $this->uri.$fragment;
