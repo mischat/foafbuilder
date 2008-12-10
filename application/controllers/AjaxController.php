@@ -17,19 +17,19 @@ class AjaxController extends Zend_Controller_Action {
 	
 	public function loadExtractorAction(){
 	
-		$this->loadFoaf();
+	$this->loadFoaf();
 		
-		//some details
+	//some details
         $uri = @$_GET['uri'];
         $flickr = @$_GET['flickr'];
-        $delicious = @$_GET['delicious'];
+        //$delicious = @$_GET['delicious'];
         $lastfm = @$_GET['lastfmUser'];
         $lj = @$_GET['lj'];
         
         //results
 	$this->view->results = array();
         $this->view->results['flickrFound'] = $this->foafData->flickrFound;
-        $this->view->results['deliciousFound'] = $this->foafData->deliciousFound;
+        //$this->view->results['deliciousFound'] = $this->foafData->deliciousFound;
         $this->view->results['lastfmFound'] = $this->foafData->lastfmFound;
         $this->view->results['ljFound'] = $this->foafData->ljFound;
         $this->view->results['uriFound'] = false;
@@ -56,6 +56,8 @@ class AjaxController extends Zend_Controller_Action {
 		}
 		if ($ok) {
 			//TODO MISCHA, public and private load
+			//just to ensure that the bnodes are unique
+			$this->foafData->mangleBnodes();
 			$uriLoadOk = $this->foafData->getModel()->load($uri);
 			$this->foafData->replacePrimaryTopic($uri);
 				
@@ -69,6 +71,7 @@ class AjaxController extends Zend_Controller_Action {
         	
 		$ljUri = 'http://'.$lj.'.livejournal.com/data/foaf';
 		//echo($ljUri);
+		$this->foafData->mangleBnodes();
 		$lj = $this->foafData->getModel()->load($ljUri);
 		// LJ are lame and don't set foaf:primaryTopic
 		$this->foafData->replaceKnowsSubject();
@@ -87,6 +90,7 @@ class AjaxController extends Zend_Controller_Action {
         	//echo($flickr);
         	if($flickr!=0){
         		$flickrUri = 'http://foaf.qdos.com/flickr/people/'.$flickr;
+			$this->foafData->mangleBnodes();
         		//echo($flickrUri);
         		$flickr = $this->foafData->getModel()->load($flickrUri);
         		$this->foafData->replacePrimaryTopic($flickrUri);
@@ -96,10 +100,11 @@ class AjaxController extends Zend_Controller_Action {
 					$this->foafData->flickrFound = true;
 				}
         	}
-        } 
+        } /*
         if($delicious && !$this->foafData->deliciousFound){
             
         	$deliciousUri = 'http://foaf.qdos.com/delicious/people/'.$delicious;
+			$this->foafData->mangleBnodes();
         	$delicious = $this->foafData->getModel()->load($deliciousUri);
 			$this->foafData->replacePrimaryTopic($flickrUri);
 			
@@ -107,9 +112,9 @@ class AjaxController extends Zend_Controller_Action {
 				$this->view->results['deliciousFound'] = true;
 				$this->foafData->deliciousFound = true;
 			}
-		} 
+		} */
         if($lastfm && !$this->foafData->lastfmFound){
-            
+            	
         	$lastfmUri = 'http://foaf.qdos.com/lastfm/people/'.$lastfm; 
         	$lastfm = $this->foafData->getModel()->load($lastfmUri);
             $this->foafData->replacePrimaryTopic($lastfmUri);

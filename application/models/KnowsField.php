@@ -58,6 +58,7 @@ class KnowsField extends Field {
                 if(property_exists($friend,'uri')){
                         //TODO: add just the  uri here
 			echo('ADDING URI HERE!!!');
+			$foafData->getModel()->add(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource("http://xmlns.com/foaf/0.1/knows"), new Resource($friend->uri)));
                 } else {
 			$bNode = Utils::GenerateUniqueBnode($foafData->getModel());
                 	
@@ -75,22 +76,16 @@ class KnowsField extends Field {
 					$friend->ifps[0] = "mailto:".$friend->ifps[0];
 				}
 				
-				echo('adding mbox');
-				
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal(sha1($friend->ifps[0]))));
 				$successfulAdd = 1;
 	
 			} else if($ifpType == "mbox_sha1sum"){
 				
-				echo('adding mbox sha1');
-
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal($friend->ifps[0])));
 				$successfulAdd = 1;
 	
 			} else {
 				//XXX make sure the correct homepage/weblog is added here
-				echo('adding homepage or weblog'.$bNode->uri);
-				
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$ifpType),new Resource($friend->ifps[0])));
 				$successfulAdd = 1;
 			}
