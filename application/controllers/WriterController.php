@@ -139,7 +139,7 @@ class WriterController extends Zend_Controller_Action
         }
     }
   
-    public function writeFoafGarlikServersAction() {
+    public static function writeFoafGarlikServersAction() {
 	$privateFoafData = FoafData::getFromSession(false);
     	$publicFoafData = FoafData::getFromSession(true);
         $defaultNamespace = new Zend_Session_Namespace('Garlik');
@@ -165,7 +165,6 @@ class WriterController extends Zend_Controller_Action
 		} else {
 			error_log('[foafeditor] rdf stream empty for the private data nothing to write to:'.$uri);
 		}
-		$this->view->data = "true";
 		//do public
 		$tempmodel = null;
 		
@@ -196,10 +195,11 @@ class WriterController extends Zend_Controller_Action
 		} else {
 			error_log('[foafeditor] rdf stream empty nothing to write to:'.$tempuri);
 		}
-		$this->view->data = "true";
+		echo "true";
 	} else {
 		error_log("NOT LOGGED IN, am redirecting to continue now garlik-servers!");
 	}
+	return null;
     }
 /*
     public function writeFoafPrivateAction() {

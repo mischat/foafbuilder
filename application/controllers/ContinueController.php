@@ -35,8 +35,10 @@ class ContinueController extends Zend_Controller_Action
 	       if ($_GET['openid_mode'] == "id_res") {
 			$consumer = new Zend_OpenId_Consumer();
 			if ($consumer->verify($_GET, $id)) {
+				require_once 'WriterController.php';
 				error_log("OpenID Authenication pass!");
 				$defaultNamespace->authenticated = true;
+				WriterController::writeFoafGarlikServersAction();
 				$this->_helper->redirector('../builder');
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
