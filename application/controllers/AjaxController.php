@@ -62,7 +62,6 @@ class AjaxController extends Zend_Controller_Action {
 			$this->foafData->replacePrimaryTopic($uri);
 			$this->foafData->replaceGeneratorAgent();
 
-				
 			if($uriLoadOk != 1){
 				$this->view->results['uriFound'] = true;
 			}
