@@ -60,6 +60,8 @@ class AjaxController extends Zend_Controller_Action {
 			$this->foafData->mangleBnodes();
 			$uriLoadOk = $this->foafData->getModel()->load($uri);
 			$this->foafData->replacePrimaryTopic($uri);
+			$this->foafData->replaceGeneratorAgent();
+
 				
 			if($uriLoadOk != 1){
 				$this->view->results['uriFound'] = true;
@@ -389,6 +391,7 @@ echo('beta');
                 
                 $newPublicModel->load($filename_1);
                 $publicFoafData->replacePrimaryTopic($publicFoafData->getUri());
+                $publicFoafData->replaceGeneratorAgent();
                 $publicFoafData->setModel($newPublicModel);
           		
                 unlink($filename_1);
@@ -408,6 +411,7 @@ echo('beta');
             	
             	$newPrivateModel->load($filename_2);
             	$privateFoafData->replacePrimaryTopic($privateFoafData->getUri());
+            	$privateFoafData->replaceGeneratorAgent();
                 $privateFoafData->setModel($newPrivateModel);
                  
                	unlink($filename_2);
