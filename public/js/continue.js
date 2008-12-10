@@ -14,5 +14,5 @@ function doOpenid(){
 	var openid_action = document.getElementById('openid_action').value;
 //	var errorConsole = document.getElementById('openid').value;
 			
-	$.post("/logon/do-openid",{openid_identifier : openid_identifier, openid_action : openid_action} , function(data) {}, 'json');			
+	$.post("/continue/do-openid",{openid_identifier : openid_identifier, openid_action : openid_action} , function(data) {}, 'json');			
 }

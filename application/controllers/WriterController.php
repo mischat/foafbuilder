@@ -138,7 +138,70 @@ class WriterController extends Zend_Controller_Action
         	$this->doWrite($publicFoafData,$newDocUri);
         }
     }
-    
+  
+    public function writeFoafGarlikServersAction() {
+	$privateFoafData = FoafData::getFromSession(false);
+    	$publicFoafData = FoafData::getFromSession(true);
+        $defaultNamespace = new Zend_Session_Namespace('Garlik');
+
+        //Check if authenicated
+        if ($defaultNamespace->authenticated == true) {
+		error_log("Writing private triples to oauth");
+		//$uri = PRIVATE_URL.$defaultNamespace->uri.'/data/foaf.rdf';
+		$uri = $privateFoafData->getURI();
+
+		$tempmodel = unserialize(serialize($privateFoafData->getModel()));
+		$tempmodel->setBaseUri(NULL);
+		$result = $tempmodel->find(NULL, NULL, NULL);
+
+		$data = $result->writeRdfToString();
+		if (strlen($data) > 0 ) {
+			$cachename = cache_filename($uri);
+			if (!file_exists(PRIVATE_DATA_DIR.$cachename)) {
+				create_cache($cachename,PRIVATE_DATA_DIR);
+			}
+			file_put_contents(PRIVATE_DATA_DIR.$cachename,$data);	
+			error_log('[foafeditor] We have created a new private file at the following url:'.$uri);
+		} else {
+			error_log('[foafeditor] rdf stream empty for the private data nothing to write to:'.$uri);
+		}
+		$this->view->data = "true";
+		//do public
+		$tempmodel = null;
+		
+		$tempmodel = unserialize(serialize($publicFoafData->getModel()));
+
+		$tempuri = $publicFoafData->getURI();
+		$tempprimaryTopic = $publicFoafData->getPrimaryTopic();
+		$newDocUriRes = new Resource($tempuri);
+		$newPersonUriRes = new Resource($tempuri."#me");
+		$oldPersonUriRes = new Resource($tempprimaryTopic);
+		$oldDocUriRes = new Resource($tempuri);
+		
+		$tempmodel->replace($oldDocUriRes,new Resource("<http://xmlns.com/foaf/0.1/primaryTopic>"),NULL,$newDocUriRes);
+		$tempmodel->replace($oldPersonUriRes,NULL,NULL,$newPersonUriRes);
+		$tempmodel->replace(NULL,NULL,$oldPersonUriRes,$newPersonUriRes);
+		$result = $tempmodel->find(NULL, NULL, NULL);
+
+		$data = $result->writeRdfToString();
+
+		if (strlen($data) > 0 ) {
+			$cachefilename = cache_filename($tempuri);
+			error_log($cachefilename);
+			if (!file_exists(PUBLIC_DATA_DIR.$cachefilename)) {
+				create_cache($cachefilename,PUBLIC_DATA_DIR);
+			}
+			file_put_contents(PUBLIC_DATA_DIR.$cachefilename, $data);
+			error_log('[foafeditor] We have created a new file at the following url:'.$tempuri);
+		} else {
+			error_log('[foafeditor] rdf stream empty nothing to write to:'.$tempuri);
+		}
+		$this->view->data = "true";
+	} else {
+		error_log("NOT LOGGED IN, am redirecting to continue now garlik-servers!");
+	}
+    }
+/*
     public function writeFoafPrivateAction() {
 	$privateFoafData = FoafData::getFromSession(false);
         $defaultNamespace = new Zend_Session_Namespace('Garlik');
@@ -164,9 +227,13 @@ class WriterController extends Zend_Controller_Action
 		} else {
 			error_log('[foafeditor] rdf stream empty for the private data nothing to write to:'.$uri);
 		}
+		$this->view->data = "true";
 	} 
-    }
 
+	error_log("NOT LOGGED IN, am redirecting to continue now!");
+    }
+*/
+/*
     public function writeFoafNodownloadAction() {
     	$publicFoafData = FoafData::getFromSession(true);
         $defaultNamespace = new Zend_Session_Namespace('Garlik');
@@ -202,9 +269,11 @@ class WriterController extends Zend_Controller_Action
 		} else {
 			error_log('[foafeditor] rdf stream empty nothing to write to:'.$tempuri);
 		}
+		$this->view->data = "true";
         } 
+	error_log("NOT LOGGED IN, am redirecting to continue now LAME AS HELL !!");
     }
-    
+  */  
     private function doWrite($foafData,$newDocUri,$writeNtriples){
 	    if (!$foafData) {
 		return;
