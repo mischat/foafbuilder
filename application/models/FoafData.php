@@ -92,22 +92,41 @@ class FoafData {
 	}
 	/*make sure that the uri and primary topic of the document is consistent*/
         $this->replacePrimaryTopic($this->uri);	
+        $this->replaceGeneratorAgent();
 	$this->putInSession();
     }
 
     //Remove the generator agent and add our own
-    public function removeGeneratorAgent($uri) {
-	error_log('[foafeditor] Trying to remove generator ');
-	$predicate_resource = new Resource('http://webns.net/mvcb/generatorAgent');
-	$primary_topic_resource = new Resource($uri);
-	
-	//find existing triples
-	$foundModel = $this->model->find($primary_topic_resource,$predicate_resource,NULL);
-	
-	//remove existing triples
-	foreach($foundModel->triples as $triple){
-		error_log('[foafeditor] found generator agent triple');
-		$this->model->remove($triple);
+    public function replaceGeneratorAgent() {
+	if (!$this->getUri()) {
+		error_log('[foafeditor] Trying to remove generator and the $uri is '.$this->getUri());
+		$gen_agent = new Resource('http://webns.net/mvcb/generatorAgent');
+		$reports_to = new Resource('http://webns.net/mvcb/errorReportsTo');
+		$mailto_admin = new Resource('mailto:admin.qdos.com');
+		$builder = new Resource(BUILDER_URL);
+		$primary_topic_resource = new Resource($this->getUri());
+		
+		//find existing triples
+		$foundModel = $this->model->find($primary_topic_resource,$gen_agent,NULL);
+		
+		//remove existing triples
+		foreach($foundModel->triples as $triple){
+			error_log('[foafeditor] found generator agent triple');
+			$this->model->remove($triple);
+		}
+
+		$statement = new Statement($primary_topic_resource,$gen_agent,$builder);
+		$this->model->addWithoutDuplicates($statement);
+
+		$foundModel = $this->model->find($primary_topic_resource,$reports_to,NULL);
+		//remove existing triples
+		foreach($foundModel->triples as $triple){
+			error_log('[foafeditor] found generator agent triple');
+			$this->model->remove($triple);
+		}
+
+		$statement = new Statement($primary_topic_resource,$reports_to,$mailto_admin);
+		$this->model->addWithoutDuplicates($statement);
 	}
     }	
     
