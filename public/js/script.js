@@ -3346,13 +3346,13 @@ function phoneDisplayToObjects(){
 	function writePublic(){
 		log('doing write public');
 
-		$.post("/writer/write-foaf-nodownload", {}, function(data){});
+		$.post("/writer/write-foaf-nodownload", {}, function(data){if(data=='null'){window.location='/logon';}});
 	}	
 	
 	function writePrivate(){
 		log('doing write private');
 		
-		$.post("/writer/write-foaf-private", {}, function(data){});
+		$.post("/writer/write-foaf-private", {}, function(data){if(data=='null'){window.location='/logon';}});
 	}
 
 	/*---------------------------other (geek view)---------------------------*/
