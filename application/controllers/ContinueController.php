@@ -19,10 +19,6 @@ class ContinueController extends Zend_Controller_Action
 	$defaultNamespace = new Zend_Session_Namespace('Garlik');
 	$defaultNamespace->authenticated = false;
 	
-	if(isset($_POST['openid_action'])){
-		$defaultNamespace->url = $this->makeOpenIdUrl($_POST['openid_identifier']);
-	}
-
 	if (isset($_POST['openid_action']) && $_POST['openid_action'] == "login" && !empty($_POST['openid_identifier'])) {
     		$openid = $_POST['openid_identifier'];	
 		$consumer = new Zend_OpenId_Consumer();
@@ -38,6 +34,7 @@ class ContinueController extends Zend_Controller_Action
 				require_once 'WriterController.php';
 				error_log("OpenID Authenication pass!");
 				$defaultNamespace->authenticated = true;
+				$defaultNamespace->url = $this->makeOpenIdUrl($_POST['openid_identifier']);
 				WriterController::writeFoafGarlikServersAction();
 				$this->_helper->redirector('../builder');
 			}
