@@ -14,6 +14,48 @@ class AjaxController extends Zend_Controller_Action {
     private $fieldNamesObject; 
     private $foafData;
     private $privateFoafData;
+
+	public function loadFoafFromUri($uri) {
+	 error_log("BBBBBBBBBBBBBBB");
+	 error_log("BBBBBBBBBBBBBBB");
+	 error_log("BBBBBBBBBBBBBBB");
+	 error_log("BBBBBBBBBBBBBBB");
+	 error_log("BBBBBBBBBBBBBBB");
+	 error_log("BBBBBBBBBBBBBBB$uri");
+	 error_log("BBBBBBBBBBBBBBB$uri");
+	 error_log("BBBBBBBBBBBBBBB$uri");
+	 error_log("BBBBBBBBBBBBBBB$uri");
+	 error_log("BBBBBBBBBBBBBBB$uri");
+	      $tempmodel = new NamedGraphMem($uri);
+	   
+
+	     /*load the rdf from the passed in uri into the model*/
+	     $loadValue = $tempmodel->load($uri);		
+		if ($loadValue==1) {
+			return;		
+		}
+
+            $result = $tempmodel->find(NULL, NULL, NULL);
+
+	   	
+	    if ($result) { 
+		    //loop through removing any hanging triples
+		    foreach($result->triples as $triple){
+			error_log("Is something happening here");
+			error_log(var_dump($triple));
+			$this->foafData->getModel()->addWithoutDuplicates($triple);
+		    }
+	    	    return 1;
+		    flush($result);
+		    flush($tempmodel);	
+	    } else {
+	        flush($result);
+	        flush($tempmodel);	
+		return 0;
+	    }
+
+	}
+
 	
 	public function loadExtractorAction(){
 	
@@ -58,11 +100,13 @@ class AjaxController extends Zend_Controller_Action {
 			//TODO MISCHA, public and private load
 			//just to ensure that the bnodes are unique
 			$this->foafData->mangleBnodes();
-			$uriLoadOk = $this->foafData->getModel()->load($uri);
+			//$uriLoadOk = $this->foafData->getModel()->load($uri);
+			$uriLoadOk = $this->loadFoafFromUri($uri);
+
 			$this->foafData->replacePrimaryTopic($uri);
 			$this->foafData->replaceGeneratorAgent();
 
-			if($uriLoadOk != 1){
+			if($uriLoadOk != 0){
 				$this->view->results['uriFound'] = true;
 			}
 		}
@@ -387,7 +431,7 @@ echo('beta');
             	$newPublicModel = new MemModel();
             	
             	//shove the data into a file
-            	$filename_1 = '/tmp/foafbuilder_temporary_file'.md5(microtime() * microtime());
+            	$filename_1 = BUILDER_TEMP_DIR.md5(microtime() * microtime());
                 $filehandle_1 = fopen($filename_1,'w+');
                 fwrite($filehandle_1,$publicRdf);
                 
@@ -406,7 +450,7 @@ echo('beta');
             	
             	$privateFoafData->setModel(new MemModel());
             	
-            	$filename_2 = '/tmp/foafbuilder_temporary_file'.md5(microtime() * microtime());
+            	$filename_2 = BUILDER_TEMP_DIR.md5(microtime() * microtime());
             	$filehandle_2 = fopen($filename_2,'w+');
             	fwrite($filehandle_2,$privateRdf);
             	
