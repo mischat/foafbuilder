@@ -19,10 +19,6 @@ class LogonController extends Zend_Controller_Action
 	$defaultNamespace = new Zend_Session_Namespace('Garlik');
 	$defaultNamespace->authenticated = false;
 	
-	if(isset($_POST['openid_action'])){
-		$defaultNamespace->url = $this->makeOpenIdUrl($_POST['openid_identifier']);
-	}
-
 	if (isset($_POST['openid_action']) && $_POST['openid_action'] == "login" && !empty($_POST['openid_identifier'])) {
     		$openid = $_POST['openid_identifier'];	
     		error_log("Please say something is happening here $openid");
@@ -39,6 +35,7 @@ class LogonController extends Zend_Controller_Action
 			if ($consumer->verify($_GET, $id)) {
 				error_log("OpenID authenication success");
 				$defaultNamespace->authenticated = true;
+				$defaultNamespace->url = $this->makeOpenIdUrl($_POST['openid_identifier']);
 				$this->_helper->redirector('../index');
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
