@@ -1,5 +1,6 @@
 <?php
 require_once 'Field.php';
+require_once 'helpers/double_metaphone.php';
 
 /*class to represent one item e.g. foafName or bioBirthday... not the same as one triple*/
 class SimpleField extends Field{
@@ -104,7 +105,47 @@ class SimpleField extends Field{
 				$value_res_or_literal = new Resource($thisValue);
 			} 		
 			$new_statement = new Statement($primary_topic_resource,$predicate_resource,$value_res_or_literal);	
-			$model->add($new_statement);
+			if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/givenname') {
+				$phones = $phones = double_metaphone($thisValue);
+				foreach ($phones as $phone) {
+					if ($phone != "") {
+						$phone_statement = new Statement($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
+						$model->addWithOutDuplicates($phone_statement);
+					}
+				}
+				
+			}
+			if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/family_name') {
+				$phones = $phones = double_metaphone($thisValue);
+				foreach ($phones as $phone) {
+					if ($phone != "") {
+						$phone_statement = new Statement($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
+						$model->addWithOutDuplicates($phone_statement);
+					}
+				}
+			}
+			if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/surname') {
+				$phones = $phones = double_metaphone($thisValue);
+				foreach ($phones as $phone) {
+					if ($phone != "") {
+						$phone_statement = new Statement($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
+						$model->addWithOutDuplicates($phone_statement);
+					}
+				}
+			}
+			if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/name') {
+				$names = split(' ',$thisValue);
+				foreach ($names as $name) {
+					$phones = $phones = double_metaphone($name);
+					foreach ($phones as $phone) {
+						if ($phone != "") {
+							$phone_statement = new Statement($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
+							$model->addWithOutDuplicates($phone_statement);
+						}
+					}
+				}
+			}
+			$model->addWithOutDuplicates($new_statement);
 		}
 	}
 	
