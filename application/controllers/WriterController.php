@@ -152,9 +152,18 @@ class WriterController extends Zend_Controller_Action
     }
   
     public static function writeFoafGarlikServersAction() {
+//	if (!check_key('post')) {
+//		error_log("POST hijack attempt ");
+//		exit();
+//	}
+
 	$privateFoafData = FoafData::getFromSession(false);
     	$publicFoafData = FoafData::getFromSession(true);
         $defaultNamespace = new Zend_Session_Namespace('Garlik');
+//	if (!check_key('post')) {
+//		error_log("POST hijack attempt ");
+//		exit();
+//	}
 
         //Check if authenicated
         if ($defaultNamespace->authenticated == true) {

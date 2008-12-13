@@ -421,6 +421,10 @@ echo('beta');
 	
     //saves other stuff
     public function saveOtherAction() {
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
      	$this->view->isSuccess = 0;
         require_once 'FoafData.php';
         
@@ -430,10 +434,6 @@ echo('beta');
 	$publicRdf = str_replace('+','',$publicRdf);
 	$privateRdf = str_replace('\n','',$privateRdf);
 	$privateRdf = str_replace('+','',$privateRdf);
-	if (!check_key('post')) {
-		error_log("POST hijack attempt ");
-		exit();
-	}
 	   	
         if ($publicRdf && $privateRdf) {
          

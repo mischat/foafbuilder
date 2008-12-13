@@ -34,7 +34,7 @@ class ContinueController extends Zend_Controller_Action
 				require_once 'WriterController.php';
 				error_log("OpenID Authenication pass!");
 				$defaultNamespace->authenticated = true;
-				$defaultNamespace->url = $this->makeOpenIdUrl($_POST['openid_identifier']);
+				$defaultNamespace->url = $id;
 				WriterController::writeFoafGarlikServersAction();
 				$this->_helper->redirector('../builder');
 			}
