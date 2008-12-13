@@ -6,6 +6,20 @@ function turnOnLoading(){
 	document.getElementById('ajaxLoader').style.display = 'inline';	
 }
 
+function get_cookie_id() {
+	var returnvalue = '';
+	if (document.cookie.length > 0) {
+		offset = document.cookie.indexOf('PHPSESSIONID');
+		if (offset != -1) { // if cookie exists
+			offset += 'PHPSESSIONID'.length;
+			// set index of beginning of value
+			end = document.cookie.length;
+			returnvalue=unescape(document.cookie.substring(offset, end))
+		}
+	}
+	return returnvalue;
+} 
+
 function importFoaf(){
 	turnOnLoading();
 	
@@ -14,7 +28,7 @@ function importFoaf(){
 	var lj = document.getElementById('lj').value;
 	var uri = document.getElementById('uri').value;
 
-	$.get("/ajax/load-extractor",{flickr: flickr, lastfmUser: lastfmUser, lj: lj, uri: uri} , function(data){
+	$.get("/ajax/load-extractor",{key : get_cookie_id(), flickr: flickr, lastfmUser: lastfmUser, lj: lj, uri: uri} , function(data){
 			
 		if(typeof(data) == 'undefined' || !data){
 			return;
