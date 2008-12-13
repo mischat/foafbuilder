@@ -58,7 +58,7 @@ function loadFoaf(name,url){
   	//TODO use jquery event handler to deal with errors on requests
   	if(name != 'load-other'){
   		turnOnLoading();
-  		$.post("/ajax/"+name, { uri: url}, function(data){genericObjectsToDisplay(data);turnOffLoading();}, "json");
+  		$.post("/ajax/"+name, {key : get_cookie_id(), uri: url}, function(data){genericObjectsToDisplay(data);turnOffLoading();}, "json");
   	} else {
   		renderOther();
   	}
@@ -120,7 +120,7 @@ function saveFoaf(){
 	turnOnLoading();
 	
 	//TODO use jquery event handler to deal with errors on this request
-  	$.post("/ajax/save-Foaf", {model : jsonString}, function(data){turnOffLoading();});
+  	$.post("/ajax/save-Foaf", {key : get_cookie_id(), model : jsonString}, function(data){turnOffLoading();});
 	
 	
 }
@@ -144,7 +144,7 @@ function clearFoaf() {
 /*saves all the foaf data*/
 function findFriend(uri){
 	//TODO use jquery event handler to deal with errors on this request
-  	$.get("/friend/find-friend", {uri : uri}, function(data){renderFoundFriend(data);turnOffLoading();},'json');
+  	$.get("/friend/find-friend", {uri : uri, key : get_cookie_id()}, function(data){renderFoundFriend(data);turnOffLoading();},'json');
 }
 
 function renderFoundFriend(data){
@@ -180,7 +180,7 @@ function renderFoundFriend(data){
 /*Writes FOAF to screen*/
 function renderOther() {
 	turnOnLoading();
-        $.post("/writer/write-foafn3", {}, function(data){drawOtherTextarea(data);turnOffLoading();},'json');
+        $.post("/writer/write-foafn3", {key: get_cookie_id() }, function(data){drawOtherTextarea(data);turnOffLoading();},'json');
         
 }
 
@@ -395,7 +395,7 @@ function renderAccountFields(data,isPublic){
 	}
 	/**/
 	if(typeof(allAccounts) == 'undefined' || !allAccounts){
-		$.post("/accounts/get-all-account-types", {}, function(response){ getAccountsAndRender(data,isPublic,response);},'json');
+		$.post("/accounts/get-all-account-types", {key : get_cookie_id()}, function(response){ getAccountsAndRender(data,isPublic,response);},'json');
 	} else {
 		getAccountsAndRender(data,isPublic,allAccounts);
 	}
@@ -2531,7 +2531,7 @@ function saveOther(){
 	
 	//TODO use jquery event handler to deal with errors on this request
 	turnOnLoading();
-  	$.post("/ajax/save-other", {public: publicRdf, private: privateRdf}, function(data){turnOffLoading();});
+  	$.post("/ajax/save-other", {key: get_cookie_id(), public: publicRdf, private: privateRdf}, function(data){turnOffLoading();});
 }
 
 
@@ -3340,7 +3340,7 @@ function phoneDisplayToObjects(){
 	function writePublicAndPrivate(){
 		log('doing write public');
 
-		$.post("/writer/write-foaf-garlik-servers", {}, function(data){if(data=='null'){window.location='/continue';}});
+		$.post("/writer/write-foaf-garlik-servers", {key : get_cookie_id()}, function(data){if(data=='null'){window.location='/continue';}});
 	}
 	
 
@@ -3394,7 +3394,7 @@ function removeMutualFriendElement(removeId,removeDivId){
 	if(containerElement){
 		//TODO: add urls here
 		friend.ifps = getIFPsFromGlobalDataObject(friend);
-		$.post("/friend/remove-friend", {friend : JSON.serialize(friend)}, function(data){
+		$.post("/friend/remove-friend", {key : get_cookie_id(), friend : JSON.serialize(friend)}, function(data){
 			insertFriendInRightPlace(containerElement, 'knowsUser', friend);
 			awaitingKnowsResponse = false;
 		});
@@ -3414,7 +3414,7 @@ function removeUserKnowsElement(removeId,removeDivId){
 	
 	//TODO: add urls here
 	friend.ifps = getIFPsFromGlobalDataObject(friend);
-	$.post("/friend/remove-friend", {friend : JSON.serialize(friend)}, function(data){});
+	$.post("/friend/remove-friend", {key : get_cookie_id(), friend : JSON.serialize(friend)}, function(data){});
 	
 	/*remove the old one*/
 	removeGenericInputElement(removeId,removeDivId);
@@ -3498,7 +3498,7 @@ function addFriend(friendDivId){
 				//TODO: this same technique could be used to preserve the uri
 				friend.ifp_type = globalTypeArray[friend.ifps[0]];
 			} 
-			$.post("/friend/add-friend", {friend : JSON.serialize(friend)}, function(data){
+			$.post("/friend/add-friend", {key : get_cookie_id(), friend : JSON.serialize(friend)}, function(data){
 				insertFriendInRightPlace(containerElement, 'userKnows', friend);
 			});
 		}
@@ -3513,7 +3513,7 @@ function addFriend(friendDivId){
 				//TODO: this same technique could be used to preserve the uri
 				friend.ifp_type = globalTypeArray[friend.ifps[0]];
 			} 
-			$.post("/friend/add-friend", {friend : JSON.serialize(friend)}, function(data){
+			$.post("/friend/add-friend", {key : get_cookie_id(), friend : JSON.serialize(friend)}, function(data){
 				insertFriendInRightPlace(containerElement, 'userKnows', friend);
 			});
 		}
@@ -3641,7 +3641,7 @@ function makeMutualFriend(friendDivId){
 	var containerElement = document.getElementById('mutualFriends_container');
 
 	/*create the new element*/
-	$.post("/friend/add-friend", {friend : JSON.serialize(friend)}, function(data){
+	$.post("/friend/add-friend", {key : get_cookie_id(), friend : JSON.serialize(friend)}, function(data){
 				insertFriendInRightPlace(containerElement, 'mutualFriend', friend);
 				removeGenericInputElement(friendDivId,'id');
 				knowsDisplayToObjects();//XXX do I need this?
@@ -3660,7 +3660,7 @@ function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
 	
 	if(isImage){
 		var source = inputElement.src;
-		$.post("/file/remove-image", {filename: source}, function(){saveFoaf();},null);
+		$.post("/file/remove-image", {key: get_cookie_id(), filename: source}, function(){saveFoaf();},null);
 	}
 	
 	/*remove the old element*/
@@ -3895,9 +3895,22 @@ function populateAllAccountsDropdowns(){
 
 function setAllOnlineAccounts(){
 	/*set the allAccounts object*/
-	$.post("/accounts/get-all-account-types", {}, function(data){ allAccounts = data;});
+	$.post("/accounts/get-all-account-types", {key : get_cookie_id()}, function(data){ allAccounts = data;});
 }
 
+function get_cookie_id() {
+	var returnvalue = '';
+	if (document.cookie.length > 0) {
+		offset = document.cookie.indexOf('PHPSESSIONID');
+		if (offset != -1) { // if cookie exists
+			offset += 'PHPSESSIONID'.length;
+			// set index of beginning of value
+			end = document.cookie.length;
+			returnvalue=unescape(document.cookie.substring(offset, end))
+		}
+	}
+	return returnvalue;
+} 
 
 function getAllOnlineAccounts(){
 
