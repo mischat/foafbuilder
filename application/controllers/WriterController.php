@@ -148,13 +148,11 @@ class WriterController extends Zend_Controller_Action
         }
     }
   
-    public static function writeFoafGarlikServersAction() {
-	/*
+    public function writeFoafGarlikServersAction() {
 	if (!check_key('post')) {
 		error_log("POST hijack attempt ");
 		exit();
 	}
-	NEED TO HAVE SOME SECURITY HERE ! */
 
 	$privateFoafData = FoafData::getFromSession(false);
     	$publicFoafData = FoafData::getFromSession(true);
@@ -186,6 +184,7 @@ class WriterController extends Zend_Controller_Action
 		//do public
 		$tempmodel = null;
 		
+		$uri = $publicFoafData->getURI();
 		$tempmodel = unserialize(serialize($publicFoafData->getModel()));
 		$tempmodel->setBaseUri(NULL);
 		$result = $tempmodel->find(NULL, NULL, NULL);
@@ -193,7 +192,7 @@ class WriterController extends Zend_Controller_Action
 		$data = $result->writeRdfToString();
 
 		if (strlen($data) > 0 ) {
-			$cachefilename = cache_filename($tempuri);
+			$cachefilename = cache_filename($uri);
 			error_log($cachefilename);
 			if (!file_exists(PUBLIC_DATA_DIR.$cachefilename)) {
 				create_cache($cachefilename,PUBLIC_DATA_DIR);

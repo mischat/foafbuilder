@@ -37,7 +37,6 @@ class ContinueController extends Zend_Controller_Action
 				$defaultNamespace->authenticated = true;
 				$defaultNamespace->url = $this->makeOpenIDUrl($id);
 				error_log("SO here is id $id, and there is the url".$this->makeOpenIdUrl($id));
-				WriterController::writeFoafGarlikServersAction();
 				$this->_helper->redirector('../builder');
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
