@@ -9,9 +9,9 @@ function turnOnLoading(){
 function get_cookie_id() {
 	var returnvalue = '';
 	if (document.cookie.length > 0) {
-		offset = document.cookie.indexOf('PHPSESSIONID');
+		offset = document.cookie.indexOf('PHPSESSID=');
 		if (offset != -1) { // if cookie exists
-			offset += 'PHPSESSIONID'.length;
+			offset += 'PHPSESSID='.length;
 			// set index of beginning of value
 			end = document.cookie.length;
 			returnvalue=unescape(document.cookie.substring(offset, end))
