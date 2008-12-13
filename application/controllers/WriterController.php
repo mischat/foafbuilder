@@ -90,8 +90,6 @@ class WriterController extends Zend_Controller_Action
 
 	$this->_helper->layout->disableLayout();
 	$response = $this->getResponse();
-	//TODO MISCHA ... fix when tabulator is fixed
-        //$response->setHeader('Content-Type', 'application/rdf+xml', true)
         $response->setHeader('Content-Type', 'application/xml', true)
             ->setHeader('Content-Disposition', 'attachment;filename=private_foaf.rdf', true)
 	    ->setHeader('Content-Length', strlen($data), true)
@@ -118,8 +116,6 @@ class WriterController extends Zend_Controller_Action
 
 	$this->_helper->layout->disableLayout();
 	$response = $this->getResponse();
-	//TODO MISCHA ... fix when tabulator is fixed
-        //$response->setHeader('Content-Type', 'application/rdf+xml', true)
         $response->setHeader('Content-Type', 'application/xml', true)
             ->setHeader('Content-Disposition', 'attachment;filename=public_foaf.rdf', true)
 	    ->setHeader('Content-Length', strlen($data), true)
@@ -166,6 +162,7 @@ class WriterController extends Zend_Controller_Action
 
         //Check if authenicated
         if ($defaultNamespace->authenticated == true) {
+
 		error_log("Writing private triples to oauth");
 		$uri = $privateFoafData->getURI();
 		$tempmodel = unserialize(serialize($privateFoafData->getModel()));
@@ -181,9 +178,8 @@ class WriterController extends Zend_Controller_Action
 			file_put_contents(PRIVATE_DATA_DIR.$cachename,$data);	
 			$result = sparql_put_string(PRIVATE_EP,$uri,$data);
 			if ($result == "201") {
-				error_log("data created in the private model");
+				error_log("data created in the private model $uri");
 			}
-			error_log('[foafeditor] We have created a new private file at the following url:'.$uri);
 		} else {
 			error_log('[foafeditor] rdf stream empty for the private data nothing to write to:'.$uri);
 		}
@@ -191,17 +187,7 @@ class WriterController extends Zend_Controller_Action
 		$tempmodel = null;
 		
 		$tempmodel = unserialize(serialize($publicFoafData->getModel()));
-
-		$tempuri = $publicFoafData->getURI();
-		$tempprimaryTopic = $publicFoafData->getPrimaryTopic();
-		$newDocUriRes = new Resource($tempuri);
-		$newPersonUriRes = new Resource($tempuri."#me");
-		$oldPersonUriRes = new Resource($tempprimaryTopic);
-		$oldDocUriRes = new Resource($tempuri);
-		
-		$tempmodel->replace($oldDocUriRes,new Resource("<http://xmlns.com/foaf/0.1/primaryTopic>"),NULL,$newDocUriRes);
-		$tempmodel->replace($oldPersonUriRes,NULL,NULL,$newPersonUriRes);
-		$tempmodel->replace(NULL,NULL,$oldPersonUriRes,$newPersonUriRes);
+		$tempmodel->setBaseUri(NULL);
 		$result = $tempmodel->find(NULL, NULL, NULL);
 
 		$data = $result->writeRdfToString();
@@ -213,7 +199,10 @@ class WriterController extends Zend_Controller_Action
 				create_cache($cachefilename,PUBLIC_DATA_DIR);
 			}
 			file_put_contents(PUBLIC_DATA_DIR.$cachefilename, $data);
-			error_log('[foafeditor] We have created a new file at the following url:'.$tempuri);
+			$result = sparql_put_string(PUBLIC_EP,$uri,$data);
+			if ($result == "201") {
+				error_log("data created in public ep $uri");
+			}
 		} else {
 			error_log('[foafeditor] rdf stream empty nothing to write to:'.$tempuri);
 		}
@@ -301,21 +290,6 @@ class WriterController extends Zend_Controller_Action
 		return;
 	    }
 	    $tempmodel = unserialize(serialize($foafData->getModel()));
-
-	    $tempuri = $foafData->getURI();
-            $tempgraph= $foafData->getGraphset();
-            $tempprimaryTopic = $foafData->getPrimaryTopic();
-
-		error_log('Here is the primaryTopic'.$foafData->getPrimaryTopic());
-	    
-            $newDocUriRes = new Resource($tempuri);
-            $newPersonUriRes = new Resource($foafData->getPrimaryTopic());
-            $oldPersonUriRes = new Resource($tempprimaryTopic);
-            $oldDocUriRes = new Resource($tempuri);
-	    
-            $tempmodel->replace($oldDocUriRes,new Resource("<http://xmlns.com/foaf/0.1/primaryTopic>"),NULL,$newDocUriRes);
-            $tempmodel->replace($oldPersonUriRes,NULL,NULL,$newPersonUriRes);
-            $tempmodel->replace(NULL,NULL,$oldPersonUriRes,$newPersonUriRes);
             $tempmodel->setBaseUri(NULL);
             
             $result = $tempmodel->find(NULL, NULL, NULL);
