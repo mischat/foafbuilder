@@ -4,6 +4,7 @@ require_once("helpers/JSON.php");
 require_once("helpers/sparql.php");
 require_once("helpers/settings.php");
 require_once("helpers/Utils.php");
+require_once("helpers/security_utils.php");
 
 class AccountsController extends Zend_Controller_Action {
 	
@@ -15,6 +16,11 @@ class AccountsController extends Zend_Controller_Action {
     /*converts a userame to a URI*/
 	//converts usernames into uris
 	public function usernameToUriAction(){
+
+		if (!check_key('post')) {
+			error_log("POST hijack attempt load extractor ");
+			exit();
+		}
 		
 		//build a query from the names of the post variables to get the appropriate patterns
 		$query = "PREFIX gs: <http://qdos.com/schema#> 
@@ -23,6 +29,7 @@ class AccountsController extends Zend_Controller_Action {
                         { ?serv rdfs:subPropertyOf gs:serviceProperty ; gs:canonicalUriPattern ?patt .
                         FILTER(";
         //we only want to get canonical patterns of things that are passed in
+	
 		foreach($_POST as $key => $value){
 			$query.='?serv = <http://qdos.com/schema#'.$key.'> || ';			
 		}
@@ -62,6 +69,10 @@ class AccountsController extends Zend_Controller_Action {
 	
 	/*get all of the various types of account*/
 	public function getAllAccountTypesAction(){
+		if (!check_key('post')) {
+			error_log("POST hijack attempt load extractor ");
+			exit();
+		}
 		
 		/*query to get account homepages and names*/
 		$query = "PREFIX gs: <http://qdos.com/schema#> 
