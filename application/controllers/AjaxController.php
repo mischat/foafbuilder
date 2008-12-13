@@ -17,34 +17,6 @@ class AjaxController extends Zend_Controller_Action {
     private $foafData;
     private $privateFoafData;
 
-	public function loadFoafFromUri($uri) {
-	      $tempmodel = new NamedGraphMem($uri);
-	   
-	     /*load the rdf from the passed in uri into the model*/
-	     $loadValue = $tempmodel->load($uri);		
-		if ($loadValue==1) {
-			return;		
-		}
-
-            $result = $tempmodel->find(NULL, NULL, NULL);
-
-	    if ($result) { 
-		    //loop through removing any hanging triples
-		    foreach($result->triples as $triple){
-			error_log("Is something happening here");
-			$this->foafData->getModel()->addWithoutDuplicates($triple);
-		    }
-	    	    return 1;
-		    flush($result);
-		    flush($tempmodel);	
-	    } else {
-	        flush($result);
-	        flush($tempmodel);	
-		return 0;
-	    }
-
-	}
-
 	public function loadExtractorAction(){
 	
 	$this->loadFoaf();
@@ -172,28 +144,59 @@ class AjaxController extends Zend_Controller_Action {
 
 	
     public function loadTheBasicsAction() {
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
     	$this->loadAnyPage('theBasics');
     }
     public function loadContactDetailsAction() {
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
     	$this->loadAnyPage('contactDetails');
     }
     public function loadPicturesAction() {
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
     	$this->loadAnyPage('pictures');
     }
-	public function loadLocationsAction() {
+    public function loadLocationsAction() {
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
     	$this->loadAnyPage('locations');
     }
-	public function loadBlogsAction() {
+    public function loadBlogsAction() {
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
     	$this->loadAnyPage('blogs');
     }
-	public function loadAccountsAction() {
+    public function loadAccountsAction() {
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
     	$this->loadAnyPage('accounts');
     }
-	public function loadInterestsAction() {
+    public function loadInterestsAction() {
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
     	$this->loadAnyPage('interests');
     }
     public function loadFriendsAction() {
-
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
     	/*build up a sparql query to get the values of all the fields we need*/
 	$this->loadFoaf();
     	if(!$this->foafData) {   
@@ -210,23 +213,32 @@ class AjaxController extends Zend_Controller_Action {
     } 
     
     public function loadOtherAction() {
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
+
     	/*build up a sparql query to get the values of all the fields we need*/
     	if($this->loadFoaf()) {   
-	if(!$this->foafData){
-		return;
-	}
-        $this->fieldNamesObject = new FieldNames('other',$this->foafData);  	
-        $this->view->results = array();
+		if(!$this->foafData) {
+			return;
+		}
+		$this->fieldNamesObject = new FieldNames('other',$this->foafData);  	
+		$this->view->results = array();
 
-        foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
-            	//need to cope with multiple fields of the same type
-            	$this->view->results = array_merge_recursive($this->view->results,$field->getData());
-        }
+		foreach ($this->fieldNamesObject->getAllFieldNames() as $field) {
+			//need to cope with multiple fields of the same type
+			$this->view->results = array_merge_recursive($this->view->results,$field->getData());
+		}
         } 
     } 
     
     /*Does the mechanics of loading for the given page (e.g. theBasics etc) */
     private function loadAnyPage($fieldName){
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
     	/*build up a sparql query to get the values of all the fields we need*/
 
         $this->loadFoaf();
@@ -261,7 +273,7 @@ class AjaxController extends Zend_Controller_Action {
         
         /* This returns a null if nothing in session! */
         $this->foafData = FoafData::getFromSession(true);
-		$this->privateFoafData = FoafData::getFromSession(false);
+	$this->privateFoafData = FoafData::getFromSession(false);
 		
 		/* Instantiate objects */
         if (!$this->foafData){
