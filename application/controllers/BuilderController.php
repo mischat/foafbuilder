@@ -8,16 +8,18 @@ class BuilderController extends Zend_Controller_Action
     public function init() {
        $this->view->baseUrl = $this->_request->getBaseUrl();
     }
-	public static function getForm()
+
+    public static function getForm()
     {
     	
     }
-	public function indexAction(){	
-		$url = @$_GET['url'];
+
+    public function indexAction(){	
+	$url = @$_GET['url'];
     	
-    	if($url){
-    		$this->view->uri = $url;
-    	}
+	if($url){
+      	    $this->view->uri = $url;
 	}
+    }
 }
 
