@@ -1,6 +1,7 @@
 <?php
 
 require_once 'Zend/Controller/Action.php';
+require_once 'helpers/settings.php';
 
 class ContinueController extends Zend_Controller_Action
 {
@@ -34,7 +35,8 @@ class ContinueController extends Zend_Controller_Action
 				require_once 'WriterController.php';
 				error_log("OpenID Authenication pass!");
 				$defaultNamespace->authenticated = true;
-				$defaultNamespace->url = $id;
+				$defaultNamespace->url = $this->makeOpenIDUrl($id);
+				error_log("SO here is id $id, and there is the url".$this->makeOpenIdUrl($id));
 				WriterController::writeFoafGarlikServersAction();
 				$this->_helper->redirector('../builder');
 			}
@@ -51,7 +53,6 @@ class ContinueController extends Zend_Controller_Action
 	$url = preg_replace('/^https{0,1}:\/\//','',$url); 
 	$url = urlencode ($url); 
 	$url = preg_replace('/%2F/',"/",$url); 
-	error_log("DOES THIS HAPPEN! $url");
 	return $url;  
     }
 

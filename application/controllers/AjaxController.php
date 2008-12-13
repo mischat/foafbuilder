@@ -45,6 +45,7 @@ class AjaxController extends Zend_Controller_Action {
 	$defaultNamespace = new Zend_Session_Namespace('Garlik');
 	if($defaultNamespace->authenticated && $defaultNamespace->uri){
 		//TODO MISCHA, public and private load
+		error_log('Authenticated ! with an openid!');
 		//$this->foafData->getModel()->load($uri);
 		//$this->foafData->replacePrimaryTopic($uri);
 	}	
