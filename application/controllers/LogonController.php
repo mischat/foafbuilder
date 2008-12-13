@@ -10,7 +10,6 @@ class LogonController extends Zend_Controller_Action
 
 	public function indexAction(){
 
-
 	}
 
     //TODO MISCHA DIRTY
@@ -29,6 +28,7 @@ class LogonController extends Zend_Controller_Action
 			$this->_helper->redirector('index?status=fail');
 
 		} 
+
 	} else if (isset($_GET['openid_mode'])) {
 	       if ($_GET['openid_mode'] == "id_res") {
 			$consumer = new Zend_OpenId_Consumer();
