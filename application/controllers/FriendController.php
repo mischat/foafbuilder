@@ -5,6 +5,7 @@ require_once("helpers/sparql.php");
 require_once("helpers/settings.php");
 require_once('helpers/IFPTriangulation.class.php');
 require_once('helpers/URITriangulation.class.php');
+require_once("helpers/security_utils.php");
 
 //XXX could turn this into a service or implement this way of searching in foaf.qdos.com
 class FriendController extends Zend_Controller_Action {
@@ -19,6 +20,10 @@ class FriendController extends Zend_Controller_Action {
       $this->view->isSuccess = 0;
         require_once 'FoafData.php';
         $friendString = @$_POST['friend'];
+	if (!check_key('post')) {
+		error_log("POST hijack attempt friend extractor");
+		exit();
+	}
         
         if ($friendString) {
             $foafData = FoafData::getFromSession();	
@@ -49,6 +54,10 @@ class FriendController extends Zend_Controller_Action {
       $this->view->isSuccess = 0;
         require_once 'FoafData.php';
         $friendString = @$_POST['friend'];
+	if (!check_key('post')) {
+		error_log("POST hijack attempt in add friend");
+		exit();
+	}
         
         if ($friendString) {
 	 	//put friends stuff in the public bit
