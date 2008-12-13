@@ -167,9 +167,7 @@ class WriterController extends Zend_Controller_Action
         //Check if authenicated
         if ($defaultNamespace->authenticated == true) {
 		error_log("Writing private triples to oauth");
-		//$uri = PRIVATE_URL.$defaultNamespace->uri.'/data/foaf.rdf';
 		$uri = $privateFoafData->getURI();
-
 		$tempmodel = unserialize(serialize($privateFoafData->getModel()));
 		$tempmodel->setBaseUri(NULL);
 		$result = $tempmodel->find(NULL, NULL, NULL);
@@ -182,7 +180,9 @@ class WriterController extends Zend_Controller_Action
 			}
 			file_put_contents(PRIVATE_DATA_DIR.$cachename,$data);	
 			$result = sparql_put_string(PRIVATE_EP,$uri,$data);
-			error("THIS IS THE RESULT OF THE WRITE TO THE PRIVATE KB!");
+			if ($result == "201") {
+				error_log("data created in the private model");
+			}
 			error_log('[foafeditor] We have created a new private file at the following url:'.$uri);
 		} else {
 			error_log('[foafeditor] rdf stream empty for the private data nothing to write to:'.$uri);
@@ -305,6 +305,8 @@ class WriterController extends Zend_Controller_Action
 	    $tempuri = $foafData->getURI();
             $tempgraph= $foafData->getGraphset();
             $tempprimaryTopic = $foafData->getPrimaryTopic();
+
+		error_log('Here is the primaryTopic'.$foafData->getPrimaryTopic());
 	    
             $newDocUriRes = new Resource($tempuri);
             $newPersonUriRes = new Resource($foafData->getPrimaryTopic());

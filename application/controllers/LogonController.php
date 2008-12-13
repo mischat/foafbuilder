@@ -35,7 +35,8 @@ class LogonController extends Zend_Controller_Action
 			if ($consumer->verify($_GET, $id)) {
 				error_log("OpenID authenication success");
 				$defaultNamespace->authenticated = true;
-				$defaultNamespace->url = $this->makeOpenIdUrl($_POST['openid_identifier']);
+				$defaultNamespace->url = $this->makeOpenIdUrl($id);
+				error_log("SO here is id $id, and there is the url".$this->makeOpenIdUrl($id));
 				$this->_helper->redirector('../index');
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
@@ -51,7 +52,6 @@ class LogonController extends Zend_Controller_Action
 	$url = preg_replace('/^https{0,1}:\/\//','',$url); 
 	$url = urlencode ($url); 
 	$url = preg_replace('/%2F/',"/",$url); 
-	error_log("DOES THIS HAPPEN! $url");
 	return $url;  
     }
 
