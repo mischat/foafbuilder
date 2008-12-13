@@ -3,7 +3,8 @@
 require_once 'Zend/Controller/Action.php';
 require_once 'helpers/settings.php';
 require_once 'helpers/write-utils.php';
-require_once("helpers/security_utils.php");
+require_once 'helpers/security_utils.php';
+require_once 'helpers/sparql.php';
 
 
 class WriterController extends Zend_Controller_Action
@@ -152,18 +153,16 @@ class WriterController extends Zend_Controller_Action
     }
   
     public static function writeFoafGarlikServersAction() {
-//	if (!check_key('post')) {
-//		error_log("POST hijack attempt ");
-//		exit();
-//	}
+	/*
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
+	NEED TO HAVE SOME SECURITY HERE ! */
 
 	$privateFoafData = FoafData::getFromSession(false);
     	$publicFoafData = FoafData::getFromSession(true);
         $defaultNamespace = new Zend_Session_Namespace('Garlik');
-//	if (!check_key('post')) {
-//		error_log("POST hijack attempt ");
-//		exit();
-//	}
 
         //Check if authenicated
         if ($defaultNamespace->authenticated == true) {
@@ -182,6 +181,8 @@ class WriterController extends Zend_Controller_Action
 				create_cache($cachename,PRIVATE_DATA_DIR);
 			}
 			file_put_contents(PRIVATE_DATA_DIR.$cachename,$data);	
+			$result = sparql_put_string(PRIVATE_EP,$uri,$data);
+			error("THIS IS THE RESULT OF THE WRITE TO THE PRIVATE KB!");
 			error_log('[foafeditor] We have created a new private file at the following url:'.$uri);
 		} else {
 			error_log('[foafeditor] rdf stream empty for the private data nothing to write to:'.$uri);
