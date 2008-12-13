@@ -17,5 +17,7 @@ define('PUBLIC_DATA_DIR','/usr/local/data/public');
 define('BUILDER_TEMP_DIR','/tmp/foafbuilder_temporary_file');
 
 define('PRIVATE_EP','http://luma:8090/sparql/');
+define('PUBLIC_EP', 'http://luma:8083/sparql/');
+
 
 ?>
