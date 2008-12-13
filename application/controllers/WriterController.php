@@ -3,6 +3,8 @@
 require_once 'Zend/Controller/Action.php';
 require_once 'helpers/settings.php';
 require_once 'helpers/write-utils.php';
+require_once("helpers/security_utils.php");
+
 
 class WriterController extends Zend_Controller_Action
 {
@@ -19,6 +21,11 @@ class WriterController extends Zend_Controller_Action
     	
     	/*if there is a uri then we need to use that*/
         $newDocUri = @$_POST['uri'];
+
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
         
         /*where the data will be stored in the view*/
         $this->view->data = new Object();
@@ -127,6 +134,11 @@ class WriterController extends Zend_Controller_Action
     	
     	/*if there is a uri then we need to use that*/
         $newDocUri = @$_POST['uri'];
+
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
         
         /*where the data will be stored in the view*/
         $this->view->data = new Object();
