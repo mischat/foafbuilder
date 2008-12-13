@@ -36,7 +36,13 @@ class ContinueController extends Zend_Controller_Action
 				error_log("OpenID Authenication pass!");
 				$defaultNamespace->authenticated = true;
 				$defaultNamespace->url = $this->makeOpenIDUrl($id);
-				error_log("SO here is id $id, and there is the url".$this->makeOpenIdUrl($id));
+
+				$publicFoafData = FoafData::getFromSession(true);
+				$publicFoafData->updateURI(PUBLIC_URL.$this->makeOpenIDUrl($id).'/foaf.rdf');
+
+				$privateFoafData = FoafData::getFromSession(false);
+				$privateFoafData->updateURI(PRIVATE_URL.$this->makeOpenIDUrl($id).'/data/foaf.rdf');
+
 				$this->_helper->redirector('../builder');
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {

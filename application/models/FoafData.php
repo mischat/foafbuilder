@@ -204,6 +204,33 @@ class FoafData {
 	 }
     }
 
+    //This should be called to update the model after login
+    public function updateURI($uri) {
+	$first = $this->getPrimaryTopic();
+	$page = $this->getUri();
+
+	$ending = "#me";
+	if (preg_match('/#(.*?)$/',$first,$matches)) {
+		if ($matches[1] != "#me") {
+			$ending = '#'.$matches[1];
+			error_log("We have matched an ending and it is ".$matches[1]);
+		}
+	}
+
+	$this->setUri($uri);
+	$this->setPrimaryTopic($uri.$ending);
+	$lame = $this->getPrimaryTopic();
+	
+	$newDocUriRes = new Resource($uri);
+	$newPersonUriRes = new Resource($uri.$ending);
+	$oldPersonUriRes = new Resource($first);
+	$oldDocUriRes = new Resource($page);
+		
+	$this->getModel()->replace($oldDocUriRes,new Resource("<http://xmlns.com/foaf/0.1/primaryTopic>"),NULL,$newDocUriRes);
+	$this->getModel()->replace($oldPersonUriRes,NULL,NULL,$newPersonUriRes);
+	$this->getModel()->replace(NULL,NULL,$oldPersonUriRes,$newPersonUriRes);
+    }
+
 	//replaces bNodes (to be called in between loading models into this) to make sure they're unique.
     public function mangleBnodes(){
 	
