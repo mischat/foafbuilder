@@ -181,7 +181,8 @@ class FoafData {
 	        $this->setPrimaryTopic($newPrimaryTopic);
 	        
 	        //XXX speak to mischa about this one
-	        if ($oldPrimaryTopic != $newPrimaryTopic) {
+	        if ($oldPrimaryTopic != $newPrimaryTopic && $oldPrimaryTopic != PUBLIC_URL.'example.com/myopenid/foaf.rdf#me' && $oldPrimaryTopic != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf#me') {
+			
 	        	$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
 	        }
         } 
@@ -290,7 +291,8 @@ class FoafData {
 	        /*just to make sure we have the right primary topic down*/
 	        $this->primaryTopic = $newPrimaryTopic;
 	        
-	        if ($oldPrimaryTopic != $newPrimaryTopic) {
+	        //if ($oldPrimaryTopic != $newPrimaryTopic) {
+	        if ($oldPrimaryTopic != $newPrimaryTopic && $oldPrimaryTopic != PUBLIC_URL.'example.com/myopenid/foaf.rdf#me' && $oldPrimaryTopic != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf#me') {
 			$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
 	        }
         } 
