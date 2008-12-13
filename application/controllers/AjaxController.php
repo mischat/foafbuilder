@@ -4,8 +4,10 @@ require_once("helpers/JSON.php");
 require_once("helpers/sparql.php");
 require_once("helpers/settings.php");
 require_once("helpers/Utils.php");
+require_once("helpers/security_utils.php");
 
 class AjaxController extends Zend_Controller_Action {
+
     public function init() {
         $this->view->baseUrl = $this->_request->getBaseUrl();
     }
@@ -16,19 +18,8 @@ class AjaxController extends Zend_Controller_Action {
     private $privateFoafData;
 
 	public function loadFoafFromUri($uri) {
-	 error_log("BBBBBBBBBBBBBBB");
-	 error_log("BBBBBBBBBBBBBBB");
-	 error_log("BBBBBBBBBBBBBBB");
-	 error_log("BBBBBBBBBBBBBBB");
-	 error_log("BBBBBBBBBBBBBBB");
-	 error_log("BBBBBBBBBBBBBBB$uri");
-	 error_log("BBBBBBBBBBBBBBB$uri");
-	 error_log("BBBBBBBBBBBBBBB$uri");
-	 error_log("BBBBBBBBBBBBBBB$uri");
-	 error_log("BBBBBBBBBBBBBBB$uri");
 	      $tempmodel = new NamedGraphMem($uri);
 	   
-
 	     /*load the rdf from the passed in uri into the model*/
 	     $loadValue = $tempmodel->load($uri);		
 		if ($loadValue==1) {
@@ -37,12 +28,10 @@ class AjaxController extends Zend_Controller_Action {
 
             $result = $tempmodel->find(NULL, NULL, NULL);
 
-	   	
 	    if ($result) { 
 		    //loop through removing any hanging triples
 		    foreach($result->triples as $triple){
 			error_log("Is something happening here");
-			error_log(var_dump($triple));
 			$this->foafData->getModel()->addWithoutDuplicates($triple);
 		    }
 	    	    return 1;
@@ -56,7 +45,6 @@ class AjaxController extends Zend_Controller_Action {
 
 	}
 
-	
 	public function loadExtractorAction(){
 	
 	$this->loadFoaf();
@@ -67,6 +55,11 @@ class AjaxController extends Zend_Controller_Action {
         //$delicious = @$_GET['delicious'];
         $lastfm = @$_GET['lastfmUser'];
         $lj = @$_GET['lj'];
+
+	if (!check_key('get')) {
+		error_log("GET hijack attempt load extractor ");
+		exit();
+	}
         
         //results
 	$this->view->results = array();
@@ -100,15 +93,16 @@ class AjaxController extends Zend_Controller_Action {
 			//TODO MISCHA, public and private load
 			//just to ensure that the bnodes are unique
 			$this->foafData->mangleBnodes();
-			//$uriLoadOk = $this->foafData->getModel()->load($uri);
-			$uriLoadOk = $this->loadFoafFromUri($uri);
+			$uriLoadOk = $this->foafData->getModel()->load($uri);
+			//$uriLoadOk = $this->loadFoafFromUri($uri);
 
 			$this->foafData->replacePrimaryTopic($uri);
 			$this->foafData->replaceGeneratorAgent();
 
-			if($uriLoadOk != 0){
+			//TODO MISCHA TO PUT BACK IN
+			//if($uriLoadOk != 0){
 				$this->view->results['uriFound'] = true;
-			}
+			//}
 		}
 	}
 	//grab the appropriate things if we haven't already
@@ -133,7 +127,6 @@ class AjaxController extends Zend_Controller_Action {
         	$flickr = Utils::getFlickrNsid($flickr);
        
 		error_log("FLICKR the is the return $flickr");
-
 
         	//echo($flickr);
         	if($flickr!=0){
@@ -176,7 +169,6 @@ class AjaxController extends Zend_Controller_Action {
         //$result = $this->foafData->getModel()->find(NULL, NULL, NULL);
         //echo($result->writeRdfToString('nt'));
 	}
-
 
 	
     public function loadTheBasicsAction() {
@@ -236,6 +228,7 @@ class AjaxController extends Zend_Controller_Action {
     /*Does the mechanics of loading for the given page (e.g. theBasics etc) */
     private function loadAnyPage($fieldName){
     	/*build up a sparql query to get the values of all the fields we need*/
+
         $this->loadFoaf();
         
         $this->fieldNamesObject = new FieldNames($fieldName,$this->foafData,$this->privateFoafData);  	
@@ -332,6 +325,12 @@ class AjaxController extends Zend_Controller_Action {
         $this->view->isSuccess = 0;
         require_once 'FoafData.php';
         $changes_model = @$_POST['model'];
+
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
+	
         
         if ($changes_model) {
 
@@ -414,11 +413,15 @@ echo('beta');
         require_once 'FoafData.php';
         
         $publicRdf = @$_POST['public'];
-	   	$privateRdf = @$_POST['private'];
-		$publicRdf = str_replace('\n','',$publicRdf);
-		$publicRdf = str_replace('+','',$publicRdf);
-		$privateRdf = str_replace('\n','',$privateRdf);
-		$privateRdf = str_replace('+','',$privateRdf);
+	$privateRdf = @$_POST['private'];
+	$publicRdf = str_replace('\n','',$publicRdf);
+	$publicRdf = str_replace('+','',$publicRdf);
+	$privateRdf = str_replace('\n','',$privateRdf);
+	$privateRdf = str_replace('+','',$privateRdf);
+	if (!check_key('post')) {
+		error_log("POST hijack attempt ");
+		exit();
+	}
 	   	
         if ($publicRdf && $privateRdf) {
          

@@ -38,6 +38,19 @@ var allAccounts;
 
 
 /*--------------------------functions which make ajax calls to control the whole model - load, save, clear, write(TODO: implement this properly)--------------------------*/
+function get_cookie_id() {
+	var returnvalue = '';
+	if (document.cookie.length > 0) {
+		offset = document.cookie.indexOf('PHPSESSID=');
+		if (offset != -1) { // if cookie exists
+			offset += 'PHPSESSID='.length;
+			// set index of beginning of value
+			end = document.cookie.length;
+			returnvalue=unescape(document.cookie.substring(offset, end));
+		}
+	}
+	return returnvalue;
+} 
 
 /*display/hide the spinner*/
 function turnOffLoading(){
@@ -3897,20 +3910,6 @@ function setAllOnlineAccounts(){
 	/*set the allAccounts object*/
 	$.post("/accounts/get-all-account-types", {key : get_cookie_id()}, function(data){ allAccounts = data;});
 }
-
-function get_cookie_id() {
-	var returnvalue = '';
-	if (document.cookie.length > 0) {
-		offset = document.cookie.indexOf('PHPSESSID=');
-		if (offset != -1) { // if cookie exists
-			offset += 'PHPSESSID='.length;
-			// set index of beginning of value
-			end = document.cookie.length;
-			returnvalue=unescape(document.cookie.substring(offset, end))
-		}
-	}
-	return returnvalue;
-} 
 
 function getAllOnlineAccounts(){
 

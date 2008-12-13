@@ -14,7 +14,7 @@ function get_cookie_id() {
 			offset += 'PHPSESSID='.length;
 			// set index of beginning of value
 			end = document.cookie.length;
-			returnvalue=unescape(document.cookie.substring(offset, end))
+			returnvalue=unescape(document.cookie.substring(offset, end));
 		}
 	}
 	return returnvalue;
