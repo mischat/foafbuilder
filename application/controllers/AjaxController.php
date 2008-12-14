@@ -443,9 +443,9 @@ echo('beta');
             $publicFoafData = FoafData::getFromSession(true);	
             $privateFoafData = FoafData::getFromSession(false);	
            
-            //XXX FIXME the directory here shouldn't be hardcoded
+            //TODO MISCHA speed up downloading here
             if($publicFoafData){
-            	echo('doing public stuff');
+            	error_log('doing public stuff');
             	$newPublicModel = new MemModel();
             	
             	//shove the data into a file
@@ -463,7 +463,7 @@ echo('beta');
                 
             }
             if($privateFoafData){
-            	echo('doing private stuff');
+            	error_log('doing private stuff');
             	$newPrivateModel = new MemModel();
             	
             	$privateFoafData->setModel(new MemModel());
