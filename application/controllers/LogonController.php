@@ -1,6 +1,7 @@
 <?php
 
 require_once 'Zend/Controller/Action.php';
+require_once 'helpers/oauth_settings.php';
 
 class LogonController extends Zend_Controller_Action
 {
@@ -26,7 +27,6 @@ class LogonController extends Zend_Controller_Action
 		if (!$consumer->login($openid)) {
 			error_log("OpenID login failed.");
 			$this->_helper->redirector('index?status=fail');
-
 		} 
 
 	} else if (isset($_GET['openid_mode'])) {
@@ -35,8 +35,28 @@ class LogonController extends Zend_Controller_Action
 			if ($consumer->verify($_GET, $id)) {
 				error_log("OpenID authenication success");
 				$defaultNamespace->authenticated = true;
-				$defaultNamespace->url = $this->makeOpenIdUrl($id);
-				error_log("SO here is id $id, and there is the url".$this->makeOpenIdUrl($id));
+				$myopenidurl = $this->makeOpenIDUrl($id);
+				$defaultNamespace->url = $myopenidurl;
+				error_log("SO here is id $id, and there is the url".$myopenidurl);
+
+				$store = OAuthStore::instance();
+				$uid = $store->checkOpenIDExists($id);
+				if ($uid) {
+					error_log('[oauth] OpenID success but account is alredy setup.');
+					//TODO MISCHA ... load in any existing info !
+				} else {
+					error_log('[oauth] OpenID AND NO ACCOUNT EXISTS! .');
+					//TODO MISCHA .... create a new account
+        				try {
+				                $store = OAuthStore::instance();
+						if ($id != "" && $myopenidurl != "") {
+				                        $store->addUser($id,$myopenidurl);
+							error_log("[oauth] created a new OAuth for OpenID $id");
+                				}
+        				} catch (OAuthException $e) {
+				                error_log('[oauth] Error: ' . $e->getMessage());
+					}
+				}	
 				$this->_helper->redirector('../index');
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
