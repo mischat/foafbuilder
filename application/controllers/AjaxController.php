@@ -66,16 +66,16 @@ class AjaxController extends Zend_Controller_Action {
 			//TODO MISCHA, public and private load
 			//just to ensure that the bnodes are unique
 			$this->foafData->mangleBnodes();
-			$uriLoadOk = $this->foafData->getModel()->load($uri);
-			//$uriLoadOk = $this->loadFoafFromUri($uri);
+			//$uriLoadOk = $this->foafData->getModel()->load($uri);
+			$uriLoadOk = $this->foafData->addRDFtoModel($uri);
 
-			$this->foafData->replacePrimaryTopic($uri);
+		//	$this->foafData->replacePrimaryTopic($uri);
 			$this->foafData->replaceGeneratorAgent();
 
 			//TODO MISCHA TO PUT BACK IN
-			//if($uriLoadOk != 0){
+			if ($uriLoadOk != 1){
 				$this->view->results['uriFound'] = true;
-			//}
+			}
 		}
 	}
 	//grab the appropriate things if we haven't already
@@ -84,7 +84,8 @@ class AjaxController extends Zend_Controller_Action {
 		$ljUri = 'http://'.$lj.'.livejournal.com/data/foaf';
 		//echo($ljUri);
 		$this->foafData->mangleBnodes();
-		$lj = $this->foafData->getModel()->load($ljUri);
+		//$lj = $this->foafData->getModel()->load($ljUri);
+		$lj = $this->foafData->addRDFtoModel($ljUri);
 		// LJ are lame and don't set foaf:primaryTopic
 		$this->foafData->replaceKnowsSubject();
 		
@@ -107,7 +108,7 @@ class AjaxController extends Zend_Controller_Action {
 			$this->foafData->mangleBnodes();
         		//echo($flickrUri);
         		$flickr = $this->foafData->getModel()->load($flickrUri);
-        		$this->foafData->replacePrimaryTopic($flickrUri);
+        	//	$this->foafData->replacePrimaryTopic($flickrUri);
 			
         		if($flickr != 1){
 					$this->view->results['flickrFound'] = true;
@@ -130,7 +131,8 @@ class AjaxController extends Zend_Controller_Action {
         if($lastfm && !$this->foafData->lastfmFound){
             	
         	$lastfmUri = 'http://foaf.qdos.com/lastfm/people/'.$lastfm; 
-        	$lastfm = $this->foafData->getModel()->load($lastfmUri);
+        	//$lastfm = $this->foafData->getModel()->load($lastfmUri);
+        	$lastfm = $this->foafData->addRDFtoModel($lastfmUri);
 	        $this->foafData->replacePrimaryTopic($lastfmUri);
 		
             if($lastfm != 1){
