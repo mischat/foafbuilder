@@ -43,6 +43,8 @@ class ContinueController extends Zend_Controller_Action
 				$privateFoafData = FoafData::getFromSession(false);
 				$privateFoafData->updateURI(PRIVATE_URL.$this->makeOpenIDUrl($id).'/data/foaf.rdf');
 
+				require_once 'WriterController.php';
+				WriterController::writeFoafGarlikServersAction();
 				$this->_helper->redirector('../builder');
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
