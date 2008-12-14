@@ -43,9 +43,21 @@ class ContinueController extends Zend_Controller_Action
 				$privateFoafData = FoafData::getFromSession(false);
 				$privateFoafData->updateURI(PRIVATE_URL.$this->makeOpenIDUrl($id).'/data/foaf.rdf');
 
+				$task = $_SESSION['task'];
 				require_once 'WriterController.php';
-				WriterController::writeFoafGarlikServersAction();
-				$this->_helper->redirector('../builder');
+				if ($task == "both") {	
+					WriterController::writeFoafGarlikServersAction();
+					$this->_helper->redirector('../builder');
+				} else if ($task == "private") {
+					WriterController::writeFoafPrivateAction();
+					$this->_helper->redirector('../builder');
+				} else if ($task == "public") {
+					WriterController::writeFoafPublicAction();
+					$this->_helper->redirector('../builder');
+				} else {
+					error_log("WARNING, an incorrect task of $task was set through the Session");
+					exit(0);
+				}
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
 			error_log("OpenID login Cancelled");
