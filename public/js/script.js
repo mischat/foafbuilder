@@ -3349,10 +3349,19 @@ function phoneDisplayToObjects(){
 	
 		
 	}
-	
-	function writePublicAndPrivate(){
-		log('doing write public');
 
+	function writePublic(){
+		log('doing write public');
+		$.post("/writer/write-foaf-public", {key : get_cookie_id()}, function(data){if(data=='null'){window.location='/continue';}});
+	}
+	
+	function writePrivate(){
+		log('doing write public');
+		$.post("/writer/write-foaf-private", {key : get_cookie_id()}, function(data){if(data=='null'){window.location='/continue';}});
+	}
+
+	function writePublicAndPrivate(){
+		log('doing write public and private');
 		$.post("/writer/write-foaf-garlik-servers", {key : get_cookie_id()}, function(data){if(data=='null'){window.location='/continue';}});
 	}
 	

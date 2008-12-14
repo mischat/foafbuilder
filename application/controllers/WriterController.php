@@ -157,7 +157,7 @@ class WriterController extends Zend_Controller_Action
 		WriterController::writeFoafPublicAction();
 		WriterController::writeFoafPrivateAction();
 	} else {
-		"This page requires authenication.";
+		$_SESSION['task'] = "both";
 		return null;
 	}
 
@@ -191,8 +191,8 @@ class WriterController extends Zend_Controller_Action
 		}
 		echo "true";
 	} else {
-		echo "This page requires authenication.";
-		exit(0);
+		$_SESSION['task'] = "private";
+		return null;
 	}
     }
 
@@ -227,8 +227,8 @@ class WriterController extends Zend_Controller_Action
 		}
 		echo "true";
 	} else {
-		echo "This page requires authenication.";
-		exit(0);
+		$_SESSION['task'] = "public";
+		return null;
 	}
     }
 
