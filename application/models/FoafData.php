@@ -84,7 +84,8 @@ class FoafData {
     		$this->model = new NamedGraphMem($this->uri);
 
 	    	/*load the rdf from the passed in uri into the model*/
-		$loadValue = $this->model->load($uri);		
+		//$loadValue = $this->model->load($uri);		
+		$loadValue = $this->model->addRDFtoModel($uri);		
 		if ($loadValue==1) {
 			return;		
 		}
@@ -94,6 +95,31 @@ class FoafData {
         $this->replacePrimaryTopic($this->uri);	
         $this->replaceGeneratorAgent();
 	$this->putInSession();
+    }
+
+    public function addRDFtoModel($uri) {
+	$tempmodel = new NamedGraphMem($uri);
+	$loadValue = $tempmodel->load($uri);
+	if ($loadValue==1) {
+		return 1;		
+	}
+	$primaryTopic = $tempmodel->find(new Resource($uri),new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),NULL);
+
+	foreach ($primaryTopic->triples as $triple) {
+		$string = $triple->obj->uri;
+	}
+	$tempmodel->replace(new Resource($uri),NULL,NULL,new Resource($this->getUri()));
+	$tempmodel->replace(NULL,NULL,new Resource($uri),new Resource($this->getUri()));
+	$tempmodel->replace(NULL,NULL,new Resource($string),new Resource($this->getPrimaryTopic()));
+	$tempmodel->replace(new Resource($string),NULL,NULL,new Resource($this->getPrimaryTopic()));
+	
+	$result = $tempmodel->find(NULL, NULL, NULL);
+
+	foreach($result->triples as $triple){
+		$this->model->addWithoutDuplicates($triple);
+	}
+
+	return 0;
     }
 
     //Remove the generator agent and add our own
