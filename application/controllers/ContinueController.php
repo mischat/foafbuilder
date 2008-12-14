@@ -2,6 +2,7 @@
 
 require_once 'Zend/Controller/Action.php';
 require_once 'helpers/settings.php';
+require_once 'helpers/oauth_settings.php';
 
 class ContinueController extends Zend_Controller_Action
 {
@@ -11,12 +12,9 @@ class ContinueController extends Zend_Controller_Action
 
 	public function indexAction(){
 
-
 	}
 
-    //TODO MISCHA DIRTY
     public function doOpenidAction() {
-
 	$defaultNamespace = new Zend_Session_Namespace('Garlik');
 	$defaultNamespace->authenticated = false;
 	
@@ -35,13 +33,33 @@ class ContinueController extends Zend_Controller_Action
 				require_once 'WriterController.php';
 				error_log("OpenID Authenication pass!");
 				$defaultNamespace->authenticated = true;
-				$defaultNamespace->url = $this->makeOpenIDUrl($id);
+				$myopenidurl = $this->makeOpenIDUrl($id);
+				$defaultNamespace->url = $myopenidurl;
 
 				$publicFoafData = FoafData::getFromSession(true);
-				$publicFoafData->updateURI(PUBLIC_URL.$this->makeOpenIDUrl($id).'/foaf.rdf');
+				$publicFoafData->updateURI(PUBLIC_URL.$myopenidurl.'/foaf.rdf');
 
 				$privateFoafData = FoafData::getFromSession(false);
-				$privateFoafData->updateURI(PRIVATE_URL.$this->makeOpenIDUrl($id).'/data/foaf.rdf');
+				$privateFoafData->updateURI(PRIVATE_URL.$myopenidurl.'/data/foaf.rdf');
+
+				$store = OAuthStore::instance();
+				$uid = $store->checkOpenIDExists($id);
+				if ($uid) {
+					error_log('[oauth] OpenID success but account is alredy setup.');
+					//TODO MISCHA ... load in any existing info !
+				} else {
+					error_log('[oauth] OpenID AND NO ACCOUNT EXISTS! .');
+					//TODO MISCHA .... create a new account
+        				try {
+				                $store = OAuthStore::instance();
+						if ($id != "" && $myopenidurl != "") {
+				                        $store->addUser($id,$myopenidurl);
+							error_log("[oauth] created a new OAuth for OpenID $id");
+                				}
+        				} catch (OAuthException $e) {
+				                error_log('[oauth] Error: ' . $e->getMessage());
+					}
+				}	
 
 				$task = $_SESSION['task'];
 				require_once 'WriterController.php';
