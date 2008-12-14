@@ -40,7 +40,7 @@ class LogonController extends Zend_Controller_Action
 				$this->_helper->redirector('../index');
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
-			error_log("CANCELED");
+			error_log("Openid login cancelled");
 			$this->_helper->redirector('index?status=cancelled');
 		}
 	} else {
