@@ -6,6 +6,7 @@ require_once("helpers/settings.php");
 require_once('helpers/IFPTriangulation.class.php');
 require_once('helpers/URITriangulation.class.php');
 require_once("helpers/security_utils.php");
+require_once('helpers/image-cache.php');
 
 //XXX could turn this into a service or implement this way of searching in foaf.qdos.com
 class FriendController extends Zend_Controller_Action {
@@ -108,7 +109,7 @@ class FriendController extends Zend_Controller_Action {
   
     	/*now we have an array of ifps (and possibly a uri)*/
     	$ifp_array = IFPTriangulation::doIterativeIFPTriangulation($ifp_array);
-    	
+
     	/*build up a filter for the query*/
     	$filter = 'FILTER(';
     	foreach($ifp_array as $ifp){
@@ -135,19 +136,23 @@ class FriendController extends Zend_Controller_Action {
     	
     	
     	$results = sparql_query(FOAF_EP,$query);
-    
+    	$images = array();
     	
     	//loop through the results we only want one image
     	foreach($results as $row){
     		if(isset($row['?img']) && $row['?img'] && $row['?img'] != 'NULL'){
-    			$this->view->results['img'] = sparql_strip($row['?img']);
-    			break;
+    			array_push($images,sparql_strip($row['?img']));
     		}
     		if(isset($row['?depiction']) && $row['?depiction'] && $row['?depiction'] != 'NULL'){
-    			$this->view->results['img'] = sparql_strip($row['?depiction']);
-    			break;
+    			array_push($images,sparql_strip($row['?depiction']));
     		}
     	}
+	$stripped_ifps = array();
+	foreach($ifp_array as $ifp){
+		array_push($stripped_ifps,sparql_strip($ifp));
+	}
+	$cachedImageArray = cache_get($stripped_ifps,$images);
+	$this->view->results['img'] = $cachedImageArray[0];
     	
     	//loop through the results we only want one name
     	foreach($results as $row){
