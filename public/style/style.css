@@ -519,6 +519,12 @@ width:100%;
 	color:#999999;
 }
 .image{
+	vertical-align: middle;
+	border:2px solid #999999;
+}
+.imageContainer{
+	text-align: center;
+	vertical-align: middle;
 	width:200px;
 	height:175px;
 	margin-bottom:10px;	
