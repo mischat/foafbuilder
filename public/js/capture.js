@@ -49,11 +49,11 @@ function importFoaf(){
 			document.getElementById('lastfm_error').style.display = 'inline';
 			errors++;
 		} 
-		if(lj && (typeof(data.ljFound=='undefined') || !data.ljFound)){
+		if(lj && (typeof(data.ljFound)=='undefined' || !data.ljFound)){
 			document.getElementById('lj_error').style.display = 'inline';
 			errors++;
 		} 
-		if(uri && (typeof(data.uriFound=='undefined') || !data.uriFound)){
+		if(uri && (typeof(data.uriFound)=='undefined' || !data.uriFound)){
 			document.getElementById('uri_error').style.display = 'inline';
 			errors++;
 		} 
