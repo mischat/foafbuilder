@@ -84,8 +84,8 @@ class FoafData {
     		$this->model = new NamedGraphMem($this->uri);
 
 	    	/*load the rdf from the passed in uri into the model*/
-		//$loadValue = $this->model->load($uri);		
-		$loadValue = $this->model->addRDFtoModel($uri);		
+		$loadValue = $this->model->load($uri);		
+		//$loadValue = $this->model-addRDFtoModel($this-uri);		
 		if ($loadValue==1) {
 			return;		
 		}
