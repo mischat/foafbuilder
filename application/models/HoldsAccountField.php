@@ -129,19 +129,16 @@ class HoldsAccountField extends Field {
 				
 			var_dump($holdsAccountContents);
 			if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage){
-				echo('saving A_service_homepage');
 				$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountServiceHomepage'), new Resource($holdsAccountContents->foafAccountServiceHomepage));
 				$foafData->getModel()->addWithoutDuplicates($newStatement);
 			}		
 			if(property_exists($holdsAccountContents,'foafAccountName') && $holdsAccountContents->foafAccountName){
-				echo('saving name');
 				$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountName'), new Literal($holdsAccountContents->foafAccountName));
 				$foafData->getModel()->addWithoutDuplicates($newStatement);
 			}
 
 
 			if(property_exists($holdsAccountContents,'foafAccountProfilePage') && $holdsAccountContents->foafAccountProfilePage){
-                                echo('saving pp');
                                 $newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($holdsAccountContents->foafAccountProfilePage));
                                 $foafData->getModel()->addWithoutDuplicates($newStatement);
                         } else if(property_exists($holdsAccountContents,'foafAccountName') && $holdsAccountContents->foafAccountName){
@@ -150,10 +147,8 @@ class HoldsAccountField extends Field {
 
 					
 					$myPage = $this->usernameToUri($holdsAccountContents->foafAccountName,$holdsAccountContents->foafAccountServiceHomepage,$patterns); 
-					echo("MY PAGE".$myPage);
 					$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($myPage));
                                 	$foafData->getModel()->addWithoutDuplicates($newStatement);
-
 
 				}
 				
