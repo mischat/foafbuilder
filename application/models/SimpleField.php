@@ -51,6 +51,63 @@ class SimpleField extends Field{
 		$queryString = "SELECT ?".$this->name." WHERE {<".$foafData->getPrimaryTopic()."> <".$this->predicateUri."> ?".$this->name." }";
 		$results = $foafData->getModel()->SparqlQuery($queryString);		
 
+		if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/givenname') {
+			$foundModel = $foafData->getModel()->find(new Resource($foafData->getPrimaryTopic()),new Resource($this->predicateUri), NULL);
+			//remove existing triples
+			foreach($foundModel->triples as $triple){
+				$phones = $phones = double_metaphone($triple->obj->label);
+				foreach ($phones as $phone) {
+					if ($phone != "") {
+						$phone_statement = new Statement(new Resource ($foafData->getPrimaryTopic()),new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
+						$foafData->getModel()->addWithOutDuplicates($phone_statement);
+					}
+				}
+			}
+		}
+		if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/family_name') {
+			$foundModel = $foafData->getModel()->find(new Resource($foafData->getPrimaryTopic()),new Resource($this->predicateUri), NULL);
+			//remove existing triples
+			foreach($foundModel->triples as $triple){
+				$phones = $phones = double_metaphone($triple->obj->label);
+				foreach ($phones as $phone) {
+					if ($phone != "") {
+						$phone_statement = new Statement(new Resource ($foafData->getPrimaryTopic()),new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
+						$foafData->getModel()->addWithOutDuplicates($phone_statement);
+					}
+				}
+			}
+		}
+		if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/surname') {
+			$foundModel = $foafData->getModel()->find(new Resource($foafData->getPrimaryTopic()),new Resource($this->predicateUri), NULL);
+			//remove existing triples
+			foreach($foundModel->triples as $triple){
+				$phones = $phones = double_metaphone($triple->obj->label);
+				foreach ($phones as $phone) {
+					if ($phone != "") {
+						$phone_statement = new Statement(new Resource ($foafData->getPrimaryTopic()),new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
+						$foafData->getModel()->addWithOutDuplicates($phone_statement);
+					}
+				}
+			}
+		}
+		if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/name') {
+			$foundModel = $foafData->getModel()->find(new Resource($foafData->getPrimaryTopic()),new Resource($this->predicateUri), NULL);
+			//remove existing triples
+			foreach($foundModel->triples as $triple){
+				$tempname = $triple->obj->label;
+				$tempname = preg_replace('/-/',' ',$tempname);
+				$names = split(' ',$tempname);
+				foreach ($names as $name) {
+					$phones = $phones = double_metaphone($name);
+					foreach ($phones as $phone) {
+						if ($phone != "") {
+							$phone_statement = new Statement(new Resource ($foafData->getPrimaryTopic()),new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
+							$foafData->getModel()->addWithOutDuplicates($phone_statement);
+						}
+					}
+				}
+			}
+		}
 		/*make sure that we populate the public or the private bit*/
 		$privacy;
 		if($foafData->isPublic){
@@ -94,6 +151,12 @@ class SimpleField extends Field{
 		//remove existing triples
 		foreach($foundModel->triples as $triple){
 			$model->remove($triple);
+		}
+
+		$foundmetaphones = $model->find($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'),NULL);
+		//remove existing triples
+		foreach($foundmetaphones->triples as $metaphonetriple){
+			$model->remove($metaphonetriple);
 		}
 		
 		//add new triples
