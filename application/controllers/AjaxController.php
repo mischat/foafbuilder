@@ -18,7 +18,8 @@ class AjaxController extends Zend_Controller_Action {
     private $privateFoafData;
 
 	public function loadExtractorAction(){
-	
+    	
+	set_time_limit(150);
 	$this->loadFoaf();
 		
 	//some details
