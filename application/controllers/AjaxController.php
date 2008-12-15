@@ -86,14 +86,13 @@ class AjaxController extends Zend_Controller_Action {
 		//echo($ljUri);
 		$this->foafData->mangleBnodes();
 		//$lj = $this->foafData->getModel()->load($ljUri);
-		$lj = $this->foafData->addRDFtoModel($ljUri);
+		$lj = $this->foafData->addLJRDFtoModel($ljUri);
 		// LJ are lame and don't set foaf:primaryTopic
-		$this->foafData->replaceKnowsSubject();
 		
 		if($lj != 1){
-				$this->view->results['ljFound'] = true;
-				$this->foafData->ljFound = true;
-			}
+			$this->view->results['ljFound'] = true;
+			$this->foafData->ljFound = true;
+		}
         } 
 	//grab the appropriate things if we haven't already
         if($flickr && !$this->foafData->flickrFound){

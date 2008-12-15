@@ -96,6 +96,62 @@ class FoafData {
 	$this->putInSession();
     }
 
+    public function addLJRDFtoModel($uri) {
+	$tempmodel = new NamedGraphMem($uri);
+	$loadValue = $tempmodel->load($uri);
+	if ($loadValue==1) {
+		return 1;		
+	}
+
+     	/*get primary topics*/
+        $query = "SELECT DISTINCT ?prim WHERE {?prim <http://xmlns.com/foaf/0.1/knows> ?other}";
+        $results = $this->model->sparqlQuery($query);
+        
+        if (!$results || empty($results)) {
+            error_log("[foaf_editor] No foaf:knows, no idea who this document is about");
+            return null;
+        }
+        foreach ($results as $row) {
+                $oldPrimaryTopic = $row['?prim']->uri;
+	    	/*replace the old primary topics with the new one*/
+		if (substr($oldPrimaryTopic, 0, 5) == 'bNode') {
+			$oldPrimaryTopicRes = new BlankNode($oldPrimaryTopic);
+		} else {
+			$oldPrimaryTopicRes = new Resource($oldPrimaryTopic);
+		}
+
+	}
+
+	$fragment = "#me";
+	//If the current one is #me
+	if (preg_match('/#me$/',$this->getPrimaryTopic())) {
+		if (preg_match('/#(.*?)$/',$oldPrimaryTopic,$fragmatch)) {
+			if ($fragmatch[1] != "me") {
+				$fragment = "#".$fragmatch[1];
+			}
+		}
+	}
+
+	//TODO must make sure that we handle having a non "#me" foaf:Person URI
+	$newPrimaryTopic = $this->uri.$fragment;
+	$newPrimaryTopicRes = new Resource($newPrimaryTopic);
+
+	$tempmodel->replace(new Resource($uri),NULL,NULL,new Resource($this->getUri()));
+	$tempmodel->replace(NULL,NULL,new Resource($uri),new Resource($this->getUri()));
+	$tempmodel->replace(NULL,NULL,$newPrimaryTopicRes,$oldPrimaryTopicRes);
+	$tempmodel->replace($newPrimaryTopicRes,NULL,NULL,$oldPrimaryTopicRes);
+	
+	$result = $tempmodel->find(NULL, NULL, NULL);
+
+	foreach($result->triples as $triple){
+		$this->model->addWithoutDuplicates($triple);
+
+	}
+	$this->replacePrimaryTopic($newPrimaryTopic);
+
+	return 0;
+    }
+
     public function addRDFtoModel($uri) {
 	$tempmodel = new NamedGraphMem($uri);
 	$loadValue = $tempmodel->load($uri);
@@ -103,12 +159,15 @@ class FoafData {
 		return 1;		
 	}
 	$primaryTopic = $tempmodel->find(new Resource($uri),new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),NULL);
+	
+	$fragment = "#me";
+	$string = $uri.$fragment;
 
+	//Get the primaryTopic if none
 	foreach ($primaryTopic->triples as $triple) {
 		$string = $triple->obj->uri;
 	}
 
-	$fragment = "#me";
 	//If the current one is #me
 	if (preg_match('/#me$/',$this->getPrimaryTopic())) {
 		if (preg_match('/#(.*?)$/',$string,$fragmatch)) {
@@ -116,7 +175,6 @@ class FoafData {
 				$fragment = "#".$fragmatch[1];
 			}
 		}
-
 	}
 	//TODO must make sure that we handle having a non "#me" foaf:Person URI
 	$newPrimaryTopic = $this->uri.$fragment;
@@ -182,7 +240,6 @@ class FoafData {
 		error_log("[foaf_editor] Error no primaryTopic");
 		return null;
 	}
-	error_log("LAMELMALEMLEMLAMLMALAMLAMALMALAMMAL");
         //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
         foreach ($results as $row) {
         	if(!isset($row['?prim'])){
@@ -194,12 +251,10 @@ class FoafData {
 		if (preg_match('/#me$/',$this->getPrimaryTopic())) {
 			if (preg_match('/#(.*?)$/',$oldPrimaryTopic,$fragmatches)) {
 				$fragment = "#".$fragmatches[1];
-				error_log("The fragment is $fragment: from this oldPrimaryTopic $oldPrimaryTopic and the primaryTopic is".$this->getPrimaryTopic());
 			}
 		} else {
 			if (preg_match('/#(.*?)$/',$this->getPrimaryTopic(),$fragmatches)) {
 				$fragment = "#".$fragmatches[1];
-				error_log("The fragment is $fragment: from this oldPrimaryTopic $oldPrimaryTopic and the primaryTopic is".$this->getPrimaryTopic());
 			}
 		}
         	//TODO must make sure that we handle having a non "#me" foaf:Person URI
@@ -224,7 +279,6 @@ class FoafData {
 	        
 	        //XXX speak to mischa about this one
 	        if ($oldPrimaryTopic != $newPrimaryTopic && $oldPrimaryTopic != PUBLIC_URL.'example.com/myopenid/foaf.rdf#me' && $oldPrimaryTopic != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf#me') {
-			
 	        	$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
 	        }
         } 
