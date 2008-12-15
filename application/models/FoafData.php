@@ -105,7 +105,7 @@ class FoafData {
 
      	/*get primary topics*/
         $query = "SELECT DISTINCT ?prim WHERE {?prim <http://xmlns.com/foaf/0.1/knows> ?other}";
-        $results = $this->model->sparqlQuery($query);
+        $results = $tempmodel->sparqlQuery($query);
         
         if (!$results || empty($results)) {
             error_log("[foaf_editor] No foaf:knows, no idea who this document is about");
@@ -132,14 +132,16 @@ class FoafData {
 		}
 	}
 
+
 	//TODO must make sure that we handle having a non "#me" foaf:Person URI
-	$newPrimaryTopic = $this->uri.$fragment;
+	$newPrimaryTopic = $this->getUri().$fragment;
 	$newPrimaryTopicRes = new Resource($newPrimaryTopic);
 
+	error_log("LAME $oldPrimaryTopic and the $newPrimaryTopic");
 	$tempmodel->replace(new Resource($uri),NULL,NULL,new Resource($this->getUri()));
 	$tempmodel->replace(NULL,NULL,new Resource($uri),new Resource($this->getUri()));
-	$tempmodel->replace(NULL,NULL,$newPrimaryTopicRes,$oldPrimaryTopicRes);
-	$tempmodel->replace($newPrimaryTopicRes,NULL,NULL,$oldPrimaryTopicRes);
+	$tempmodel->replace(NULL,NULL,$oldPrimaryTopicRes,$newPrimaryTopicRes);
+	$tempmodel->replace($oldPrimaryTopicRes,NULL,NULL,$newPrimaryTopicRes);
 	
 	$result = $tempmodel->find(NULL, NULL, NULL);
 
@@ -147,6 +149,7 @@ class FoafData {
 		$this->model->addWithoutDuplicates($triple);
 
 	}
+
 	$this->replacePrimaryTopic($newPrimaryTopic);
 
 	return 0;
@@ -379,63 +382,6 @@ class FoafData {
 
     }
     
-    public function replaceKnowsSubject(){
-    	//TODO: probably need to do some de duping at some point
-    	
-     	/*get primary topics*/
-        $query = "SELECT DISTINCT ?prim WHERE {?prim <http://xmlns.com/foaf/0.1/knows> ?other}";
-        $results = $this->model->sparqlQuery($query);
-        
-        if (!$results || empty($results)) {
-            error_log("[foaf_editor] No foaf:knows, no idea who this document is about");
-            return null;
-        }
-        //TODO must make sure that we handle having a non "#me" foaf:Person URI
-        foreach ($results as $row) {
-                $oldPrimaryTopic = $row['?prim']->uri;
-             
-	        //if no new uri has been passed in then just set it as the existing primary topic or, if that isn't set then the hash of the uri
-	    	$newPrimaryTopic = $this->primaryTopic;			
-	    	if(!$newPrimaryTopic){
-	    		$newPrimaryTopic = $this->uri."#me"; 
-	    	}  	
-		error_log("replacing $oldPrimaryTopic with $newPrimaryTopic");
-	       
-	    	/*replace the old primary topics with the new one*/
-		if (substr($oldPrimaryTopic, 0, 5) == 'bNode') {
-			$oldPrimaryTopicRes = new BlankNode($oldPrimaryTopic);
-		} else {
-			$oldPrimaryTopicRes = new Resource($oldPrimaryTopic);
-		}
-	        $newPrimaryTopicRes = new Resource($newPrimaryTopic);
-	        $this->model->replace($oldPrimaryTopicRes,NULL,NULL,$newPrimaryTopicRes);
-	        $this->model->replace(NULL,NULL,$oldPrimaryTopicRes,$newPrimaryTopicRes);
-	        
-	        /*just to make sure we have the right primary topic down*/
-	        $this->primaryTopic = $newPrimaryTopic;
-	        
-	        //if ($oldPrimaryTopic != $newPrimaryTopic) {
-	        if ($oldPrimaryTopic != $newPrimaryTopic && $oldPrimaryTopic != PUBLIC_URL.'example.com/myopenid/foaf.rdf#me' && $oldPrimaryTopic != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf#me') {
-			$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
-	        }
-        } 
-        /*make sure that the document has only one uri*/
-        
-	//find the triples containing document uris
-	$predicate = new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type');
-	$object = new Resource('http://xmlns.com/foaf/0.1/PersonalProfileDocument');  
-	$foundDocTriples = $this->model->find(NULL,$predicate,$object); 
-	$replacementUriRes = new Resource($this->getUri());
-	    
-	//and replace them
-	if($foundDocTriples && property_exists($foundDocTriples,'triples') && !empty($foundDocTriples->triples)) {
-		foreach($foundDocTriples->triples as $triple) {
-	    		$this->model->replace($triple->subj,NULL,NULL,$replacementUriRes);
-	    		$this->model->replace(NULL,NULL,$triple->subj,$replacementUriRes);
-	       	}
-	}
-    }
-
     public static function getFromSession($isPublic = true) {
     	//TODO: use auth session for particular users
         $defaultNamespace = new Zend_Session_Namespace('Garlik');

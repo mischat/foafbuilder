@@ -88,7 +88,7 @@ class AjaxController extends Zend_Controller_Action {
 		//$lj = $this->foafData->getModel()->load($ljUri);
 		$lj = $this->foafData->addLJRDFtoModel($ljUri);
 		// LJ are lame and don't set foaf:primaryTopic
-		
+  		//$this->foafData->replacePrimaryTopic($ljUri);
 		if($lj != 1){
 			$this->view->results['ljFound'] = true;
 			$this->foafData->ljFound = true;
@@ -108,7 +108,7 @@ class AjaxController extends Zend_Controller_Action {
 			$this->foafData->mangleBnodes();
         		//echo($flickrUri);
         		$flickr = $this->foafData->getModel()->load($flickrUri);
-        	//	$this->foafData->replacePrimaryTopic($flickrUri);
+        		$this->foafData->replacePrimaryTopic($flickrUri);
 			
         		if($flickr != 1){
 					$this->view->results['flickrFound'] = true;
