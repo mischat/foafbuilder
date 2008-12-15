@@ -175,7 +175,7 @@ class WriterController extends Zend_Controller_Action
 		$tempmodel->setBaseUri(NULL);
 		$result = $tempmodel->find(NULL, NULL, NULL);
 
-		$data = $result->writeRdfToString();
+		$data = $result->writeRdfToString('nt');
 		if (strlen($data) > 0 ) {
 			$cachename = cache_filename($uri);
 			if (!file_exists(PRIVATE_DATA_DIR.$cachename)) {
@@ -209,7 +209,7 @@ class WriterController extends Zend_Controller_Action
 		$tempmodel->setBaseUri(NULL);
 		$result = $tempmodel->find(NULL, NULL, NULL);
 
-		$data = $result->writeRdfToString();
+		$data = $result->writeRdfToString('nt');
 
 		if (strlen($data) > 0 ) {
 			$cachefilename = cache_filename($uri);
