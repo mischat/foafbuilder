@@ -3205,16 +3205,20 @@ function phoneDisplayToObjects(){
 		
 		//add the name with a link to foaf.qdos.com
 		if(name && !ifp){
+
 			var nameDiv = document.createElement('div');
 			nameDiv.className = 'friendName';
 			nameDiv.appendChild(document.createTextNode(name));
 			friendDiv.appendChild(nameDiv);
+						
+
 		} else if(name && ifp){
 			
 			var nameDiv = document.createElement('div');
 			nameDiv.className = 'friendName';
 			
 			var nameLink = document.createElement('a');
+			nameLink.setAttribute('target','_blank');
 			nameLink = makeCursorAPointer(nameLink);
 			nameLink.appendChild(document.createTextNode(name));
 			nameLink.href = 'http://foaf.qdos.com/find/?q='+ifp;
