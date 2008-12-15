@@ -15,8 +15,16 @@ class BuilderController extends Zend_Controller_Action
     }
 
     public function indexAction(){	
-	$url = @$_GET['url'];
-    	
+	$url = @$_GET['url'];    	
+	
+	$defaultNamespace = new Zend_Session_Namespace('Garlik');
+
+	if($defaultNamespace->authenticated){
+		$this->view->authenticated = 'true';
+	} else {
+		$this->view->authenticated = 'false';
+	}
+	
 	if($url){
       	    $this->view->uri = $url;
 	}

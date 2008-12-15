@@ -6,16 +6,16 @@ require_once 'helpers/write-utils.php';
 
 class LogonController extends Zend_Controller_Action
 {
-	public function init() {
+    public function init() {
 		$this->view->baseUrl = $this->_request->getBaseUrl();
-	}
+    }
 
-	public function indexAction(){
+    public function indexAction(){
 
-	}
+    }
 
     //TODO MISCHA DIRTY
-    public function doOpenidAction() {
+    public function doOpenidAction(){
 
 	$defaultNamespace = new Zend_Session_Namespace('Garlik');
 	$defaultNamespace->authenticated = false;
