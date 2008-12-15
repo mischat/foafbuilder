@@ -5,6 +5,7 @@ require_once 'dataset/DatasetMem.php';
 require_once 'sparql/SparqlParser.php';
 require_once 'helpers/settings.php';
 require_once 'helpers/write-utils.php';
+require_once 'helpers/errorhandler.php';
 
 class FoafData {
     private $bNodeNumber = 0;
@@ -155,7 +156,9 @@ class FoafData {
 	return 0;
     }
 
-    public function addRDFtoModel($uri) {
+   public function addRDFtoModel($uri) {
+
+	$olderrorhandler = set_error_handler("myErrorHandler");
 	$tempmodel = new NamedGraphMem($uri);
 	$loadValue = $tempmodel->load($uri);
 	if ($loadValue==1) {
@@ -195,6 +198,7 @@ class FoafData {
 	}
 	$this->replacePrimaryTopic($newPrimaryTopic);
 
+	set_error_handler($olderrorhandler);
 	return 0;
     }
 
