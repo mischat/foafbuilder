@@ -1136,34 +1136,45 @@ function renderKnowsFields(data){
 		menuDiv.className = 'menuDiv';
 		containerElement.appendChild(menuDiv);
 		
-		/*create a form to do the nifty file upload stuff*/
-		var menuForm = document.createElement('form');
-		menuDiv.appendChild(menuForm);
-		menuForm.id = 'menuForm_'+name;
-		menuForm.setAttribute('onsubmit',"return AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_"+name+"_public})")
+		/*you can only upload images if you're authenticated*/
+		if(authenticated){
+			/*create a form to do the nifty file upload stuff*/
+			var menuForm = document.createElement('form');
+			menuDiv.appendChild(menuForm);
+			menuForm.id = 'menuForm_'+name;
+			menuForm.setAttribute('onsubmit',"return AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_"+name+"_public})")
+			
+			/*create and append upload label*/
+			var uploadLabel = document.createElement('div');
+			uploadLabel.appendChild(document.createTextNode('Upload new'));
+			uploadLabel.className = 'uploadLabel';
+			menuForm.appendChild(uploadLabel);
+			menuForm.setAttribute('method','post');
+			menuForm.setAttribute('action','/file/upload-image');
+			menuForm.setAttribute('enctype','multipart/form-data');
+
+			/*create and append upload input field*/
+			var uploadElement = document.createElement('input');
+			uploadElement.className = 'uploadElement';
+			uploadElement.id = 'uploadElement_'+name;
+			uploadElement.name = 'uploadedImage';
+			uploadElement.setAttribute('type','file');
+			menuForm.appendChild(uploadElement);
 		
+			/*create a submit button and append it*/
+                	var submitElement = document.createElement('input');
+                	submitElement.className = 'submitElement';
+                	submitElement.id = 'submitElement_'+name;
+                	submitElement.className = 'imageSubmitButton';
+                	submitElement.setAttribute('type','submit');
+                	submitElement.setAttribute('value','Add');
+                	menuForm.appendChild(submitElement);
+		}
+
 		/*create a form to do the link to image stuff*/
-		var menuFormLink = document.createElement('form');
-		menuDiv.appendChild(menuFormLink);
-		menuFormLink.id = 'menuForm_'+name;	
-		
-		/*create and append upload label*/
-		
-		var uploadLabel = document.createElement('div');
-		uploadLabel.appendChild(document.createTextNode('Upload new'));
-		uploadLabel.className = 'uploadLabel';
-		menuForm.appendChild(uploadLabel);
-		menuForm.setAttribute('method','post');
-		menuForm.setAttribute('action','/file/upload-image');
-		menuForm.setAttribute('enctype','multipart/form-data');
-		
-		/*create and append upload input field*/
-		var uploadElement = document.createElement('input');
-		uploadElement.className = 'uploadElement';
-		uploadElement.id = 'uploadElement_'+name;
-		uploadElement.name = 'uploadedImage';
-		uploadElement.setAttribute('type','file');
-		menuForm.appendChild(uploadElement);
+                var menuFormLink = document.createElement('form');
+                menuDiv.appendChild(menuFormLink);
+                menuFormLink.id = 'menuForm_'+name;
 		
 		/*create and append link to image label*/
 		var linkToImageLabel = document.createElement('div');
@@ -1179,15 +1190,7 @@ function renderKnowsFields(data){
 		linkToImageInput.setAttribute('onchange','previewImage("'+containerElement.id+'","'+name+'",this.value,false,true);');
 		menuFormLink.appendChild(linkToImageInput);
 		
-		/*create a submit button and append it*/
-		var submitElement = document.createElement('input');
-		submitElement.className = 'submitElement';
-		submitElement.id = 'submitElement_'+name;
-		submitElement.className = 'imageSubmitButton';
-		submitElement.setAttribute('type','submit');
-		submitElement.setAttribute('value','Add');
-		menuForm.appendChild(submitElement);
-		
+		/*append submit element link*/
 		var submitElementLink = document.createElement('input');
 		submitElementLink.className = 'linkSubmitElement';
 		submitElementLink.id = 'linkSubmitElement_'+name;
