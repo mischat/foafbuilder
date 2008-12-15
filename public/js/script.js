@@ -1,4 +1,4 @@
-/*for logging purposes*/
+/for logging purposes*/
 var loggingOn = false;
 
 /*--------------------------global variables--------------------------*/
@@ -2715,8 +2715,10 @@ function phoneDisplayToObjects(){
 		var name = null;
 		
 		for(childNode in friendDiv.childNodes){
-			if(friendDiv.childNodes[childNode].className == 'friendImage' && typeof(friendDiv.childNodes[childNode].src) !='undefined'){
-				img = friendDiv.childNodes[childNode].src;
+			if(friendDiv.childNodes[childNode].className == 'friendImageContainer' && typeof(friendDiv.childNodes[childNode].childNodes[0]) !='undefined'){
+				if(friendDiv.childNodes[childNode].childNodes[0].src != 'undefined'){
+					img = friendDiv.childNodes[childNode].childNodes[0].src;
+				}
 			}
 			if(friendDiv.childNodes[childNode].className == 'friendName'){
 				for(grandChildNode in friendDiv.childNodes[childNode].childNodes){
@@ -3190,11 +3192,16 @@ function phoneDisplayToObjects(){
 		friendDiv.id = idName+"_"+thisElementCount;
 		container.appendChild(friendDiv);
 		
+		//add a wrapping div
+		var imgWrapper = document.createElement('div');
+		imgWrapper.className = 'friendImageContainer';
+		friendDiv.appendChild(imgWrapper);			
+
 		//add an image
 		var imageElement = document.createElement('img');
 		imageElement.src = img;
-		imageElement.className = 'friendImage';
-		friendDiv.appendChild(imageElement);
+		imageElement.className = 'friendImage';		
+		imgWrapper.appendChild(imageElement);
 		
 		//add the name with a link to foaf.qdos.com
 		if(name && !ifp){

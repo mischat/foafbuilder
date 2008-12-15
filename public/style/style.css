@@ -527,10 +527,16 @@ width:100%;
 .menuDiv{
 	margin-top:20px;
 }
-.friendImage{
+.friendImageContainer{
+	text-align:center;
 	width:58px;
 	height:58px;
+	vertical-align:middle;
 	float:left;
+	display:block;
+}
+.friendImage{
+	vertical-align:middle;
 }
 .friendName{
 	width:240px;
@@ -539,6 +545,7 @@ width:100%;
 	margin-top:30px;
 }
 .friend{
+	vertical-align:middle;
 	display:block;
 	width:300px;
 	height:58px;
