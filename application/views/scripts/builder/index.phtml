@@ -1,11 +1,13 @@
 <?
 //TODO: need to generate forms for input elements to aid with eventual w3c compliance
+
+
 ?>
 <table cellspacing="10">
 	<tr>
 		<td>
 			<form action = "javascript:clearFoaf();">
-					<input type = 'submit' value = "Start Again" />
+				<input type = 'submit' value = "Start Again" />
 			</form>
 		</td>
 		<td>
@@ -147,4 +149,5 @@
 	
 <script type='text/javascript'>
 	loadFoaf('load-the-basics');
+	var authenticated = <?php echo($this->authenticated); ?>
 </script>

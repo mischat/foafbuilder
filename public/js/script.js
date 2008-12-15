@@ -254,7 +254,7 @@ function genericObjectsToDisplay(data){
 
 function nearestAirportFieldsObjectsToDisplay(data){
 	if(!data){
-		return;
+ 		return;
 	}
 	if(data.private){
 		renderNearestAirportFields(data.private,false);
@@ -1129,7 +1129,7 @@ function renderKnowsFields(data){
 	
 	/*renders the menu which allows you to upload images or submit urls*/
 	function renderImageMenu(name,containerElement){
-	
+		
 		/*create a div to hold this stuff*/
 		var menuDiv = document.createElement('div');
 		menuDiv.id = 'menuDiv_'+name;
@@ -1140,9 +1140,7 @@ function renderKnowsFields(data){
 		var menuForm = document.createElement('form');
 		menuDiv.appendChild(menuForm);
 		menuForm.id = 'menuForm_'+name;
-		
 		menuForm.setAttribute('onsubmit',"return AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_"+name+"_public})")
-	
 		
 		/*create a form to do the link to image stuff*/
 		var menuFormLink = document.createElement('form');
@@ -1150,6 +1148,7 @@ function renderKnowsFields(data){
 		menuFormLink.id = 'menuForm_'+name;	
 		
 		/*create and append upload label*/
+		
 		var uploadLabel = document.createElement('div');
 		uploadLabel.appendChild(document.createTextNode('Upload new'));
 		uploadLabel.className = 'uploadLabel';
