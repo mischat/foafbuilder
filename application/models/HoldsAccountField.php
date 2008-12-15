@@ -151,7 +151,6 @@ class HoldsAccountField extends Field {
                                 	$foafData->getModel()->addWithoutDuplicates($newStatement);
 
 				}
-				
 			}
 		}
 	}
@@ -192,7 +191,7 @@ class HoldsAccountField extends Field {
 		
                 $ret =  str_replace('@USER@',$username,$patterns[$serviceHomepage]);
 
-		return($ret);
+		return sparql_strip($ret);
 	}
 	
 	private function removeAllAccounts($foafData){

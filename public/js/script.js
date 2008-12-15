@@ -473,6 +473,7 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 		
 		//whether we'll need to show the extra boxes (if the accountservicehomepage isn't in the dropsown)
 		var needExtraBoxes = true;
+		var isQdosAccount = false;
 
 		selectElement[0] = new Option('Other','',false,false);
 		var y=1;                         
@@ -485,9 +486,13 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
                                  selectElement[y] = new Option(allAccounts[key]['name'],allAccounts[key]['page'],false,false);
 				 if(thisAccount.foafAccountServiceHomepage == allAccounts[key]['page']
 					|| thisAccount.foafAccountServiceHomepage==allAccounts[key]['page']+'/'
-					|| thisAccount.foafAccountServiceHomepage+'/'==allAccounts[key]['page']){
+					|| thisAccount.foafAccountServiceHomepage+'/'==allAccounts[key]['page']
+					){//XXX a bit of a hack
 					selectElement[y].selected = true;
 					needExtraBoxes = false;
+				 }
+				 if(thisAccount.foafAccountServiceHomepage == 'http://qdos.com'){
+					isQdosAccount = true;
 				 }
                                  y++;
 			}
@@ -513,7 +518,7 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 		accountServiceTypeInput.className = 'accountTypeInput';
 		accountServiceTypeInput.id = 'accountTypeInput_'+accountDiv.id;
 		accountServiceTypeInput.setAttribute('onchange','saveFoaf()');
-		if(needExtraBoxes){
+		if(needExtraBoxes && !isQdosAccount){
 			accountServiceTypeInput.style.display='inline';
 		}
 		if(typeof(thisAccount['foafAccountServiceHomepage']) != 'undefined' && thisAccount['foafAccountServiceHomepage']){
@@ -530,7 +535,7 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 		accountProfileElem.className = 'accountProfile';
 		accountProfileElem.id = 'accountProfile_'+accountDiv.id;
 		accountProfileElem.setAttribute('onchange','saveFoaf()');
-		if(needExtraBoxes){
+		if(needExtraBoxes || isQdosAccount){
 			accountProfileElem.style.display='inline';
 		}
 		if(typeof(thisAccount['foafAccountProfilePage']) != 'undefined' && thisAccount['foafAccountProfilePage']){
@@ -560,10 +565,14 @@ function toggleAccountFields(id,value){
 	}
 
 	//i.e. other was selected
-	if(!value || typeof(value) == 'undefined'){
-		field1.style.display = 'inline';
-		field1.value = 'Account service homepage';
-		field1.style.color = '#dddddd';		
+	if(!value || typeof(value) == 'undefined' || value == 'http://qdos.com'){
+		if(value == 'http://qdos.com'){
+			field1.style.display = 'none';
+		} else {
+			field1.style.display = 'inline';
+			field1.value = 'Account service homepage';
+			field1.style.color = '#dddddd';		
+		}
 
 		field2.style.display = 'inline';
 		field2.value = 'Account profile page';

@@ -176,21 +176,6 @@ class AccountsController extends Zend_Controller_Action {
   )
 
   ,
-
-  array(
-
-    "name"=>
-
-    "FOAF",
-
-    "page"=>
-
-    "http://www.foaf-project.org/"
-
- ) 
-
-  ,
-
   array(
 
     "name"=>
@@ -237,53 +222,11 @@ class AccountsController extends Zend_Controller_Action {
 
     "name"=>
 
-    "IMDB",
-
-    "page"=>
-
-   "http://www.imdb.com/"
-
-  )
-
-  ,
-
-  array(
-
-    "name"=>
-
-    "IMDB",
-
-    "page"=>
-
-    "http://www.imdb.com/"
-
-  )
-
-  ,
-
-  array(
-
-    "name"=>
-
     "IMDB User",
 
     "page"=>
 
     "http://www.imdb.com/"
-
-  )
-
-  ,
-
-  array(
-
-    "name"=>
-
-    "Last.fm Artist",
-
-    "page"=>
-
-   "http://www.last.fm/"
 
   )
 
@@ -595,8 +538,18 @@ class AccountsController extends Zend_Controller_Action {
     "http://www.hi5.com"
 
   )
+
+  ,
+
+  array(
+	"name" =>
+	"QDOS User Page",
+	"page"=>
+	"http://qdos.com"
+
+ )	
 );
-		
+	asort($retArray);	
 	//	var_dump($retArray);
 		/*add the results to the view*/
 		$this->view->results = $retArray;
