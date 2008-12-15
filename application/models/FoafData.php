@@ -49,7 +49,6 @@ class FoafData {
 		//$this->uri = 'http://private-dev.qdos.com/oauth/'.$this->openid.'/data/foaf.rdf';
 		$this->uri = PRIVATE_URL.$this->openid.'/data/foaf.rdf';
 	}
-	error_log('URI is '.$this->uri);
 	
         if (!$this->isPublic) {
 		//If match then one of ours ...
@@ -108,16 +107,32 @@ class FoafData {
 	foreach ($primaryTopic->triples as $triple) {
 		$string = $triple->obj->uri;
 	}
+
+	$fragment = "#me";
+	//If the current one is #me
+	if (preg_match('/#me$/',$this->getPrimaryTopic())) {
+		if (preg_match('/#(.*?)$/',$string,$fragmatch)) {
+			if ($fragmatch[1] != "me") {
+				$fragment = "#".$fragmatch[1];
+			}
+		}
+
+	}
+	//TODO must make sure that we handle having a non "#me" foaf:Person URI
+	$newPrimaryTopic = $this->uri.$fragment;
+
 	$tempmodel->replace(new Resource($uri),NULL,NULL,new Resource($this->getUri()));
 	$tempmodel->replace(NULL,NULL,new Resource($uri),new Resource($this->getUri()));
-	$tempmodel->replace(NULL,NULL,new Resource($string),new Resource($this->getPrimaryTopic()));
-	$tempmodel->replace(new Resource($string),NULL,NULL,new Resource($this->getPrimaryTopic()));
+	$tempmodel->replace(NULL,NULL,new Resource($newPrimaryTopic),new Resource($this->getPrimaryTopic()));
+	$tempmodel->replace(new Resource($newPrimaryTopic),NULL,NULL,new Resource($this->getPrimaryTopic()));
 	
 	$result = $tempmodel->find(NULL, NULL, NULL);
 
 	foreach($result->triples as $triple){
 		$this->model->addWithoutDuplicates($triple);
+
 	}
+	$this->replacePrimaryTopic($newPrimaryTopic);
 
 	return 0;
     }
@@ -167,6 +182,7 @@ class FoafData {
 		error_log("[foaf_editor] Error no primaryTopic");
 		return null;
 	}
+	error_log("LAMELMALEMLEMLAMLMALAMLAMALMALAMMAL");
         //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
         foreach ($results as $row) {
         	if(!isset($row['?prim'])){
