@@ -3,6 +3,7 @@
 require_once 'Zend/Controller/Action.php';
 require_once 'helpers/settings.php';
 require_once 'helpers/oauth_settings.php';
+require_once 'helpers/write-utils.php';
 
 class ContinueController extends Zend_Controller_Action
 {
@@ -33,7 +34,7 @@ class ContinueController extends Zend_Controller_Action
 				require_once 'WriterController.php';
 				error_log("OpenID Authenication pass!");
 				$defaultNamespace->authenticated = true;
-				$myopenidurl = $this->makeOpenIDUrl($id);
+				$myopenidurl = makeOpenIDUrl($id);
 				$defaultNamespace->url = $myopenidurl;
 
 				$publicFoafData = FoafData::getFromSession(true);
@@ -85,12 +86,4 @@ class ContinueController extends Zend_Controller_Action
 		error_log("Openid login attempt with no value");
 	}
     } //end openid
-
-    private function makeOpenIDUrl ($url) { 
-	$url = preg_replace('/^https{0,1}:\/\//','',$url); 
-	$url = urlencode ($url); 
-	$url = preg_replace('/%2F/',"/",$url); 
-	return $url;  
-    }
-
 }

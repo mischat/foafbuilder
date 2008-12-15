@@ -2,6 +2,7 @@
 
 require_once 'Zend/Controller/Action.php';
 require_once 'helpers/oauth_settings.php';
+require_once 'helpers/write-utils.php';
 
 class LogonController extends Zend_Controller_Action
 {
@@ -35,7 +36,7 @@ class LogonController extends Zend_Controller_Action
 			if ($consumer->verify($_GET, $id)) {
 				error_log("OpenID authenication success");
 				$defaultNamespace->authenticated = true;
-				$myopenidurl = $this->makeOpenIDUrl($id);
+				$myopenidurl = makeOpenIDUrl($id);
 				$defaultNamespace->url = $myopenidurl;
 				error_log("SO here is id $id, and there is the url".$myopenidurl);
 
@@ -57,7 +58,7 @@ class LogonController extends Zend_Controller_Action
 				                error_log('[oauth] Error: ' . $e->getMessage());
 					}
 				}	
-				$this->_helper->redirector('../index');
+				$this->_helper->redirector('../builder');
 			}
 		} else if ($_GET['openid_mode'] == "cancel") {
 			error_log("Openid login cancelled");
@@ -67,12 +68,5 @@ class LogonController extends Zend_Controller_Action
 		error_log("Openid login attempt with no value");
 	}
     } //end openid
-
-    private function makeOpenIDUrl ($url) { 
-	$url = preg_replace('/^https{0,1}:\/\//','',$url); 
-	$url = urlencode ($url); 
-	$url = preg_replace('/%2F/',"/",$url); 
-	return $url;  
-    }
 
 }

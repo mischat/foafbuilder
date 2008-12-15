@@ -135,10 +135,10 @@ class AjaxController extends Zend_Controller_Action {
         	$lastfm = $this->foafData->addRDFtoModel($lastfmUri);
 	        $this->foafData->replacePrimaryTopic($lastfmUri);
 		
-            if($lastfm != 1){
-				$this->view->results['lastfmFound'] = true;
-				$this->foafData->lastfmFound = true;
-			}
+ 		if($lastfm != 1){
+			$this->view->results['lastfmFound'] = true;
+			$this->foafData->lastfmFound = true;
+		}
         }   
         
         //$result = $this->foafData->getModel()->find(NULL, NULL, NULL);
