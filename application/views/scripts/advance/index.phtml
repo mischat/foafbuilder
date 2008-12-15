@@ -1,0 +1,83 @@
+<?	
+	//We don't want to laod all the scripts
+?>
+<div id="content">
+	<div class="">
+		<h3>
+			Foaf Builder Advanced Writing Options
+		</h3>
+
+		<div id="garlik">
+			<h2>Write to Garlik Servers</h2>
+			<table cellspacing="10">
+			<tr>
+				<td>
+					<form id="otherFormprivate" action="javascript:writePrivate()">
+						<input class="otherButton" type="submit" value="Private"/>
+					</form>
+				</td>
+				<td>
+					<form id="otherFormpublic" action="javascript:writePublic()">
+						<input class="otherButton" type="submit" value="Public"/>
+					</form>
+				</td>
+				<td>
+					<form id="otherFormpublicprivate" action="javascript:writePublicAndPrivate()">
+						<input class="otherButton" type="submit" value="Both"/>
+					</form>
+				</td>
+			</tr>
+			</table>
+		</div>
+		
+
+		<div id="download">
+			<h2>Download files</h2>
+			<table cellspacing="10">
+			<tr>
+				<td>
+					<form action="javascript:write('private')">
+						<input class="otherButton" type="submit" value="Private"/>
+					</form>
+				</td>
+				<td>
+					<form action="javascript:write('public')">
+						<input class="otherButton" type="submit" value="Public"/>
+					</form>
+				</td>
+			</tr>
+			</table>
+		</div>
+
+	
+		<div id="webdav">
+			<h2>Write to WebDAV</h2>
+			      <p>
+				Coming soon...
+			      </p>
+		</div>
+
+		<div id="oauth">
+			<h2>Write to OAuth</h2>
+			      <p>
+				Coming soon...
+			      </p>
+		</div>
+
+
+		<div id="builder">
+			<h2>Back to the builder</h2>
+			<table cellspacing="10">
+			<tr>
+				<td>
+					<form id="builder" action="/builder">
+						<input class="otherButton" type="submit" value="Builder"/>
+					</form>
+				</td>
+			</tr>
+			</table>
+
+		</div>
+  </div>
+</div><!-- end content -->
+<!-- footer -->
