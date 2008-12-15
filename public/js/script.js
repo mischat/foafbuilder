@@ -273,6 +273,7 @@ function imgFieldsObjectsToDisplay(data){
 	if(data.public){
 		renderImgFields(data.public,true);
 	}
+	resize();
 }
 function depictionFieldsObjectsToDisplay(data){
 	if(!data){
@@ -3786,6 +3787,9 @@ function previewImage(containerElementId,name,source,file,isPublic){
 	
 	/*reattach the menu div underneath the existing menu*/
 	containerElement.appendChild(menuDiv);
+	
+	/*resize to fit the image*/
+	resize();
 
 	saveFoaf();	
 }	
@@ -4273,6 +4277,27 @@ function createMapElement(container){
      	} 
    
 }
+
+function resize(){
+  var maxWidth = 200;
+  var maxHeight= 175;
+  var img=document.images;
+  
+  for(var i=0; i < img.length; i++){
+    if(img[i].className=="image" && img[i].width>maxWidth){
+      img[i].style.cursor="hand";
+      img[i].title="Click to See Full Size";
+      img[i].width=maxWidth;
+      img[i].style.height="auto";
+      while(img[i].height>maxHeight){
+        img[i].width--;
+      }
+    }
+  }
+return 'done';
+}
+ 
+
 
 function makeCursorAPointer(element){
 
