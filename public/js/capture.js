@@ -31,7 +31,6 @@ function importFoaf(){
 	$.get("/ajax/load-extractor",{key : get_cookie_id(), flickr: flickr, lastfmUser: lastfmUser, lj: lj, uri: uri} , function(data){
 			
 		if(typeof(data) == 'undefined' || !data){
-			alert('data is null');
 			return;
 		}
 
@@ -41,28 +40,23 @@ function importFoaf(){
 		document.getElementById('lj_error').style.display = 'none';
 		document.getElementById('uri_error').style.display = 'none';
 		
-		alert('turn off loading1');
 		
 		if(flickr && (typeof(data.flickrFound)=='undefined' || !data.flickrFound)){
 			document.getElementById('flickr_error').style.display = 'inline';			
 			errors++;
 		} 
-		alert('turn off loading2');
 		if(lastfmUser && (typeof(data.lastfmFound)=='undefined' || !data.lastfmFound)){
 			document.getElementById('lastfm_error').style.display = 'inline';
 			errors++;
 		} 
-		alert('turn off loading3');
-		if(lj && (typeof(data.ljFound)=='undefined') || !data.ljFound)){
+		if(lj && (typeof(data.ljFound=='undefined') || !data.ljFound)){
 			document.getElementById('lj_error').style.display = 'inline';
 			errors++;
 		} 
-		alert('turn off loading4');
-		if(uri && (typeof(data.uriFound)=='undefined') || !data.uriFound)){
+		if(uri && (typeof(data.uriFound=='undefined') || !data.uriFound)){
 			document.getElementById('uri_error').style.display = 'inline';
 			errors++;
 		} 
-		alert('turn off loading5');
 		turnOffLoading();
 		if (errors == 0) {
 			window.location = '/builder/';
