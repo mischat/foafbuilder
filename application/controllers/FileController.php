@@ -1,6 +1,8 @@
 <?php
 require_once 'Zend/Controller/Action.php';
-require_once("helpers/JSON.php");
+require_once 'helpers/JSON.php';
+require_once 'helpers/settings.php';
+require_once 'helpers/write-utils.php';
 
 class FileController extends Zend_Controller_Action {
 	
@@ -22,51 +24,52 @@ class FileController extends Zend_Controller_Action {
         		
     	if($foafData){
     		
-    	   $dirname = $_SERVER['DOCUMENT_ROOT']."/images/".sha1($foafData->getPrimaryTopic());
+	   //$imageurl = $foafData->getPrimaryTopic().'/'.microtime();
+	   /*create a new directory for this person if necessary*/
+	   /*check that the uploaded file has a name*/
+	   if(!isset($_FILES['uploadedImage']['name']) || !$_FILES['uploadedImage']['name']){
+			return;
+	   }
+	    
+	   /*check that there wasn't an error uploading the file*/
+	   if($_FILES["uploadedImage"]["error"]){
+			return;
+	   }
+	   
+	   /*check that the file doesn't exceed the maximum size*/
+	   if($_FILES["uploadedImage"]["size"] > $maximumSizeInBytes){
+			return;   	
+	   }
+	   
+	   /*check that a mime type is set*/
+	   if(!$_FILES["uploadedImage"]["type"]){
+			return;
+	   }
+	   
+	   $existingFilename = $_FILES['uploadedImage']['name'];
+	   $fileExtension = substr($existingFilename, strrpos($existingFilename, '.') + 1);
 
-    	   /*create a new directory for this person if necessary*/
-    	   if(!file_exists($dirname)){
-    	   		mkdir($dirname);			
-    	   } 
-    	
-    	   /*check that the uploaded file has a name*/
-    	   if(!isset($_FILES['uploadedImage']['name']) || !$_FILES['uploadedImage']['name']){
-    	   		return;
-    	   }
-    	    
-    	   /*check that there wasn't an error uploading the file*/
-    	   if($_FILES["uploadedImage"]["error"]){
-    	   		return;
-    	   }
-    	   
-    	   /*check that the file doesn't exceed the maximum size*/
-    	   if($_FILES["uploadedImage"]["size"] > $maximumSizeInBytes){
-    	   		return;   	
-    	   }
-    	   
-    	   /*check that a mime type is set*/
-    	   if(!$_FILES["uploadedImage"]["type"]){
-    	   		return;
-    	   }
-    	   
-    	   $existingFilename = $_FILES['uploadedImage']['name'];
-    	   $fileExtension = substr($existingFilename, strrpos($existingFilename, '.') + 1);
-    	   
-    	   /*check that the file has an allowed mimetype*/
-    	   if (!$fileExtension || !isset($allowedMimeTypesArray[$fileExtension]) 
-    	   		|| $allowedMimeTypesArray[$fileExtension] != $_FILES["uploadedImage"]["type"]){
-    	   		return;
-    	   }
-    	   
-    	   $new_filename = sha1(microtime()."_".rand(0,99999)).".gif";   
-    	   $new_name = $dirname."/".$new_filename;
-    	   $url = "/images/".sha1($foafData->getPrimaryTopic())."/".$new_filename;
-    	   
-    	   if(move_uploaded_file($_FILES['uploadedImage']['tmp_name'], $new_name)){
-    			$this->view->isSuccess  = $url;
-		   } 
-        }
+	   $imageurl = IMAGE_URL.md5(microtime());
+	   $imageurl .= '.'.$fileExtension;
+	   $cachefilename = cache_filename($imageurl);
+
+	   //If we can access the datadirectory then ...
+	   if (create_cache($cachefilename,IMAGE_DATA_DIR)) {
+
+		   /*check that the file has an allowed mimetype*/
+		   if (!$fileExtension || !isset($allowedMimeTypesArray[$fileExtension]) 
+				|| $allowedMimeTypesArray[$fileExtension] != $_FILES["uploadedImage"]["type"]){
+				return;
+		   }
+
+    	   	   if(move_uploaded_file($_FILES['uploadedImage']['tmp_name'], IMAGE_DATA_DIR.$cachefilename)) {
+    			$this->view->isSuccess  = $imageurl;
+		   }
+	   }
+
 	}
+    }	
+
 	/*either does nothing and returns 0 or acts and returns success*/
     public function removeImageAction() {	    	
     	/*
