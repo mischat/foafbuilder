@@ -1,5 +1,5 @@
 /for logging purposes*/
-var loggingOn = false;
+var loggingOn = true;
 
 /*--------------------------global variables--------------------------*/
 
@@ -267,7 +267,6 @@ function genericObjectsToDisplay(data){
 /*-----------------objects to display elements to convert data to html elements and split public/private pairs up-----------------*/
 function interestsObjectsToDisplay(data){
 	//TODO: get rid of this when necessary
-	renderInterestsFields(data,true);
 	if(!data){
  		return;
 	}
@@ -977,26 +976,73 @@ function getjs(value) {
 }
 
 function renderInterestsFields(data,isPublic){
-	alert(data);
-	/* uncomment out when loading works
-	if(!data || typeof(data.interestsFields) == 'undefined'){
+	//alert(data);
+	if(!data || typeof(data.foafInterestsFields) == 'undefined'){
                 return;
-        }*/
+        }
 	//get these from the incoming data
-	var name = 'foafInterests';
-	var label = 'interests';
+	var name = data.foafInterestsFields.name;
+	var label = data.foafInterestsFields.displayLabel;
 	
-	/*build the container if it isn't there already*/
+	//build the container if it isn't there already
         var containerElement = document.getElementById(name+"_container");
         if(!containerElement){
                 containerElement = createFieldContainer(name, label);
         }
-	var inputField = createGenericInputElement(name,'Enter an interest e.g "football"', 0,false,true,true,!isPublic,true);
-	inputField.onkeyup = function(){getjs(this.value);};
 	
-	var foundDiv = document.createElement('div');
-	foundDiv.id='foundInterestDiv';
-	containerElement.appendChild(foundDiv);
+	//create the search input field if there isn't one already
+	var inputField = document.getElementById('foafInterests_0');
+	if(!inputField){
+		var inputField = createGenericInputElement(name,'Enter an interest e.g "football"', 0,false,true,true,!isPublic,true);
+		inputField.onkeyup = function(){getjs(this.value);};
+		var foundDiv = document.createElement('div');
+                foundDiv.id='foundInterestDiv';
+                containerElement.appendChild(foundDiv);
+	}
+	
+	//create a div to actually show the interests
+	var actualInterestDiv = document.getElementById('actualInterests');
+	if(!actualInterestDiv){
+		var actualInterestDiv = document.createElement('div');
+		actualInterestDiv.id = 'actualInterests';
+		containerElement.appendChild(actualInterestDiv);
+	}
+
+	saveTitle = true;	
+	var count = 0;	
+
+	//loop through the values rendering them
+	for(elemKey in data.foafInterestsFields.values){
+		
+		if(typeof(data.foafInterestsFields.values[elemKey].uri) != 'undefined' && data.foafInterestsFields.values[elemKey].uri){
+			var thisUri = data.foafInterestsFields.values[elemKey].uri;
+		} 
+		if(typeof(data.foafInterestsFields.values[elemKey].title) != 'undefined' && data.foafInterestsFields.values[elemKey].title){
+			var thisTitle = data.foafInterestsFields.values[elemKey].title;
+		} else {
+			thisTitle = thisUri;
+			saveTitle = false;
+		}
+		//create a div to contain everything from one interest field
+		var thisInterestDiv = document.createElement('div');
+		thisInterestDiv.id = 'interestDiv_'+count;
+		thisInterestDiv.className = 'interestDiv';
+
+		//create the actual link
+		var thisInterestLink = document.createElement('a');
+		thisInterestLink.className = 'interestLink';
+		thisInterestLink.href = thisUri;
+		thisInterestLink.id = 'interestLink_'+count;
+		if(!saveTitle){
+			thisInterestLink.setAttribute('rel','external');//XXX really bad - a little flag to say don't save the title
+		}
+		thisInterestLink.appendChild(document.createTextNode(thisTitle));
+		thisInterestDiv.appendChild(thisInterestLink);
+
+		actualInterestDiv.appendChild(thisInterestDiv);
+		count++;
+	}
+
 }
 
 
@@ -1853,6 +1899,9 @@ function displayToObjects(name){
 			depictionDisplayToObjects();
 			imgDisplayToObjects();
 			break;
+		case 'load-interests':
+			interestsDisplayToObjects();
+			break;
 		case 'load-friends':
 			knowsDisplayToObjects();
 			break;
@@ -1864,6 +1913,62 @@ function displayToObjects(name){
 			break;
 	}
 }
+
+function interestsDisplayToObjects(){
+
+	
+	globalPrivateFieldData.foafInterestsFields.values = new Array();
+	globalFieldData.foafInterestsFields.values = new Array();
+	
+	log("IN DISPLAY TO OBJECTS");
+	var interestsContainer = document.getElementById('actualInterests');
+	
+	if(!interestsContainer){
+		log("INTERESTS CONTAINER NOT FOUND");
+		return;
+	}	
+	if(typeof(interestsContainer.childNodes) == 'undefined' || !interestsContainer.childNodes || typeof(interestsContainer.childNodes[0]) == 'undefined'){
+		log("INTERESTS CONTAINER CHILDNODES NOT FOUND");
+		return;
+	}
+	
+	/*loop through the nodes adding them to the global data object*/
+	log("STILL IN IT");
+	for(nodeKey in interestsContainer.childNodes){
+		var thisElem = interestsContainer.childNodes[nodeKey];
+		if(thisElem.className != 'interestDiv'){
+			log("INTERESTS DIV not found");
+			continue;
+		}
+		if(!thisElem.childNodes || typeof(thisElem.childNodes[0]) == 'undefined'){
+			log("INTERESTS childNodes 2 not found");
+			continue;
+		}
+
+		for(subNodeKey in thisElem.childNodes){
+			var thisSubElem = thisElem.childNodes[subNodeKey];
+			var classNameHere = thisSubElem.className;
+
+			//XXX get some privacy stuff going here TODO
+			if(classNameHere == 'interestLink'){
+
+				thisInterestObj = new Object();
+				thisInterestObj.uri = thisSubElem.href;
+				//XXX this is a naughty little flag to tell us whether to save the title or not
+				if(thisSubElem.rel != 'external'){
+					thisInterestObj.title = thisSubElem.childNodes[0].nodeValue;
+				}
+
+		                globalFieldData.foafInterestsFields.values.push(thisInterestObj);
+			}
+		}
+	}
+
+	
+		
+
+}
+
 
 /*--------------------------second level display to objects functions--------------------------*/
 
