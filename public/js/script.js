@@ -218,6 +218,17 @@ function write(privacy){
 /*sets the globalFieldData object with data and calls all the render functions*/ 
 function genericObjectsToDisplay(data){
 	
+	/*XXX it has to work in IE so we have to keep this thing attached to something*/
+	if(typeof(autocomplete_autocompleteDiv) != 'undefined' && autocomplete_autocompleteDiv){
+		if(typeof(autocomplete_autocompleteDiv.parentNode) != 'undefined' && autocomplete_autocompleteDiv.parentNode){
+			autocomplete_autocompleteDiv.parentNode.removeChild(autocomplete_autocompleteDiv);
+			document.body.appendChild(autocomplete_autocompleteDiv);
+			autocomplete_autocompleteDiv.style.display = 'none';
+		}
+	} else {
+		alert('variabl not there');
+	}
+
 	/*set the global variable which holds the data*/
 	globalFieldData = data.public;
 	globalPrivateFieldData = data.private;
@@ -469,7 +480,7 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 		//create a select element for the account type
 		var selectElement = document.createElement("select");
 		selectElement.className = 'accountTypeSelect';
-		selectElement.setAttribute('onchange','toggleAccountFields("'+accountDiv.id+'",this.value);saveFoaf();');
+		selectElement.onchange = function(){toggleAccountFields(accountDiv.id,this.value);saveFoaf();};
 		accountDiv.appendChild(selectElement);		
 		
 		//whether we'll need to show the extra boxes (if the accountservicehomepage isn't in the dropsown)
@@ -510,15 +521,15 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 			userNameElement.value = 'Username';
 			userNameElement.style.color = '#dddddd';
 		}
-		userNameElement.setAttribute('onfocus',"if(this.value == 'Username'){this.value='';this.style.color='#000000';}");
-		userNameElement.setAttribute('onchange','saveFoaf()');
+		userNameElement.onfocus = function(){if(this.value == 'Username'){this.value='';this.style.color='#000000';}};
+		userNameElement.onchange = function(){saveFoaf();};
 		accountDiv.appendChild(userNameElement);
 
 		//create an input element for the account service type (for display if it isn't in the dropdown)
 		var accountServiceTypeInput = document.createElement('input');
 		accountServiceTypeInput.className = 'accountTypeInput';
 		accountServiceTypeInput.id = 'accountTypeInput_'+accountDiv.id;
-		accountServiceTypeInput.setAttribute('onchange','saveFoaf()');
+		accountServiceTypeInput.onchange = function(){saveFoaf();};
 		if(needExtraBoxes && !isQdosAccount){
 			accountServiceTypeInput.style.display='inline';
 		}
@@ -528,14 +539,14 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 			accountServiceTypeInput.value = 'Account service homepage';
 			accountServiceTypeInput.style.color = '#dddddd';
 		}
-		accountServiceTypeInput.setAttribute('onfocus',"if(this.value == 'Account service homepage'){this.value='';this.style.color='#000000';}");
+		accountServiceTypeInput.onfocus = function(){if(this.value == 'Account service homepage'){this.value='';this.style.color='#000000';}};
 		accountDiv.appendChild(accountServiceTypeInput);
 			
 		//create an input element for the account profile page (for display if the type isn't in the dropdown)
 		var accountProfileElem = document.createElement('input');
 		accountProfileElem.className = 'accountProfile';
 		accountProfileElem.id = 'accountProfile_'+accountDiv.id;
-		accountProfileElem.setAttribute('onchange','saveFoaf()');
+		accountProfileElem.onchange = function(){ saveFoaf(); };
 		if(needExtraBoxes || isQdosAccount){
 			accountProfileElem.style.display='inline';
 		}
@@ -546,7 +557,7 @@ function createSingleAccount(thisAccount,accountBnodeId,containerElement,isPubli
 			accountProfileElem.style.color = '#dddddd';
 
 		}
-		accountProfileElem.setAttribute('onfocus',"if(this.value == 'Account profile page'){this.value='';this.style.color='#000000';}");
+		accountProfileElem.onfocus = function(){if(this.value == 'Account profile page'){this.value='';this.style.color='#000000';}};
 		accountDiv.appendChild(accountProfileElem);
 }
 
@@ -978,7 +989,7 @@ function renderAddressFields(data,isPublic){
 	}
 	
 	var name = data.addressFields.name;
-	var label =	data.addressFields.displayLabel;
+	var label = data.addressFields.displayLabel;
 	
 	/*create a map element if there isn't one already*/
 	createMapElement();
@@ -1412,7 +1423,7 @@ function renderKnowsFields(data){
 		viewOnMapLink = makeCursorAPointer(viewOnMapLink);
 		viewOnMapLink.className = 'viewOnMapLink';
 		viewOnMapLink.appendChild(document.createTextNode('view on map'));
-		viewOnMapLink.setAttribute('onclick',"displayMap('"+bNodeKey+"')");
+		viewOnMapLink.setAttribute('href',"javascript:displayMap('"+bNodeKey+"')");
 		viewOnMapDiv.appendChild(viewOnMapLink);
 		locationDiv.appendChild(viewOnMapDiv);
 		
@@ -1443,7 +1454,7 @@ function renderKnowsFields(data){
 		var streetInputElement = document.createElement('input');
 		streetInputElement.className='street';
 		streetInputElement.id = 'street';
-		streetInputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
+		streetInputElement.onchange =  function(){placeAddressDisplayToObjects(prefix,bNodeKey);saveFoaf();};
 		locationDiv.appendChild(streetInputElement);
 		//populate it
 		if(address[prefix+'Street']){
@@ -1457,7 +1468,7 @@ function renderKnowsFields(data){
 		locationDiv.appendChild(street2LabelDiv);
 		var street2InputElement = document.createElement('input');
 		street2InputElement.id = 'street2';
-		street2InputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
+		street2InputElement.onchange =  function(){placeAddressDisplayToObjects(prefix,bNodeKey);saveFoaf();};
 		locationDiv.appendChild(street2InputElement);
 		
 		//populate it
@@ -1471,8 +1482,8 @@ function renderKnowsFields(data){
 		street3LabelDiv.className='street3Label';
 		locationDiv.appendChild(street3LabelDiv);
 		var street3InputElement = document.createElement('input');
+		street3InputElement.onchange =  function(){placeAddressDisplayToObjects(prefix,bNodeKey);saveFoaf();};
 		street3InputElement.id = 'street3';
-		street3InputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
 		locationDiv.appendChild(street3InputElement);
 		//populate it
 		if(address[prefix+'Street3']){
@@ -1486,7 +1497,7 @@ function renderKnowsFields(data){
                 locationDiv.appendChild(cityLabelDiv);
                 var cityInputElement = document.createElement('input');
                 cityInputElement.id = 'city';
-                cityInputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
+		cityInputElement.onchange =  function(){placeAddressDisplayToObjects(prefix,bNodeKey);saveFoaf();};
                 locationDiv.appendChild(cityInputElement);
                 //populate it
                 if(address[prefix+'City']){
@@ -1500,7 +1511,7 @@ function renderKnowsFields(data){
 		locationDiv.appendChild(postalCodeLabelDiv);
 		var postalCodeInputElement = document.createElement('input');
 		postalCodeInputElement.id = 'postalCode';
-		postalCodeInputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
+		postalCodeInputElement.onchange =  function(){placeAddressDisplayToObjects(prefix,bNodeKey);saveFoaf();};
 		locationDiv.appendChild(postalCodeInputElement);
 		//populate it
 		if(address[prefix+'PostalCode']){
@@ -1516,7 +1527,7 @@ function renderKnowsFields(data){
 		var countryInputElement = document.createElement('input');
 		countryInputElement.className='country';
 		countryInputElement.id = 'country';
-		countryInputElement.setAttribute('onChange',"placeAddressDisplayToObjects('"+prefix+"','"+bNodeKey+"');");
+		countryInputElement.onchange =  function(){placeAddressDisplayToObjects(prefix,bNodeKey);saveFoaf();};
 		locationDiv.appendChild(countryInputElement);
 		if(address[prefix+'Country']){
 			countryInputElement.value = address[prefix+'Country'];
@@ -1561,7 +1572,6 @@ function renderKnowsFields(data){
 
 	/*gets the already rendered autocomplete div and attaches it to the container given*/
 	function displayAndAttachAirportAutocompleteDiv(container){
-	
 		/*get the already rendered autocomplete div*/
 		if(!autocomplete_autocompleteDiv){
 			autocomplete_autocompleteDiv = document.getElementById('airport_autocomplete');
@@ -2088,11 +2098,9 @@ function accountsDisplayToObjects(){
 
 			 //do the right thing for the right element, and miss any elements we don't care about.
                         if (holdsAccountElement.childNodes[k].className == 'accountUsername'){
-
                                 thisAccount['foafAccountName'] = holdsAccountElement.childNodes[k].value;
                                                 log('saving account name');
                         } else if(holdsAccountElement.childNodes[k].className == 'accountProfile'){
-
                                 thisAccount['foafAccountProfilePage'] = holdsAccountElement.childNodes[k].value;
                                         log('saving foaf account profile page');
                         } else if (holdsAccountElement.childNodes[k].className == 'accountTypeSelect' || holdsAccountElement.childNodes[k].className == 'accountTypeInput'){
@@ -2776,19 +2784,19 @@ function phoneDisplayToObjects(){
 		//if(!document.getElementById(name+'_container')){
 			/*label*/
 			newFieldLabelContainer = document.createElement('div');
-			newFieldLabelContainer.setAttribute("class","fieldLabelContainer");
+			newFieldLabelContainer.className = "fieldLabelContainer";
 			textNode = document.createTextNode(label);
 			newFieldLabelContainer.appendChild(textNode);
 	
 			/*value*/
 			newFieldValueContainer = document.createElement('div');
+			newFieldLabelContainer.className = "fieldValueContainer";
 			newFieldValueContainer.id = name+'_container';
-			newFieldValueContainer.setAttribute("class","fieldValueContainer");
 	
 			/*container*/
 			newFieldContainer = document.createElement('div');
-			newFieldContainer.setAttribute("class","fieldContainer");
-	
+			newFieldLabelContainer.className = "fieldContainer";
+
 			/*append them*/
 			container = document.getElementById('personal');
 			container.appendChild(newFieldContainer);
@@ -2891,7 +2899,8 @@ function phoneDisplayToObjects(){
 		var newElement = document.createElement('input');
 		newElement.id = name+'_'+thisElementCount;
 		newElement.setAttribute('value',value);
-		newElement.onchange = function(){ saveFoaf()};
+		newElement.onchange = function(){ saveFoaf();};
+		newElement.onfocus = function(){ saveFoaf();};
 		//newElement.setAttribute('onfocus','saveFoaf()');
 		
 		//if the contname does not specify the container to put it in
@@ -2951,12 +2960,12 @@ function phoneDisplayToObjects(){
 		if(value=='' && name=='foafAccountName'){
 			value = 'Enter username here';
 			newElement.style.color='#dddddd';
-			newElement.onfocus = function(){"if(this.value == 'Enter username here'){this.value = '';this.style.color='#000000'}"};
+			newElement.onfocus = function(){if(this.value == 'Enter username here'){this.value = '';this.style.color='#000000';}};
 		}	
 		if(value=='' && name=='foafAccountProfilePage'){
 			value = 'Enter profile URL here';
 			newElement.style.color='#dddddd';
-			newElement.onfocus = function(){"if(this.value == 'Enter profile URL here'){this.value = '';this.style.color='#000000'}"};
+			newElement.onfocus = function(){if(this.value == 'Enter profile URL here'){this.value = '';this.style.color='#000000';}};
 		}	
 		
 		newElement.setAttribute('value',value);
@@ -2982,7 +2991,7 @@ function phoneDisplayToObjects(){
 		addLink = makeCursorAPointer(addLink);
 		addLink.appendChild(document.createTextNode("+Add an Account"));
 		addLink.className="addLink";
-		addLink.setAttribute("onclick" , "createEmptyHoldsAccountElement(this.parentNode.parentNode,null)");
+		addLink.onclick = function(){createEmptyHoldsAccountElement(this.parentNode.parentNode,null);};
 		addDiv.appendChild(addLink);
 		container.appendChild(addDiv);
 	
@@ -3010,7 +3019,7 @@ function phoneDisplayToObjects(){
 		removeLink.appendChild(document.createTextNode("- Remove this account"));
 		removeLink.id="removeLink";
 		removeLink.className="removeLink";
-		removeLink.setAttribute("onclick" , "this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);");
+		removeLink.onclick = function(){this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);};
 		removeDiv.appendChild(removeLink);
 		holdsAccountElement.appendChild(removeDiv);
 		
@@ -3037,35 +3046,6 @@ function phoneDisplayToObjects(){
 			
 	/*---------------------------Homepage---------------------------*/
 	
-	/*renders a dropdown box with a list of possible accountServiceHomepages in it (e.g. skype, msn etc)*/
-	function createFoafAccountServiceHomepageInputElement(value,container){
-		selectElement = document.createElement("select");
-		//XXX get this so that it is populated asynchronously
-		/*
-		var allAccounts = getAllOnlineAccounts();
-		
-		selectElement[0] = new Option('Other','',false,false);
-		var y=1;
-					
-		//loop through all online accounts and create options from them
-		for(key in allAccounts){
-			if(key != 'dedup'){
-				selectElement[y] = new Option(key,allAccounts[key],false,false);
-				y++;
-			}
-		}
-		/*
-		selectElement.id = 'foafAccountServiceHomepage';
-		selectElement.className = 'fieldInputSelect';
-		selectElement.value = value;
-		*/
-		
-		
-		/*show the hidden input elements if there is no option matching this id here*/
-		selectElement.setAttribute('onchange',"toggleHiddenAccountInputElements(this.value,this.parentNode, '');saveFoaf();");
-		
-		container.appendChild(selectElement);
-	}
 	
 	/*---------------------------basedNear---------------------------*/
 
@@ -3078,7 +3058,7 @@ function phoneDisplayToObjects(){
 		addLink = makeCursorAPointer(addLink);
 		addLink.appendChild(document.createTextNode("+Add a point I'm based near"));
 		addLink.className="addLink";
-		addLink.setAttribute("onclick" , "createBasedNearElementAboveAddLink('"+container.id+"',this.parentNode.id)");
+		addLink.setAttribute("href" , "javascript:createBasedNearElementAboveAddLink('"+container.id+"','"+addDiv.id+"')");
 		addDiv.appendChild(addLink);
 		container.appendChild(addDiv);
 	}
@@ -4177,8 +4157,8 @@ function anyPrefixDisplayToObjectsGeoCode(prefix,point){
 			globalPrivateFieldData.addressFields[prefix][bNodekey]['latitude'] = point.lat();
 			globalPrivateFieldData.addressFields[prefix][bNodekey]['longitude'] = point.lat();
 		} else {
-			globalPublicFieldData.addressFields[prefix][bNodekey]['latitude'] = point.lat();
-			globalPublicFieldData.addressFields[prefix][bNodekey]['longitude'] = point.lat();
+			globalFieldData.addressFields[prefix][bNodekey]['latitude'] = point.lat();
+			globalFieldData.addressFields[prefix][bNodekey]['longitude'] = point.lat();
 		}
 			
 		if(doPan){
@@ -4211,7 +4191,7 @@ function displayMap(anchorElementId){
 		//render a link to close the map if there isnt one already
 		if(!document.getElementById('mapCloseLink')){
 			var closeLink = document.createElement('div');
-			closeLink.setAttribute('onclick',"this.parentNode.style.display='none';this.parentNode.removeChild(this);");
+			closeLink.onclick = function(){this.parentNode.style.display='none';this.parentNode.removeChild(this);};
 			closeLink.appendChild(document.createTextNode('close [X]'));
 			closeLink.id='mapCloseLink';
      		
