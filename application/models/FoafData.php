@@ -193,8 +193,12 @@ class FoafData {
 	$result = $tempmodel->find(NULL, NULL, NULL);
 
 	foreach($result->triples as $triple){
+		/*TODO MISCHA 
+                if ($triple->pred->uri == "http://xmlns.com/foaf/0.1/nick") {
+                        $triple->obj->lang = NULL;
+		}
+		*/
 		$this->model->addWithoutDuplicates($triple);
-
 	}
 	$this->replacePrimaryTopic($newPrimaryTopic);
 
