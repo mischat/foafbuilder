@@ -608,8 +608,8 @@ function renderSimpleFields(data,isPublic){
 				
 				if(values.length != 0){
 					//create an input element for each value
-					for(item in values){
-						createGenericInputElement(name, values[item], containerElement.childNodes.length,false, false, false, !isPublic);	
+					for(var count=0; count<values.length; count++){
+						createGenericInputElement(name, values[count], containerElement.childNodes.length,false, false, false, !isPublic);	
 						i++;	
 					}	
 				} else {
@@ -1769,13 +1769,14 @@ function birthdayDisplayToObjects(){
 	if(document.getElementById('dayDropdown').value){
 		foafBirthdayFields['day'] = document.getElementById('dayDropdown').value; 
 	}
-	
+
+	//TODO: make sure the below lines are in the non i.e. js if there ends up needing to be one
 	if(privacyCheckbox.checked){
-		log('saving checked');
 		globalPrivateFieldData.foafBirthdayFields = foafBirthdayFields;
+		globalFieldData.foafBirthdayFields = new Object();
 	} else {
-		log('saving unchecked');
 		globalFieldData.foafBirthdayFields = foafBirthdayFields;
+		globalPrivateFieldData.foafBirthdayFields = new Object();
 	}
 	
 }
@@ -1924,7 +1925,6 @@ function simpleFieldsDisplayToObjects(){
 	
 	/*loop through the different kinds of fields*/
 	for(simpleField in globalFieldData.fields){
-
 		var containerElement = document.getElementById(simpleField + "_container");
 		
 		if(!containerElement){
@@ -1940,9 +1940,8 @@ function simpleFieldsDisplayToObjects(){
 			
 		/*add the elements that are present in the display to the appropriate object*/
 		for(i=0 ; i <containerElement.childNodes.length ; i++){
-
 			var element = containerElement.childNodes[i];	
-							
+				
 			/*if it isn't an input field then skip it (it could be a remove link or something else)*/
 			if(element.className != 'fieldInput' || element.value == null){
 				continue;
@@ -1955,7 +1954,7 @@ function simpleFieldsDisplayToObjects(){
 				continue;
 			}
 			
-			 //XXX naughty
+			 //XXX naughty -check the color to see if this is actually user input or not
                         if(element.style.color && element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
                                 continue;
                         }
@@ -2810,19 +2809,18 @@ function phoneDisplayToObjects(){
 		addLink.appendChild(document.createTextNode("+Add another "+displayLabel));
 		addLink.className="addLink";
 		
-		addLink.setAttribute("onclick" , "createGenericInputElementAboveAddLink('"+name+"',this.parentNode.parentNode.childNodes.length,'"+container.id+"',this.parentNode.id,'"+displayLabel+"','"+defaultIsPrivate+"');");
-		
+		//it needs to work in ie
+			addLink.href = "javascript:createGenericInputElementAboveAddLink('"+name+"',document.getElementById('"+addDiv.id+"').parentNode.childNodes.length,'"+container.id+"','"+addDiv.id+"','"+displayLabel+"','"+defaultIsPrivate+"');";
+
 		addDiv.appendChild(addLink);
 		container.appendChild(addDiv);
 	
 	}
 	//TODO: can we get rid of thisElementCount?
 	function createGenericInputElementAboveAddLink(name,thisElementCount,containerId,addElementId,displayLabel,defaultIsPrivate){
-		
 		/*remove the add element*/
 		var addElement = document.getElementById(addElementId);
 		addElement.parentNode.removeChild(addElement);
-		
 		var value = '';
 		/*append a child node*/
 		if(displayLabel){
@@ -2830,7 +2828,6 @@ function phoneDisplayToObjects(){
 		}
 		
 		createGenericInputElement(name,value,thisElementCount,containerId,true,false,defaultIsPrivate);
-		
 		/*re add the add element*/
 		document.getElementById(containerId).appendChild(addElement);
 	}
@@ -2850,9 +2847,9 @@ function phoneDisplayToObjects(){
 			removeLink.id="_removeLink";
 			removeLink.className="removeLink";
 			if(!isImage){
-				removeLink.setAttribute("onclick" , "removeGenericInputElement('"+removeId+"','"+removeDiv.id+"')");
+				removeLink.setAttribute("href" , "javascript:removeGenericInputElement('"+removeId+"','"+removeDiv.id+"')");
 			} else {
-				removeLink.setAttribute("onclick" , "removeGenericInputElement('"+removeId+"','"+removeDiv.id+"','true')");
+				removeLink.setAttribute("href" , "javascript:removeGenericInputElement('"+removeId+"','"+removeDiv.id+"','true')");
 			}
 			removeDiv.appendChild(removeLink);
 			containerDiv.appendChild(removeDiv);
@@ -2875,13 +2872,15 @@ function phoneDisplayToObjects(){
 			privacyDiv.appendChild(lineBreak);
 			
 			var privacyCheckbox = document.createElement('input');
-			privacyCheckbox.setAttribute('onchange','saveFoaf()');
+			privacyCheckbox.onchange = function(){ saveFoaf(); };
 			privacyCheckbox.setAttribute('type','checkbox');
 			privacyCheckbox.id = "privacycheckbox_"+elementId;
-			privacyCheckbox.checked = isPrivate;
 			privacyDiv.appendChild(privacyCheckbox);
 			
 			containerDiv.appendChild(privacyDiv);
+
+			/*must be done after appending because of IE*/
+			privacyCheckbox.checked = isPrivate;
 		}
 	}
 	
@@ -2892,8 +2891,8 @@ function phoneDisplayToObjects(){
 		var newElement = document.createElement('input');
 		newElement.id = name+'_'+thisElementCount;
 		newElement.setAttribute('value',value);
-		newElement.setAttribute('onchange','saveFoaf()');
-		newElement.setAttribute('onfocus','saveFoaf()');
+		newElement.onchange = function(){ saveFoaf()};
+		//newElement.setAttribute('onfocus','saveFoaf()');
 		
 		//if the contname does not specify the container to put it in
 		if(!contname){
@@ -2903,7 +2902,8 @@ function phoneDisplayToObjects(){
 		/*if it is a new one, we need to remember to make the contents disappear when it is clicked*/
 		if(isNew){
 			newElement.style.color = '#dddddd';
-			newElement.setAttribute("onfocus","if(this.value=='"+value+"'){this.value ='';this.style.color='#000000';}");
+			//XXX this looks weird because it is to make stuff work in ie
+			newElement.onfocus = function(){if(this.value==value){this.value ='';this.style.color='#000000';}};
 		}
 		if(!softRemove){
 			createGenericInputElementRemoveLink(newElement.id,contname);
@@ -2913,12 +2913,12 @@ function phoneDisplayToObjects(){
 		}
 
 		document.getElementById(contname).appendChild(newElement);
-		newElement.setAttribute('class','fieldInput');
+		newElement.className = 'fieldInput';
 		
 		
 		return newElement;
 	}
-	
+
 	/*creates and appends a generic hidden element and appends it to the appropriate field container*/
 	function createGenericHiddenElement(name, value, thisElementCount, contname){
 		var newElement = document.createElement('input');
@@ -2944,19 +2944,19 @@ function phoneDisplayToObjects(){
 	function createAccountsInputElement(name, value, element){
 		
 		newElement = document.createElement('input');
-		newElement.setAttribute('onchange','saveFoaf()');
+		newElement.onchange = function(){saveFoaf();};
 		newElement.id = name;
 		
 		//XXX this is a bit of a hack
 		if(value=='' && name=='foafAccountName'){
 			value = 'Enter username here';
 			newElement.style.color='#dddddd';
-			newElement.setAttribute('onfocus',"if(this.value == 'Enter username here'){this.value = '';this.style.color='#000000'}");
+			newElement.onfocus = function(){"if(this.value == 'Enter username here'){this.value = '';this.style.color='#000000'}"};
 		}	
 		if(value=='' && name=='foafAccountProfilePage'){
 			value = 'Enter profile URL here';
 			newElement.style.color='#dddddd';
-			newElement.setAttribute('onfocus',"if(this.value == 'Enter profile URL here'){this.value = '';this.style.color='#000000'}");
+			newElement.onfocus = function(){"if(this.value == 'Enter profile URL here'){this.value = '';this.style.color='#000000'}"};
 		}	
 		
 		newElement.setAttribute('value',value);
@@ -2967,7 +2967,7 @@ function phoneDisplayToObjects(){
 		}
 	
 		element.appendChild(newElement);
-		newElement.setAttribute('class','fieldInput');
+		newElement.className = 'fieldInput';
 	
 		return newElement;
 	}
@@ -3258,7 +3258,7 @@ function phoneDisplayToObjects(){
 		
 		/*create div and attach it to the element given*/
 		var locationDiv = document.createElement("div");
-		locationDiv.setAttribute('class',optionalClassName);
+		locationDiv.className = optionalClassName;
 		locationDiv.id = bnodeId;
 		if(bnodeId!='nearestAirport'){
 			locationDiv.setAttribute("onclick","map.panTo(mapMarkers['"+bnodeId+"'].getLatLng());");
@@ -3398,17 +3398,19 @@ function phoneDisplayToObjects(){
 		
 	  		var dayDropDownElement = document.createElement('select');
 	  		var monthDropDownElement = document.createElement('select');
-	  		var yearDropDownElement =document.createElement('select');
+	  		var yearDropDownElement = document.createElement('select');
 				
-	  		dayDropDownElement.setAttribute('class','dateSelector');
 	  		dayDropDownElement.id = 'dayDropdown';
-	  		dayDropDownElement.setAttribute('onchange','saveFoaf()');
-	  		monthDropDownElement.setAttribute('class','dateSelector');
+	  		dayDropDownElement.className = 'dateSelector';
+	  		dayDropDownElement.onchange = function() { saveFoaf(); };
+
+	  		monthDropDownElement.className = 'dateSelector';
 	  		monthDropDownElement.id = 'monthDropdown';
-	  		monthDropDownElement.setAttribute('onchange','saveFoaf()');
-	  		yearDropDownElement.setAttribute('class','dateSelector');
+	  		monthDropDownElement.onchange = function() { saveFoaf(); };
+
+	  		yearDropDownElement.className = 'dateSelector';
 	  		yearDropDownElement.id = 'yearDropdown';
-	  		yearDropDownElement.setAttribute('onchange','saveFoaf()');
+	  		yearDropDownElement.onchange = function() { saveFoaf(); };
 	  		
 	  		container.appendChild(dayDropDownElement);
 	  		container.appendChild(monthDropDownElement);
