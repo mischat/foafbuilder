@@ -252,7 +252,6 @@ class FoafData {
 		
 	if (!$results || empty($results)) {
 		//TODO MISCHA should do some error reporting here
-		error_log("[foaf_editor] Error no primaryTopic");
 		return null;
 	}
         //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
