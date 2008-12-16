@@ -12,6 +12,6 @@ class AboutController extends Zend_Controller_Action
 
     public function indexAction()
     {
-    	$this->view->intro_text = "This is the Foaf Editor"; 
+    	$this->view->intro_text = "This is the Foaf Builder"; 
     }
 }
