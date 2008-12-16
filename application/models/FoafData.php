@@ -59,8 +59,25 @@ class FoafData {
 			if (file_exists(PRIVATE_DATA_DIR.$cachename)) {
 				$uri = 'file://'.PRIVATE_DATA_DIR.$cachename;
 				error_log($uri);	
-			} else {
-				$uri = "";
+			} 
+		}
+		//TODO MISCHA
+		//In future make OAuth dance here ...
+    	} else if ($this->isPublic) {
+		//If match then one of ours ...
+		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/people/',$this->uri) && $this->uri != PRIVATE_URL.'example/myopenid/data/foaf.rdf') {
+			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
+			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
+			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
+			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
+			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
+			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
+			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
+			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
+			$cachename = cache_filename($this->uri);
+			if (file_exists(PUBLIC_DATA_DIR.$cachename)) {
+				$uri = 'file://'.PUBLIC_DATA_DIR.$cachename;
+				error_log($uri);	
 			} 
 		}
 		//TODO MISCHA
@@ -81,6 +98,8 @@ class FoafData {
 		
         /*create a model if there isn't one already*/
 	if (!$this->model){
+    		$this->getEmptyDocument();
+		$this->putInSession();
     		$this->model = new NamedGraphMem($this->uri);
 
 	    	/*load the rdf from the passed in uri into the model*/
