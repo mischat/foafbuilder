@@ -244,13 +244,13 @@ class WriterController extends Zend_Controller_Action
 	
             if($foafData->isPublic){
             	if($writeNtriples){
-            		$this->view->data->public = $result->writeRdfToString('nt');
+            		$this->view->data->public = $result->writeRdfToString('n3');
             	} else {
             		$this->view->data->public = $result->writeRdfToString();
             	}
             } else {
             	if($writeNtriples){
-            		$this->view->data->private = $result->writeRdfToString('nt');
+            		$this->view->data->private = $result->writeRdfToString('n3');
             	} else {
             		$this->view->data->private = $result->writeRdfToString();
             	}	
