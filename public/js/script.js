@@ -225,8 +225,6 @@ function genericObjectsToDisplay(data){
 			document.body.appendChild(autocomplete_autocompleteDiv);
 			autocomplete_autocompleteDiv.style.display = 'none';
 		}
-	} else {
-		alert('variabl not there');
 	}
 
 	/*set the global variable which holds the data*/
