@@ -92,11 +92,12 @@ function uploadCallback_foafDepiction_private(response) {
 		//TODO: do jquery error stuff here
 		alert("Sorry, something went wrong uploading the image.");
 	}
+	resize();
 }
 
 /*this callback is currently only used for the image upload*/
 function uploadCallback_foafImg_private(response) {
-	if(response){
+	if(response && response != '0'){
 		log('Upload callback');
 		previewImage('foafImg_container','foafImg',response,false,false);
 		
@@ -104,6 +105,7 @@ function uploadCallback_foafImg_private(response) {
 		//TODO: do jquery error stuff here
 		alert("Sorry, something went wrong uploading the image.");
 	}
+	resize();
 }
 
 /*this callback is currently only used for the image upload*/
@@ -116,17 +118,19 @@ function uploadCallback_foafDepiction_public(response) {
 		//TODO: do jquery error stuff here
 		alert("Sorry, something went wrong uploading the image.");
 	}
+	resize();
 }
 
 /*this callback is currently only used for the image upload*/
 function uploadCallback_foafImg_public(response) {
-	if(response){
+	if(response && response != '0'){
 		previewImage('foafImg_container','foafImg',response,false,true);
 		
 	} else {
 		//TODO: do jquery error stuff here
 		alert("Sorry, something went wrong uploading the image.");
 	}
+	resize();
 }
 
 

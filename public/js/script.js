@@ -1154,8 +1154,12 @@ function renderKnowsFields(data){
 			var menuForm = document.createElement('form');
 			menuDiv.appendChild(menuForm);
 			menuForm.id = 'menuForm_'+name;
-			menuForm.setAttribute('onsubmit',"return AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_"+name+"_public})")
-			
+			if(name == 'foafImg'){
+				menuForm.onsubmit = function(){AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_foafImg_public});};
+			} else {
+				menuForm.onsubmit = function(){AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_foafDepiction_public});};
+			}			
+
 			/*create and append upload label*/
 			var uploadLabel = document.createElement('div');
 			uploadLabel.appendChild(document.createTextNode('Upload new'));
@@ -1199,7 +1203,7 @@ function renderKnowsFields(data){
 		linkToImageInput.className = 'linkToImage';
 		linkToImageInput.name = 'linkToImage_'+name;
 		linkToImageInput.id = 'linkToImage_'+name;
-		linkToImageInput.setAttribute('onchange','previewImage("'+containerElement.id+'","'+name+'",this.value,false,true);');
+		linkToImageInput.onchange = function(){previewImage("'+containerElement.id+'",name,this.value,false,true);};
 		menuFormLink.appendChild(linkToImageInput);
 		
 		/*append submit element link*/
@@ -1218,7 +1222,7 @@ function renderKnowsFields(data){
 	
 	/*renders the inputField etc*/
 	function renderSearchUI(){
-		var containerElement = createFieldContainer('addFriends', 'Add Friends');
+		var containerElefment = createFieldContainer('addFriends', 'Add Friends');
 		
 		var findForm = document.createElement('form');
 		findForm.id='findForm';
@@ -4261,6 +4265,7 @@ function createMapElement(container){
 }
 
 function resize(){
+  alert('being called');
   var maxWidth = 200;
   var maxHeight= 175;
   var img=document.images;
