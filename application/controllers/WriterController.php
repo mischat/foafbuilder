@@ -176,12 +176,13 @@ class WriterController extends Zend_Controller_Action
 		$result = $tempmodel->find(NULL, NULL, NULL);
 
 		$data = $result->writeRdfToString('nt');
+		$xml = $result->writeRdfToString();
 		if (strlen($data) > 0 ) {
 			$cachename = cache_filename($uri);
 			if (!file_exists(PRIVATE_DATA_DIR.$cachename)) {
 				create_cache($cachename,PRIVATE_DATA_DIR);
 			}
-			file_put_contents(PRIVATE_DATA_DIR.$cachename,$data);	
+			file_put_contents(PRIVATE_DATA_DIR.$cachename,$xml);	
 			$result = sparql_put_string(PRIVATE_EP,$uri,$data);
 			if ($result == "201") {
 				error_log("data created in the private model $uri");
@@ -210,14 +211,14 @@ class WriterController extends Zend_Controller_Action
 		$result = $tempmodel->find(NULL, NULL, NULL);
 
 		$data = $result->writeRdfToString('nt');
-
+		$xml = $result->writeRdfToString();
 		if (strlen($data) > 0 ) {
 			$cachefilename = cache_filename($uri);
 			error_log($cachefilename);
 			if (!file_exists(PUBLIC_DATA_DIR.$cachefilename)) {
 				create_cache($cachefilename,PUBLIC_DATA_DIR);
 			}
-			file_put_contents(PUBLIC_DATA_DIR.$cachefilename, $data);
+			file_put_contents(PUBLIC_DATA_DIR.$cachefilename, $xml);
 			$result = sparql_put_string(PUBLIC_EP,$uri,$data);
 			if ($result == "201") {
 				error_log("data created in public ep $uri");
