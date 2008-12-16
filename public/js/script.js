@@ -917,13 +917,26 @@ function renderPhoneFields(data,isPublic){
 function doDisambiguation(){
 	alert('Doing disambiguation');
 	
+	var container = document.getElementById('foafInterests_container');
+	
+	if(typeof(container) == 'undefined' || !container){
+		return;
+	}
+
 	/*clear out the disambiguation div*/
 	if(document.getElementById('disambiguationList') && document.getElementById('disambiguationList').childNodes && document.getElementById('disambiguationList').childNodes[0] != 'undefined'){
 		for(nodeKey in document.getElementById('disambiguationList').childNodes){
 			var thisNode = document.getElementById('disambiguationList').childNodes[nodeKey];
 			thisNode.parentNode.removeChild(thisNode);	
 		}
+	} else {
+		var disDiv = document.createElement('div');
+		disDiv.id = 'disambiguationList';
+		container.appendChild(disDiv);
 	}
+	
+	
+	
 }
 
 function spellcheck(data) {
@@ -964,7 +977,7 @@ function getjs(value) {
 }
 
 function renderInterestsFields(data,isPublic){
-	
+	alert(data);
 	/* uncomment out when loading works
 	if(!data || typeof(data.interestsFields) == 'undefined'){
                 return;
