@@ -129,7 +129,8 @@ class MemModel extends Model {
 	* @throws	PhpError
 	*/
 	function add($statement) {
-		if (!is_a($statement, 'Statement')) {
+		//if (!is_a($statement, 'Statement')) {
+		if (!($statement instanceof 'Statement')) {
 			$errmsg = RDFAPI_ERROR . '(class: MemModel; method: add): Statement expected.';
 			trigger_error($errmsg, E_USER_ERROR);
 		}
@@ -169,7 +170,8 @@ class MemModel extends Model {
 	*/
 	function addWithoutDuplicates($statement) {
 
-		if (!is_a($statement, 'Statement')) {
+		//if (!is_a($statement, 'Statement')) {
+		if (!($statement instanceof 'Statement')) {
 			$errmsg = RDFAPI_ERROR . '(class: MemModel; method: addWithoutDuplicates): Statement expected.';
 			trigger_error($errmsg, E_USER_ERROR);
 		}
@@ -194,7 +196,8 @@ class MemModel extends Model {
 	*/
 	function remove($statement) {
 
-		if (!is_a($statement, 'Statement')) {
+		//if (!is_a($statement, 'Statement')) {
+		if (!($statement instanceof 'Statement')) {
 			$errmsg = RDFAPI_ERROR . '(class: MemModel; method: remove): Statement expected.';
 			trigger_error($errmsg, E_USER_ERROR);
 		}
@@ -567,9 +570,12 @@ class MemModel extends Model {
 	function find($subject,$predicate,$object) {
 
 		if (
-		(!is_a($subject, 'Resource') && $subject != NULL) ||
-		(!is_a($predicate, 'Resource') && $predicate != NULL) ||
-		(!is_a($object, 'Node') && $object != NULL)
+		//(!is_a($subject, 'Resource') && $subject != NULL) ||
+		//(!is_a($predicate, 'Resource') && $predicate != NULL) ||
+		//(!is_a($object, 'Node') && $object != NULL)
+		(!($subject instanceof 'Resource') && $subject != NULL) ||
+		(!($predicate instanceof 'Resource') && $predicate != NULL) ||
+		(!($object instanceof 'Node') && $object != NULL)
 		) {
 			$errmsg = RDFAPI_ERROR . '(class: MemModel; method: find): Parameters must be subclasses of Node or NULL';
 			trigger_error($errmsg, E_USER_ERROR);
@@ -923,10 +929,14 @@ class MemModel extends Model {
 	function replace($subject, $predicate, $object, $replacement) {
 
 		if (
-		(!is_a($replacement, 'Node')) ||
-		(!is_a($subject, 'Resource') && $subject != NULL) ||
-		(!is_a($predicate, 'Resource') && $predicate != NULL) ||
-		(!is_a($object, 'Node') && $object != NULL)
+		//(!is_a($replacement, 'Node')) ||
+		//(!is_a($subject, 'Resource') && $subject != NULL) ||
+		//(!is_a($predicate, 'Resource') && $predicate != NULL) ||
+		//(!is_a($object, 'Node') && $object != NULL)
+		(!($replacement instanceof 'Node')) ||
+		(!($subject instanceof 'Resource') && $subject != NULL) ||
+		(!($predicate instanceof 'Resource') && $predicate != NULL) ||
+		(!($object instanceof 'Node') && $object != NULL)
 		) {
 			$errmsg = RDFAPI_ERROR . '(class: MemModel; method: replace): Parameters must be subclasses of Node or NULL';
 			trigger_error($errmsg, E_USER_ERROR);
