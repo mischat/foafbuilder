@@ -79,7 +79,6 @@ class NearestAirportField extends Field {
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
     public function saveToModel(&$foafData, $value) {
-	    
     	if(!property_exists($value,'nearestAirport') || !$value->nearestAirport){
     		return;
     	}
@@ -102,9 +101,10 @@ class NearestAirportField extends Field {
 				
     	/*generate a new airport bnode*/
     	$airportBnode = Utils::GenerateUniqueBnode($foafData->getModel());
-    	$foafData->getModel()->add(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource('http://www.w3.org/2000/10/swap/pim/contact#nearestAirport'),$airportBnode));
-    	$foafData->getModel()->add(new Statement($airportBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource('http://xmlns.com/wordnet/1.6/Airport')));
-   
+	if ((property_exists($value->nearestAirport,'icaoCode') && $value->nearestAirport->icaoCode) || (property_exists($value->nearestAirport,'icaoCode') && $value->nearestAirport->icaoCode)) {
+		$foafData->getModel()->addWithoutDuplicates(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource('http://www.w3.org/2000/10/swap/pim/contact#nearestAirport'),$airportBnode));
+		$foafData->getModel()->addWithoutDuplicates(new Statement($airportBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource('http://xmlns.com/wordnet/1.6/Airport')));
+	} 
     	/*remove the existing icao and iata codes*/
     	$removeTriples1 = $foafData->getModel()->find($airportBnode,new Resource('http://dig.csail.mit.edu/TAMI/2007/amord/air#iata'),NULL);
     	$removeTriples2 = $foafData->getModel()->find($airportBnode,new Resource('http://dig.csail.mit.edu/TAMI/2007/amord/air#icao'),NULL);
@@ -118,13 +118,13 @@ class NearestAirportField extends Field {
     	$this->removeFoundTriples($removeTriples4,$foafData);
     	
     	/*add the iata and icao codes that have been passed in*/
-    	if(property_exists($value->nearestAirport,'iataCode') && $value->nearestAirport->iataCode){  	
-    		$foafData->getModel()->add(new Statement($airportBnode,new Resource('http://dig.csail.mit.edu/TAMI/2007/amord/air#iata'),new Literal($value->nearestAirport->iataCode)));
-    		$foafData->getModel()->add(new Statement($airportBnode,new Resource('http://www.megginson.com/exp/ns/airports#iata'),new Literal($value->nearestAirport->iataCode)));
+    	if(property_exists($value->nearestAirport,'iataCode') && $value->nearestAirport->iataCode) {  
+    		$foafData->getModel()->addWithoutDuplicates(new Statement($airportBnode,new Resource('http://dig.csail.mit.edu/TAMI/2007/amord/air#iata'),new Literal($value->nearestAirport->iataCode)));
+    		$foafData->getModel()->addWithoutDuplicates(new Statement($airportBnode,new Resource('http://www.megginson.com/exp/ns/airports#iata'),new Literal($value->nearestAirport->iataCode)));
     	}
-    	if(property_exists($value->nearestAirport,'icaoCode') && $value->nearestAirport->icaoCode){    		 	
-    		$foafData->getModel()->add(new Statement($airportBnode,new Resource('http://dig.csail.mit.edu/TAMI/2007/amord/air#icao'),new Literal($value->nearestAirport->icaoCode)));
-    		$foafData->getModel()->add(new Statement($airportBnode,new Resource('http://www.megginson.com/exp/ns/airports#icao'),new Literal($value->nearestAirport->icaoCode)));
+    	if (property_exists($value->nearestAirport,'icaoCode') && $value->nearestAirport->icaoCode) { 
+    		$foafData->getModel()->addWithoutDuplicates(new Statement($airportBnode,new Resource('http://dig.csail.mit.edu/TAMI/2007/amord/air#icao'),new Literal($value->nearestAirport->icaoCode)));
+    		$foafData->getModel()->addWithoutDuplicates(new Statement($airportBnode,new Resource('http://www.megginson.com/exp/ns/airports#icao'),new Literal($value->nearestAirport->icaoCode)));
     	}
     }
     
