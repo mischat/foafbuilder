@@ -144,7 +144,7 @@ function removeCallback(response) {
 		alert("Sorry, something went wrong removing the image.");
 	}
 }
-     
+
 AIM = {
 
     frame : function(c) {
