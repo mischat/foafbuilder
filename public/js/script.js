@@ -71,7 +71,7 @@ function loadFoaf(name,url){
   	//TODO use jquery event handler to deal with errors on requests
   	if(name != 'load-other'){
   		turnOnLoading();
-  		$.post("/ajax/"+name, {key : get_cookie_id(), uri: url}, function(data){genericObjectsToDisplay(data);turnOffLoading();}, "json");
+  		$.post("/ajax/"+name, {key : get_cookie_id(), uri: url}, function(data){genericObjectsToDisplay(data);turnOffLoading();saveFoaf();}, "json");
   	} else {
   		renderOther();
   	}
@@ -82,6 +82,7 @@ function loadFoaf(name,url){
   	document.getElementById('load-locations').style.backgroundImage = 'url(/images/locations-pink.gif)';
   	document.getElementById('load-friends').style.backgroundImage = 'url(/images/friends-pink.gif)';
   	document.getElementById('load-other').style.backgroundImage = 'url(/images/other-pink.gif)';
+  	document.getElementById('load-interests').style.backgroundImage = 'url(/images/other-pink.gif)';
   	
   	//XXX verbose and messy
   	switch(name){
@@ -105,6 +106,9 @@ function loadFoaf(name,url){
 			break;
 		case 'load-other':
 			imageType = 'other';
+			break;
+		case 'load-interests':
+			imageType = 'interests';
 			break;
 		default:
 			return null;
