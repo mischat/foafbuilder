@@ -82,41 +82,33 @@ class InterestsField extends Field {
 	
     /*saves the values created by the editor in value... as encoded in json. */
     public function saveToModel(&$foafData, $value) {
-			require_once 'FieldNames.php';
+	$value = '{"public":{"foafInterestsFields":{"values":[{"uri":"http:\/\/www.w3.org\/RDF\/","title":"Resource Description Framework (RDF)"},{"uri":"http:\/\/www.w3.org\/2000\/01\/sw\/","title":"Semantic Web"},{"uri":"http:\/\/dbpedia.org\/resource\/Beer","title":"Beer"},{"uri":"http:\/\/dbpedia.org\/resource\/Photography","title":"Photography"},{"uri":"http:\/\/dbpedia.org\/resource\/Juggling","title":"Juggling"},{"uri":"http:\/\/dbpedia.org\/resource\/Guitar","title":"Guitar"},{"uri":"http:\/\/dbpedia.org\/resource\/Drums","title":"Drums"},{"uri":"http:\/\/dbpedia.org\/resource\/Wii","title":"Nintendo Wii"},{"uri":"http:\/\/dbpedia.org\/resource\/Nintendo","title":"Nintendo"},{"uri":"http:\/\/dbpedia.org\/resource\/Linux","title":"Linux"},{"uri":"http:\/\/dbpedia.org\/resource\/Perl","title":"Perl"},{"uri":"http:\/\/dbpedia.org\/resource\/Rock_climbing","title":"Rock climbing"},{"uri":"http:\/\/dbpedia.org\/resource\/Swimming","title":"Swimming"},{"uri":"http:\/\/dbpedia.org\/resource\/Heavy_metal_music","title":"Heavy metal music"}],"displayLabel":"Interests","name":"foafInterests"}}}';
 			
-			$sha1Sum_resource = new Resource('http://xmlns.com/foaf/0.1/mbox_sha1sum');
-			$predicate_resource = new Resource('http://xmlns.com/foaf/0.1/mbox');
-			$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
-			
-			//find existing triples
-			$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
-			//echo($primary_topic_resource->uri);
-			//var_dump($foundModel);
-			//var_dump($foafData->getModel());
-			//echo("------------------------------HERE------------------------------");
-			//remove existing triples
-			foreach($foundModel->triples as $triple){
-				//echo('removing mbox triples');
-				$foafData->getModel()->remove($triple);
-			}
-			
-			//add new triples
-			$valueArray = $value->values;
-			
-			foreach($valueArray as $thisValue){
-				$mangledValue = $this->onSaveMangleEmailAddress($thisValue);
-				
-				$resourceValue = new Resource($mangledValue);
-				$literalValue = new Literal(sha1($sha1Sum_resource->uri));
-				
-				$mboxStatement = new Statement($primary_topic_resource,$predicate_resource,$resourceValue);	
-				$mbox_Sha1Statement = new Statement($primary_topic_resource,$sha1Sum_resource,$literalValue);	
-				
-				$foafData->getModel()->addWithoutDuplicates($mboxStatement);
-				$foafData->getModel()->addWithoutDuplicates($mbox_Sha1Statement);
-			}
-			
-
+	$interest_resource = new Resource('http://xmlns.com/foaf/0.1/interest');
+	$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
+	
+	//find existing triples
+	$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
+	//remove existing triples
+	foreach($foundModel->triples as $triple){
+		$foafData->getModel()->remove($triple);
+	}
+	
+	//add new triples
+	$valueArray = $value->values;
+	
+	foreach($valueArray as $thisValue){
+		var_dump($thisValue);
+	/*
+		$interestURI = 
+		$interestTitle = $this->
+		$resourceValue = new Resource($mangledValue);
+		$literalValue = new Literal(sha1($sha1Sum_resource->uri));
+		$mboxStatement = new Statement($primary_topic_resource,$predicate_resource,$resourceValue);	
+		$mbox_Sha1Statement = new Statement($primary_topic_resource,$sha1Sum_resource,$literalValue);	
+		$foafData->getModel()->addWithoutDuplicates($mboxStatement);
+		$foafData->getModel()->addWithoutDuplicates($mbox_Sha1Statement);
+	*/
+	}
     }
-
 }
