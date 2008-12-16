@@ -50,20 +50,17 @@ class Statement extends Object {
    */
   function Statement($subj, $pred, $obj) {
 
-    //if (!is_a($subj, 'Resource')) {
-    if (!($subj instanceof 'Resource')) {
+    	if (!is_a($subj, 'Resource')) {
 		$errmsg = RDFAPI_ERROR . 
 		          '(class: Statement; method: new): Resource expected as subject.';
 		trigger_error($errmsg, E_USER_ERROR); 
 	}
-	//if (!is_a($pred, 'Resource') || is_a($pred, 'BlankNode')) {
-	if (!($pred instanceof 'Resource') || ($pred instanceof 'BlankNode')) {
+	if (!is_a($pred, 'Resource') || is_a($pred, 'BlankNode')) {
 		$errmsg = RDFAPI_ERROR . 
 		          '(class: Statement; method: new): Resource expected as predicate, no blank node allowed.';
 		trigger_error($errmsg, E_USER_ERROR); 
 	}
-	//if (!(is_a($obj, 'Resource') or is_a($obj, 'Literal'))) {
-	if (!(($obj instanceof 'Resource') or ($obj instanceof 'Literal'))) {
+	if (!(is_a($obj, 'Resource') or is_a($obj, 'Literal'))) {
 		$errmsg = RDFAPI_ERROR . 
 		          '(class: Statement; method: new): Resource or Literal expected as object.';
 		trigger_error($errmsg, E_USER_ERROR); 
@@ -222,8 +219,7 @@ class Statement extends Object {
 	    if ($this == $that) {
 	      return true;
 	    }
-	    //if ($that == NULL || !(is_a($that, 'Statement'))) {
-	    if ($that == NULL || !(($that instanceof 'Statement'))) {
+	    if ($that == NULL || !(is_a($that, 'Statement'))) {
 	      return false;
 	    }
   
@@ -260,8 +256,7 @@ class Statement extends Object {
 
   function & reify(&$model_or_bNodeID) {
 		
-		//if (is_a($model_or_bNodeID, 'MemModel')) {
-		if (($model_or_bNodeID instanceof 'MemModel')) {
+		if (is_a($model_or_bNodeID, 'MemModel')) {
 			// parameter is model
 			$statementModel = new MemModel($model_or_bNodeID->getBaseURI());
 			$thisStatement = new BlankNode($model_or_bNodeID);
