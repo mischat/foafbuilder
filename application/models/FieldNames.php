@@ -117,7 +117,8 @@ class FieldNames {
 	}
 	
 	private function instantiateInterestsFields($fullInstantiation = true){
-		$this->allFieldNames['foafInterest'] = new SimpleField('foafInterest', 'Interests', "http://xmlns.com/foaf/0.1/interest",$this->foafData,"resource", $fullInstantiation);
+		/*$this->allFieldNames['foafInterest'] = new SimpleField('foafInterest', 'Interests', "http://xmlns.com/foaf/0.1/interest",$this->foafData,"resource", $fullInstantiation);*/
+		$this->allFieldNames['foafInterest'] = new InterestsField($this->foafData,$this->privateFoafData,$fullInstantiation);
 	}
 	
 	private function instantiateLocationsFields($fullInstantiation = true){
