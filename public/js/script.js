@@ -912,29 +912,98 @@ function renderPhoneFields(data,isPublic){
 	}
 }
 
+function disambiguate(data){
+var found = false;
+ var url='';
+ var text = data [0];
+
+ if (text != document.getElementById ('foafInterests_0').value)
+ return;
+
+var incorrectText ='Not found';
+var correctText = 'Found - disambiguate below';
+
+ for (i=0; i<data [1].length; i++) {
+        if (text.toLowerCase () == data [1] [i].toLowerCase ()) {
+                var found = true;
+                var url ='http://en.wikipedia.org/wiki/' + text;
+                var quotedText = "'text'";
+                document.getElementById ('foundInterestDiv').innerHTML = '<b style="color:green">'+correctText+'</b> - <a href="javascript:doDisambiguation('+quotedText+');" href="' + url + '">Disambiguate</a>';
+        }
+ }
+
+ if (! found)
+        document.getElementById ('foundInterestDiv').innerHTML = '<b style="color:red">'+incorrectText+'</b>';
+
+}
+
+function get_dis_js(value){
+ if (! value){
+        return;
+  }
+ var checkingText = 'Looking up ...';
+ var url = 'http://en.wikipedia.org/w/api.php?action=opensearch&search='+value+'&format=json&callback=disambiguate';
+
+ document.getElementById ('foundInterestDiv').innerHTML = checkingText;
+ var elem = document.createElement ('script');
+ elem.setAttribute ('src', url);
+ elem.setAttribute ('type','text/javascript');
+ document.getElementsByTagName ('head') [0].appendChild (elem);
+
+}
+
 /*renders a disambiguationList*/
-function doDisambiguation(){
-	alert('Doing disambiguation');
+function doDisambiguation(data){
 	
 	var container = document.getElementById('foafInterests_container');
 	
 	if(typeof(container) == 'undefined' || !container){
+		log('undefined');
 		return;
 	}
-
+	
+	var disDiv = document.getElementById('disambiguationList');
+	
 	/*clear out the disambiguation div*/
-	if(document.getElementById('disambiguationList') && document.getElementById('disambiguationList').childNodes && document.getElementById('disambiguationList').childNodes[0] != 'undefined'){
-		for(nodeKey in document.getElementById('disambiguationList').childNodes){
-			var thisNode = document.getElementById('disambiguationList').childNodes[nodeKey];
-			thisNode.parentNode.removeChild(thisNode);	
-		}
-	} else {
-		var disDiv = document.createElement('div');
-		disDiv.id = 'disambiguationList';
-		container.appendChild(disDiv);
-	}
-	
-	
+	disDiv.innerHTML = ''; 	
+
+	/*loop through the disambiguation stuff adding it to the div*/
+	for(disItem in data[1]){
+		var disSubDiv = document.createElement('div');
+		disSubDiv.className = 'disambiguationLinkContainer';
+		var thisItem = data[1][disItem];
+		var thisLink = document.createElement("a");
+		thisLink.href = "javascript:addInterest('"+thisItem+"');";
+		thisLink.className = 'disambiguationLink';
+		thisLink.appendChild(document.createTextNode(thisItem));
+		disDiv.appendChild(disSubDiv);
+		disSubDiv.appendChild(thisLink);
+	}	
+}
+
+//XXX repeated code here and in renderInterests
+function addInterest(interestString){
+		var actualInterestDiv = document.getElementById('actualInterests');
+		var dbpediaUrl = "http://dbpedia.org/resource/"+interestString.replace(' ','_');
+
+		//create a div to contain everything from one interest field
+                var thisInterestDiv = document.createElement('div');
+                //thisInterestDiv.id = 'interestDiv_'+;
+                thisInterestDiv.className = 'interestDiv';
+
+                //create the actual link
+                var thisInterestLink = document.createElement('a');
+                thisInterestLink.className = 'interestLink';
+                thisInterestLink.href = dbpediaUrl;
+                //thisInterestLink.id = 'interestLink_'+count;
+                //if(!saveTitle){
+                  //      thisInterestLink.setAttribute('rel','external');//XXX really bad - a little flag to say don't save the title
+                //}
+                thisInterestLink.appendChild(document.createTextNode(interestString));
+                thisInterestDiv.appendChild(thisInterestLink);
+
+                actualInterestDiv.appendChild(thisInterestDiv);
+
 	
 }
 
@@ -942,7 +1011,6 @@ function spellcheck(data) {
  var found = false;
  var url='';
  var text = data [0];
-
  if (text != document.getElementById ('foafInterests_0').value)
  return;
 
@@ -951,11 +1019,14 @@ var correctText = 'Found';
 
  for (i=0; i<data [1].length; i++) {
  	if (text.toLowerCase () == data [1] [i].toLowerCase ()) {
- 		found = true;
- 		url ='http://en.wikipedia.org/wiki/' + text;
+ 		var found = true;
+ 		var url ='http://en.wikipedia.org/wiki/' + text;
 		var quotedText = "'text'";
- 		document.getElementById ('foundInterestDiv').innerHTML = '<b style="color:green">'+correctText+'</b> - <a href="javascript:doDisambiguation('+quotedText+');" href="' + url + '">Disambiguate</a>';
- 	}
+		document.getElementById('')
+ 		document.getElementById ('foundInterestDiv').innerHTML = '<b style="color:green">'+correctText+'</b>';
+ 		doDisambiguation(data);
+		break;
+	}
  }
 
  if (! found)
@@ -966,7 +1037,7 @@ function getjs(value) {
  	return;
   }
  var checkingText = 'Looking up ...';
- url = 'http://en.wikipedia.org/w/api.php?action=opensearch&search='+value+'&format=json&callback=spellcheck';
+ var url = 'http://en.wikipedia.org/w/api.php?action=opensearch&search='+value+'&format=json&callback=spellcheck';
 
  document.getElementById ('foundInterestDiv').innerHTML = checkingText;
  var elem = document.createElement ('script');
@@ -999,7 +1070,15 @@ function renderInterestsFields(data,isPublic){
                 foundDiv.id='foundInterestDiv';
                 containerElement.appendChild(foundDiv);
 	}
-	
+
+	//create a div to show the disambiguation stuff
+	var disDiv = document.getElementById('disambiguationList');
+	if(!disDiv){
+		disDiv = document.createElement('div');
+                disDiv.id = 'disambiguationList';
+                containerElement.appendChild(disDiv);
+	}
+
 	//create a div to actually show the interests
 	var actualInterestDiv = document.getElementById('actualInterests');
 	if(!actualInterestDiv){
