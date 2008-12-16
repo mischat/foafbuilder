@@ -247,8 +247,8 @@ function genericObjectsToDisplay(data){
 	mboxFieldsObjectsToDisplay(data);
 	phoneFieldsObjectsToDisplay(data);
 	addressFieldsObjectsToDisplay(data);
-	imgFieldsObjectsToDisplay(data);
 	depictionFieldsObjectsToDisplay(data);
+	imgFieldsObjectsToDisplay(data);
 	nearestAirportFieldsObjectsToDisplay(data);
 	basedNearFieldsObjectsToDisplay(data);
 	homepageObjectsToDisplay(data);
@@ -296,6 +296,7 @@ function depictionFieldsObjectsToDisplay(data){
 	if(data.public){
 		renderDepictionFields(data.public,true);
 	}
+	resize();
 }
 function simpleFieldsObjectsToDisplay(data){
 	if(!data){
@@ -2562,8 +2563,8 @@ function saveOther(){
 		return;
 	}
 	
-	var publicRdf = publicTextArea.form.public.value;
-	var privateRdf = privateTextArea.form.private.value;
+	var privateRdf = document.getElementById('otherTextAreaprivate').value;
+	var publicRdf = document.getElementById('otherTextAreapublic').value;
 	
 	//TODO use jquery event handler to deal with errors on this request
 	turnOnLoading();
@@ -2786,14 +2787,12 @@ function phoneDisplayToObjects(){
 	/*creates and appends a field container for the given name if it is not already there*/
 	function createFieldContainer(name,label){
 		//if(!document.getElementById(name+'_container')){
-			//alert('creating container with name'+name);
 			/*label*/
 			var newFieldLabelContainer = document.createElement('div');
 			newFieldLabelContainer.className = "fieldLabelContainer";
 			textNode = document.createTextNode(label);
 			newFieldLabelContainer.appendChild(textNode);
 			
-			alert(1);
 			var newFieldValueContainer = document.createElement('div');
 			newFieldValueContainer.className = "fieldValueContainer";
 			newFieldValueContainer.id = name+'_container';
@@ -3295,7 +3294,6 @@ function phoneDisplayToObjects(){
 		var name = 'other';
 		var label = 'Geek View';
 		var containerElement = createFieldContainer(name, label);
-	
 		
 		log('drawing other3');
 		/*build a textarea for private & public*/
@@ -3328,6 +3326,7 @@ function phoneDisplayToObjects(){
 		var rdfForm = document.createElement('form');	
 		rdfForm.setAttribute('action','javascript:saveOther()');
 		rdfForm.id = 'otherForm'+privacy;
+		rdfForm.name = 'otherForm'+privacy;
 		container.appendChild(rdfForm);
 		
 		/*render the header*/
@@ -4300,8 +4299,8 @@ function makeCursorAPointer(element){
 		return;
 	}
 	
-	element.setAttribute('onmouseover','this.style.cursor="pointer";');
-	element.setAttribute('onmouseout','this.style.cursor="default";');
+	element.onmouseover = function(){this.style.cursor="pointer";};
+	element.onmouseout = function(){this.style.cursor="default";};
 	
 	return element;
 }
