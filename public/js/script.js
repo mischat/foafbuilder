@@ -1155,9 +1155,9 @@ function renderKnowsFields(data){
 			menuDiv.appendChild(menuForm);
 			menuForm.id = 'menuForm_'+name;
 			if(name == 'foafImg'){
-				menuForm.onsubmit = function(){AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_foafImg_public});};
+				menuForm.onsubmit = function(){return AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_foafImg_public});};
 			} else {
-				menuForm.onsubmit = function(){AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_foafDepiction_public});};
+				menuForm.onsubmit = function(){return AIM.submit(this, {'onStart' : startCallback, 'onComplete' : uploadCallback_foafDepiction_public});};
 			}			
 
 			/*create and append upload label*/
@@ -1203,7 +1203,7 @@ function renderKnowsFields(data){
 		linkToImageInput.className = 'linkToImage';
 		linkToImageInput.name = 'linkToImage_'+name;
 		linkToImageInput.id = 'linkToImage_'+name;
-		linkToImageInput.onchange = function(){previewImage("'+containerElement.id+'",name,this.value,false,true);};
+		linkToImageInput.onchange = function(){previewImage(containerElement.id,name,this.value,false,true);};
 		menuFormLink.appendChild(linkToImageInput);
 		
 		/*append submit element link*/
@@ -1222,7 +1222,7 @@ function renderKnowsFields(data){
 	
 	/*renders the inputField etc*/
 	function renderSearchUI(){
-		var containerElefment = createFieldContainer('addFriends', 'Add Friends');
+		var containerElement = createFieldContainer('addFriends', 'Add Friends');
 		
 		var findForm = document.createElement('form');
 		findForm.id='findForm';
@@ -1234,7 +1234,7 @@ function renderKnowsFields(data){
 		/*create a button to submit the form*/
 		var img = document.createElement('img');
 		img.id = 'findButton';
-		img.setAttribute('onclick',"document.getElementById('findForm').submit();");
+		img.onclick = function(){document.getElementById('findForm').submit();};
 		img.setAttribute('src',"/images/go.png");
 		containerElement.appendChild(img);
 	}
@@ -2786,19 +2786,19 @@ function phoneDisplayToObjects(){
 	/*creates and appends a field container for the given name if it is not already there*/
 	function createFieldContainer(name,label){
 		//if(!document.getElementById(name+'_container')){
+			//alert('creating container with name'+name);
 			/*label*/
-			newFieldLabelContainer = document.createElement('div');
+			var newFieldLabelContainer = document.createElement('div');
 			newFieldLabelContainer.className = "fieldLabelContainer";
 			textNode = document.createTextNode(label);
 			newFieldLabelContainer.appendChild(textNode);
-	
-			/*value*/
-			newFieldValueContainer = document.createElement('div');
+			alert(1);
+			var newFieldValueContainer = document.createElement('div');
 			newFieldLabelContainer.className = "fieldValueContainer";
 			newFieldValueContainer.id = name+'_container';
 	
 			/*container*/
-			newFieldContainer = document.createElement('div');
+			var newFieldContainer = document.createElement('div');
 			newFieldLabelContainer.className = "fieldContainer";
 
 			/*append them*/
@@ -3112,9 +3112,9 @@ function phoneDisplayToObjects(){
 			removeLink.className="removeLink";
 	
 			if(isMutual){
-				removeLink.setAttribute("onclick" , "removeMutualFriendElement('"+removeId+"','"+removeDiv.id+"');");
+				removeLink.onclick = function(){removeMutualFriendElement(removeId,removeDiv.id);};
 			} else {
-				removeLink.setAttribute("onclick" , "removeUserKnowsElement('"+removeId+"','"+removeDiv.id+"');");
+				removeLink.onclick = function(){removeUserKnowsElement(removeId,removeDiv.id);};
 			}
 			
 			removeDiv.appendChild(removeLink);
@@ -3135,7 +3135,7 @@ function phoneDisplayToObjects(){
 			makeFriendLink.appendChild(document.createTextNode("-Confirm"));
 			makeFriendLink.className="removeLink";
 	
-			makeFriendLink.setAttribute("onclick" , "makeMutualFriend('"+friendDiv.id+"');");
+			makeFriendLink.onclick = function(){makeMutualFriend(friendDiv.id);};
 			
 			makeFriendDiv.appendChild(makeFriendLink);
 			friendDiv.appendChild(makeFriendDiv);
@@ -3155,7 +3155,7 @@ function phoneDisplayToObjects(){
 			makeFriendLink.appendChild(document.createTextNode("-Add"));
 			makeFriendLink.className="removeLink";
 	
-			makeFriendLink.setAttribute("onclick" , "addFriend('"+friendDiv.id+"');");
+			makeFriendLink.onclick = function(){addFriend(friendDiv.id);};
 			
 			makeFriendDiv.appendChild(makeFriendLink);
 			friendDiv.appendChild(makeFriendDiv);
@@ -3245,7 +3245,7 @@ function phoneDisplayToObjects(){
 		locationDiv.className = optionalClassName;
 		locationDiv.id = bnodeId;
 		if(bnodeId!='nearestAirport'){
-			locationDiv.setAttribute("onclick","map.panTo(mapMarkers['"+bnodeId+"'].getLatLng());");
+			locationDiv.onclick = function(){map.panTo(mapMarkers[bnodeId].getLatLng());};
 		}
 		attachElement.appendChild(locationDiv);
 		
@@ -3260,7 +3260,7 @@ function phoneDisplayToObjects(){
 	
 		if(!softRemove){
 			removeLink.appendChild(document.createTextNode("- Remove this location"));
-			removeLink.setAttribute("onclick" , "map.removeOverlay(mapMarkers[this.parentNode.parentNode.id]);this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);");
+			removeLink.onclick = function(){map.removeOverlay(mapMarkers[this.parentNode.parentNode.id]);this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);};
 		} 
 		
 		removeLink.id="removeLink";
@@ -3470,13 +3470,16 @@ function addFriend(friendDivId){
 	
 	var removeIfps = new Array;//the ifps of an element we want to remove
 	
+	var sha1Friend = sha1(friend.ifps[0]);
+	var sha1MailToFriend = sha1('mailto:'+friend.ifps[0]);
+
 	/*check whether this person is in the mutual friends bit*/
 	for(friendKey in globalFieldData.foafKnowsFields.mutualFriends){
 		for(ifpKey in globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps){		
 			//XXX this could this be more efficient
 			if(globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps[ifpKey]==friend.ifps[0] ||
-				globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps[ifpKey]==sha1(friend.ifps[0]) ||
-				globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps[ifpKey]==sha1('mailto:'+friend.ifps[0]) ||
+				globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps[ifpKey]==sha1Friend ||
+				globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps[ifpKey]==sha1MailToFriend ||
 				sha1(globalFieldData.foafKnowsFields.mutualFriends[friendKey].ifps[ifpKey])==friend.ifps[0]){
 				
 				isMutualFriend = true;
@@ -3488,8 +3491,8 @@ function addFriend(friendDivId){
 		for(ifpKey in globalFieldData.foafKnowsFields.userKnows[friendKey].ifps){
 			//XXX this could this be more efficient
 			if(globalFieldData.foafKnowsFields.userKnows[friendKey].ifps[ifpKey]==friend.ifps[0] ||
-				globalFieldData.foafKnowsFields.userKnows[friendKey].ifps[ifpKey]==sha1(friend.ifps[0]) ||
-				globalFieldData.foafKnowsFields.userKnows[friendKey].ifps[ifpKey]==sha1('mailto:'+friend.ifps[0]) ||
+				globalFieldData.foafKnowsFields.userKnows[friendKey].ifps[ifpKey]==sha1Friend ||
+				globalFieldData.foafKnowsFields.userKnows[friendKey].ifps[ifpKey]==sha1MailToFriend ||
 				sha1(globalFieldData.foafKnowsFields.userKnows[friendKey].ifps[ifpKey])==friend.ifps[0]){
 				
 				isUserKnows = true;
@@ -3500,14 +3503,18 @@ function addFriend(friendDivId){
 	for(friendKey in globalFieldData.foafKnowsFields.knowsUser){
 		for(ifpKey in globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps){
 			//XXX this could this be more efficient
+	
+			 var sha1FriendKey = sha1(globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]);
+                         var sha1FriendKeyMailTo = sha1('mailto:'+globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]);
+
 			if(globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==friend.ifps[0] ||
-				globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==sha1(friend.ifps[0]) ||
-				globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==sha1('mailto:'+friend.ifps[0]) ||
-				sha1(globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==friend.ifps[0] ||
-				sha1(globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==sha1('mailto:'+friend.ifps[0]) ||
-				sha1('mailto:'+globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==friend.ifps[0] ||
-				sha1('mailto:'+globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==sha1(friend.ifps[0]) ||
-				sha1('mailto:'+globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey])==sha1("mailto:"+friend.ifps[0])){
+				globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==sha1Friend ||
+				globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps[ifpKey]==sha1MailToFriend ||
+				sha1FriendKey==friend.ifps[0] ||
+				sha1FriendKey==sha1MailToFriend ||
+			 	sha1FriendKeyMailTo==friend.ifps[0] ||
+				sha1FriendKeyMailTo==sha1Friend ||
+				sha1FriendKeyMailTo==sha1MailToFriend){
 
 				removeIfps = globalFieldData.foafKnowsFields.knowsUser[friendKey].ifps;
 				isKnowsUser = true;
@@ -3774,10 +3781,11 @@ function previewImage(containerElementId,name,source,file,isPublic){
 	/*reattach the menu div underneath the existing menu*/
 	containerElement.appendChild(menuDiv);
 	
-	/*resize to fit the image*/
-	resize();
+	/*resize to fit the page nicely*/
 
 	saveFoaf();	
+	
+	resize();
 }	
 
 /*when an account dropdown is changed, this renders the appropriate hidden or showing fields 
@@ -4265,7 +4273,6 @@ function createMapElement(container){
 }
 
 function resize(){
-  alert('being called');
   var maxWidth = 200;
   var maxHeight= 175;
   var img=document.images;
