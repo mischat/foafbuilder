@@ -388,30 +388,21 @@ class AjaxController extends Zend_Controller_Action {
     }
     
     private function saveAllFields($privateOrPublicModel,$allFieldNames,&$foafData){
-     echo('alpha');   
     	/*loop through all the rows in the sparql results style 'almost model'*/
         foreach($privateOrPublicModel as $key => $value) {
-            
-	echo('what?');		/*get rid of 'fields at the end of the name'*/
             if(isset($allFieldNames[substr($key,0,-6)])) {
-            
-	echo('whatid going on?');		/*get rid of 'fields at the end of the name'*/
                 /*get some details about the fields we're dealing with*/
                 $field = $allFieldNames[substr($key,0,-6)];
-                
-             echo('hmmmm'.$key);   /*save them using the appropriate method*/
                 $field->saveToModel($foafData, $value);
-echo('beta');
             } else if($key == 'fields'){
             	//we need to look inside the simplefield array to do the right kind of save
- 		echo('midway through the for loop');
             	foreach($value as $fieldName => $fieldValue){
             		 if(isset($allFieldNames[$fieldName])){
             		 	/*get some details about the fields we're dealing with*/
                	 		$field = $allFieldNames[$fieldName];
           
-						/*save them using the appropriate method (notice that the save process
-						 is different depending on whether it is public or private*/
+				/*save them using the appropriate method (notice that the save process
+				is different depending on whether it is public or private*/
                			$field->saveToModel($foafData, $value);
             		 }            	 
             	}
@@ -419,7 +410,6 @@ echo('beta');
                 echo("unrecognised fields:".$key."\n");	
             }//end if
         }//end foreach 	
-	echo('end');
     }
 	
     //saves other stuff
