@@ -2792,14 +2792,15 @@ function phoneDisplayToObjects(){
 			newFieldLabelContainer.className = "fieldLabelContainer";
 			textNode = document.createTextNode(label);
 			newFieldLabelContainer.appendChild(textNode);
+			
 			alert(1);
 			var newFieldValueContainer = document.createElement('div');
-			newFieldLabelContainer.className = "fieldValueContainer";
+			newFieldValueContainer.className = "fieldValueContainer";
 			newFieldValueContainer.id = name+'_container';
 	
 			/*container*/
 			var newFieldContainer = document.createElement('div');
-			newFieldLabelContainer.className = "fieldContainer";
+			newFieldContainer.className = "fieldContainer";
 
 			/*append them*/
 			container = document.getElementById('personal');
