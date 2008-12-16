@@ -31,10 +31,10 @@ class FoafData {
 
 	//Check if authenicated
 	if($defaultNamespace->authenticated == true) {
-		error_log("AUTHENICATED! ");
+		error_log("[builder] The user has AUTHENTICATED! ");
 		$this->openid = $defaultNamespace->url;
 	} else {
-		error_log("NOT AUTHENICATED! ");
+		error_log("[builder] The user has NOT AUTHENTICATED! ");
 		$this->openid = "example.com/myopenid";
 	}
 
@@ -55,10 +55,9 @@ class FoafData {
 		//If match then one of ours ...
 		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/oauth/',$this->uri) && $this->uri != PRIVATE_URL.'example/myopenid/data/foaf.rdf') {
 			$cachename = cache_filename($this->uri);
-			error_log($cachename);
 			if (file_exists(PRIVATE_DATA_DIR.$cachename)) {
 				$uri = 'file://'.PRIVATE_DATA_DIR.$cachename;
-				error_log($uri);	
+				error_log('[builder] found local url to load'.$uri);	
 			} 
 		}
 		//TODO MISCHA
@@ -66,22 +65,12 @@ class FoafData {
     	} else if ($this->isPublic) {
 		//If match then one of ours ...
 		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/people/',$this->uri) && $this->uri != PRIVATE_URL.'example/myopenid/data/foaf.rdf') {
-			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
-			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
-			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
-			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
-			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
-			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
-			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
-			error_log("DOES THIS EVER HAPPEN!!?!?!??!?!?!");
 			$cachename = cache_filename($this->uri);
 			if (file_exists(PUBLIC_DATA_DIR.$cachename)) {
 				$uri = 'file://'.PUBLIC_DATA_DIR.$cachename;
-				error_log($uri);	
+				error_log('[builder] found local url to load'.$uri);	
 			} 
 		}
-		//TODO MISCHA
-		//In future make OAuth dance here ...
     	} 
     	
     	/*
@@ -128,7 +117,7 @@ class FoafData {
         $results = $tempmodel->sparqlQuery($query);
         
         if (!$results || empty($results)) {
-            error_log("[foaf_editor] No foaf:knows, no idea who this document is about");
+            error_log("[foaf_editor] No foaf:knows, no idea who this document is about!");
             return null;
         }
         foreach ($results as $row) {
@@ -157,7 +146,6 @@ class FoafData {
 	$newPrimaryTopic = $this->getUri().$fragment;
 	$newPrimaryTopicRes = new Resource($newPrimaryTopic);
 
-	error_log("LAME $oldPrimaryTopic and the $newPrimaryTopic");
 	$tempmodel->replace(new Resource($uri),NULL,NULL,new Resource($this->getUri()));
 	$tempmodel->replace(NULL,NULL,new Resource($uri),new Resource($this->getUri()));
 	$tempmodel->replace(NULL,NULL,$oldPrimaryTopicRes,$newPrimaryTopicRes);
@@ -228,7 +216,6 @@ class FoafData {
     //Remove the generator agent and add our own
     public function replaceGeneratorAgent() {
 	if (!$this->getUri()) {
-		error_log('[foafeditor] Trying to remove generator and the $uri is '.$this->getUri());
 		$gen_agent = new Resource('http://webns.net/mvcb/generatorAgent');
 		$reports_to = new Resource('http://webns.net/mvcb/errorReportsTo');
 		$mailto_admin = new Resource('mailto:admin.qdos.com');
@@ -240,7 +227,7 @@ class FoafData {
 		
 		//remove existing triples
 		foreach($foundModel->triples as $triple){
-			error_log('[foafeditor] found generator agent triple');
+			error_log('[foafeditor] found generator agent triple and removing now');
 			$this->model->remove($triple);
 		}
 
@@ -250,7 +237,6 @@ class FoafData {
 		$foundModel = $this->model->find($primary_topic_resource,$reports_to,NULL);
 		//remove existing triples
 		foreach($foundModel->triples as $triple){
-			error_log('[foafeditor] found generator agent triple');
 			$this->model->remove($triple);
 		}
 
@@ -339,7 +325,6 @@ class FoafData {
 	if (preg_match('/#(.*?)$/',$first,$matches)) {
 		if ($matches[1] != "#me") {
 			$ending = '#'.$matches[1];
-			error_log("We have matched an ending and it is ".$matches[1]);
 		}
 	}
 
