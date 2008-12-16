@@ -82,7 +82,7 @@ function loadFoaf(name,url){
   	document.getElementById('load-locations').style.backgroundImage = 'url(/images/locations-pink.gif)';
   	document.getElementById('load-friends').style.backgroundImage = 'url(/images/friends-pink.gif)';
   	document.getElementById('load-other').style.backgroundImage = 'url(/images/other-pink.gif)';
-  	document.getElementById('load-interests').style.backgroundImage = 'url(/images/other-pink.gif)';
+  	document.getElementById('load-interests').style.backgroundImage = 'url(/images/interests-pink.gif)';
   	
   	//XXX verbose and messy
   	switch(name){
@@ -257,6 +257,7 @@ function genericObjectsToDisplay(data){
 	birthdayFieldsObjectsToDisplay(data);
 	weblogObjectsToDisplay(data);
 	accountsObjectsToDisplay(data);
+	interestsObjectsToDisplay(data);
 	
 	/*friends stuff does not have privacy settings*/
 	renderKnowsFields(data);
@@ -264,7 +265,19 @@ function genericObjectsToDisplay(data){
 }
 
 /*-----------------objects to display elements to convert data to html elements and split public/private pairs up-----------------*/
-
+function interestsObjectsToDisplay(data){
+	//TODO: get rid of this when necessary
+	renderInterestsFields(data,true);
+	if(!data){
+ 		return;
+	}
+	if(data.private){
+		renderInterestsFields(data.private,true);
+	}
+	if(data.public){
+		renderInterestsFields(data.public,true);
+	}
+}
 function nearestAirportFieldsObjectsToDisplay(data){
 	if(!data){
  		return;
@@ -898,6 +911,79 @@ function renderPhoneFields(data,isPublic){
 	if(isPublic){
 		createGenericAddElement(containerElement,name,label);
 	}
+}
+
+/*renders a disambiguationList*/
+function doDisambiguation(){
+	alert('Doing disambiguation');
+	
+	/*clear out the disambiguation div*/
+	if(document.getElementById('disambiguationList') && document.getElementById('disambiguationList').childNodes && document.getElementById('disambiguationList').childNodes[0] != 'undefined'){
+		for(nodeKey in document.getElementById('disambiguationList').childNodes){
+			var thisNode = document.getElementById('disambiguationList').childNodes[nodeKey];
+			thisNode.parentNode.removeChild(thisNode);	
+		}
+	}
+}
+
+function spellcheck(data) {
+ var found = false;
+ var url='';
+ var text = data [0];
+
+ if (text != document.getElementById ('foafInterests_0').value)
+ return;
+
+var incorrectText ='Not found';
+var correctText = 'Found';
+
+ for (i=0; i<data [1].length; i++) {
+ 	if (text.toLowerCase () == data [1] [i].toLowerCase ()) {
+ 		found = true;
+ 		url ='http://en.wikipedia.org/wiki/' + text;
+		var quotedText = "'text'";
+ 		document.getElementById ('foundInterestDiv').innerHTML = '<b style="color:green">'+correctText+'</b> - <a href="javascript:doDisambiguation('+quotedText+');" href="' + url + '">Disambiguate</a>';
+ 	}
+ }
+
+ if (! found)
+ 	document.getElementById ('foundInterestDiv').innerHTML = '<b style="color:red">'+incorrectText+'</b>';
+}
+function getjs(value) {
+ if (! value){
+ 	return;
+  }
+ var checkingText = 'Looking up ...';
+ url = 'http://en.wikipedia.org/w/api.php?action=opensearch&search='+value+'&format=json&callback=spellcheck';
+
+ document.getElementById ('foundInterestDiv').innerHTML = checkingText;
+ var elem = document.createElement ('script');
+ elem.setAttribute ('src', url);
+ elem.setAttribute ('type','text/javascript');
+ document.getElementsByTagName ('head') [0].appendChild (elem);
+}
+
+function renderInterestsFields(data,isPublic){
+	
+	/* uncomment out when loading works
+	if(!data || typeof(data.interestsFields) == 'undefined'){
+                return;
+        }*/
+	//get these from the incoming data
+	var name = 'foafInterests';
+	var label = 'interests';
+	
+	/*build the container if it isn't there already*/
+        var containerElement = document.getElementById(name+"_container");
+        if(!containerElement){
+                containerElement = createFieldContainer(name, label);
+        }
+	var inputField = createGenericInputElement(name,'Enter an interest e.g "football"', 0,false,true,true,!isPublic,true);
+	inputField.onkeyup = function(){getjs(this.value);};
+	
+	var foundDiv = document.createElement('div');
+	foundDiv.id='foundInterestDiv';
+	containerElement.appendChild(foundDiv);
 }
 
 
