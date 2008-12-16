@@ -405,7 +405,7 @@ class N3Serializer extends Object
             if ($p === $lastp) {
                 $out .= ' , ';
             } else {
-                if ($lastp!='') {
+                if ((string) $lastp!='') {
                     if ($this->stylePretty) {
                         $out .= ";\n" . $strIndent;
                     } else {
