@@ -40,13 +40,17 @@ class InterestsField extends Field {
 	                PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
 	                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
 	                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-	                SELECT ?foafInterests
+	                PREFIX dc:  <http://purl.org/dc/elements/1.1/>
+	                SELECT ?foafInterests ?foafInterestTitles
 	                WHERE{
-	                <".$foafData->getPrimaryTopic()."> foaf:interest ?foafInterests .
-	                };";
-	
+			   <".$foafData->getPrimaryTopic()."> foaf:interest ?foafInterests 
+			   OPTIONAL {
+				?foafInterests dc:title ?foafInterestTitles
+			   }
+			}";
+
 	    $results = $foafData->getModel()->SparqlQuery($queryString);		
-	
+
 	    //Check if results are not empty
 	    if (empty($results)) {
 		return;	
@@ -59,31 +63,25 @@ class InterestsField extends Field {
 	    } else {
 		$privacy = 'private';			
 	    }
-		
+
 	    /*mangle the results so that they can be easily rendered*/
 	    foreach ($results as $row) {	
-		if (!isset($row['?foafMbox'])) {
+	    	$interestsArray = array();
+		if (!isset($row['?foafInterests'])) {
 			continue;	
 		}
-			
-	    $mBoxElem = $row['?foafMbox'];			
-			
-			/*add it to the data array which is returned to the application.  Try to load literals as well*/
-			if(property_exists($mBoxElem,'label') && $this->isEmailAddressValid($mBoxElem->label)){
-				
-				array_push( $this->data[$privacy]["foafMboxFields"]['values'],$this->onLoadMangleEmailAddress($mBoxElem->label));
-		        	        	
-			} else if(property_exists($mBoxElem,'uri') && $this->isEmailAddressValid($mBoxElem->uri)){
-
-				array_push($this->data[$privacy]["foafMboxFields"]['values'],$this->onLoadMangleEmailAddress($mBoxElem->uri));	
-	
-			}
-	     }
+	    	if ($row['?foafInterests']->uri) {
+			$interestsArray['uri'] = $row['?foafInterests']->uri;
+		}
+		if (isset($row['?foafInterestTitles']) && $row['?foafInterestTitles']->label) {
+			$interestsArray['title'] = $row['?foafInterestTitles']->label;
+		}
+		array_push($this->data[$privacy]["foafInterestsFields"]['values'],$interestsArray);
+	   }
     }
 	
     /*saves the values created by the editor in value... as encoded in json. */
     public function saveToModel(&$foafData, $value) {
-
 			require_once 'FieldNames.php';
 			
 			$sha1Sum_resource = new Resource('http://xmlns.com/foaf/0.1/mbox_sha1sum');
@@ -120,33 +118,5 @@ class InterestsField extends Field {
 			
 
     }
-    /*mangles the email address for display purposes*/
-	private function onLoadMangleEmailAddress($value){
-		//TODO: more mangling will probably at some point be required here
-		$ret = str_replace('mailto:','',$value);
-		return $ret;
-	}
-	
-    /*mangles the email address  for saving purposes*/
-	private function onSaveMangleEmailAddress($value){
-		//TODO: more mangling will at some point probably be required here
-		$ret = $value;
-		
-		if(substr($value,0,4) != 'mailto:'){
-			$ret = 'mailto:'.$value;
-		}
-		
-		return $ret;
-	}
-	
-    private function isEmailAddressValid($value) {
-        //TODO: add some proper validation here
-    	if($value){
-        	return true;
-        } else {
-        	return false;
-        }
-    }
 
 }
-
