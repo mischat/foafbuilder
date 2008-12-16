@@ -79,7 +79,6 @@ class FoafData {
     	 */
     	if($uri=='' || !$uri){
     		//create a skeleton empty document
-		error_log("Creating an empty document");
     		$this->getEmptyDocument();
 		$this->putInSession();
 		return;
