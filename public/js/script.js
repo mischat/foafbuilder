@@ -983,6 +983,7 @@ function doDisambiguation(data){
 
 //XXX repeated code here and in renderInterests
 function addInterest(interestString){
+
 		var actualInterestDiv = document.getElementById('actualInterests');
 		var dbpediaUrl = "http://dbpedia.org/page/"+interestString.replace(' ','_');
 
@@ -1002,9 +1003,16 @@ function addInterest(interestString){
                 thisInterestLink.appendChild(document.createTextNode(interestString));
                 thisInterestDiv.appendChild(thisInterestLink);
 
+		thisInterestDiv.id = createRandomString(50);
                 actualInterestDiv.appendChild(thisInterestDiv);
 
-	
+		//create a remove link
+                var removeLink = document.createElement('a');
+                removeLink.className = 'interestsRemoveLink';
+                removeLink.onclick = function(){document.getElementById(thisInterestDiv.id).parentNode.removeChild(document.getElementById(thisInterestDiv.id));this.parentNode.removeChild(this);};
+                removeLink.appendChild(document.createTextNode('Remove'));
+                actualInterestDiv.appendChild(removeLink);
+
 }
 
 function spellcheck(data) {
@@ -1069,6 +1077,15 @@ function renderInterestsFields(data,isPublic){
 		var foundDiv = document.createElement('div');
                 foundDiv.id='foundInterestDiv';
                 containerElement.appendChild(foundDiv);
+	}	
+	
+	//create a div with the title in it
+	var disTitle = document.getElementById('disambiguationTitle');
+	if(!disTitle){
+		disTitle = document.createElement('div');
+		disTitle.id = 'disambiguationTitle';
+		disTitle.appendChild(document.createTextNode('Choose the interest you want to add'));
+		containerElement.appendChild(disTitle);
 	}
 
 	//create a div to show the disambiguation stuff
@@ -1078,6 +1095,15 @@ function renderInterestsFields(data,isPublic){
                 disDiv.id = 'disambiguationList';
                 containerElement.appendChild(disDiv);
 	}
+	
+	//create a div to show the disambiguation stuff
+        var myInterests = document.getElementById('myInterests');
+        if(!myInterests){
+                myInterests = document.createElement('div');
+                myInterests.id = 'myInterests';
+		myInterests.appendChild(document.createTextNode('My Interests'));
+                containerElement.appendChild(myInterests);
+        }
 
 	//create a div to actually show the interests
 	var actualInterestDiv = document.getElementById('actualInterests');
@@ -1106,6 +1132,7 @@ function renderInterestsFields(data,isPublic){
 		var thisInterestDiv = document.createElement('div');
 		thisInterestDiv.id = 'interestDiv_'+count;
 		thisInterestDiv.className = 'interestDiv';
+		thisInterestDiv.id = 'interestLink_'+count;
 
 		//create the actual link
 		var thisInterestLink = document.createElement('a');
@@ -1117,11 +1144,17 @@ function renderInterestsFields(data,isPublic){
 		}
 		thisInterestLink.appendChild(document.createTextNode(thisTitle));
 		thisInterestDiv.appendChild(thisInterestLink);
-
 		actualInterestDiv.appendChild(thisInterestDiv);
+
+		//create a remove link
+		var removeLink = document.createElement('a');
+		removeLink.className = 'interestsRemoveLink';
+		removeLink.onclick = function(){document.getElementById(thisInterestDiv.id).parentNode.removeChild(document.getElementById(thisInterestDiv.id));this.parentNode.removeChild(this);};
+		removeLink.appendChild(document.createTextNode('Remove'));
+		actualInterestDiv.appendChild(removeLink);
+
 		count++;
 	}
-
 }
 
 
