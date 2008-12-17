@@ -209,9 +209,13 @@ CREATE TABLE IF NOT EXISTS oauth_users (
     osu_maxfiles	  int(11) not null default '0',
     osu_maxfilesize	  int(11) not null default '0',
     osu_numfiles	  int(11) not null default '0',
+    osu_publicfoaf	  varchar(255) not null,	
+    osu_privatefoaf       varchar(255) not null,
 
     primary key (osu_id),
     unique key (osu_url),
+    unique key (osu_privatefoaf),
+    unique key (osu_publicfoaf),
     unique key (osu_openid)
 
 ) engine=InnoDB default charset=utf8;
