@@ -104,7 +104,6 @@ class InterestsField extends Field {
 	
 	$dctitle_res = new Resource("http://purl.org/dc/elements/1.1/title");
 	foreach($value->values as $thisValue){
-error_log("Am writng a new triple");
 		$foafData->getModel()->addWithoutDuplicates(new Statement ($primary_topic_resource,$interest_resource,new Resource((string) $thisValue->uri))); 
 		$foafData->getModel()->addWithoutDuplicates(new Statement (new Resource((string)$thisValue->uri),$dctitle_res,new Literal((string) $thisValue->title))); 
 	}
