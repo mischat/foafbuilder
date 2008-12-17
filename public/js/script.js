@@ -248,7 +248,7 @@ function genericObjectsToDisplay(data){
 	simpleFieldsObjectsToDisplay(data);
 	mboxFieldsObjectsToDisplay(data);
 	phoneFieldsObjectsToDisplay(data);
-	addressFieldsObjectsToDisplay(data);
+	//addressFieldsObjectsToDisplay(data);
 	depictionFieldsObjectsToDisplay(data);
 	imgFieldsObjectsToDisplay(data);
 	nearestAirportFieldsObjectsToDisplay(data);
@@ -1962,7 +1962,7 @@ function displayToObjects(name){
 			simpleFieldsDisplayToObjects();
 			break;
 		case 'load-contact-details':
-			addressDisplayToObjects();
+			//addressDisplayToObjects();
 			mboxDisplayToObjects();
 			phoneDisplayToObjects();
 			break;
@@ -4290,11 +4290,11 @@ function geoCodeNewAddress(point){
   } else{
   	geoCodeNewAddress.count++;
   }
-  
+     //just add a point at the garlik office
      if (!point) {
      	log("No point");
-     	//TODO: possibly do something here, maybe do nothing
-     } else {
+	point = new GLatLng(51.46223,-0.29339);
+     }
 		      	  
       	/*get some variables according to the count*/
 		var title = addressDetailsToGeoCode[geoCodeNewAddress.count]['title'];
@@ -4316,7 +4316,6 @@ function geoCodeNewAddress(point){
 		map.addOverlay(marker);
 		map.setCenter(point);	
 		createAddressDiv(title,address,bnode,container,latitude,longitude, prefix,isPublic);
-	}			
 }
 
 //callback for geocoding nearest airport info.  Updates the lat longs and creates a map marker if there isn't one already.
@@ -4419,25 +4418,16 @@ function geoCodeExistingAddress(bNodeKey,prefix,doPan,isPrivate){
 }
 
 function homeDisplayToObjectsGeoCode(point) {
-		if (!point) {
-			log("No point");
-			//TODO: possibly do something here, maybe do nothing
-	    } else {
 	    	anyPrefixDisplayToObjectsGeoCode('home',point);
-	  	}			
 }
 
 function officeDisplayToObjectsGeoCode(point) {
-	    	if (!point) {
-	    		log('no point office');
-	        	//TODO: possibly do something here, maybe do nothing
-	      	} else {
 	    		anyPrefixDisplayToObjectsGeoCode('office',point);
-	      	}			
 }
 
 function anyPrefixDisplayToObjectsGeoCode(prefix,point){
-		if(typeof(prefix) == 'undefined' || !prefix){
+
+	if(typeof(prefix) == 'undefined' || !prefix){
 			log('error');
 			return;
 		}
@@ -4446,9 +4436,11 @@ function anyPrefixDisplayToObjectsGeoCode(prefix,point){
 	    var doPan = homeArray['doPan'];
 	    var isPrivate = homeArray['isPrivate'];
 
-		    //move the point and the centre of the map
-		    mapMarkers[bNodekey].setLatLng(point);
+		if(typeof(point != 'undefined') && point){
+	   		//move the point and the centre of the map
+	           mapMarkers[bNodekey].setLatLng(point);
     		    log('geocoding2');
+		}
 
 	    //update the display to show the new latitude and longitude	  	
 	    updateLatLongText(bNodekey,mapMarkers[bNodekey]);
