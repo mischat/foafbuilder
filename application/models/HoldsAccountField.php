@@ -127,7 +127,7 @@ class HoldsAccountField extends Field {
 			$foafData->getModel()->addWithoutDuplicates($accountStatement); 
 			$foafData->getModel()->addWithoutDuplicates($bNodeStatement); 
 				
-			var_dump($holdsAccountContents);
+			//var_dump($holdsAccountContents);
 			if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage){
 				$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountServiceHomepage'), new Resource($holdsAccountContents->foafAccountServiceHomepage));
 				$foafData->getModel()->addWithoutDuplicates($newStatement);

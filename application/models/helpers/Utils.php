@@ -17,11 +17,11 @@ class Utils{
 	
 	static function bNodeIsFound($i,$model,$bNodePrefix){
 		$foundModel1 = $model->find(new BlankNode($bNodePrefix.$i), NULL, NULL);
-		$foundModel2 = $model->find(NULL, new BlankNode($bNodePrefix.$i), NULL);
+//		$foundModel2 = $model->find(NULL, new BlankNode($bNodePrefix.$i), NULL);
 		$foundModel3 = $model->find(NULL, NULL, new BlankNode($bNodePrefix.$i));		
 		
 		if(isset($foundModel1->triples[0]) 
-			|| isset($foundModel2->triples[0]) 
+			//|| isset($foundModel2->triples[0]) 
 			|| isset($foundModel3->triples[0])){
 			
 			return true;

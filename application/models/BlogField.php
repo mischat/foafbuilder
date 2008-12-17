@@ -113,6 +113,9 @@ class BlogField extends Field {
             $valueArray = get_object_vars($value);
 
             foreach($valueArray['values'] as $thisValue){
+                    if (!preg_match('/https{0,1}:\/\//',$thisValue)) {
+                        $thisValue = "http://".$thisValue;
+                    }
                     if ($this->isHomepageValid($thisValue)) {
                         $new_statement = new Statement($primary_topic_resource,$predicate_resource,new Resource($thisValue));	
                         $foafData->getModel()->addWithoutDuplicates($new_statement);
