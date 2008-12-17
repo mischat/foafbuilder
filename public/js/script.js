@@ -979,6 +979,7 @@ function doDisambiguation(data){
 		disDiv.appendChild(disSubDiv);
 		disSubDiv.appendChild(thisLink);
 	}	
+
 }
 
 //XXX repeated code here and in renderInterests
@@ -1011,6 +1012,7 @@ function addInterest(interestString){
                 removeLink.className = 'interestsRemoveLink';
                 removeLink.onclick = function(){document.getElementById(thisInterestDiv.id).parentNode.removeChild(document.getElementById(thisInterestDiv.id));this.parentNode.removeChild(this);};
                 removeLink.appendChild(document.createTextNode('Remove'));
+		makeCursorAPointer(removeLink);
                 actualInterestDiv.appendChild(removeLink);
 
 }
@@ -1151,6 +1153,7 @@ function renderInterestsFields(data,isPublic){
 		removeLink.className = 'interestsRemoveLink';
 		removeLink.onclick = function(){document.getElementById(thisInterestDiv.id).parentNode.removeChild(document.getElementById(thisInterestDiv.id));this.parentNode.removeChild(this);};
 		removeLink.appendChild(document.createTextNode('Remove'));
+		makeCursorAPointer(removeLink);
 		actualInterestDiv.appendChild(removeLink);
 
 		count++;
