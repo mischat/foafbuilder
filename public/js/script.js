@@ -984,7 +984,7 @@ function doDisambiguation(data){
 //XXX repeated code here and in renderInterests
 function addInterest(interestString){
 		var actualInterestDiv = document.getElementById('actualInterests');
-		var dbpediaUrl = "http://dbpedia.org/resource/"+interestString.replace(' ','_');
+		var dbpediaUrl = "http://dbpedia.org/page/"+interestString.replace(' ','_');
 
 		//create a div to contain everything from one interest field
                 var thisInterestDiv = document.createElement('div');
