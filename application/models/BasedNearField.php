@@ -63,6 +63,7 @@ class BasedNearField extends Field {
 		$predicate_resource = new Resource('http://xmlns.com/foaf/0.1/based_near');
 		
 	    //find existing triples
+	error_log("111111111111111111111");
 		$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
 			
 		//remove existing triples
@@ -77,23 +78,25 @@ class BasedNearField extends Field {
     //XXX: should be able to use rap's remove with NULLs for pred/obj
     public function removeTripleRecursively($triple, &$foafData){
     	
-    	$foundHangingStuff = $foafData->getModel()->find($triple->obj,NULL,NULL);
-    	
-    	if($foundHangingStuff && $foundHangingStuff->triples){
-    		foreach($foundHangingStuff->triples as $subTriple){
-    			if(property_exists($subTriple,'obj') && $subTriple->obj && property_exists($subTriple->obj,'uri')){
-	    			
-    				$foundSubStuff = $foafData->getModel()->find($subTriple->obj,NULL,NULL);
+	if (($triple instanceof BlankNode)) {
+		$foundHangingStuff = $foafData->getModel()->find($triple->obj,NULL,NULL);
+		
+		if($foundHangingStuff && $foundHangingStuff->triples){
+			foreach($foundHangingStuff->triples as $subTriple){
+				if(property_exists($subTriple,'obj') && $subTriple->obj && property_exists($subTriple->obj,'uri')){
 					
-	    			if($foundSubStuff && $foundSubStuff->triples){
-	    				foreach($foundHangingStuff->triples as $subSubTriple){
-	    					$foafData->getModel()->remove($subSubTriple);
-	    				}
-	    			}
-    				$foafData->getModel()->remove($subTriple);
-    			}
-    		}
-    	}
+					$foundSubStuff = $foafData->getModel()->find($subTriple->obj,NULL,NULL);
+						
+					if($foundSubStuff && $foundSubStuff->triples){
+						foreach($foundHangingStuff->triples as $subSubTriple){
+							$foafData->getModel()->remove($subSubTriple);
+						}
+					}
+					$foafData->getModel()->remove($subTriple);
+				}
+			}
+		}
+	}
     	$foafData->getModel()->remove($triple);	
     }
     
