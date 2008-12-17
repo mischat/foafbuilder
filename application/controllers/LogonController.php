@@ -41,7 +41,8 @@ class LogonController extends Zend_Controller_Action
 				error_log("SO here is id $id, and there is the url".$myopenidurl);
 
 				$store = OAuthStore::instance();
-				$uid = $store->checkOpenIDExists($id);
+				$our_openid = preg_replace('/\/$/','',$id);
+				$uid = $store->checkOpenIDExists($our_openid);
 				if ($uid) {
 					error_log('[oauth] OpenID success but account is alredy setup.');
 					//TODO MISCHA ... load in any existing info !
@@ -51,7 +52,7 @@ class LogonController extends Zend_Controller_Action
         				try {
 				                $store = OAuthStore::instance();
 						if ($id != "" && $myopenidurl != "") {
-				                        $store->addUser($id,$myopenidurl);
+				                        $store->addUser($our_openid,$myopenidurl,$id);
 							error_log("[oauth] created a new OAuth for OpenID $id");
                 				}
         				} catch (OAuthException $e) {
