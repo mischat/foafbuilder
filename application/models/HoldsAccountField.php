@@ -251,7 +251,10 @@ class HoldsAccountField extends Field {
     //XXX: should be able to use rap's remove with NULLs for pred/obj
     public function removeTripleRecursively($triple, &$foafData){
     	
-    	$foundHangingStuff = $foafData->getModel()->find($triple->obj,NULL,NULL);
+	$foundHangingStuff = "";
+	if ($triple->obj instanceof BlankNode) {
+		$foundHangingStuff = $foafData->getModel()->find($triple->obj,NULL,NULL);
+	}
     	
     	if($foundHangingStuff && $foundHangingStuff->triples){
     		foreach($foundHangingStuff->triples as $subTriple){
