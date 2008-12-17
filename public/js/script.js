@@ -1,4 +1,4 @@
-/for logging purposes*/
+/*for logging purposes*/
 var loggingOn = false;
 
 /*--------------------------global variables--------------------------*/
@@ -1603,8 +1603,8 @@ function renderKnowsFields(data){
 		//i.e. a new blank address
 		if(bNodeKey.length == '50'){
 			//TODO: change these values to those of the garlik address
-			latitude = '40';
-			longitude = '34';
+			latitude = '';
+			longitude = '';
 		}
 		
 		/*there is an address there but the latitude and longitude isn't set*/
