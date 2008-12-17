@@ -62,8 +62,11 @@ class AddressField extends Field {
     	 * It would be better to preserve triples where possible, although moving things between models is hard.*/
     	
     	//remove all the address fields
-		$this->removeAllExistingAddressTriples($foafData);
-		
+	$this->removeAllExistingAddressTriples($foafData);
+	
+	var_dump($value->home);
+
+	var_dump($value->office);
 		//save the new addresses
         $this->saveAddressFieldsToModel($foafData,$value->home,'home');
         $this->saveAddressFieldsToModel($foafData,$value->office,'office');
@@ -76,13 +79,6 @@ class AddressField extends Field {
 						
 			//XXX RAP doesn't seem to be very good at generating unique bnodes, so do some jiggery pokery
 			$homeBnode = Utils::GenerateUniqueBnode($foafData->getModel());
-				
-			// create a home/office triple here and add it to the model.  also set the bnode to be created.
-			$homeStatement = new Statement(new Resource($foafData->getPrimaryTopic()),new Resource('http://www.w3.org/2000/10/swap/pim/contact#'.$type),$homeBnode);	
-			$homeLocationStatement = new Statement($homeBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource("http://www.w3.org/2000/10/swap/pim/contact#ContactLocation"));
-	                	
-			$foafData->getModel()->add($homeStatement);
-			$foafData->getModel()->add($homeLocationStatement);				
 			
 			/*add new triples*/
 			$this->addNewAddressTriples($foafData,$homeBnode,$value,$type);	
@@ -137,20 +133,28 @@ class AddressField extends Field {
 	
     private function addNewAddressTriples(&$foafData,$homeBnode,$value,$type){
     	
-    	$addressBnode = Utils::GenerateUniqueBnode($foafData->getModel());
-    	$addressStatement = new Statement($homeBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#address'),$addressBnode);
+    		$addressBnode = Utils::GenerateUniqueBnode($foafData->getModel());
+    		$addressStatement = new Statement($homeBnode, new Resource('http://www.w3.org/2000/10/swap/pim/contact#address'),$addressBnode);
 		$homeLocationStatement = new Statement($homeBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource("http://www.w3.org/2000/10/swap/pim/contact#ContactLocation"));
-			
-		$foafData->getModel()->add($addressStatement);
-		$foafData->getModel()->add($homeLocationStatement);
-			
+                $homeStatement = new Statement(new Resource($foafData->getPrimaryTopic()),new Resource('http://www.w3.org/2000/10/swap/pim/contact#'.$type),$homeBnode);
+	
+		$somethingWasAdded = false;
+
 		//XXX continue adding stuff here		
 		if($type=='office'){
-			$this->addOfficeAddressTriples($value,$foafData,$addressBnode);
+			$somethingWasAdded = $this->addOfficeAddressTriples($value,$foafData,$addressBnode);
 		} else {
-			$this->addHomeAddressTriples($value,$foafData,$addressBnode);
+			$somethingWasAdded = $this->addHomeAddressTriples($value,$foafData,$addressBnode);
 		}
-			
+		
+		if(!$somethingWasAdded){
+			return;
+		}
+
+		$foafData->getModel()->addWithoutDuplicates($addressStatement);
+                $foafData->getModel()->addWithoutDuplicates($homeLocationStatement);
+                $foafData->getModel()->addWithoutDuplicates($homeStatement);
+		
 		if(property_exists($value,'latitude') && $value->latitude && property_exists($value,'latitude') && $value->latitude){
 			$longStatement = new Statement($homeBnode,new Resource('http://www.w3.org/2003/01/geo/wgs84_pos#long'),new Literal($value->longitude));
 			$foafData->getModel()->add($longStatement);
@@ -166,96 +170,95 @@ class AddressField extends Field {
     private function addHomeAddressTriples($value,&$foafData,$addressBnode){
 			
     		echo("\n"."Adding home triples"."\n");	
-    	
+    		$somethingWasAdded = false;
+
     		if(property_exists($value,'homeCity') && $value->homeCity){
 				$cityStatement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#city'),new Literal($value->homeCity));
 				$foafData->getModel()->add($cityStatement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'homeCountry') && $value->homeCountry){
 				$countryStatement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#country'),new Literal($value->homeCountry));
 				$foafData->getModel()->add($countryStatement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'homeStreet') && $value->homeStreet){
 				$streetStatement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#street'),new Literal($value->homeStreet));
 				$foafData->getModel()->add($streetStatement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'homeStreet2') && $value->homeStreet2){
 				$street2Statement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#street2'),new Literal($value->homeStreet2));
 				$foafData->getModel()->add($street2Statement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'homeStreet3') && $value->homeStreet3){
 				$street3Statement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#street3'),new Literal($value->homeStreet3));
 				$foafData->getModel()->add($street3Statement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'homePostalCode') && $value->homePostalCode){
 				$postalCodeStatement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#postalCode'),new Literal($value->homePostalCode));
 				$foafData->getModel()->add($postalCodeStatement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'homeStateOrProvince') && $value->homeStateOrProvince){
 				$stateOrProvinceStatement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#stateOrProvince'),new Literal($value->homeStateOrProvince));
 				$foafData->getModel()->add($stateOrProvinceStatement);
+				$somethingWasAdded = true;
 		    }
+		return $somethingWasAdded;
     }
     
     private function addOfficeAddressTriples($value,&$foafData,$addressBnode){
 
     		echo("\n"."Adding office triples"."\n");	
-    	
+    		$somethingWasAdded = false;
     		if(property_exists($value,'officeCity') && $value->officeCity){
 				$cityStatement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#city'),new Literal($value->officeCity));
-				$foafData->getModel()->add($cityStatement);
+				$foafData->getModel()->addWithoutDuplicates($cityStatement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'officeCountry') && $value->officeCountry){
 				$countryStatement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#country'),new Literal($value->officeCountry));
 				$foafData->getModel()->add($countryStatement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'officeStreet') && $value->officeStreet){
 				$streetStatement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#street'),new Literal($value->officeStreet));
 				$foafData->getModel()->add($streetStatement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'officeStreet2') && $value->officeStreet2){
 				$street2Statement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#street2'),new Literal($value->officeStreet2));
 				$foafData->getModel()->add($street2Statement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'officeStreet3') && $value->officeStreet3){
 				$street3Statement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#street3'),new Literal($value->officeStreet3));
 				$foafData->getModel()->add($street3Statement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'officePostalCode') && $value->officePostalCode){
 				$postalCodeStatement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#postalCode'),new Literal($value->officePostalCode));
 				$foafData->getModel()->add($postalCodeStatement);
+				$somethingWasAdded = true;
 			}
 			if(property_exists($value,'officeStateOrProvince') && $value->officeStateOrProvince){
 				$stateOrProvinceStatement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#stateOrProvince'),new Literal($value->officeStateOrProvince));
 				$foafData->getModel()->add($stateOrProvinceStatement);
+				$somethingWasAdded = true;
 		    }
+	return $somethingWasAdded;
     }
     
     private function removeAllExistingAddressTriples(&$foafData){
     	
     	//FIXME: we should really try to preserve as many triples as we can but moving them between models is hard
-    	
-    	/*removes any existing home triples and sub triples which have an address associated with them*/
-    	$query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-    			  PREFIX contact: <http://www.w3.org/2000/10/swap/pim/contact#>
-    		      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-    		      SELECT ?office ?home WHERE {
-    			  	?z foaf:primaryTopic <".$foafData->getPrimaryTopic()."> .
-	                ?z foaf:primaryTopic ?primaryTopic .
-    			  		?primaryTopic contact:office ?office .
-	                	?office rdf:type contact:ContactLocation .
-	                	?office contact:address ?address .
-	    		  	UNION .
-	                	?primaryTopic contact:home ?home .
-	                	?home rdf:type contact:ContactLocation .
-	                	?home contact:address ?address .
-    			   }";
-		
     	$primaryTopicRes = new Resource($foafData->getPrimaryTopic());
     	$contactHomeRes = new Resource('http://www.w3.org/2000/10/swap/pim/contact#home');
     	$contactOfficeRes = new Resource('http://www.w3.org/2000/10/swap/pim/contact#office');
     	
-
     	/*delete all the homes*/
     	$foundHomes = $foafData->getModel()->find($primaryTopicRes, $contactHomeRes, NULL);
 		
@@ -263,6 +266,7 @@ class AddressField extends Field {
 			&& $foundHomes->triples && !empty($foundHomes->triples)){
 					
 			foreach($foundHomes->triples as $homeTriple){	
+				$foafData->getModel()->remove($homeTriple);
 				if(!property_exists($homeTriple->obj,'uri') || !$homeTriple->obj->uri){
 					continue;		
 				}
@@ -278,6 +282,7 @@ class AddressField extends Field {
 			&& $foundOffices->triples && !empty($foundOffices->triples)){
 					
 			foreach($foundOffices->triples as $officeTriple){	
+				$foafData->getModel()->remove($officeTriple);
 				if(!property_exists($officeTriple->obj,'uri') || !$officeTriple->obj->uri){
 					continue;		
 				}
@@ -285,36 +290,41 @@ class AddressField extends Field {
 			}
 		}
     	
+		/*delete any leftover contact locations XXX this function is too verbose and messy*/
+		//$foundTriples = $foafData->getModel()->find($primaryTopicRes, new Resource(), new Resource());
    	}
    	
    	//delete all triples that are 'hanging off' this bnode as well as the triple connecting it to the primarytopic
    	private function deleteUnderThisBnode($bNodeName,&$foafData,$prefix){
    		$foundStuff = $foafData->getModel()->find(new BlankNode($bNodeName),NULL,NULL);
 		
+		
    		echo("Deleting type: ".$prefix." bNodeName:".$bNodeName."\n");
    		
 		if(!$foundStuff || !property_exists($foundStuff,'triples')  
 			|| !$foundStuff->triples || empty($foundStuff->triples)){
-			echo("return"."\n");
 			return;
 		}
 		
-		
-		//remove all triples and subtriples.  Could have done this in fewer lines using the remove(x,null,null) functionality in RAP.
 		foreach($foundStuff->triples as $foundTriple){			
-			
+			if(!($foundTriple->obj instanceof BlankNode) && !($foundTriple->obj instanceof Resource)){
+				echo("not bnode or resource");
+				continue;
+			}
+			echo("found triple resource ".$foundTriple->subj->uri." ".$foundTriple->pred->uri." ".$foundTriple->obj->uri);
+
+			$foafData->getModel()->remove($foundTriple);
+
 			$foundMoreStuff = $foafData->getModel()->find($foundTriple->obj,NULL,NULL);
-			
 			if(!$foundMoreStuff || !property_exists($foundMoreStuff,'triples')  
 				|| !$foundMoreStuff->triples || empty($foundMoreStuff->triples)){
 				continue;
 			}
-			echo("continue");
 
 			foreach($foundMoreStuff->triples as $foundMoreTriple){
 				$foafData->getModel()->remove($foundMoreTriple);
+				echo("Removing Contact Location".$foundMoreTriple->pred->uri);
 			}
-			$foafData->getModel()->remove($foundTriple);
 		}	
    		
 		$mainStatement = new Statement(new Resource($foafData->getPrimaryTopic()),
