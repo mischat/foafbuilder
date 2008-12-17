@@ -678,3 +678,32 @@ width:100%;
 	float:left;
 	width:20ex;
 }
+#disambiguationTitle{
+        color:#999999;
+        font-size:12px;
+        margin-bottom:5px;
+        margin-top:10px;
+        height:20px;
+}
+#myInterests{
+        color:#999999;
+        margin-bottom:5px;
+        margin-top:10px;
+        height:20px;
+}
+#actualInterests{
+}
+.interestsRemoveLink{
+	float:left;
+	width:120px;
+}
+.interestLink{
+	float:left;
+	width:200px;
+}
+#foafInterests_container{
+	height:900px;
+}
+#interestsRemoveLink{
+}
+
