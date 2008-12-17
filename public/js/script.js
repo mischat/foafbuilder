@@ -1599,18 +1599,12 @@ function renderKnowsFields(data){
 		
 		var latitude = address['latitude'];
 		var longitude = address['longitude'];
-		
-		//i.e. a new blank address
-		if(bNodeKey.length == '50'){
-			//TODO: change these values to those of the garlik address
-			latitude = '';
-			longitude = '';
-		}
+		var addressArray = getProperties(address);
 		
 		/*there is an address there but the latitude and longitude isn't set*/
-		if(!latitude && !longitude){
-			var addressArray = getProperties(address);
-			
+		if(!latitude && !longitude && addressArray.length > 1){
+			alert("lat long "+address+"");
+		
 			/*array to pass to the geocoder's callback function*/
 			theseDetails = new Array();
 			theseDetails['bnode'] = bNodeKey;	
@@ -1620,20 +1614,29 @@ function renderKnowsFields(data){
 			theseDetails['title'] = title;	
 			theseDetails['isPublic'] = isPublic;	
 			addressDetailsToGeoCode.push(theseDetails);
-	
+			
 			/*do the actual geoCoding*/
 			var geocoder = new GClientGeocoder();
 			geocoder.getLatLng(addressArray,geoCodeNewAddress);
 	   		
-		} else{
-			var point = new GLatLng(latitude, longitude);
-			var marker = new GMarker(point,{title: prefix});	
+		} else  {
+			if(!latitude || !longitude || typeof(latitude)=='undefined' || typeof(longitude)=='undefined'){
+				latitude = '';
+				longitude = '';
+			}
+			if(addressArray.length < 1){
+				latitude = '';
+				longitude = '';
+				var point = new GLatLng(51.46223, -0.29339);
+				var marker = new GMarker(point,{title: prefix});	
+			} else {	
+				var point = new GLatLng(latitude, longitude);
+				var marker = new GMarker(point,{title: prefix});	
+			}
 			
 			mapMarkers[bNodeKey] = marker;
-		
 			map.addOverlay(marker);
 			map.setCenter(point);
-			
 			createAddressDiv(title,address,bNodeKey,containerElement,latitude,longitude, prefix,isPublic);
 		}
 	}
@@ -1665,7 +1668,6 @@ function renderKnowsFields(data){
 		locationDiv.appendChild(addressTitleDiv);
 		
 		/*latitude and longitude*/
-		//TODO: geocoding to get these if necessary
 		var latitudeDiv = document.createElement('div');
 		var longitudeDiv = document.createElement('div');
 		latitudeDiv.appendChild(document.createTextNode('Latitude: '+latitude));
@@ -3363,8 +3365,8 @@ function phoneDisplayToObjects(){
 		//create a big random string as we don't actually know what the bnode for this one is and put the details in the globalFieldData object
 		var bNodeKey = createRandomString(50);
 		var thisBasedNear = new Object()
-		thisBasedNear.latitude = '50';
-		thisBasedNear.longitude = '10';
+		thisBasedNear.latitude = '';
+		thisBasedNear.longitude = '';
 		
 		//if this is the first based near
 		globalFieldData.basedNearFields.basedNear[bNodeKey] = thisBasedNear;
