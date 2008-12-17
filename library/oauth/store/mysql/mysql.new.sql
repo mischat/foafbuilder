@@ -200,18 +200,17 @@ CREATE TABLE IF NOT EXISTS oauth_server_token (
 # Table used to house our oauth-users 
 # Table includes to columns uid (crc-hash) of users openID
 # And a column with the actual openID
-# Test
 # a column for the max file size and max number of files
 
 CREATE TABLE IF NOT EXISTS oauth_users (
-    osu_id		  int(11) not null auto_increment,
-    osu_url		  varchar(255) not null,	
+    osu_id                int(11) not null auto_increment,
+    osu_url               varchar(255) not null,
     osu_openid            varchar(255) not null,
-    osu_openidori	  varchar(255) not null,
-    osu_maxfiles	  int(11) not null default '0',
-    osu_maxfilesize	  int(11) not null default '0',
-    osu_numfiles	  int(11) not null default '0',
-    osu_publicfoaf	  varchar(255) not null default '',	
+    osu_openidori         varchar(255) not null,
+    osu_maxfiles          int(11) not null default '0',
+    osu_maxfilesize       int(11) not null default '0',
+    osu_numfiles          int(11) not null default '0',
+    osu_publicfoaf        varchar(255) not null default '',
     osu_privatefoaf       varchar(255) not null default '',
 
     primary key (osu_id),

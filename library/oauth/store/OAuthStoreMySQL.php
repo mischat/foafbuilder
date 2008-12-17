@@ -1735,26 +1735,24 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	}
 
 /*************************************** TODO MISCHA ***************************************/
-
-	/**
-	 * Add a new user to the oauth_users table.
-	 * 
-	 * @param string token
-	 */
-	public function addUser ($openid,$url,$openidori)
-	{
-					//INSERT IGNORE INTO oauth_users
-		$this->query('
-					INSERT INTO oauth_users
-					SET osu_id = \'NULL\',
-						osu_url = \'%s\',
-						osu_openid = \'%s\',
-						osu_openidori = \'%s\'
-					',
-					$url,
-					$openid,$openidori);
-	}
-
+        /**
+         * Add a new user to the oauth_users table.
+         * 
+         * @param string token
+         */
+        public function addUser ($openid,$url,$openidori)
+        {
+                                        //INSERT IGNORE INTO oauth_users
+                $this->query('
+                                        INSERT INTO oauth_users
+                                        SET osu_id = \'NULL\',
+                                                osu_url = \'%s\',
+                                                osu_openid = \'%s\',
+                                                osu_openidori = \'%s\'
+                                        ',
+                                        $url,
+                                        $openid,$openidori);
+        }
 
 	/**
 	 * Check if user with OpenID exists
