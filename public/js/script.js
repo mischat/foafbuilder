@@ -3517,7 +3517,8 @@ function phoneDisplayToObjects(){
 		imageElement.src = img;
 		imageElement.className = 'friendImage';		
 		imgWrapper.appendChild(imageElement);
-		
+		resize();
+
 		//add the name with a link to foaf.qdos.com
 		if(name && !ifp){
 
