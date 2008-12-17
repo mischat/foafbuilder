@@ -200,6 +200,7 @@ CREATE TABLE IF NOT EXISTS oauth_server_token (
 # Table used to house our oauth-users 
 # Table includes to columns uid (crc-hash) of users openID
 # And a column with the actual openID
+# Test
 # a column for the max file size and max number of files
 
 CREATE TABLE IF NOT EXISTS oauth_users (

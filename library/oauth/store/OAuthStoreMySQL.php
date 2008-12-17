@@ -1737,7 +1737,7 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 /*************************************** TODO MISCHA ***************************************/
 
 	/**
-	 * Delete a consumer token.  The token must be a request or authorized token.
+	 * Add a new user to the oauth_users table.
 	 * 
 	 * @param string token
 	 */
