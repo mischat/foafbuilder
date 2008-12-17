@@ -25,8 +25,10 @@
 
     function makeOpenIDUrl ($url) { 
 	$url = preg_replace('/^https{0,1}:\/\//','',$url); 
+        $url = preg_replace('/\/$/','',$url);
 	$url = urlencode ($url); 
-	$url = preg_replace('/%2F/',"/",$url); 
+        $url = preg_replace('/%2F/',"/",$url);
+
 	return $url;  
     }
 ?>
