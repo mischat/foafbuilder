@@ -87,7 +87,6 @@ class FoafData {
         /*create a model if there isn't one already*/
 	if (!$this->model){
     		$this->getEmptyDocument();
-		$this->putInSession();
     		$this->model = new NamedGraphMem($this->uri);
 
 	    	/*load the rdf from the passed in uri into the model*/
