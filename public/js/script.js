@@ -1603,7 +1603,6 @@ function renderKnowsFields(data){
 		
 		/*there is an address there but the latitude and longitude isn't set*/
 		if(!latitude && !longitude && addressArray.length > 1){
-			alert("lat long "+address+"");
 		
 			/*array to pass to the geocoder's callback function*/
 			theseDetails = new Array();
@@ -4011,7 +4010,14 @@ function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
 function updateLatLongText(holderName,marker){
 	var latElement = document.getElementById('latitude_' + holderName);
 	var longElement = document.getElementById('longitude_' + holderName);
-	    	
+	
+	if(!latElement 
+		|| !longElement 
+		|| typeof(latElement)=='undefined' 
+		|| typeof(longElement)=='undefined'){
+		return;
+	}
+
 	if(latElement.childNodes[0] && longElement.childNodes[0]){
 		latElement.removeChild(latElement.childNodes[0]);
 	   	longElement.removeChild(longElement.childNodes[0]);
@@ -4435,30 +4441,26 @@ function anyPrefixDisplayToObjectsGeoCode(prefix,point){
 			log('error');
 			return;
 		}
-		log('geocoding');
-		var homeArray = existingAddressDetailsToGeoCode[prefix];
+	    var homeArray = existingAddressDetailsToGeoCode[prefix];
 	    var bNodekey = homeArray['bnode'];
 	    var doPan = homeArray['doPan'];
 	    var isPrivate = homeArray['isPrivate'];
-	   	
-	   	log('geocoding1');
-	   	
-	    //move the point and the centre of the map
-	    mapMarkers[bNodekey].setLatLng(point);
-    	
-    	log('geocoding2');
-    		
+
+		    //move the point and the centre of the map
+		    mapMarkers[bNodekey].setLatLng(point);
+    		    log('geocoding2');
+
 	    //update the display to show the new latitude and longitude	  	
 	    updateLatLongText(bNodekey,mapMarkers[bNodekey]);
 		
-		//set the global data with the appropriate stuff
-		if(isPrivate){
-			globalPrivateFieldData.addressFields[prefix][bNodekey]['latitude'] = point.lat();
-			globalPrivateFieldData.addressFields[prefix][bNodekey]['longitude'] = point.lat();
-		} else {
-			globalFieldData.addressFields[prefix][bNodekey]['latitude'] = point.lat();
-			globalFieldData.addressFields[prefix][bNodekey]['longitude'] = point.lat();
-		}
+	    //set the global data with the appropriate stuff
+	    if(isPrivate){
+		globalPrivateFieldData.addressFields[prefix][bNodekey]['latitude'] = point.lat();
+		globalPrivateFieldData.addressFields[prefix][bNodekey]['longitude'] = point.lat();
+	     } else {
+		globalFieldData.addressFields[prefix][bNodekey]['latitude'] = point.lat();
+		globalFieldData.addressFields[prefix][bNodekey]['longitude'] = point.lat();
+	     }
 			
 		if(doPan){
 			map.panTo(point);
