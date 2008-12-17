@@ -195,17 +195,54 @@ class HoldsAccountField extends Field {
 	}
 	
 	private function removeAllAccounts($foafData){
+		//TODO: this is too verbose, slow and a bit of a mess
 		//find them all
-		$foundAccounts = $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/holdsAccount'), NULL);
-		
+		$foundAccounts =  $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/holdsAccount'), NULL);
+		$foundAccounts1 = $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/accountName'), NULL);		
+		$foundAccounts2 = $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/OnlineAccount'), NULL);		
+		$foundAccounts3 = $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/accountServiceHomepage'), NULL);		
+		$foundAccounts4 = $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), NULL);		
+
 		if(!$foundAccounts ||  !property_exists($foundAccounts,'triples') || !$foundAccounts->triples){
 			return;	
 		}
-		
 		//loop through removing any hanging triples
 		foreach($foundAccounts->triples as $triple){
 			$this->removeTripleRecursively($triple,$foafData);
 		}
+		
+		if(!$foundAccounts1 ||  !property_exists($foundAccounts1,'triples') || !$foundAccounts1->triples){
+                        return; 
+                }
+                //loop through removing any hanging triples
+                foreach($foundAccounts1->triples as $triple){
+                        $this->removeTripleRecursively($triple,$foafData);
+                }
+		
+		if(!$foundAccounts2 ||  !property_exists($foundAccounts2,'triples') || !$foundAccounts2->triples){
+                        return;
+                }
+                //loop through removing any hanging triples
+                foreach($foundAccounts2->triples as $triple){
+                        $this->removeTripleRecursively($triple,$foafData);
+                }
+	
+		if(!$foundAccounts3 ||  !property_exists($foundAccounts3,'triples') || !$foundAccounts3->triples){
+                        return;
+                }
+                //loop through removing any hanging triples
+                foreach($foundAccounts3->triples as $triple){
+                        $this->removeTripleRecursively($triple,$foafData);
+                }
+
+		if(!$foundAccounts4 ||  !property_exists($foundAccounts4,'triples') || !$foundAccounts4->triples){
+                        return;
+                }
+                //loop through removing any hanging triples
+                foreach($foundAccounts4->triples as $triple){
+                        $this->removeTripleRecursively($triple,$foafData);
+                }
+
 	}
 	
 	//TODO: move all copies of this function to utils
