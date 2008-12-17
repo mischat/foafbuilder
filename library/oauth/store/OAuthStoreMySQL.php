@@ -1741,17 +1741,18 @@ class OAuthStoreMySQL extends OAuthStoreAbstract
 	 * 
 	 * @param string token
 	 */
-	public function addUser ($openid,$url)
+	public function addUser ($openid,$url,$openidori)
 	{
 					//INSERT IGNORE INTO oauth_users
 		$this->query('
 					INSERT INTO oauth_users
 					SET osu_id = \'NULL\',
 						osu_url = \'%s\',
-						osu_openid = \'%s\'
+						osu_openid = \'%s\',
+						osu_openidori = \'%s\'
 					',
 					$url,
-					$openid);
+					$openid,$openidori);
 	}
 
 

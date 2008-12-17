@@ -206,6 +206,7 @@ CREATE TABLE IF NOT EXISTS oauth_users (
     osu_id		  int(11) not null auto_increment,
     osu_url		  varchar(255) not null,	
     osu_openid            varchar(255) not null,
+    osu_openidori	  varchar(255) not null,
     osu_maxfiles	  int(11) not null default '0',
     osu_maxfilesize	  int(11) not null default '0',
     osu_numfiles	  int(11) not null default '0',
@@ -214,6 +215,7 @@ CREATE TABLE IF NOT EXISTS oauth_users (
 
     primary key (osu_id),
     unique key (osu_url),
+    unique key (osu_openidori),
     key (osu_privatefoaf),
     key (osu_publicfoaf),
     unique key (osu_openid)
