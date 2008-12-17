@@ -274,7 +274,7 @@ class KnowsField extends Field {
         			if(isset($row['?name']) && $row['?name'] && $row['?name'] != 'NULL'){
         				$thisFriendDetails['name'] = sparql_strip($row['?name']);
         			} else if(isset($row['?nick']) && $row['?nick'] && $row['?nick'] != 'NULL'){
-        				$thisFriendDetails['nick'] = sparql_strip($row['?nick']);
+        				$thisFriendDetails['name'] = sparql_strip($row['?nick']);
         			} else{
         				continue;
         			}
