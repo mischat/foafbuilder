@@ -82,7 +82,6 @@ class InterestsField extends Field {
 	
     /*saves the values created by the editor in value... as encoded in json. */
     public function saveToModel(&$foafData, $value) {
-	error_log("Am saving ... ");
 	$interest_resource = new Resource('http://xmlns.com/foaf/0.1/interest');
 	$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
 	
@@ -90,9 +89,6 @@ class InterestsField extends Field {
 	$foundModel = $foafData->getModel()->find($primary_topic_resource,$interest_resource,NULL);
 
 	foreach($foundModel->triples as $triple){
-
-		error_log("Am removing something now!");
-                        
 		$foundSubTriples = $foafData->getModel()->find($triple->obj,NULL,NULL);
 
                 //remove all triples that are hanging off this one
@@ -105,21 +101,10 @@ class InterestsField extends Field {
 		$foafData->getModel()->remove($triple);
 	}
 	
-	//add new triples
-	$valueArray = $value->values;
-	
-	foreach($valueArray as $thisValue){
-		var_dump($thisValue);
-	/*
-		$interestURI = 
-		$interestTitle = $this->
-		$resourceValue = new Resource($mangledValue);
-		$literalValue = new Literal(sha1($sha1Sum_resource->uri));
-		$mboxStatement = new Statement($primary_topic_resource,$predicate_resource,$resourceValue);	
-		$mbox_Sha1Statement = new Statement($primary_topic_resource,$sha1Sum_resource,$literalValue);	
-		$foafData->getModel()->addWithoutDuplicates($mboxStatement);
-		$foafData->getModel()->addWithoutDuplicates($mbox_Sha1Statement);
-	*/
+	$dctitle_res = new Resource("http://purl.org/dc/elements/1.1/title");
+	foreach($value->values as $thisValue){
+		$foafData->getModel()->add(new Statement ($primary_topic_resource,$interest_resource,new Resource((string) $thisValue->uri))); 
+		$foafData->getModel()->add(new Statement (new Resource((string)$thisValue->uri),$dctitle_res,new Literal((string) $thisValue->title))); 
 	}
     }
 }
