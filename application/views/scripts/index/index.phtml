@@ -5,16 +5,24 @@
 <div id="content">
   <div class="">
     <h2>
-      Welcome to the FOAF builder. 
+      Welcome to the FOAF builder
     </h2>
+     <p>FOAF (Friend of a Friend) is a way of describing people, their activities, and their relationships to other people and things. FOAF allows groups of people to truly open social networks that are controlled by individual users and not by any one single entity.<p>
+
+     <p>Garlik's FOAF builder is a user-friendly way of allowing you to create your own or edit an existing FOAF profile.</p>
+
+    <h2>To login please click <a href="/logon">here</a></h2><br/>
+     <form id="logon" method='get' action="/logon">
+	<input class="logonButton" type="submit" value="Login"/>
+     </form><br/>
+
+     <p>To create your own simply click 'build', or you can add details to your FOAF profile automatically by providing usernames of your Flickr, Last.fm or LiveJournal accounts.<p>
+
     <form method='get' id='importForm' action='javascript:importFoaf()'>
-      <p>
-        If you'd like to load in publicly available information, please fill in the fields below. Click 'Build' to continue to the FOAF Builder.
-      </p>
       <div class="formfield">Flickr username:</div><input id='flickr' class='urlField' name='flickr' value=''><br/>
         <span id='flickr_error' style='display:none'>Could not get FOAF from Flickr.</span><br/>
-      <div class="formfield">Last FM username:</div><input id='lastfmUser' class='urlField' name='lastfmUser' value=''><br/>
-        <span id='lastfm_error' style='display:none'>Could not get FOAF from Last FM.</span><br/>
+      <div class="formfield">Last.fm username:</div><input id='lastfmUser' class='urlField' name='lastfmUser' value=''><br/>
+        <span id='lastfm_error' style='display:none'>Could not get FOAF from Last.fm.</span><br/>
       <div class="formfield">Livejournal username:</div><input id='lj' class='urlField' name='lj' value=''><br/>
         <span id='lj_error' style='display:none'>Could not get FOAF from Livejournal.</span><br/>
       <div class="formfield">Your foaf file URL:</div><input id='uri' name='uri' size="80"/><br/><br/>
