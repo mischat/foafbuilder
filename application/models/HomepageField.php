@@ -105,7 +105,6 @@ class HomepageField extends Field {
             
             //remove existing triples
             foreach($foundModel->triples as $triple){
-                    //echo("KKKKKKKKKKKKKKKKKKKKKKKK\n".var_dump($triple)."\n");
                     $foafData->getModel()->remove($triple);
             }
             
@@ -113,6 +112,9 @@ class HomepageField extends Field {
             $valueArray = get_object_vars($value);
 
             foreach($valueArray['values'] as $thisValue){
+                    if (!preg_match('/^https?:\/\//',$thisValue)) {
+                        $thisValue = "http://".$thisValue;
+                    }
                     if ($this->isHomepageValid($thisValue)) {
                         $new_statement = new Statement($primary_topic_resource,$predicate_resource,new Resource($thisValue));	
                         $foafData->getModel()->addWithoutDuplicates($new_statement);
@@ -139,7 +141,6 @@ class HomepageField extends Field {
 		error_log('[foaf_editor] homepage is valid');
         	return true;
         } else {
-		error_log('[foaf_editor] homepage is not-valid');
         	return false;
         }
     }
