@@ -23,6 +23,8 @@ class IFPTriangulation {
 						    	 || ?pred = foaf:mbox_sha1sum
 						    	 || ?pred = foaf:mbox)}limit 200";
 
+
+
 			$res = sparql_query(FOAF_EP,$query);
 
 			if(isset($res[0]['?pred']) && $res[0]['?pred']){
@@ -56,6 +58,11 @@ class IFPTriangulation {
 	}
 
 	static function doIFPTriangulation($ifp_array){	
+
+		$ifp_array =  array_unique  ( $ifp_array);
+	
+
+
 		
 		$ifp_query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 					SELECT DISTINCT ?ifp_wanted WHERE {
@@ -81,11 +88,14 @@ class IFPTriangulation {
 				&& $ifp
 				&& $ifp != "NULL" 
 				&& substr($ifp,0,2)!="_:"){
-					$want_filter.=" ?ifp_wanted != ".$ifp." &&";
-					$already_have_filter.=" ?ifp_already_have = ".$ifp." ||";			
+					if ($ifp != "<mailto:>") {
+						$want_filter.=" ?ifp_wanted != ".$ifp." &&";
+						$already_have_filter.=" ?ifp_already_have = ".$ifp." ||";			
+					}
 			}
 		}
 		
+
 		if($already_have_filter != ""){
 			$ifp_query.="FILTER(".substr($already_have_filter,0,-2).")";
 		}
@@ -98,11 +108,9 @@ class IFPTriangulation {
 		else{
 			$ifp_query="";
 		}
-		
 		if($ifp_query!=""){
 			$ifp_query.="}";
 		}
-		
 		$results = sparql_query(FOAF_EP,$ifp_query);
 		$return_array = array();
 		
