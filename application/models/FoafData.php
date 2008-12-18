@@ -98,6 +98,7 @@ class FoafData {
 		//TODO MISCHA catch fail ... from load
 	}
 	/*make sure that the uri and primary topic of the document is consistent*/
+
         $this->replacePrimaryTopic($this->uri);	
         $this->replaceGeneratorAgent();
 	$this->putInSession();
@@ -169,6 +170,7 @@ class FoafData {
 	if ($loadValue==1) {
 		return 1;		
 	}
+
 	$primaryTopic = $tempmodel->find(new Resource($uri),new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),NULL);
 	
 	$fragment = "#me";
@@ -194,7 +196,7 @@ class FoafData {
 	$tempmodel->replace(NULL,NULL,new Resource($uri),new Resource($this->getUri()));
 	$tempmodel->replace(NULL,NULL,new Resource($newPrimaryTopic),new Resource($this->getPrimaryTopic()));
 	$tempmodel->replace(new Resource($newPrimaryTopic),NULL,NULL,new Resource($this->getPrimaryTopic()));
-	
+
 	$result = $tempmodel->find(NULL, NULL, NULL);
 
 	foreach($result->triples as $triple){
@@ -243,6 +245,16 @@ class FoafData {
 	}
     }	
     
+    private function addRdfsSeeAlso() {
+	//TODO in the future I need to query the Oauth_servers database to check what their private URL is
+	error_log('The user openid is '.$this->openid);
+	if ($this->isPublic) {
+		$this->model->addWithoutDuplicates(new Statement (new Resource ($this->getUri()),new Resource('http://www.w3.org/2002/07/owl#sameAs'), new Resource(PRIVATE_URL.$this->openid.'/data/foaf.rdf#me')));
+	}
+
+    }
+
+
     //replace the existing primary topic with either newPrimaryTopic or a hash of the uri
     public function replacePrimaryTopic($uri){
 	/*get primary topics*/
@@ -420,11 +432,12 @@ class FoafData {
     public function getModel() {
         return $this->model;	
     }
-    
+   
+/* 
     public function getGraphset() {
         return $this->graphset;	
     }
-
+*/
     public function getUri() {
         return $this->uri;
     }
@@ -452,13 +465,15 @@ class FoafData {
     public function setUri($uri) {
     	$this->uri = $uri;
     }
-    
+ /*   
     public function setGraphset($graphset) {
     	$this->graphset= $graphset;
     }
+
+*/
     public function getEmptyDocument(){
     	
-	$graphset = ModelFactory::getDatasetMem('GarlikDataset');
+//	$graphset = ModelFactory::getDatasetMem('GarlikDataset');
 	$model = new NamedGraphMem($this->uri);
 	$this->model = $model;
 	
@@ -470,7 +485,8 @@ class FoafData {
 	$this->model->addWithoutDuplicates($primaryTopicTriple);
 	
 	$this->primaryTopic = $primaryResource->uri;
-	$this->graphset = $graphset;
+	//$this->graphset = $graphset;
+        $this->addRdfsSeeAlso();
 			
     	return;
     }
