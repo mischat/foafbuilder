@@ -10,12 +10,7 @@
 
      <p>Garlik's FOAF builder is a user-friendly way of allowing you to create your own or edit an existing FOAF profile.</p>
 
-    <h2>To login please click <a href="/logon">here</a></h2><br/>
-     <form id="logon" method='get' action="/logon">
-	<input class="logonButton" type="submit" value="Login"/>
-     </form><br/>
-
-     <p>To create your own simply click 'build', or you can add details to your FOAF profile automatically by providing usernames of your Flickr, Last.fm or LiveJournal accounts.<p>
+     <p>To create your own simply click 'build', or you can add details to your FOAF profile automatically by providing usernames of your Flickr, Last.fm or LiveJournal accounts. If you already have a FOAF profile you can enter it in below.<p>
 
     <form method='get' id='importForm' action='javascript:importFoaf()'>
       <div class="formfield">Flickr username:</div><input id='flickr' class='urlField' name='flickr' value=''><br/>
@@ -24,12 +19,16 @@
         <span id='lastfm_error' style='display:none'>Could not get FOAF from Last.fm.</span><br/>
       <div class="formfield">Livejournal username:</div><input id='lj' class='urlField' name='lj' value=''><br/>
         <span id='lj_error' style='display:none'>Could not get FOAF from Livejournal.</span><br/>
-      <div class="formfield">Your foaf file URL:</div><input id='uri' name='uri' size="80"/><br/><br/>
+      <div class="formfield">FOAF profile:</div><input id='uri' name='uri' size="80"/><br/><br/>
         <span id='uri_error' style='display:none'>Could not get FOAF from the url specified.</span><br/>
-      <input id='button' type='submit' value='Build'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
+      <input id='button' type='submit' value='Build'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/><br/><br/>
     </form>
 
-<br/>     <p>If you find that you can not render your FOAF profile document in the builder, do try our <a href="http://foaf.qdos.com/validator/">FOAF validator</a></p>
+    <h2>To login please click <a href="/logon">here</a></h2><br/>
+     <form id="logon" method='get' action="/logon">
+	<input class="logonButton" type="submit" value="Login"/>
+     </form><br/>
+        <p>If you find that your FOAF profile is not displayed correctly you may want to try our <a href="http://foaf.qdos.com/validator/">FOAF validator</a></p>
 
 </div><!-- end content -->
 <!-- footer -->
