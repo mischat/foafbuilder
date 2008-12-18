@@ -4234,6 +4234,7 @@ function updateCodesFromAirportName(value){
 		var geocoder = new GClientGeocoder();
 		geocoder.getLatLng(autocomplete_airportData[value]['icao'],geoCodeNearestAirport);
 	}
+	saveFoaf();
 }
 
 /*toggles the pale blue private UI*/
