@@ -1519,7 +1519,7 @@ function renderKnowsFields(data){
 			return;
 		}
 		/*build the container*/
-		var containerElement = createFieldContainer('mutualFriends', 'Friends');
+		var containerElement = createFieldContainer('mutualFriends', 'Mutual Friends');
 		
 		for(friend in foafKnowsFields.mutualFriends){
 			
@@ -1537,7 +1537,7 @@ function renderKnowsFields(data){
 			return;
 		}
 		/*build the container*/
-		var containerElement = createFieldContainer('userKnows', 'User knows');
+		var containerElement = createFieldContainer('userKnows', 'My Friends');
 		
 		for(friend in foafKnowsFields.userKnows){
 			
@@ -1554,7 +1554,7 @@ function renderKnowsFields(data){
 		}
 
 		/*build the container*/
-		var containerElement = createFieldContainer('knowsUser', 'Knows user');
+		var containerElement = createFieldContainer('knowsUser', 'Friend Requests');
 	
 		for(friend in foafKnowsFields.knowsUser){
 			
