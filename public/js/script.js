@@ -969,7 +969,7 @@ function doDisambiguation(data){
 		disSubDiv.className = 'disambiguationLinkContainer';
 		var thisItem = data[1][disItem];
 		var thisLink = document.createElement("a");
-		thisLink.href = "javascript:addInterest('"+addSlashes(thisItem)+"');";
+		thisLink.href = "javascript:addInterest('"+addslashes(thisItem)+"');";
 		thisLink.className = 'disambiguationLink';
 		thisLink.appendChild(document.createTextNode(thisItem));
 		disDiv.appendChild(disSubDiv);
@@ -1021,7 +1021,7 @@ function addInterest(interestString){
 		//create a remove link
                 var removeLink = document.createElement('a');
                 removeLink.className = 'interestsRemoveLink';
-                removeLink.onclick = function(){document.getElementById(thisInterestDiv.id).parentNode.removeChild(document.getElementById(thisInterestDiv.id));this.parentNode.removeChild(this);};
+                removeLink.setAttribute('onclick',"document.getElementById('"+thisInterestDiv.id+"').parentNode.removeChild(document.getElementById('"+thisInterestDiv.id+"'));this.parentNode.removeChild(this);saveFoaf();");
                 removeLink.appendChild(document.createTextNode('Remove'));
 		makeCursorAPointer(removeLink);
                 actualInterestDiv.appendChild(removeLink);
@@ -1163,7 +1163,7 @@ function renderInterestsFields(data,isPublic){
 		//create a remove link
 		var removeLink = document.createElement('a');
 		removeLink.className = 'interestsRemoveLink';
-                removeLink.setAttribute('onclick',"document.getElementById('"+thisInterestDiv.id+"').parentNode.removeChild(document.getElementById('"+thisInterestDiv.id+"'));this.parentNode.removeChild(this);}");
+                removeLink.setAttribute('onclick',"document.getElementById('"+thisInterestDiv.id+"').parentNode.removeChild(document.getElementById('"+thisInterestDiv.id+"'));this.parentNode.removeChild(this);;saveFoaf()");
 		removeLink.appendChild(document.createTextNode('Remove'));
 		makeCursorAPointer(removeLink);
 		actualInterestDiv.appendChild(removeLink);
@@ -2064,6 +2064,9 @@ function interestsDisplayToObjects(){
 	log("STILL IN IT");
 	for(nodeKey in interestsContainer.childNodes){
 		var thisElem = interestsContainer.childNodes[nodeKey];
+		if(typeof(thisElem) && !thisElem){
+			continue
+		}
 		if(thisElem.className != 'interestDiv'){
 			log("INTERESTS DIV not found");
 			continue;
