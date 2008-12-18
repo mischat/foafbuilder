@@ -461,14 +461,10 @@ function getAccountsAndRender(data,isPublic,response){
 		if(accountBnodeId == 'displayLabel' || accountBnodeId == 'name'){
 			continue;
 		}
-		
-
 
 		var thisAccount = data.foafHoldsAccountFields[accountBnodeId];
 		
 		createSingleAccount(thisAccount, accountBnodeId, containerElement,isPublic);
-		
-			
 	}
 	
 	//add a link to add another account. We only want to do this once. XXX this relies on the public bit being rendered second

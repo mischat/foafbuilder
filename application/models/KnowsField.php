@@ -57,7 +57,6 @@ class KnowsField extends Field {
 
                 if(property_exists($friend,'uri')){
                         //TODO: add just the  uri here
-			echo('ADDING URI HERE!!!');
 			$foafData->getModel()->add(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource("http://xmlns.com/foaf/0.1/knows"), new Resource($friend->uri)));
                 } else {
 			$bNode = Utils::GenerateUniqueBnode($foafData->getModel());
@@ -65,28 +64,25 @@ class KnowsField extends Field {
 			$foafData->getModel()->add(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource("http://xmlns.com/foaf/0.1/knows"), $bNode));
                 	$foafData->getModel()->add(new Statement($bNode,new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/Person")));
 			
-			if(!property_exists($friend,'ifp_type') || !$friend->ifp_type){
-				$ifpType = $this->getIfpType($friend);
-			} else {
-				$ifpType = $friend->ifp_type;
-			}		
+			$ifpType = $this->getIfpType($friend);
 
-			if($ifpType == "mbox"){
+			if(($ifpType == "http://xmlns.com/foaf/0.1/mbox" || $ifpType == "http://xmlns.com/foaf/0.1/mbox_sha1sum") && !preg_match("/^[a-f0-9]{40}$/i", $friend->ifps[0])){
 				if(substr($friend->ifps[0],0,7) != 'mailto:'){ 
 					$friend->ifps[0] = "mailto:".$friend->ifps[0];
 				}
 				
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal(sha1($friend->ifps[0]))));
+				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox"),new Resource($friend->ifps[0])));
 				$successfulAdd = 1;
 	
-			} else if($ifpType == "mbox_sha1sum"){
-				
+			} else if($ifpType == "http://xmlns.com/foaf/0.1/mbox" || $ifpType == "http://xmlns.com/foaf/0.1/mbox_sha1sum"){
+
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal($friend->ifps[0])));
 				$successfulAdd = 1;
-	
+			
 			} else {
 				//XXX make sure the correct homepage/weblog is added here
-				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/".$ifpType),new Resource($friend->ifps[0])));
+				$foafData->getModel()->add(new Statement($bNode,new Resource($ifpType),new Resource($friend->ifps[0])));
 				$successfulAdd = 1;
 			}
                 }
@@ -102,29 +98,30 @@ class KnowsField extends Field {
 			return;
 		}
 
-		$val = $friend->ifps[0];
-		$ret;
+		//$val = $friend->ifps[0];
+		//$ret;
+		var_dump($friend);
+		//get ifp type
+		$query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+			  PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                                SELECT DISTINCT ?ifpType
+                                WHERE {
+                                    ?x ?ifpType ?value . 
+                                 FILTER(?value = "'.$friend->ifps[0].'"@EN || ?value = "'.$friend->ifps[0].'" || ?value = <'.$friend->ifps[0].'> || ?value = "'.sha1($friend->ifps[0]).'" || ?value = "'.sha1("mailto:".$friend->ifps[0]).'" || ?value = <mailto:'.$friend->ifps[0].'>) . FILTER(?ifpType = foaf:mbox_sha1sum || ?ifpType = foaf:mbox || ?ifpType = foaf:homepage || ?ifpType = foaf:weblog)
+			} ';
 
-		if (preg_match("/(mailto:)?([^\s]+@[a-zA-Z0-9\.-]+)/", $val, $matches)) {
-			
-			$ret = 'mbox';
-         		echo('setting ifp type as mbox');
-		} else if (preg_match("/(((http|ftp|mailto)+:\\/\\/)[a-zA-Z0-9\.-]+.*)/", $val, $matches)) {
+		$results = sparql_query(FOAF_EP,$query);
 
-			$ret = 'homepage';
-         		echo('setting ifp type as homepage');
-
-        	} else if (preg_match("/^[a-f0-9]{40}$/i", $val)) {
-			
-			$ret = 'mbox_sha1sum';
-         		echo('setting ifp type as sha1sum');
-               	} else {
-			echo('Illegal IFP entered');
-			error_log('Illegal IFP entered');
-			$ret = 'homepage';
+		if($results && !empty($results) && isset($results[0]) && $results[0] && isset($results[0]['?ifpType'])){
+			echo("found".$results[0]['?ifpType']);
+			return sparql_strip($results[0]['?ifpType']);
+		} else {
+			echo("not found!");
+			error_log('ifp type not found, homepage written out');
+			return 'http://xmlns.com/foaf/0.1/homepage';
 		}
-		
-		return $ret;
+
+
         }
 
 
@@ -299,7 +296,7 @@ class KnowsField extends Field {
         				$thisFriendDetails['uri'] = sparql_strip($thisUri);
         			}
         		}
-        		if(!empty($thisFriendDetails)){
+        		if(isset($thisFriendDetails['name'])){
         			array_push($userKnowsDetails,$thisFriendDetails);
         		}
      
@@ -485,6 +482,7 @@ class KnowsField extends Field {
         		foreach($ifps as $ifp){
                         if(isset($ifp) && $ifp && substr($ifp,0,2)!="_:"){
                                 $inquery.=" ?ifp = ".$ifp." || ";
+                                $inquery.=' ?ifp ="'.sparql_strip($ifp).'"@EN || ';//XXX is this OK? TODO FIXME
                                 //look for sha1s both done the correct way and the incorrect way too
                                 if(substr($ifp,0,8)=="<mailto:"){
                                 	$inquery.=" ?ifp = \"".sha1(sparql_strip($ifp))."\" ||";
@@ -532,17 +530,16 @@ class KnowsField extends Field {
                       
               
     			/*loop through the people who know them and triangulate their IFPs*/
-                 
+                 	
         		$knowsUserIfps = array();
         		foreach($knows as $key => $values){
         			$thisIfpArray = IFPTriangulation::doIterativeIFPTriangulation($values);
         			$knowsUserIfps[$key] = $thisIfpArray;
         		}
         		
+
         		//echo("KNOWS USER IFPS:");
         		//var_dump($knowsUserIfps);
-        		//var_dump($knowsUserIfps);
-
                 return $knowsUserIfps;
     }
     
