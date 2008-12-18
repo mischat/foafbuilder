@@ -3,19 +3,16 @@
 	$this->layout()->setLayout('continue');
 ?>
 <div id="content">
-			<div class="">
-				<h2>
-					In order to continue writing to our servers please authenicate with your OpenID
-				</h2>
-				<!--<form method='post' id='openidForm' action='javascript:doOpenid()'>-->
-				<form method='post' id='openidForm' action='/continue/do-openid'>
-					<p>In order to save your FOAF profile you will need enter your OpenID.  If you do not have an OpenID click <a href="https://www.myopenid.com/signup">here</a>. If you have an OpenID you can use it to identify yourself to us now. Your OpenID provider might ask you to log in if you have not done so recently.</p>
-					<span>OpenID:    </span><input id='openid_identifier' class='urlField' name='openid_identifier' value=''><br/>
-					<p><small>For example, fnivramd.livejournal.com</small></p>
-					<input id='openid_action' name='openid_action' type='submit' value='login'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
+	<div class="">
+		<h2>Save your FOAF profile</h2>
+		<!--<form method='post' id='openidForm' action='javascript:doOpenid()'>-->
+		<form method='post' id='openidForm' action='/continue/do-openid'>
+			<p>In order to save your FOAF profile you will need enter your OpenID.</p><p>If you do not have an OpenID click <a href="https://www.myopenid.com/signup">here</a>. If you have an OpenID you can use it to identify yourself to us now. Your OpenID provider might ask you to log in if you have not done so recently.</p>
+			<span>OpenID:    </span><input id='openid_identifier' class='urlField' name='openid_identifier' value=''><br/>
+			<p><small>For example, fnivramd.livejournal.com</small></p>
+			<input id='openid_action' name='openid_action' type='submit' value='login'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
 
-				</form>
-			</div>
+		</form>
+	</div>
 </div><!-- end content -->
-
-			<!-- footer -->
+<!-- footer -->
