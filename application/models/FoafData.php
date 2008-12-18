@@ -166,48 +166,55 @@ class FoafData {
 
 	$olderrorhandler = set_error_handler("myErrorHandler");
 	$tempmodel = new NamedGraphMem($uri);
-	$loadValue = $tempmodel->load($uri);
-	if ($loadValue==1) {
-		return 1;		
-	}
 
-	$primaryTopic = $tempmodel->find(new Resource($uri),new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),NULL);
-	
-	$fragment = "#me";
-	$string = $uri.$fragment;
+	try {
+		$loadValue = $tempmodel->load($uri);
+		if ($loadValue==1) {
+			return 1;		
+		}
 
-	//Get the primaryTopic if none
-	foreach ($primaryTopic->triples as $triple) {
-		$string = $triple->obj->uri;
-	}
+		$primaryTopic = $tempmodel->find(new Resource($uri),new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),NULL);
+		
+		$fragment = "#me";
+		$string = $uri.$fragment;
 
-	//If the current one is #me
-	if (preg_match('/#me$/',$this->getPrimaryTopic())) {
-		if (preg_match('/#(.*?)$/',$string,$fragmatch)) {
-			if ($fragmatch[1] != "me") {
-				$fragment = "#".$fragmatch[1];
+		//Get the primaryTopic if none
+		foreach ($primaryTopic->triples as $triple) {
+			$string = $triple->obj->uri;
+		}
+
+		//If the current one is #me
+		if (preg_match('/#me$/',$this->getPrimaryTopic())) {
+			if (preg_match('/#(.*?)$/',$string,$fragmatch)) {
+				if ($fragmatch[1] != "me") {
+					$fragment = "#".$fragmatch[1];
+				}
 			}
 		}
-	}
-	//TODO must make sure that we handle having a non "#me" foaf:Person URI
-	$newPrimaryTopic = $this->uri.$fragment;
+		//TODO must make sure that we handle having a non "#me" foaf:Person URI
+		$newPrimaryTopic = $this->uri.$fragment;
 
-	$tempmodel->replace(new Resource($uri),NULL,NULL,new Resource($this->getUri()));
-	$tempmodel->replace(NULL,NULL,new Resource($uri),new Resource($this->getUri()));
-	$tempmodel->replace(NULL,NULL,new Resource($newPrimaryTopic),new Resource($this->getPrimaryTopic()));
-	$tempmodel->replace(new Resource($newPrimaryTopic),NULL,NULL,new Resource($this->getPrimaryTopic()));
+		$tempmodel->replace(new Resource($uri),NULL,NULL,new Resource($this->getUri()));
+		$tempmodel->replace(NULL,NULL,new Resource($uri),new Resource($this->getUri()));
+		$tempmodel->replace(NULL,NULL,new Resource($newPrimaryTopic),new Resource($this->getPrimaryTopic()));
+		$tempmodel->replace(new Resource($newPrimaryTopic),NULL,NULL,new Resource($this->getPrimaryTopic()));
 
-	$result = $tempmodel->find(NULL, NULL, NULL);
+		$result = $tempmodel->find(NULL, NULL, NULL);
 
-	foreach($result->triples as $triple){
-		/*TODO MISCHA 
-                if ($triple->pred->uri == "http://xmlns.com/foaf/0.1/nick") {
-                        $triple->obj->lang = NULL;
+		foreach($result->triples as $triple){
+			/*TODO MISCHA 
+			if ($triple->pred->uri == "http://xmlns.com/foaf/0.1/nick") {
+				$triple->obj->lang = NULL;
+			}
+			*/
+			$this->model->addWithoutDuplicates($triple);
 		}
-		*/
-		$this->model->addWithoutDuplicates($triple);
+		$this->replacePrimaryTopic($newPrimaryTopic);
+
+	} catch (exception $e) {
+		echo "false";
+		exit;
 	}
-	$this->replacePrimaryTopic($newPrimaryTopic);
 
 	set_error_handler($olderrorhandler);
 	return 0;
