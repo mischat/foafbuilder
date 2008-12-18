@@ -63,7 +63,6 @@ class BasedNearField extends Field {
 		$predicate_resource = new Resource('http://xmlns.com/foaf/0.1/based_near');
 		
 	    //find existing triples
-	error_log("111111111111111111111");
 		$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
 			
 		//remove existing triples
