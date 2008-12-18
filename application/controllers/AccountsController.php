@@ -37,8 +37,6 @@ class AccountsController extends Zend_Controller_Action {
 		$query = substr($query,0,-3).')}';
 		
 		
-		echo($query);
-		
 		//execute the query to get the patterns
 		$res = sparql_query(QDOS_EP,$query);
 

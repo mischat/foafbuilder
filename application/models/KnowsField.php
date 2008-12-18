@@ -48,7 +48,6 @@ class KnowsField extends Field {
 					$successfulRemove = 1;	
 				}
 			}
-			echo($query);
 			var_dump($results);
 		}
 
@@ -76,19 +75,16 @@ class KnowsField extends Field {
 				if(substr($friend->ifps[0],0,7) != 'mailto:'){ 
 					$friend->ifps[0] = "mailto:".$friend->ifps[0];
 				}
-				echo("adding mbox".$friend->ifps[0]);
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal(sha1($friend->ifps[0]))));
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox"),new Resource($friend->ifps[0])));
 				$successfulAdd = 1;
 	
 			} else if($ifpType == "http://xmlns.com/foaf/0.1/mbox" || $ifpType == "http://xmlns.com/foaf/0.1/mbox_sha1sum"){
 
-				echo("adding mbox_sha1sum".$friend->ifps[0]);
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal($friend->ifps[0])));
 				$successfulAdd = 1;
 			
 			} else {
-				echo("adding mbox".$friend->ifps[0]);
 				//XXX make sure the correct homepage/weblog is added here
 				$foafData->getModel()->add(new Statement($bNode,new Resource($ifpType),new Resource($friend->ifps[0])));
 				$successfulAdd = 1;
@@ -102,7 +98,6 @@ class KnowsField extends Field {
 		
 		if(!property_exists($friend,'ifps') || !isset($friend->ifps[0]) || !$friend->ifps[0]){
 			error_log('illegal IFP entered');
-			echo('illegal IFP entered');
 			return;
 		}
 
@@ -121,10 +116,8 @@ class KnowsField extends Field {
 		$results = sparql_query(FOAF_EP,$query);
 
 		if($results && !empty($results) && isset($results[0]) && $results[0] && isset($results[0]['?ifpType'])){
-			echo("found".$results[0]['?ifpType']);
 			return sparql_strip($results[0]['?ifpType']);
 		} else {
-			echo("not found!");
 			error_log('ifp type not found, homepage written out');
 			return 'http://xmlns.com/foaf/0.1/homepage';
 		}
@@ -689,7 +682,6 @@ class KnowsField extends Field {
 	/*gets a url from the ifp that is passed in, if it isn't a bnode*/
 	public function getURIFromIFP($ifp){
 		
-		echo("This is the IFP: ".$ifp."\n");
 		//maybe flesh this out FIXME
 	}
 }

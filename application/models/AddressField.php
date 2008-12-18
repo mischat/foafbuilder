@@ -169,7 +169,6 @@ class AddressField extends Field {
     
     private function addHomeAddressTriples($value,&$foafData,$addressBnode){
 			
-    		echo("\n"."Adding home triples"."\n");	
     		$somethingWasAdded = false;
 
     		if(property_exists($value,'homeCity') && $value->homeCity){
@@ -212,7 +211,6 @@ class AddressField extends Field {
     
     private function addOfficeAddressTriples($value,&$foafData,$addressBnode){
 
-    		echo("\n"."Adding office triples"."\n");	
     		$somethingWasAdded = false;
     		if(property_exists($value,'officeCity') && $value->officeCity){
 				$cityStatement = new Statement($addressBnode,new Resource('http://www.w3.org/2000/10/swap/pim/contact#city'),new Literal($value->officeCity));
@@ -299,8 +297,6 @@ class AddressField extends Field {
    		$foundStuff = $foafData->getModel()->find(new BlankNode($bNodeName),NULL,NULL);
 		
 		
-   		echo("Deleting type: ".$prefix." bNodeName:".$bNodeName."\n");
-   		
 		if(!$foundStuff || !property_exists($foundStuff,'triples')  
 			|| !$foundStuff->triples || empty($foundStuff->triples)){
 			return;
@@ -308,10 +304,8 @@ class AddressField extends Field {
 		
 		foreach($foundStuff->triples as $foundTriple){			
 			if(!($foundTriple->obj instanceof BlankNode) && !($foundTriple->obj instanceof Resource)){
-				echo("not bnode or resource");
 				continue;
 			}
-			echo("found triple resource ".$foundTriple->subj->uri." ".$foundTriple->pred->uri." ".$foundTriple->obj->uri);
 
 			$foafData->getModel()->remove($foundTriple);
 
@@ -323,7 +317,6 @@ class AddressField extends Field {
 
 			foreach($foundMoreStuff->triples as $foundMoreTriple){
 				$foafData->getModel()->remove($foundMoreTriple);
-				echo("Removing Contact Location".$foundMoreTriple->pred->uri);
 			}
 		}	
    		
