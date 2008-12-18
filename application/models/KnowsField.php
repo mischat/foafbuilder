@@ -409,7 +409,7 @@ class KnowsField extends Field {
     	/*loop through the people they know and triangulate their IFPs*/
         $userKnowsIfps = array();
         foreach($actualIfpArray as $key => $row){
-        	$thisFriendsIfps = IFPTriangulation::doIterativeIFPTriangulation($row);
+        	$thisFriendsIfps = array_merge($row,IFPTriangulation::doIterativeIFPTriangulation($row));
         	
         	if(!isset($userKnowsIfps[$key])){
         		$userKnowsIfps[$key] = array();	
