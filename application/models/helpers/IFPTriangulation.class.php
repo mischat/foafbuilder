@@ -61,9 +61,6 @@ class IFPTriangulation {
 
 		$ifp_array =  array_unique  ( $ifp_array);
 	
-
-
-		
 		$ifp_query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 					SELECT DISTINCT ?ifp_wanted WHERE {
 					   ?person ?predicate_already_have ?ifp_already_have .
@@ -78,6 +75,9 @@ class IFPTriangulation {
 					         || ?predicate_wanted = foaf:mbox)";
 		
 		
+$lame = join('^^^^',$ifp_array);	
+
+	error_log("gaddd $lame hjadsgdahdjsg ");
 		
 		$already_have_filter="";
 		$want_filter="";
@@ -115,7 +115,10 @@ class IFPTriangulation {
 		$return_array = array();
 		
 		foreach($results as $res){		
-			array_push($return_array,@$res['?ifp_wanted']);
+			$ifp = @$res['?ifp_wanted'];
+			if ($ifp != "<mailto:>" && $ifp != '"da39a3ee5e6b4b0d3255bfef95601890afd80709"' && $ifp != '"08445a31a78661b5c746feff39a9db6e4e2cc5cf"' && $ifp != '""' & $ifp != '"20cb76cb42b39df43cb616fffdda22dbb5ebba32"' ) {
+				array_push($return_array,$ifp);
+			}
 		}
 		
 		return $return_array;
