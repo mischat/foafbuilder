@@ -30,8 +30,12 @@ class KnowsField extends Field {
 			foreach($friend->ifps as $ifp){
 				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate <".$ifp.">  }";
 				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate \"".$ifp."\" }";
+				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate \"".$ifp."\"@EN }";
 				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate \"".sha1($ifp)."\" }";
+				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate \"".sha1($ifp)."\"@EN }";
 				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate \"".sha1('mailto:'.$ifp)."\" }";
+				$query .= " . OPTIONAL{ ?knowsResource ?ifp_predicate \"".sha1('mailto:'.$ifp)."\"@EN }";
+				
 			}
 			
 			$query.="}";
@@ -44,6 +48,8 @@ class KnowsField extends Field {
 					$successfulRemove = 1;	
 				}
 			}
+			echo($query);
+			var_dump($results);
 		}
 
 		return $successfulRemove;
@@ -70,17 +76,19 @@ class KnowsField extends Field {
 				if(substr($friend->ifps[0],0,7) != 'mailto:'){ 
 					$friend->ifps[0] = "mailto:".$friend->ifps[0];
 				}
-				
+				echo("adding mbox".$friend->ifps[0]);
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal(sha1($friend->ifps[0]))));
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox"),new Resource($friend->ifps[0])));
 				$successfulAdd = 1;
 	
 			} else if($ifpType == "http://xmlns.com/foaf/0.1/mbox" || $ifpType == "http://xmlns.com/foaf/0.1/mbox_sha1sum"){
 
+				echo("adding mbox_sha1sum".$friend->ifps[0]);
 				$foafData->getModel()->add(new Statement($bNode,new Resource("http://xmlns.com/foaf/0.1/mbox_sha1sum"),new Literal($friend->ifps[0])));
 				$successfulAdd = 1;
 			
 			} else {
+				echo("adding mbox".$friend->ifps[0]);
 				//XXX make sure the correct homepage/weblog is added here
 				$foafData->getModel()->add(new Statement($bNode,new Resource($ifpType),new Resource($friend->ifps[0])));
 				$successfulAdd = 1;
@@ -387,7 +395,15 @@ class KnowsField extends Field {
     					array_push($actualIfpArray[$row['?uri']->uri],'"'.$row['?mbox_sha1sum']->label.'"');	
     				}	
     			}
-    		}
+			if(isset($row['?mbox_sha1sum']) && $row['?mbox_sha1sum']){
+                                if(property_exists($row['?mbox_sha1sum'],'uri') && $row['?mbox_sha1sum']->uri){
+                                        array_push($actualIfpArray[$row['?uri']->uri],'"'.$row['?mbox_sha1sum']->uri.'"@EN');
+                                } else if(property_exists($row['?mbox_sha1sum'],'label') && $row['?mbox_sha1sum']->label){
+                                        array_push($actualIfpArray[$row['?uri']->uri],'"'.$row['?mbox_sha1sum']->label.'"@EN');
+     		                   }
+                        
+    			}
+		}
     	}
     	
     	/*loop through the people they know and triangulate their IFPs*/
