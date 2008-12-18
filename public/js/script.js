@@ -973,7 +973,7 @@ function doDisambiguation(data){
 		disSubDiv.className = 'disambiguationLinkContainer';
 		var thisItem = data[1][disItem];
 		var thisLink = document.createElement("a");
-		thisLink.href = "javascript:addInterest('"+thisItem+"');";
+		thisLink.href = "javascript:addInterest('"+addSlashes(thisItem)+"');";
 		thisLink.className = 'disambiguationLink';
 		thisLink.appendChild(document.createTextNode(thisItem));
 		disDiv.appendChild(disSubDiv);
@@ -982,9 +982,24 @@ function doDisambiguation(data){
 
 }
 
+function addslashes(str) {
+str=str.replace(/\'/g,'\\\'');
+str=str.replace(/\"/g,'\\"');
+str=str.replace(/\\/g,'\\\\');
+str=str.replace(/\0/g,'\\0');
+return str;
+}
+function stripslashes(str) {
+str=str.replace(/\\'/g,'\'');
+str=str.replace(/\\"/g,'"');
+str=str.replace(/\\\\/g,'\\');
+str=str.replace(/\\0/g,'\0');
+return str;
+}
+
 //XXX repeated code here and in renderInterests
 function addInterest(interestString){
-
+		interestString = stripslashes(interestString);
 		var actualInterestDiv = document.getElementById('actualInterests');
 		var dbpediaUrl = "http://dbpedia.org/page/"+interestString.replace(' ','_');
 
@@ -1146,12 +1161,13 @@ function renderInterestsFields(data,isPublic){
 		}
 		thisInterestLink.appendChild(document.createTextNode(thisTitle));
 		thisInterestDiv.appendChild(thisInterestLink);
+		thisInterestDiv.id = createRandomString(50);
 		actualInterestDiv.appendChild(thisInterestDiv);
 
 		//create a remove link
 		var removeLink = document.createElement('a');
 		removeLink.className = 'interestsRemoveLink';
-		removeLink.onclick = function(){document.getElementById(thisInterestDiv.id).parentNode.removeChild(document.getElementById(thisInterestDiv.id));this.parentNode.removeChild(this);};
+                removeLink.setAttribute('onclick',"document.getElementById('"+thisInterestDiv.id+"').parentNode.removeChild(document.getElementById('"+thisInterestDiv.id+"'));this.parentNode.removeChild(this);}");
 		removeLink.appendChild(document.createTextNode('Remove'));
 		makeCursorAPointer(removeLink);
 		actualInterestDiv.appendChild(removeLink);
