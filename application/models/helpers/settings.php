@@ -1,6 +1,6 @@
 <?php
 
-define('FOAF_ROOT', 'http://luke.foaf.qdos.com/');
+define('FOAF_ROOT', 'http://foaf.qdos.com/');
 define('FOAF_EP', 'http://luma:8083/sparql/');
 define('FOAF_ALT_EP', 'http://luma:8082/sparql/');
 define('QDOS_EP', 'http://luma:8080/sparql/');
