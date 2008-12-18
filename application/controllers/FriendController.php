@@ -45,7 +45,8 @@ class FriendController extends Zend_Controller_Action {
                 	$this->view->isSuccess = 1;
                	}
             } else {
-                echo("there aint anything in the session");
+                //echo("there aint anything in the session");
+		error_log('[Foaf Builder] there is no foafdata in the session');
             }
         }
     }
@@ -80,7 +81,7 @@ class FriendController extends Zend_Controller_Action {
                 	$this->view->isSuccess = 1;
                	}
             } else {
-                echo("there aint anything in the session");
+		error_log('[Foaf Builder] there is no foafdata in the session');
             }
         }
     }
