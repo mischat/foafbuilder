@@ -88,7 +88,7 @@ class IFPTriangulation {
 				&& $ifp
 				&& $ifp != "NULL" 
 				&& substr($ifp,0,2)!="_:"){
-					if ($ifp != "<mailto:>") {
+					if ($ifp != "<mailto:>" && $ifp != "da39a3ee5e6b4b0d3255bfef95601890afd80709" && $ifp != "08445a31a78661b5c746feff39a9db6e4e2cc5cf" && $ifp != "" & $ifp != "20cb76cb42b39df43cb616fffdda22dbb5ebba32") {
 						$want_filter.=" ?ifp_wanted != ".$ifp." &&";
 						$already_have_filter.=" ?ifp_already_have = ".$ifp." ||";			
 					}
