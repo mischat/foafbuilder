@@ -15,7 +15,7 @@ ErrorDocument 404 /page_not_found.html
 </ifmodule>
 
 Order Deny,Allow
-Deny from all
+#Deny from all
 Allow from 127.0.0.1		# Loopback
 Allow from 192.168.31.254	# Localhost
 Allow from 193.203.246.177	# Garlik Richmond
