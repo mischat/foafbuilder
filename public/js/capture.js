@@ -29,7 +29,15 @@ function importFoaf(){
 	var uri = document.getElementById('uri').value;
 
 	$.get("/ajax/load-extractor",{key : get_cookie_id(), flickr: flickr, lastfmUser: lastfmUser, lj: lj, uri: uri} , function(data){
-			
+
+		//TODO MISCHA Hack for the if syntax incorrect
+		if (!data) {
+			document.getElementById('rap_error').style.display = 'inline';
+			errors++;
+			turnOffLoading();
+			return;
+		}
+
 		if(typeof(data) == 'undefined' || !data){
 			return;
 		}
@@ -40,6 +48,7 @@ function importFoaf(){
 		document.getElementById('lj_error').style.display = 'none';
 		document.getElementById('uri_error').style.display = 'none';
 		
+
 		
 		if(flickr && (typeof(data.flickrFound)=='undefined' || !data.flickrFound)){
 			document.getElementById('flickr_error').style.display = 'inline';			
