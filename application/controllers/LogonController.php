@@ -1,6 +1,7 @@
 <?php
 
 require_once 'Zend/Controller/Action.php';
+require_once 'helpers/settings.php';
 require_once 'helpers/oauth_settings.php';
 require_once 'helpers/write-utils.php';
 
@@ -38,8 +39,13 @@ class LogonController extends Zend_Controller_Action
 				$defaultNamespace->authenticated = true;
 				$myopenidurl = makeOpenIDUrl($id);
 				$defaultNamespace->url = $myopenidurl;
-				error_log("SO here is id $id, and there is the url".$myopenidurl);
+/*
+				$publicFoafData = FoafData::getFromSession(true);
+                                $publicFoafData->updateURI(PUBLIC_URL.$myopenidurl.'/foaf.rdf');
 
+                                $privateFoafData = FoafData::getFromSession(false);
+                                $privateFoafData->updateURI(PRIVATE_URL.$myopenidurl.'/data/foaf.rdf');
+*/
 				$store = OAuthStore::instance();
 				$our_openid = preg_replace('/\/$/','',$id);
 				$uid = $store->checkOpenIDExists($our_openid);
