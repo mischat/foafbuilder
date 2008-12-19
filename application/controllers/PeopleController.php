@@ -12,7 +12,6 @@ class PeopleController extends Zend_Controller_Action
 		$this->uri = $_SERVER['SCRIPT_URI'];
 		$this->url = $_SERVER['SCRIPT_URL'];
 		$this->uri = preg_replace('/#/','%23',$this->uri);
-		
 		 if (preg_match('/^\/people\/(.+?)$/',$this->url,$matches)) {
 			$cachename = cache_filename($this->uri);
 			if (file_exists(PUBLIC_DATA_DIR.$cachename)) {
