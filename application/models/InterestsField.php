@@ -71,10 +71,10 @@ class InterestsField extends Field {
 		if (!isset($row['?foafInterests'])) {
 			continue;	
 		}
-	    	if ($row['?foafInterests']->uri) {
+	    	if (property_exists($row['?foafInterests'],'uri') && $row['?foafInterests']->uri) {
 			$interestsArray['uri'] = $row['?foafInterests']->uri;
 		}
-		if (isset($row['?foafInterestTitles']) && isset($row['?foafInterestTitles']->label)) {
+		if (property_exists($row['?foafInterestTitles'],'label') && isset($row['?foafInterestTitles']) && $row['?foafInterestTitles']->label) {
 			$interestsArray['title'] = $row['?foafInterestTitles']->label;
 		}
 		array_push($this->data[$privacy]["foafInterestsFields"]['values'],$interestsArray);
