@@ -11,6 +11,7 @@ class PeopleController extends Zend_Controller_Action
 		// 3. Get all request parameters
 		$this->uri = $_SERVER['SCRIPT_URI'];
 		$this->url = $_SERVER['SCRIPT_URL'];
+		$this->uri = preg_replace('/#/','%23',$this->uri);
 		
 		 if (preg_match('/^\/people\/(.+?)$/',$this->url,$matches)) {
 			$cachename = cache_filename($this->uri);
