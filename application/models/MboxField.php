@@ -107,14 +107,14 @@ class MboxField extends Field {
 			$valueArray = $value->values;
 			
 			foreach($valueArray as $thisValue){
-				if(!$thisValue || $thisValue == '' || trim($thisValue) == '' || !trim($thisValue)){
+				/*if(!$thisValue || $thisValue == '' || trim($thisValue) == '' || !trim($thisValue)){
 					continue;			
-				}
+				}*/
 
 				$mangledValue = $this->onSaveMangleEmailAddress($thisValue);
 				
 				$resourceValue = new Resource($mangledValue);
-				$literalValue = new Literal(sha1($sha1Sum_resource->uri));
+				$literalValue = new Literal(sha1($mangledValuea));
 				
 				$mboxStatement = new Statement($primary_topic_resource,$predicate_resource,$resourceValue);	
 				$mbox_Sha1Statement = new Statement($primary_topic_resource,$sha1Sum_resource,$literalValue);	
