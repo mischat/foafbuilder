@@ -107,9 +107,9 @@ class MboxField extends Field {
 			$valueArray = $value->values;
 			
 			foreach($valueArray as $thisValue){
-				/*if(!$thisValue || $thisValue == '' || trim($thisValue) == '' || !trim($thisValue)){
+				if(!$thisValue || $thisValue == '' || trim($thisValue) == '' || !trim($thisValue)){
 					continue;			
-				}*/
+				}
 
 				$mangledValue = $this->onSaveMangleEmailAddress($thisValue);
 				
