@@ -87,6 +87,7 @@ class ContinueController extends Zend_Controller_Action
 		}
 	} else {
 		error_log("Openid login attempt with no value");
+                $this->_helper->redirector('../continue');
 	}
     } //end openid
 }

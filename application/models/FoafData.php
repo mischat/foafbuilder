@@ -32,6 +32,7 @@ class FoafData {
 	//Check if authenicated
 	if($defaultNamespace->authenticated == true) {
 		error_log("[builder] The user has AUTHENTICATED! ");
+		error_log("the openid is ".$this->openid);
 		$this->openid = $defaultNamespace->url;
 	} else {
 		error_log("[builder] The user has NOT AUTHENTICATED! ");
@@ -53,7 +54,7 @@ class FoafData {
 	
         if (!$this->isPublic) {
 		//If match then one of ours ...
-		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/oauth/',$this->uri) && $this->uri != PRIVATE_URL.'example/myopenid/data/foaf.rdf') {
+		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/oauth/',$this->uri) && $this->uri != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf') {
 			$cachename = cache_filename($this->uri);
 			if (file_exists(PRIVATE_DATA_DIR.$cachename)) {
 				$uri = 'file://'.PRIVATE_DATA_DIR.$cachename;
@@ -64,7 +65,7 @@ class FoafData {
 		//In future make OAuth dance here ...
     	} else if ($this->isPublic) {
 		//If match then one of ours ...
-		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/people/',$this->uri) && $this->uri != PRIVATE_URL.'example/myopenid/data/foaf.rdf') {
+		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/people/',$this->uri) && $this->uri != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf') {
 			$cachename = cache_filename($this->uri);
 			if (file_exists(PUBLIC_DATA_DIR.$cachename)) {
 				$uri = 'file://'.PUBLIC_DATA_DIR.$cachename;
@@ -353,8 +354,11 @@ class FoafData {
 	$newPersonUriRes = new Resource($uri.$ending);
 	$oldPersonUriRes = new Resource($first);
 	$oldDocUriRes = new Resource($page);
+
+error_log("uri = $uri ending $ending first $first and page $page and the new primaryTopic is $lame");
 		
-	$this->getModel()->replace($oldDocUriRes,new Resource("<http://xmlns.com/foaf/0.1/primaryTopic>"),NULL,$newDocUriRes);
+	//$this->getModel()->replace($oldDocUriRes,new Resource("<http://xmlns.com/foaf/0.1/primaryTopic>"),NULL,$newDocUriRes);
+	$this->getModel()->replace($oldDocUriRes,NULL,NULL,$newDocUriRes);
 	$this->getModel()->replace($oldPersonUriRes,NULL,NULL,$newPersonUriRes);
 	$this->getModel()->replace(NULL,NULL,$oldPersonUriRes,$newPersonUriRes);
     }
