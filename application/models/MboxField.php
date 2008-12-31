@@ -25,12 +25,13 @@ class MboxField extends Field {
 			return;
         } 
 
-		if($foafDataPublic){
-			$this->doFullLoad($foafDataPublic);
-		} 
-		if($foafDataPrivate){
-			$this->doFullLoad($foafDataPrivate);
-		}
+	if($foafDataPublic){
+		$this->doFullLoad($foafDataPublic);
+	} 
+
+	if($foafDataPrivate){
+		$this->doFullLoad($foafDataPrivate);
+	}
     }
     
     private function doFullLoad(&$foafData){
@@ -115,16 +116,18 @@ class MboxField extends Field {
 					continue;			
 				}
 
-				$mangledValue = $this->onSaveMangleEmailAddress($thisValue);
-				
-				$resourceValue = new Resource($mangledValue);
-				$literalValue = new Literal(sha1($mangledValue));
-				
-				$mboxStatement = new Statement($primary_topic_resource,$predicate_resource,$resourceValue);	
-				$mbox_Sha1Statement = new Statement($primary_topic_resource,$sha1Sum_resource,$literalValue);	
-				
-				$foafData->getModel()->addWithoutDuplicates($mboxStatement);
-				$foafData->getModel()->addWithoutDuplicates($mbox_Sha1Statement);
+				if ($this->isEmailAddressValid($thisValue)) {
+					$mangledValue = $this->onSaveMangleEmailAddress($thisValue);
+					
+					$resourceValue = new Resource($mangledValue);
+					$literalValue = new Literal(sha1($mangledValue));
+					
+					$mboxStatement = new Statement($primary_topic_resource,$predicate_resource,$resourceValue);	
+					$mbox_Sha1Statement = new Statement($primary_topic_resource,$sha1Sum_resource,$literalValue);	
+					
+					$foafData->getModel()->addWithoutDuplicates($mboxStatement);
+					$foafData->getModel()->addWithoutDuplicates($mbox_Sha1Statement);
+				}
 			}
 			
 
@@ -150,11 +153,10 @@ class MboxField extends Field {
 	
     private function isEmailAddressValid($value) {
         //TODO: add some proper validation here
-    	if($value){
-        	return true;
-        } else {
-        	return false;
-        }
+	if (preg_match('/.+\@.+\..+/',$value)) {
+		return true;
+	} 
+	return false;
     }
 
 }
