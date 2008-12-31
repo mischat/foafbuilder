@@ -93,12 +93,16 @@ class MboxField extends Field {
 			
 			//find existing triples
 			$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
-			//echo($primary_topic_resource->uri);
-			//var_dump($foundModel);
-			//var_dump($foafData->getModel());
-			//echo("------------------------------HERE------------------------------");
 			//remove existing triples
 			foreach($foundModel->triples as $triple){
+				//echo('removing mbox triples');
+				$foafData->getModel()->remove($triple);
+			}
+
+			//find existing triples
+			$foundModel2 = $foafData->getModel()->find($primary_topic_resource,$sha1Sum_resource,NULL);
+			//remove existing triples
+			foreach($foundModel2->triples as $triple){
 				//echo('removing mbox triples');
 				$foafData->getModel()->remove($triple);
 			}
