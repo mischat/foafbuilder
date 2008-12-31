@@ -101,14 +101,12 @@ class PhoneField extends Field {
 			$valueArray = $value->values;
 			
 			foreach($valueArray as $thisValue){
-				$mangledValue = $this->onSaveManglePhoneNo($thisValue);
-
-				$resourceValue = new Resource($mangledValue);
-				
-				$phoneStatement = new Statement($primary_topic_resource,$predicate_resource,$resourceValue);	
-				
-				$foafData->getModel()->add($phoneStatement);
-
+				if ($thisValue != "") {
+					$mangledValue = $this->onSaveManglePhoneNo($thisValue);
+					$resourceValue = new Resource($mangledValue);
+					$phoneStatement = new Statement($primary_topic_resource,$predicate_resource,$resourceValue);	
+					$foafData->getModel()->addWithoutDuplicates($phoneStatement);
+				}
 			}
     }
     /*mangles the email address for display purposes*/
