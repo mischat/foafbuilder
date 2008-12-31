@@ -26,12 +26,12 @@ class NearestAirportField extends Field {
 			return;
         }
 
-   		if($foafDataPublic){
-			$this->doFullLoad($foafDataPublic,'public');
-		} 
-		if($foafDataPrivate){
-			$this->doFullLoad($foafDataPrivate,'private');
-		}
+	if($foafDataPublic){
+		$this->doFullLoad($foafDataPublic,'public');
+	} 
+	if($foafDataPrivate){
+		$this->doFullLoad($foafDataPrivate,'private');
+	}
        
     }
     
