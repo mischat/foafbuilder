@@ -65,7 +65,7 @@ class FoafData {
 		//In future make OAuth dance here ...
     	} else if ($this->isPublic) {
 		//If match then one of ours ...
-                if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/people/',$this->uri) && $this->uri != PUBLIC_URL.'example.com/myopenid/foaf.rdf') {
+		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/people/',$this->uri) && $this->uri != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf') {
 			$cachename = cache_filename($this->uri);
 			if (file_exists(PUBLIC_DATA_DIR.$cachename)) {
 				$uri = 'file://'.PUBLIC_DATA_DIR.$cachename;
