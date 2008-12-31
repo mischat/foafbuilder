@@ -114,7 +114,7 @@ class MboxField extends Field {
 				$mangledValue = $this->onSaveMangleEmailAddress($thisValue);
 				
 				$resourceValue = new Resource($mangledValue);
-				$literalValue = new Literal(sha1($mangledValuea));
+				$literalValue = new Literal(sha1($mangledValue));
 				
 				$mboxStatement = new Statement($primary_topic_resource,$predicate_resource,$resourceValue);	
 				$mbox_Sha1Statement = new Statement($primary_topic_resource,$sha1Sum_resource,$literalValue);	
