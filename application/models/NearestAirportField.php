@@ -54,27 +54,25 @@ class NearestAirportField extends Field {
     }
 
     private function removeAirports(&$foafData,$existingAirports1,$exceptionBnode = false){
-		
     	//loop through existing airports removing them
-		foreach($existingAirports1->triples as $triple){
-			
-			/*don't remove the exception*/
-			if($exceptionBnode && $triple->obj == $exceptionBnode){
-				continue;	
-			}
-			
-			//remove this triple
-			$foafData->getModel()->remove($triple);
-			$foundSubTriples = $foafData->getModel()->find($triple->obj,NULL,NULL);
-					
-			//remove all triples that are hanging off this one
-			if(!$foundSubTriples->triples || empty($foundSubTriples->triples)){
-				continue;
-			}
-			foreach($foundSubTriples->triples as $subTriple){
-				$foafData->getModel()->remove($subTriple);
-			}
+	foreach ($existingAirports1->triples as $triple) {
+		/*don't remove the exception*/
+		if ($exceptionBnode && $triple->obj == $exceptionBnode) {
+			continue;	
 		}
+		
+		//remove this triple
+		$foafData->getModel()->remove($triple);
+		$foundSubTriples = $foafData->getModel()->find($triple->obj,NULL,NULL);
+				
+		//remove all triples that are hanging off this one
+		if (!$foundSubTriples->triples || empty($foundSubTriples->triples)) {
+			continue;
+		}
+		foreach ($foundSubTriples->triples as $subTriple) {
+			$foafData->getModel()->remove($subTriple);
+		}
+	}
     }
 	
     /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
@@ -94,13 +92,14 @@ class NearestAirportField extends Field {
     	
     	/*remove all but the first airport, since there should only be one*/
     	$airportBnode = false;
-    	if($existingAirports1 && !empty($existingAirports1->triples)){
-    		$airportBnode = $existingAirports1->triples[0]->obj;
-			$this->removeAirports($foafData,$existingAirports1,$existingAirports1->triples[0]->obj);
-		} 
-				
-    	/*generate a new airport bnode*/
-    	$airportBnode = Utils::GenerateUniqueBnode($foafData->getModel());
+    	if ($existingAirports1 && !empty($existingAirports1->triples)) {
+		/*here we use the old bnode*/
+		$airportBnode = $existingAirports1->triples[0]->obj;
+		$this->removeAirports($foafData,$existingAirports1,$existingAirports1->triples[0]->obj);
+	} else {
+		/*generate a new airport bnode*/
+		$airportBnode = Utils::GenerateUniqueBnode($foafData->getModel());
+	}
 	if ((property_exists($value->nearestAirport,'icaoCode') && $value->nearestAirport->icaoCode) || (property_exists($value->nearestAirport,'icaoCode') && $value->nearestAirport->icaoCode)) {
 		$foafData->getModel()->addWithoutDuplicates(new Statement(new Resource($foafData->getPrimaryTopic()),new Resource('http://www.w3.org/2000/10/swap/pim/contact#nearestAirport'),$airportBnode));
 		$foafData->getModel()->addWithoutDuplicates(new Statement($airportBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource('http://xmlns.com/wordnet/1.6/Airport')));
