@@ -74,7 +74,7 @@ class InterestsField extends Field {
 	    	if ($row['?foafInterests']->uri) {
 			$interestsArray['uri'] = $row['?foafInterests']->uri;
 		}
-		if (isset($row['?foafInterestTitles']) && $row['?foafInterestTitles']->label) {
+		if (isset($row['?foafInterestTitles']) && isset($row['?foafInterestTitles']->label)) {
 			$interestsArray['title'] = $row['?foafInterestTitles']->label;
 		}
 		array_push($this->data[$privacy]["foafInterestsFields"]['values'],$interestsArray);
