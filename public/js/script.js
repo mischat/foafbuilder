@@ -248,7 +248,7 @@ function genericObjectsToDisplay(data){
 	simpleFieldsObjectsToDisplay(data);
 	mboxFieldsObjectsToDisplay(data);
 	phoneFieldsObjectsToDisplay(data);
-	//addressFieldsObjectsToDisplay(data);
+	addressFieldsObjectsToDisplay(data);
 	depictionFieldsObjectsToDisplay(data);
 	imgFieldsObjectsToDisplay(data);
 	nearestAirportFieldsObjectsToDisplay(data);
