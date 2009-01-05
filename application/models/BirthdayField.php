@@ -132,8 +132,6 @@ class BirthdayField extends Field {
     } 
 
     private function removeAllBirthdayTriples($foafData) {
-            error_log("so yay we are removing foaf birthday triples");
-
             $primary_topic_resource = new Resource($foafData->getPrimaryTopic());
             $predicate_resource = new Resource('http://xmlns.com/foaf/0.1/birthday');
 
