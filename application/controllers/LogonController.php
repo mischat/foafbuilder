@@ -39,13 +39,22 @@ class LogonController extends Zend_Controller_Action
 				$defaultNamespace->authenticated = true;
 				$myopenidurl = makeOpenIDUrl($id);
 				$defaultNamespace->url = $myopenidurl;
-/*
+
 				$publicFoafData = FoafData::getFromSession(true);
+
+				if (!$publicFoafData) {
+					//$this->foafData = new FoafData(false,true);
+					$publicFoafData = new FoafData(false,true);
+				}
                                 $publicFoafData->updateURI(PUBLIC_URL.$myopenidurl.'/foaf.rdf');
 
                                 $privateFoafData = FoafData::getFromSession(false);
+				if (!$privateFoafData) {
+			                //$this->privateFoafData = new FoafData(false,false);
+			                $privateFoafData = new FoafData(false,false);
+				}
                                 $privateFoafData->updateURI(PRIVATE_URL.$myopenidurl.'/data/foaf.rdf');
-*/
+
 				$store = OAuthStore::instance();
 				$our_openid = preg_replace('/\/$/','',$id);
 				$uid = $store->checkOpenIDExists($our_openid);
