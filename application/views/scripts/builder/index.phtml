@@ -1,146 +1,168 @@
 <?
 //TODO: need to generate forms for input elements to aid with eventual w3c compliance
 
-
 ?>
+<div id='foafUrlContainer'>
+		<?php if(property_exists($this,'publicUri') && $this->publicUri){
+                                echo("<span id='foafUrlTitle'>Your Public FOAF URI: </span><span id='foafUrl'>".$this->publicUri."</span>");
+
+                } ?>
+		<br/>
+
+		<?php if(property_exists($this,'privateUri') && $this->privateUri){
+                                echo("<span id='foafUrlTitle'>Your Private FOAF URI: </span><span id='foafUrl'>".$this->privateUri."</span>");
+
+                } ?>
+		
+
+</div>
 <table cellspacing="10">
-	<tr>
-		<td>
-			<form action = "javascript:clearFoaf();">
-				<input type = 'submit' value = "Start Again" />
-			</form>
-		</td>
-		<td>
-			<form id="otherFormpublicprivate" action="javascript:writePublicAndPrivate()">
-				<input class="otherButton" type="submit" value="Save Data"/>
-			</form>
-		</td>
-		<td>
-			<form id="otherFormadvance" action="/advance">
-				<input class="otherButton" type="submit" value="Advanced Writing"/>
-			</form>
-		</td>
-		<td>
-			<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
-		</td>
-	</tr>
+<tr>
+	<td>
+		<form action = "javascript:clearFoaf();">
+			<input type = 'submit' value = "Start Again" />
+		</form>
+	</td>
+	<td>
+		<form id="otherFormpublicprivate" action="javascript:writePublicAndPrivate()">
+			<input class="otherButton" type="submit" value="Save Data"/>
+		</form>
+	</td>
+	<td>
+		<form id="otherFormadvance" action="/advance">
+			<input class="otherButton" type="submit" value="Advanced Writing"/>
+		</form>
+	</td>
+	<td>
+		<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
+	</td>
+	<td>
+		<?php
+			if($this->authenticated && $this->authenticated=='true'){
+				echo("<div id='loggedIn'>You are logged in</div>");
+			} else {
+				echo("<div id='loggedIn'><a href='/logon'>Log in</a></div>");	
+			}
+		?>		
+	</td>
+</tr>
 </table>
 
 
 <?
 //TODO: need to generate forms for input elements to aid with eventual w3c compliance
 ?>
-		
+	
 <div id="leftCol">
 <form action="#">
-	<? //TODO: perhaps the load-the-basics name should be generated somehow ?>
-		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-the-basics');" class="editorElement">
-			<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" id="load-the-basics" class="editorTitle">
-				<div class="editorTitleText">The basics </div>
-			</div>
-			<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleEven">
-				Title
-			</div>
-			<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleOdd">
-				Given Name 
-			</div>
-			<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleEven">
-				Family Name 
-			</div>
-			<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleOdd">
-				Real Name 
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
-				Nickname 
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
-				Birthday 
-			</div>
+<? //TODO: perhaps the load-the-basics name should be generated somehow ?>
+	<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-the-basics');" class="editorElement">
+		<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" id="load-the-basics" class="editorTitle">
+			<div class="editorTitleText">The basics </div>
 		</div>
-		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-contact-details');" class="editorElement">
-			<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" id='load-contact-details' class="editorTitle">
-				<div class="editorTitleText">Contact details </div>
-			</div>
-			<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleEven">
-				Email 
-			</div>
-			<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleOdd">
-				Phones 
-			</div>
-			<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleEven">
-				Addresses 
-			</div>
+		<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleEven">
+			Title
 		</div>
-		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-pictures');" class="editorElement">
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-pictures" class="editorTitle">
-				<div class="editorTitleText">Pictures </div>
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
-				Main Image 
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
-				Others 
-			</div>
+		<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleOdd">
+			Given Name 
 		</div>
-		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-locations');" class="editorElement">
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-locations" class="editorTitle">
-				<div class="editorTitleText">Locations </div>
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
-				Nearest Airport 
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
-				Based Near 
-			</div>
+		<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleEven">
+			Family Name 
 		</div>
-		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-accounts');" class="editorElement">
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-accounts" class="editorTitle">
-				<div class="editorTitleText">Accounts </div>
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
-				My Accounts 
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
-				Blogs
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
-				Homepages 
-			</div>
+		<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleOdd">
+			Real Name 
 		</div>
-		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-friends');" class="editorElement">
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-friends" class="editorTitle">
-				<div class="editorTitleText">Friends </div>
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
-				Mutual Friends 
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
-				Friend Requests	
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
-				My Friends
-			</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
+			Nickname 
 		</div>
-		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-interests');" class="editorElement">
-                        <div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-interests" class="editorTitle">
-                                <div class="editorTitleText">Interests </div>
-                        </div>
-                        <div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
-                                Interests
-                        </div>
-                </div>
-		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-other');" class="editorElement">
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-other" class="editorTitle">
-				<div class="editorTitleText">Geek View </div>
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
-				Private
-			</div>
-			<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
-				Public
-			</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
+			Birthday 
 		</div>
-	</form>
+	</div>
+	<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-contact-details');" class="editorElement">
+		<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" id='load-contact-details' class="editorTitle">
+			<div class="editorTitleText">Contact details </div>
+		</div>
+		<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleEven">
+			Email 
+		</div>
+		<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleOdd">
+			Phones 
+		</div>
+		<div  onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" class="editorSubTitleEven">
+			Addresses 
+		</div>
+	</div>
+	<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-pictures');" class="editorElement">
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-pictures" class="editorTitle">
+			<div class="editorTitleText">Pictures </div>
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
+			Main Image 
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
+			Others 
+		</div>
+	</div>
+	<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-locations');" class="editorElement">
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-locations" class="editorTitle">
+			<div class="editorTitleText">Locations </div>
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
+			Nearest Airport 
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
+			Based Near 
+		</div>
+	</div>
+	<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-accounts');" class="editorElement">
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-accounts" class="editorTitle">
+			<div class="editorTitleText">Accounts </div>
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
+			My Accounts 
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
+			Blogs
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
+			Homepages 
+		</div>
+	</div>
+	<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-friends');" class="editorElement">
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-friends" class="editorTitle">
+			<div class="editorTitleText">Friends </div>
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
+			Mutual Friends 
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
+			Friend Requests	
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
+			My Friends
+		</div>
+	</div>
+	<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-interests');" class="editorElement">
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-interests" class="editorTitle">
+			<div class="editorTitleText">Interests </div>
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
+			Interests
+		</div>
+	</div>
+	<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'" onclick="saveFoaf();loadFoaf('load-other');" class="editorElement">
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  id="load-other" class="editorTitle">
+			<div class="editorTitleText">Geek View </div>
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleEven">
+			Private
+		</div>
+		<div onmouseover="this.style.cursor='pointer'" onmouseout="this.style.cursor='default'"  class="editorSubTitleOdd">
+			Public
+		</div>
+	</div>
+</form>
 </div><!-- end leftCol -->
 
 <div class="rightCol" id="personal">
@@ -148,11 +170,11 @@
 
 </div>
 <!-- hidden div for autocomplete to work for airports. TODO: configure this in a more straightforward way -->
-	<div id='airport_autocomplete'>
-	<input type="text" value="Find an airport" onclick="if(this.value=='Find an airport'){this.value='';}" id="CityLocal" autocomplete="off" class="ac_input" style=""/>
+<div id='airport_autocomplete'>
+<input type="text" value="Find an airport" onclick="if(this.value=='Find an airport'){this.value='';}" id="CityLocal" autocomplete="off" class="ac_input" style=""/>
 </div>
-	
+
 <script type='text/javascript'>
-	loadFoaf('load-the-basics');
-	var authenticated = <?php echo($this->authenticated); ?>
+loadFoaf('load-the-basics');
+var authenticated = <?php echo($this->authenticated); ?>
 </script>
