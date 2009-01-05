@@ -330,7 +330,7 @@ define('VCARD_NS'   , 'http://www.w3.org/2001/vcard-rdf/3.0#');
 
 global $default_prefixes;
 $default_prefixes = array(
-   RDF_NAMESPACE_PREFIX => RDF_NAMESPACE_URI,
+  RDF_NAMESPACE_PREFIX => RDF_NAMESPACE_URI,
    RDF_SCHEMA_PREFIX => RDF_SCHEMA_URI,
    'xsd'  => 'http://www.w3.org/2001/XMLSchema#',
    OWL_PREFIX => OWL_URI,
@@ -338,11 +338,13 @@ $default_prefixes = array(
    'word' => 'http://xmlns.com/wordnet/1.6/',
    'tami' => 'http://dig.csail.mit.edu/TAMI/2007/amord/air#',
    'bio' => 'http://purl.org/vocab/bio/0.1/',
-   'dbp' => 'http://dbpedia.org/',
+   'dbpedia' => 'http://dbpedia.org/page/',
    'air' => 'http://www.megginson.com/exp/ns/airports#',
    'dc' => 'http://purl.org/dc/elements/1.1/',
    'dcterms' => 'http://purl.org/dc/terms/',
-   'vcard' => 'http://www.w3.org/2001/vcard-rdf/3.0#'
+   'vcard' => 'http://www.w3.org/2001/vcard-rdf/3.0#',
+   'mail' => 'mail:',
+   'tel' => 'tel:'
 );
 
 
