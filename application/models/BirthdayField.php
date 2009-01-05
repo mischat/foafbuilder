@@ -130,23 +130,21 @@ class BirthdayField extends Field {
             }
         }    
     } 
-	
-    /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and random strings to be replaced by the view.*/
-    public function saveToModel(&$foafData, $value) {
-        $valueArray = $this->objectToArray($value);
 
-        //First to make sure that at least one has been selected*/
-        if (isset($valueArray['month']) || isset($valueArray['day']) || isset($valueArray['year'])) {
-            /*find existing triples for foafBirthday and foafDateOfBirth*/
-            $foundModel1 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/birthday"),NULL);
-            /*If foaf:birthday remove it */
+    private function removeAllBirthdayTriples($foafData) {
+            error_log("so yay we are removing foaf birthday triples");
+
+            $primary_topic_resource = new Resource($foafData->getPrimaryTopic());
+            $predicate_resource = new Resource('http://xmlns.com/foaf/0.1/birthday');
+
+            //find existing triples of the first type
+            $foundModel1 = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
             if (!$foundModel1->isEmpty()) {
-                error_log('[foaf_editor] So here we have foaf:birthday');
+                error_log('[foaf_editor] So here we are removing a foaf:birthday');
                 foreach($foundModel1->triples as $triple) {
                     $foafData->getModel()->remove($triple);
                 }
-            } 
-            /*If foaf:dateOfBirth remove it*/
+            }
             $foundModel2 = $foafData->getModel()->find(NULL,new Resource("http://xmlns.com/foaf/0.1/dateOfBirth"),NULL);
             if (!$foundModel2->isEmpty()) {
                 //error_log('[foaf_editor] So here we have foaf:dateOfBirth');
@@ -155,7 +153,7 @@ class BirthdayField extends Field {
                 }
             } 
             /* Now to check for bio: and if exists replace */
-           $query = 
+            $query = 
                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -167,9 +165,9 @@ class BirthdayField extends Field {
                    ?e bio:date ?bioBirthday .
                }";
    
-           $results = $foafData->getModel()->sparqlQuery($query);
-           /*If it does exist*/
-           if (isset($results[0]['?e']) && isset($results[0]['?bioBirthday'])) { 
+            $results = $foafData->getModel()->sparqlQuery($query);
+            /*If it does exist*/
+            if (isset($results[0]['?e']) && isset($results[0]['?bioBirthday'])) { 
                 $bioDateResource = new Resource("http://purl.org/vocab/bio/0.1/date");
                 $bioEventResource = new Resource("http://purl.org/vocab/bio/0.1/event");
                 $bioBirthResource = new Resource("http://purl.org/vocab/bio/0.1/Birth");
@@ -185,6 +183,18 @@ class BirthdayField extends Field {
         
                 /*There is no need to create these triples here*/
             }
+    }
+
+    /*saves the values created by the editor in value... as encoded in json.  Returns an array of bnodeids and 
+    random strings to be replaced by the view.*/
+    public function saveToModel(&$foafData, $value) {
+        $valueArray = $this->objectToArray($value);
+
+        //Clean all birthday triples
+        $this->removeAllBirthdayTriples($foafData);
+
+        //First to make sure that at least one has been selected*/
+        if (isset($valueArray['month']) || isset($valueArray['day']) || isset($valueArray['year'])) {
 
             /*Now to write out triples after cleaning them*/
             /*If NO year presented then fit the most appropriate foaf:birthday*/
@@ -239,7 +249,8 @@ class BirthdayField extends Field {
                 } 
 
                 $dateLiteral = new Literal($dateString);
-                $new_bnode = new BlankNode($foafData->getModel());
+                //$new_bnode = new BlankNode($foafData->getModel());
+                $new_bnode = Utils::GenerateUniqueBnode($foafData->getModel());
                 $add_statement = new Statement(new Resource($foafData->getPrimaryTopic()), new Resource("http://purl.org/vocab/bio/0.1/event"),$new_bnode);
                 $foafData->getModel()->add($add_statement);
                 $add_statement = new Statement($new_bnode, new Resource("http://purl.org/vocab/bio/0.1/date"),$dateLiteral);

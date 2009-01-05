@@ -8,33 +8,33 @@ class BasedNearField extends Field {
 	
     /*predicateUri is only appropriate for simple ones (one triple only)*/
     public function BasedNearField($foafDataPublic,$foafDataPrivate,$fullInstantiation = true) {
- 		$this->name = 'basedNear';
+ 	$this->name = 'basedNear';
         $this->label = "I'm based near...";
         
         $this->data['public'] = array();
     	$this->data['public']['basedNearFields'] = array();
-		$this->data['public']['basedNearFields']['basedNear'] = array();
-		$this->data['public']['basedNearFields']['displayLabel'] = $this->label;
+	$this->data['public']['basedNearFields']['basedNear'] = array();
+	$this->data['public']['basedNearFields']['displayLabel'] = $this->label;
         $this->data['public']['basedNearFields']['name'] = $this->name;
           
         $this->data['private'] = array();
         $this->data['private']['basedNearFields'] = array();
-		$this->data['private']['basedNearFields']['basedNear'] = array();
-		$this->data['private']['basedNearFields']['displayLabel'] = $this->label;
+	$this->data['private']['basedNearFields']['basedNear'] = array();
+	$this->data['private']['basedNearFields']['displayLabel'] = $this->label;
         $this->data['private']['basedNearFields']['name'] = $this->name;
          
         /*don't sparql query the model etc if a full instantiation is not required*/
         if (!$fullInstantiation) {
-			return;
+		return;
         }
         
         /*Do full load*/
     	if($foafDataPublic){
-			$this->doFullLoad($foafDataPublic);
-		} 
-		if($foafDataPrivate){
-			$this->doFullLoad($foafDataPrivate);
-		}
+		$this->doFullLoad($foafDataPublic);
+	} 
+	if($foafDataPrivate){
+		$this->doFullLoad($foafDataPrivate);
+	}
     }
     
     public function doFullLoad(&$foafData){
@@ -49,7 +49,6 @@ class BasedNearField extends Field {
         } 
         
         if($results && !empty($results)){
-        
 	    	/*mangle the results so that they can be easily rendered*/
 	        foreach ($results as $row) {
 	            $this->addBasedNearElements($row,$privacy);
@@ -62,7 +61,7 @@ class BasedNearField extends Field {
 		$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
 		$predicate_resource = new Resource('http://xmlns.com/foaf/0.1/based_near');
 		
-	    //find existing triples
+	        //find existing triples
 		$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
 			
 		//remove existing triples
@@ -114,7 +113,8 @@ class BasedNearField extends Field {
 			
 			//if it is new or a bnode, save a bnode.  If not, save the uri.
 			if(substr($basedNearName,0,5)=='bNode' || strlen($basedNearName) == 50){
-				$subject = new BlankNode($foafData->getModel());	
+				//$subject = new BlankNode($foafData->getModel());	
+                		$subject = Utils::GenerateUniqueBnode($foafData->getModel());
 			} else {
 				$subject = new Resource($basedNearName);
 			}
