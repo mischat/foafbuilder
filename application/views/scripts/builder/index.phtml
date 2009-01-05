@@ -4,17 +4,16 @@
 ?>
 <div id='foafUrlContainer'>
 		<?php if(property_exists($this,'publicUri') && $this->publicUri){
-                                echo("<span id='foafUrlTitle'>Your Public FOAF URI: </span><span id='foafUrl'>".$this->publicUri."</span>");
+                                	echo("<div class='foafUrlTitle'>Your Public FOAF URI: </div><div class='foafUrl'>".$this->publicUri."</div>");
 
                 } ?>
 		<br/>
 
 		<?php if(property_exists($this,'privateUri') && $this->privateUri){
-                                echo("<span id='foafUrlTitle'>Your Private FOAF URI: </span><span id='foafUrl'>".$this->privateUri."</span>");
+                                echo("<div class='foafUrlTitle'>Your Private FOAF URI: </div><div class='foafUrl'>".$this->privateUri."</div>");
 
                 } ?>
 		
-
 </div>
 <table cellspacing="10">
 <tr>
@@ -37,12 +36,13 @@
 		<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
 	</td>
 	<td>
-		<?php
+		<?php /*
 			if($this->authenticated && $this->authenticated=='true'){
 				echo("<div id='loggedIn'>You are logged in</div>");
 			} else {
 				echo("<div id='loggedIn'><a href='/logon'>Log in</a></div>");	
 			}
+		     */
 		?>		
 	</td>
 </tr>
