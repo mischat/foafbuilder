@@ -112,7 +112,8 @@ class HoldsAccountField extends Field {
 			
 			$holdsAccountBnode;
 			if(substr($holdsAccountName,0,5)=='bNode' || strlen($holdsAccountName) == 50){
-				$holdsAccountBnode = new BlankNode($foafData->getModel());		
+				//$holdsAccountBnode = new BlankNode($foafData->getModel());		
+                		$holdsAccountBnode = Utils::GenerateUniqueBnode($foafData->getModel());
 			} else {
 				$holdsAccountBnode = new Resource($holdsAccountName);				
 			}
