@@ -25,13 +25,11 @@ class BuilderController extends Zend_Controller_Action
 		$foafData = FoafData::getFromSession();
 		if($foafData && $foafData->getUri() && $foafData->getUri() != 'http://foafbuilder.qdos.com/people/example.com/myopenid/foaf.rdf'){
 			$this->view->publicUri = $foafData->getUri();
-			echo($this->view->publicUri);
 		}
 		
 		$privateFoafData = FoafData::getFromSession(false);
 		if($privateFoafData && $privateFoafData->getUri() && $privateFoafData->getUri() != 'http://private.qdos.com/oauth/example.com/myopenid/data/foaf.rdf'){
 			$this->view->privateUri = $privateFoafData->getUri();
-			echo($this->view->privateUri);
 		}
 
 	} else {

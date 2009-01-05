@@ -669,11 +669,6 @@ width:100%;
 	margin-bottom:-25px;
 	margin-left:260px;
 }
-
-.foafUrl{
-	color:#888888;
-}
-
 .formfield{
 	float:left;
 	width:20ex;
@@ -711,11 +706,15 @@ width:100%;
 	margin-left: 220px;
 	margin-top:-34px;
 }
-#foafUrl{
+.foafUrl{
+	width: 430px;
+	float:left;
 	font-weight:600;
 	color:#000000;
 }
-#foafUrlTitle{
+.foafUrlTitle{
+	float:left;
+	width: 150px;
 	font-weight:600;
 	color:#999999;
 }

@@ -1,6 +1,20 @@
 <?	
 	//We don't want to laod all the scripts
 ?>
+<div id='foafUrlContainer'>
+                <?php if(property_exists($this,'publicUri') && $this->publicUri){
+                                        echo("<div class='foafUrlTitle'>Your Public FOAF URI: </div><div class='foafUrl'>".$this->publicUri."</div>");
+
+                } ?>
+
+                <br/>
+
+                <?php if(property_exists($this,'privateUri') && $this->privateUri){
+                                echo("<div class='foafUrlTitle'>Your Private FOAF URI: </div><div class='foafUrl'>".$this->privateUri."</div>");
+
+                } ?>
+
+</div>
 <div id="content">
 	<div class="">
 		<h3>
