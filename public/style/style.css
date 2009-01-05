@@ -706,4 +706,16 @@ width:100%;
 }
 #interestsRemoveLink{
 }
-
+#foafUrlContainer{
+	float:left;
+	margin-left: 220px;
+	margin-top:-34px;
+}
+#foafUrl{
+	font-weight:600;
+	color:#000000;
+}
+#foafUrlTitle{
+	font-weight:600;
+	color:#999999;
+}

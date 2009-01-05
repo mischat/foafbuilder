@@ -2,6 +2,7 @@
 require_once 'helpers/settings.php';
 require_once 'helpers/sparql.php';
 require_once 'Zend/Controller/Action.php';
+require_once 'FoafData.php';
 
 class BuilderController extends Zend_Controller_Action
 {
@@ -15,19 +16,28 @@ class BuilderController extends Zend_Controller_Action
     }
 
     public function indexAction(){	
-	$url = @$_GET['url'];    	
 	
 	$defaultNamespace = new Zend_Session_Namespace('Garlik');
-
+	
 	if($defaultNamespace->authenticated){
 		$this->view->authenticated = 'true';
+	
+		$foafData = FoafData::getFromSession();
+		if($foafData && $foafData->getUri() && $foafData->getUri() != 'http://foafbuilder.qdos.com/people/example.com/myopenid/foaf.rdf'){
+			$this->view->publicUri = $foafData->getUri();
+			echo($this->view->publicUri);
+		}
+		
+		$privateFoafData = FoafData::getFromSession(false);
+		if($privateFoafData && $privateFoafData->getUri() && $privateFoafData->getUri() != 'http://private.qdos.com/oauth/example.com/myopenid/data/foaf.rdf'){
+			$this->view->privateUri = $privateFoafData->getUri();
+			echo($this->view->privateUri);
+		}
+
 	} else {
 		$this->view->authenticated = 'false';
 	}
 	
-	if($url){
-      	    $this->view->uri = $url;
-	}
     }
 }
 
