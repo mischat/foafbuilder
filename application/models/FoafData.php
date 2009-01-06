@@ -370,46 +370,16 @@ error_log("uri = $uri ending $ending first $first and page $page and the new pri
 		return;
 	}
 	
-	$firstLoop = true;
-	$additionalNumber = false;
-
 	foreach($this->model->triples as $triple){
 		
 		if($triple->subj instanceof BlankNode){
-			$uriArray = explode('_',$triple->subj->uri);
-			if(!$additionalNumber){
-				$additionalNumber = 0;
-				if(isset($uriArray[1])){
-					$additionalNumber = $uriArray[1];	
-				}
-			}
-			if(isset($uriArray[0])){
-				$triple->subj->uri = $uriArray[0].'_'.$additionalNumber;
-			}
+			$triple->subj->uri = 'bNode_'.uniqid();
 		}
 		if($triple->pred instanceof BlankNode){
-			$uriArray = explode('_',$triple->pred->uri);
-			if(!$additionalNumber){
-				$additionalNumber = 0;
-				if(isset($uriArray[1])){
-					$additionalNumber = $uriArray[1];	
-				}
-			}
-			if(isset($uriArray[0])){
-				$triple->pred->uri = $uriArray[0].'_'.$additionalNumber;
-			}
+			$triple->pred->uri = 'bNode_'.uniqid();
 		}
 		if($triple->obj instanceof BlankNode){
-			$uriArray = explode('_',$triple->obj->uri);
-			if(!$additionalNumber){
-				$additionalNumber = 0;
-				if(isset($uriArray[1])){
-					$additionalNumber = $uriArray[1];	
-				}
-			}
-			if(isset($uriArray[0])){
-				$triple->obj->uri = $uriArray[0].'_'.$additionalNumber;
-			}
+			$triple->obk->uri = 'bNode_'.uniqid();
 		}
 	}
 
