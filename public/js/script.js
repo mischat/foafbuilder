@@ -3705,19 +3705,65 @@ function phoneDisplayToObjects(){
 
 	function writePublic(){
 		log('doing write public');
-		$.post("/writer/write-foaf-public", {key : get_cookie_id()}, function(data){if(data=='null'){window.location='/continue';}});
+		$.post("/writer/write-foaf-public", {key : get_cookie_id()}, function(data){
+										if(data=='null'){
+											window.location='/continue';
+										} else {
+											showSaveUpdate();
+										}});
 	}
 	
 	function writePrivate(){
 		log('doing write public');
-		$.post("/writer/write-foaf-private", {key : get_cookie_id()}, function(data){if(data=='null'){window.location='/continue';}});
+		$.post("/writer/write-foaf-private", {key : get_cookie_id()}, function(data){
+										if(data=='null'){
+											window.location='/continue';
+										} else {
+											showSaveUpdate();
+										}});
 	}
 
 	function writePublicAndPrivate(){
 		log('doing write public and private');
-		$.post("/writer/write-foaf-garlik-servers", {key : get_cookie_id()}, function(data){if(data=='null'){window.location='/continue';}});
+		$.post("/writer/write-foaf-garlik-servers", {key : get_cookie_id()}, function(data){
+									if(data=='null'){
+										window.location='/continue';
+									} else {
+										showSaveUpdate();
+									}
+
+								});
 	}
 	
+	function showSaveUpdate(){
+
+		var currentTime = new Date()
+		var hours = currentTime.getHours()
+		var minutes = currentTime.getMinutes()
+		var seconds = currentTime.getSeconds()
+		var timeString=hours+":";
+		
+		if (minutes < 10){
+			timeString+="0" + minutes +":";
+		} else {
+			timeString+=minutes +":";	
+		}
+		if (seconds < 10){
+			timeString+="0" + seconds +" ";
+		} else {
+			timeString+=seconds +" ";	
+		}
+		if(hours > 11){
+			timeString+="PM";
+		} else {
+			timeString+="AM";
+		}
+		
+		var saveElement = document.getElementById('saveInfo');
+		saveElement.childNodes[0].nodeValue="Saved at: "+timeString;
+		greenFade(saveElement);
+
+	}
 
 	/*---------------------------other (geek view)---------------------------*/
 
