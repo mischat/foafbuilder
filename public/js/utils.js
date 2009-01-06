@@ -393,6 +393,17 @@ function yellowFade(el) {
   f();
 }
 
+function greenFade(el) {
+  var b = 50;
+  function f() {
+    el.style.color = 'rgb('+ (b+=4) +',200,'+ (b+=4) +')';
+    if (b < 200) {
+      setTimeout(f, 40);
+    }
+  };
+  f();
+}
+
 function clone(myObj)
 {
 	if(typeof(myObj) != 'object') return myObj;
