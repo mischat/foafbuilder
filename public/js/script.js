@@ -36,6 +36,8 @@ var map;
 /*variable to hold all the accounts data*/
 var allAccounts;
 
+/*variable to keep track of the spinner*/
+var awaitingSpinner = 0;
 
 /*--------------------------functions which make ajax calls to control the whole model - load, save, clear, write(TODO: implement this properly)--------------------------*/
 function get_cookie_id() {
@@ -54,9 +56,17 @@ function get_cookie_id() {
 
 /*display/hide the spinner*/
 function turnOffLoading(){
-	document.getElementById('ajaxLoader').style.display = 'none';
+		
+	awaitingSpinner--;
+
+	if(awaitingSpinner == 0){
+		document.getElementById('ajaxLoader').style.display = 'none';
+	}
+
 }
 function turnOnLoading(){
+	
+	awaitingSpinner++;
 	document.getElementById('ajaxLoader').style.display = 'inline';	
 }
 
