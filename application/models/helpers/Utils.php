@@ -7,12 +7,8 @@ class Utils{
 	static function GenerateUniqueBnode($model){
 		
 		$bNodePrefix = 'bNode';
-		$i=1;
-
-		for(; Utils::bNodeIsFound($i,$model,$bNodePrefix); $i++){
-		}	
 		
-		return new BlankNode($bNodePrefix.$i);
+		return new BlankNode($bNodePrefix.'_'.uniqid());
 	}
 	
 	static function bNodeIsFound($i,$model,$bNodePrefix){
