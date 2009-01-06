@@ -343,7 +343,12 @@ $default_prefixes = array(
    'dc' => 'http://purl.org/dc/elements/1.1/',
    'dcterms' => 'http://purl.org/dc/terms/',
    'vcard' => 'http://www.w3.org/2001/vcard-rdf/3.0#',
+   'wot' => 'http://xmlns.com/wot/0.1/',
+   'cc' => 'http://creativecommons.org/ns#',
+   'geo' => 'http://www.w3.org/2003/01/geo/wgs84_pos#',
    'mail' => 'mail:',
+   'cert' => 'http://www.w3.org/ns/auth/cert#',
+   'rsa' => 'http://www.w3.org/ns/auth/rsa#',
    'tel' => 'tel:'
 );
 
