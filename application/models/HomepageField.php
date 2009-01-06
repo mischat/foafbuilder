@@ -10,7 +10,7 @@ class HomepageField extends Field {
     public function HomepageField($foafDataPublic,$foafDataPrivate,$fullInstantiation = true) {
     	
         $this->name = 'foafHomepage';
-        $this->label = 'Homepage';
+        $this->label = 'Personal Homepages';
 
         $this->data['public']['foafHomepageFields'] = array();
         $this->data['public']['foafHomepageFields']['values'] = array();
