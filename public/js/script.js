@@ -455,6 +455,8 @@ function getAccountsAndRender(data,isPublic,response){
 		containerElement = createFieldContainer(name, label);
 	}
 	
+	var renderedAtLeastOneAccount = false;
+
 	for(accountBnodeId in data.foafHoldsAccountFields){
 		log('In loop accounts:'+accountBnodeId);
 
@@ -465,8 +467,14 @@ function getAccountsAndRender(data,isPublic,response){
 		var thisAccount = data.foafHoldsAccountFields[accountBnodeId];
 		
 		createSingleAccount(thisAccount, accountBnodeId, containerElement,isPublic);
+		renderedAtLeastOneAccount = true;
 	}
 	
+	/*render an empty account if there aren't any*/
+	if(!renderedAtLeastOneAccount && isPublic){
+		createSingleAccount(new Object(),createRandomString(50), containerElement, true);	
+	}
+
 	//add a link to add another account. We only want to do this once. XXX this relies on the public bit being rendered second
 	if(isPublic){
 		createAccountsAddElement(containerElement);
