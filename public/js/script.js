@@ -61,6 +61,8 @@ function turnOffLoading(){
 
 	if(awaitingSpinner == 0){
 		document.getElementById('ajaxLoader').style.display = 'none';
+		document.body.style.cursor = 'default';
+		document.getElementById('leftCol').style.cursor = 'pointer';
 	}
 
 }
@@ -68,6 +70,8 @@ function turnOnLoading(){
 	
 	awaitingSpinner++;
 	document.getElementById('ajaxLoader').style.display = 'inline';	
+	document.getElementById('leftCol').style.cursor = 'wait';
+	document.body.style.cursor = 'wait';
 }
 
 /*loads all the foaf data from the given file (or the session if there is no uri) into the editor.*/
@@ -4697,9 +4701,20 @@ function makeCursorAPointer(element){
 		return;
 	}
 	
-	element.onmouseover = function(){this.style.cursor="pointer";};
-	element.onmouseout = function(){this.style.cursor="default";};
-	
+	element.onmouseover = function(){
+		if(document.body.style.cursor!='wait'){
+			this.style.cursor="pointer";
+		}};
+	element.onmouseout = function(){
+		if(document.body.style.cursor!='wait'){
+			this.style.cursor="default";
+		}};
+	element.onmousemove=function(){
+		if(document.body.style.cursor=='wait'){
+			this.style.cursor='wait'
+		} else {
+			this.style.cursor='pointer';
+		}};
 	return element;
 }
 
