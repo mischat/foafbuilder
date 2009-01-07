@@ -106,8 +106,10 @@ class FoafData {
     }
 
     public function addLJRDFtoModel($uri) {
+
 	$tempmodel = new NamedGraphMem($uri);
 	$loadValue = $tempmodel->load($uri);
+
 	if ($loadValue==1) {
 		return 1;		
 	}
@@ -120,6 +122,7 @@ class FoafData {
             error_log("[foaf_editor] No foaf:knows, no idea who this document is about!");
             return null;
         }
+
         foreach ($results as $row) {
                 $oldPrimaryTopic = $row['?prim']->uri;
 	    	/*replace the old primary topics with the new one*/
@@ -131,34 +134,24 @@ class FoafData {
 
 	}
 
-	$fragment = "#me";
-	//If the current one is #me
-	if (preg_match('/#me$/',$this->getPrimaryTopic())) {
-		if (preg_match('/#(.*?)$/',$oldPrimaryTopic,$fragmatch)) {
-			if ($fragmatch[1] != "me") {
-				$fragment = "#".$fragmatch[1];
-			}
-		}
-	}
+	$olderrorhandler = set_error_handler("myErrorHandler");
+        $tempmodel = new NamedGraphMem($uri);
+        FoafData::replacePrimaryTopicInModel($tempmodel,$uri,$this->getPrimaryTopic());
 
+        try {
+                $result = $tempmodel->find(NULL, NULL, NULL);
+                foreach($result->triples as $triple){
+                        //TODO MISCHA 
+                        $this->model->addWithoutDuplicates($triple);
+                }
+        //      var_dump($this->model);
+                $this->replacePrimaryTopic($newPrimaryTopic);
 
-	//TODO must make sure that we handle having a non "#me" foaf:Person URI
-	$newPrimaryTopic = $this->getUri().$fragment;
-	$newPrimaryTopicRes = new Resource($newPrimaryTopic);
+        } catch (exception $e) {
+                exit;
+        }
 
-	$tempmodel->replace(new Resource($uri),NULL,NULL,new Resource($this->getUri()));
-	$tempmodel->replace(NULL,NULL,new Resource($uri),new Resource($this->getUri()));
-	$tempmodel->replace(NULL,NULL,$oldPrimaryTopicRes,$newPrimaryTopicRes);
-	$tempmodel->replace($oldPrimaryTopicRes,NULL,NULL,$newPrimaryTopicRes);
-	
-	$result = $tempmodel->find(NULL, NULL, NULL);
-
-	foreach($result->triples as $triple){
-		$this->model->addWithoutDuplicates($triple);
-
-	}
-
-	$this->replacePrimaryTopic($newPrimaryTopic);
+        set_error_handler($olderrorhandler);
 
 	return 0;
     }
@@ -167,53 +160,18 @@ class FoafData {
 
 	$olderrorhandler = set_error_handler("myErrorHandler");
 	$tempmodel = new NamedGraphMem($uri);
+	FoafData::replacePrimaryTopicInModel($tempmodel,$uri,$this->getPrimaryTopic());
 
 	try {
-		$loadValue = $tempmodel->load($uri);
-		if ($loadValue==1) {
-			return 1;		
-		}
-
-		$primaryTopic = $tempmodel->find(new Resource($uri),new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),NULL);
-		
-		$fragment = "#me";
-		$string = $uri.$fragment;
-
-		//Get the primaryTopic if none
-		foreach ($primaryTopic->triples as $triple) {
-			$string = $triple->obj->uri;
-		}
-
-		//If the current one is #me
-		if (preg_match('/#me$/',$this->getPrimaryTopic())) {
-			if (preg_match('/#(.*?)$/',$string,$fragmatch)) {
-				if ($fragmatch[1] != "me") {
-					$fragment = "#".$fragmatch[1];
-				}
-			}
-		}
-		//TODO must make sure that we handle having a non "#me" foaf:Person URI
-		$newPrimaryTopic = $this->uri.$fragment;
-
-		$tempmodel->replace(new Resource($uri),NULL,NULL,new Resource($this->getUri()));
-		$tempmodel->replace(NULL,NULL,new Resource($uri),new Resource($this->getUri()));
-		$tempmodel->replace(NULL,NULL,new Resource($newPrimaryTopic),new Resource($this->getPrimaryTopic()));
-		$tempmodel->replace(new Resource($newPrimaryTopic),NULL,NULL,new Resource($this->getPrimaryTopic()));
-
 		$result = $tempmodel->find(NULL, NULL, NULL);
-
 		foreach($result->triples as $triple){
-			/*TODO MISCHA 
-			if ($triple->pred->uri == "http://xmlns.com/foaf/0.1/nick") {
-				$triple->obj->lang = NULL;
-			}
-			*/
+			//TODO MISCHA 
 			$this->model->addWithoutDuplicates($triple);
 		}
+	//	var_dump($this->model);
 		$this->replacePrimaryTopic($newPrimaryTopic);
 
 	} catch (exception $e) {
-		echo "false";
 		exit;
 	}
 
@@ -264,11 +222,11 @@ class FoafData {
     }
 
 
-    //replace the existing primary topic with either newPrimaryTopic or a hash of the uri
-    public function replacePrimaryTopic($uri){
+    public static function replacePrimaryTopicInModel($model,$uri,$prim,$foafData = false){
+	
 	/*get primary topics*/
 	$query = "SELECT ?prim WHERE {?anything <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
-	$results = $this->model->sparqlQuery($query);
+	$results = $model->sparqlQuery($query);
 		
 	if (!$results || empty($results)) {
 		//TODO MISCHA should do some error reporting here
@@ -282,17 +240,17 @@ class FoafData {
         	}
             	$oldPrimaryTopic = $row['?prim']->uri;
 		$fragment = "#me";
-		if (preg_match('/#me$/',$this->getPrimaryTopic())) {
+		if (preg_match('/#me$/',$prim)) {
 			if (preg_match('/#(.*?)$/',$oldPrimaryTopic,$fragmatches)) {
 				$fragment = "#".$fragmatches[1];
 			}
 		} else {
-			if (preg_match('/#(.*?)$/',$this->getPrimaryTopic(),$fragmatches)) {
+			if (preg_match('/#(.*?)$/',$prim,$fragmatches)) {
 				$fragment = "#".$fragmatches[1];
 			}
 		}
         	//TODO must make sure that we handle having a non "#me" foaf:Person URI
-	    	$newPrimaryTopic = $this->uri.$fragment;
+	    	$newPrimaryTopic = $uri.$fragment;
 	       
 	    	/*replace the old primary topics with the new one*/
 		if (substr($oldPrimaryTopic, 0, 5) == 'bNode') {
@@ -300,20 +258,23 @@ class FoafData {
 		} else {
 			$oldPrimaryTopicRes = new Resource($oldPrimaryTopic);
 		}
+
 	        $newPrimaryTopicRes = new Resource($newPrimaryTopic);
-		$foafDataRes = new Resource($this->uri."#me");
+		$foafDataRes = new Resource($uri."#me");
 		
-	        $this->model->replace($oldPrimaryTopicRes,NULL,NULL,$newPrimaryTopicRes);
-	        $this->model->replace(NULL,NULL,$oldPrimaryTopicRes,$newPrimaryTopicRes);
-	        $this->model->replace(NULL,NULL,$foafDataRes,$newPrimaryTopicRes);
-	        $this->model->replace(NULL,NULL,$foafDataRes,$newPrimaryTopicRes);
+	        $model->replace($oldPrimaryTopicRes,NULL,NULL,$newPrimaryTopicRes);
+	        $model->replace(NULL,NULL,$oldPrimaryTopicRes,$newPrimaryTopicRes);
+	        $model->replace(NULL,NULL,$foafDataRes,$newPrimaryTopicRes);
+	        $model->replace(NULL,NULL,$foafDataRes,$newPrimaryTopicRes);
 
 	        /*just to make sure we have the right primary topic down*/
-	        $this->setPrimaryTopic($newPrimaryTopic);
-	        
+		if($foafData){
+	        	$foafData->setPrimaryTopic($newPrimaryTopic);
+	        }
+
 	        //XXX speak to mischa about this one
 	        if ($oldPrimaryTopic != $newPrimaryTopic && $oldPrimaryTopic != PUBLIC_URL.'example.com/myopenid/foaf.rdf#me' && $oldPrimaryTopic != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf#me') {
-	        	$this->model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
+	        	$model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
 	        }
         } 
         
@@ -322,16 +283,24 @@ class FoafData {
 	//find the triples containing document uris
 	$predicate = new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type');
 	$object = new Resource('http://xmlns.com/foaf/0.1/PersonalProfileDocument');  
-	$foundDocTriples = $this->model->find(NULL,$predicate,$object); 
-	$replacementUriRes = new Resource($this->getUri());
+	$foundDocTriples = $model->find(NULL,$predicate,$object); 
+	$replacementUriRes = new Resource($uri);
 	    
 	//and replace them
 	if($foundDocTriples && property_exists($foundDocTriples,'triples') && !empty($foundDocTriples->triples)){
 	    	foreach($foundDocTriples->triples as $triple){
-	    		$this->model->replace($triple->subj,NULL,NULL,$replacementUriRes);
-	    		$this->model->replace(NULL,NULL,$triple->subj,$replacementUriRes);
+	    		$model->replace($triple->subj,NULL,NULL,$replacementUriRes);
+	    		$model->replace(NULL,NULL,$triple->subj,$replacementUriRes);
 	       	}
 	 }
+
+    }
+
+    //replace the existing primary topic with either newPrimaryTopic or a hash of the uri
+    //TODO: get rid of $uri in here
+    public function replacePrimaryTopic($uri){
+	
+	FoafData::replacePrimaryTopicInModel($this->model, $this->uri,$this->getPrimaryTopic(),$this);
     }
 
     //This should be called to update the model after login
