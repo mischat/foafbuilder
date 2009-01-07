@@ -76,7 +76,6 @@ class FoafData {
     	
     	/*
     	 * LUKE if the uri does not exist then create an empty skeleton
-    	 * TODO: change this uri to fit the oauth server
     	 */
     	if($uri=='' || !$uri){
     		//create a skeleton empty document
@@ -105,62 +104,18 @@ class FoafData {
 	$this->putInSession();
     }
 
-    public function addLJRDFtoModel($uri) {
+    public function addLJRDFtoModel($uri){
 
-	$tempmodel = new NamedGraphMem($uri);
-	$loadValue = $tempmodel->load($uri);
-
-	if ($loadValue==1) {
-		return 1;		
-	}
-
-     	/*get primary topics*/
-        $query = "SELECT DISTINCT ?prim WHERE {?prim <http://xmlns.com/foaf/0.1/knows> ?other}";
-        $results = $tempmodel->sparqlQuery($query);
-        
-        if (!$results || empty($results)) {
-            error_log("[foaf_editor] No foaf:knows, no idea who this document is about!");
-            return null;
-        }
-
-        foreach ($results as $row) {
-                $oldPrimaryTopic = $row['?prim']->uri;
-	    	/*replace the old primary topics with the new one*/
-		if (substr($oldPrimaryTopic, 0, 5) == 'bNode') {
-			$oldPrimaryTopicRes = new BlankNode($oldPrimaryTopic);
-		} else {
-			$oldPrimaryTopicRes = new Resource($oldPrimaryTopic);
-		}
-
-	}
-
-	$olderrorhandler = set_error_handler("myErrorHandler");
-        $tempmodel = new NamedGraphMem($uri);
-        FoafData::replacePrimaryTopicInModel($tempmodel,$uri,$this->getPrimaryTopic());
-
-        try {
-                $result = $tempmodel->find(NULL, NULL, NULL);
-                foreach($result->triples as $triple){
-                        //TODO MISCHA 
-                        $this->model->addWithoutDuplicates($triple);
-                }
-        //      var_dump($this->model);
-                $this->replacePrimaryTopic($newPrimaryTopic);
-
-        } catch (exception $e) {
-                exit;
-        }
-
-        set_error_handler($olderrorhandler);
+	$this->addRDFtoModel($uri,true);
 
 	return 0;
     }
 
-   public function addRDFtoModel($uri) {
+   public function addRDFtoModel($uri,$isLJ = false) {
 
 	$olderrorhandler = set_error_handler("myErrorHandler");
 	$tempmodel = new NamedGraphMem($uri);
-	FoafData::replacePrimaryTopicInModel($tempmodel,$uri,$this->getPrimaryTopic());
+	FoafData::replacePrimaryTopicInModel($tempmodel,$uri,$this->getPrimaryTopic(),false,$isLJ);
 
 	try {
 		$result = $tempmodel->find(NULL, NULL, NULL);
@@ -222,10 +177,16 @@ class FoafData {
     }
 
 
-    public static function replacePrimaryTopicInModel($model,$uri,$prim,$foafData = false){
+    public static function replacePrimaryTopicInModel($model,$uri,$prim,$foafData = false,$isLJ){
 	
 	/*get primary topics*/
-	$query = "SELECT ?prim WHERE {?anything <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
+	//get the primary topic in a diferent way for livejournal
+	if($isLJ){
+		$query = "SELECT ?prim WHERE {?anything <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
+	} else {
+		$query = "SELECT DISTINCT ?prim WHERE {?prim <http://xmlns.com/foaf/0.1/knows> ?other}";
+	}
+
 	$results = $model->sparqlQuery($query);
 		
 	if (!$results || empty($results)) {
