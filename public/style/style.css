@@ -264,6 +264,7 @@ width:100%;
 
 /*-------left col-------*/
 #leftCol{
+	cursor:pointer;
 	width:221px;
 	height:1000px;
 	float: left;
