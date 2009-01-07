@@ -104,22 +104,26 @@ class FoafData {
 	$this->putInSession();
     }
 
-    public function addLJRDFtoModel($uri){
+    public function addLJRDFtoModel($uri,$replacementUri){
 
-	$this->addRDFtoModel($uri,true);
+	$this->addRDFtoModel($uri,$replacementUri,true);
 
 	return 0;
     }
 
-   public function addRDFtoModel($uri,$isLJ = false) {
+   public function addRDFtoModel($uri,$replacementUri,$isLJ = false) {
 
 	$olderrorhandler = set_error_handler("myErrorHandler");
 	$tempmodel = new NamedGraphMem($uri);
-	FoafData::replacePrimaryTopicInModel($tempmodel,$uri,$this->getPrimaryTopic(),false,$isLJ);
+	$tempmodel->load($uri);
+	FoafData::replacePrimaryTopicInModel($tempmodel,$replacementUri,$uri,$this->getPrimaryTopic(),false,$isLJ);
+	echo('NOW:'.$replacementUri);
+	var_dump($tempmodel);
+//	echo($this->getPrimaryTopic());
 
 	try {
-		$result = $tempmodel->find(NULL, NULL, NULL);
-		foreach($result->triples as $triple){
+		//var_dump($tempmodel->triples);
+		foreach($tempmodel->triples as $triple){
 			//TODO MISCHA 
 			$this->model->addWithoutDuplicates($triple);
 		}
@@ -177,7 +181,7 @@ class FoafData {
     }
 
 
-    public static function replacePrimaryTopicInModel($model,$uri,$prim,$foafData = false,$isLJ){
+    public static function replacePrimaryTopicInModel(&$model,$replacementUri,$uri,$prim,$foafData = false,$isLJ){
 	
 	/*get primary topics*/
 	//get the primary topic in a diferent way for livejournal
@@ -190,11 +194,12 @@ class FoafData {
 	$results = $model->sparqlQuery($query);
 		
 	if (!$results || empty($results)) {
-		//TODO MISCHA should do some error reporting here
+		error_log('[FoafData] no primary topic found');
 		return null;
 	}
         //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
         foreach ($results as $row) {
+		
         	if(!isset($row['?prim'])){
         		error_log('[foaf_editor] primary topic not set');
         		continue;
@@ -211,8 +216,8 @@ class FoafData {
 			}
 		}
         	//TODO must make sure that we handle having a non "#me" foaf:Person URI
-	    	$newPrimaryTopic = $uri.$fragment;
-	       
+	    	$newPrimaryTopic = $replacementUri.$fragment;
+
 	    	/*replace the old primary topics with the new one*/
 		if (substr($oldPrimaryTopic, 0, 5) == 'bNode') {
 			$oldPrimaryTopicRes = new BlankNode($oldPrimaryTopic);
@@ -236,7 +241,7 @@ class FoafData {
 	        //XXX speak to mischa about this one
 	        if ($oldPrimaryTopic != $newPrimaryTopic && $oldPrimaryTopic != PUBLIC_URL.'example.com/myopenid/foaf.rdf#me' && $oldPrimaryTopic != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf#me') {
 	        	$model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
-	        }
+	        } 
         } 
         
         /*make sure that the document has only one uri*/
@@ -261,7 +266,7 @@ class FoafData {
     //TODO: get rid of $uri in here
     public function replacePrimaryTopic($uri){
 	
-	FoafData::replacePrimaryTopicInModel($this->model, $this->uri,$this->getPrimaryTopic(),$this);
+	FoafData::replacePrimaryTopicInModel($this->model, $this->uri, $this->uri,$this->getPrimaryTopic(),$this);
     }
 
     //This should be called to update the model after login

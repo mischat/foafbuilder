@@ -68,7 +68,7 @@ class AjaxController extends Zend_Controller_Action {
 			//just to ensure that the bnodes are unique
 			$this->foafData->mangleBnodes();
 			//$uriLoadOk = $this->foafData->getModel()->load($uri);
-			$uriLoadOk = $this->foafData->addRDFtoModel($uri);
+			$uriLoadOk = $this->foafData->addRDFtoModel($uri,$this->foafData->getUri());
 
 		//	$this->foafData->replacePrimaryTopic($uri);
 			$this->foafData->replaceGeneratorAgent();
@@ -86,7 +86,7 @@ class AjaxController extends Zend_Controller_Action {
 		//echo($ljUri);
 		$this->foafData->mangleBnodes();
 		//$lj = $this->foafData->getModel()->load($ljUri);
-		$lj = $this->foafData->addLJRDFtoModel($ljUri);
+		$lj = $this->foafData->addLJRDFtoModel($ljUri,$this->foafData->getUri());
 		// LJ are lame and don't set foaf:primaryTopic
   		//$this->foafData->replacePrimaryTopic($ljUri);
 		if($lj != 1){
@@ -107,7 +107,7 @@ class AjaxController extends Zend_Controller_Action {
         		$flickrUri = 'http://foaf.qdos.com/flickr/people/'.$flickr;
 			$this->foafData->mangleBnodes();
         		//echo($flickrUri);
-        		$flickr = $this->foafData->getModel()->load($flickrUri);
+        		$flickr = $this->foafData->addRDFtoModel($flickrUri,$this->foafData->getUri());
         		$this->foafData->replacePrimaryTopic($flickrUri);
 			
         		if($flickr != 1){
@@ -132,7 +132,7 @@ class AjaxController extends Zend_Controller_Action {
             	
         	$lastfmUri = 'http://foaf.qdos.com/lastfm/people/'.$lastfm; 
         	//$lastfm = $this->foafData->getModel()->load($lastfmUri);
-        	$lastfm = $this->foafData->addRDFtoModel($lastfmUri);
+        	$lastfm = $this->foafData->addRDFtoModel($lastfmUri,$this->foafData->getUri());
 	        $this->foafData->replacePrimaryTopic($lastfmUri);
 		
  		if($lastfm != 1){
