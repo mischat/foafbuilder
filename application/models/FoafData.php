@@ -117,17 +117,13 @@ class FoafData {
 	$tempmodel = new NamedGraphMem($uri);
 	$tempmodel->load($uri);
 	FoafData::replacePrimaryTopicInModel($tempmodel,$replacementUri,$uri,$this->getPrimaryTopic(),false,$isLJ);
-	echo('NOW:'.$replacementUri);
-	var_dump($tempmodel);
-//	echo($this->getPrimaryTopic());
 
 	try {
-		//var_dump($tempmodel->triples);
 		foreach($tempmodel->triples as $triple){
-			//TODO MISCHA 
+			//TODO MISCHA §
+
 			$this->model->addWithoutDuplicates($triple);
 		}
-	//	var_dump($this->model);
 		$this->replacePrimaryTopic($newPrimaryTopic);
 
 	} catch (exception $e) {
@@ -184,8 +180,8 @@ class FoafData {
     public static function replacePrimaryTopicInModel(&$model,$replacementUri,$uri,$prim,$foafData = false,$isLJ){
 	
 	/*get primary topics*/
-	//get the primary topic in a diferent way for livejournal
-	if($isLJ){
+	//get the primary topic in a different way for livejournal
+	if(!$isLJ){
 		$query = "SELECT ?prim WHERE {?anything <http://xmlns.com/foaf/0.1/primaryTopic> ?prim}";
 	} else {
 		$query = "SELECT DISTINCT ?prim WHERE {?prim <http://xmlns.com/foaf/0.1/knows> ?other}";
@@ -194,14 +190,14 @@ class FoafData {
 	$results = $model->sparqlQuery($query);
 		
 	if (!$results || empty($results)) {
-		error_log('[FoafData] no primary topic found');
+		error_log('[FoafData] no primary topic found livejournal = '.$isLJ);
 		return null;
 	}
         //TODO MISCHA ... Need to have some return here to say that the Sub of  PrimaryTopic is just not good enough !
         foreach ($results as $row) {
 		
         	if(!isset($row['?prim'])){
-        		error_log('[foaf_editor] primary topic not set');
+        		error_log('[foaf_editor] primary topic not set is livejournal ='.$isLJ);
         		continue;
         	}
             	$oldPrimaryTopic = $row['?prim']->uri;
@@ -217,7 +213,7 @@ class FoafData {
 		}
         	//TODO must make sure that we handle having a non "#me" foaf:Person URI
 	    	$newPrimaryTopic = $replacementUri.$fragment;
-
+		
 	    	/*replace the old primary topics with the new one*/
 		if (substr($oldPrimaryTopic, 0, 5) == 'bNode') {
 			$oldPrimaryTopicRes = new BlankNode($oldPrimaryTopic);

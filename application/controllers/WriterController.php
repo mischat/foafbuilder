@@ -43,6 +43,7 @@ class WriterController extends Zend_Controller_Action
   public function removeLanguageTags($results) {
 
 	foreach ($results->triples as $result) {
+	
 		if ($result->pred->uri == "http://xmlns.com/foaf/0.1/jabberID") {
 			$result->obj->lang = NULL;
 		} else if ($result->pred->uri == "http://xmlns.com/foaf/0.1/aimChatID") {
@@ -65,7 +66,7 @@ class WriterController extends Zend_Controller_Action
 			$result->obj->lang = NULL;
 		} else if ($result->pred->uri == "http://www.megginson.com/exp/ns/airports#iata") {
 			$result->obj->lang = NULL;
-		}	
+		}
 	}
 	return $results;
   }
