@@ -77,9 +77,34 @@
 	
 		<div id="webdav">
 			<h2>Write to WebDAV</h2>
-			      <p>
-				Coming soon... 
-			      </p>
+			<p>If you would like to write to a WebDAV resource, please complete the forms below</p>
+			<table cellspacing="10">
+			<tr>
+				<td>
+					<form id="webdavFormpublic" action="javascript:writePublicWebDav()">
+FOAF URI: <input type="text" name="uri" id="webdavpublicuri" maxlength="800" value="http://"/><br/>
+Username: <input type="text" name="username" id="webdavpublicusername" maxlength="800" value=""/><br/>
+Password:  <input type="password" name="password" id="webdavpublicpassword" maxlength="800" value=""/><br/><br/>
+<input class="webdavpubButton" type="submit" value="Public"/>
+					</form>
+				</td>
+				<td id='webdavpublicsaveInfo'>
+        			</td>
+			</tr>
+			<tr>
+				<td>
+					<form id="webdavFormprivate" action="javascript:writePrivateWebDav()">
+FOAF URI: <input type="text" name="uri" id="webdavprivateuri" maxlength="800" value="http://"/><br/>
+Username: <input type="text" name="username" id="webdavprivateusername" maxlength="800" value=""/><br/>
+Password: <input type="password" name="password" id="webdavprivatepassword" maxlength="800" value=""/><br/><br/>
+<input class="webdavpriButton" type="submit" value="Private"/>
+					</form>
+				</td>
+				<td id='webdavprivatesaveInfo'>
+        			</td>
+			</tr>
+			</table>
+
 		</div>
 
 		<div id="oauth">

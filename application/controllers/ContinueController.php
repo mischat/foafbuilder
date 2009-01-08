@@ -38,10 +38,19 @@ class ContinueController extends Zend_Controller_Action
 				$defaultNamespace->url = $myopenidurl;
 
 				$publicFoafData = FoafData::getFromSession(true);
-				$publicFoafData->updateURI(PUBLIC_URL.$myopenidurl.'/foaf.rdf');
 
-				$privateFoafData = FoafData::getFromSession(false);
-				$privateFoafData->updateURI(PRIVATE_URL.$myopenidurl.'/data/foaf.rdf');
+                                if (!$publicFoafData) {
+                                        //$this->foafData = new FoafData(false,true);
+                                        $publicFoafData = new FoafData(false,true);
+                                }
+                                $publicFoafData->updateURI(PUBLIC_URL.$myopenidurl.'/foaf.rdf');
+
+                                $privateFoafData = FoafData::getFromSession(false);
+                                if (!$privateFoafData) {
+                                        //$this->privateFoafData = new FoafData(false,false);
+                                        $privateFoafData = new FoafData(false,false);
+                                }
+                                $privateFoafData->updateURI(PRIVATE_URL.$myopenidurl.'/data/foaf.rdf');
 
 				$store = OAuthStore::instance();
 

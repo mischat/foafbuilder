@@ -13,6 +13,7 @@ if (isset($bootstrap) && $bootstrap) {
    $rootPath . '/application/models' . PATH_SEPARATOR . 
    $rootPath . '/library' . PATH_SEPARATOR . 
    $rootPath . '/library/oauth' . PATH_SEPARATOR . 
+   $rootPath . '/library/PEAR' . PATH_SEPARATOR . 
    $rootPath . '/public' . PATH_SEPARATOR . 
    $rootPath . '/rdfapi-php/api/' . PATH_SEPARATOR . 
    $rootPath . '/rdfapi-php/sparql/');

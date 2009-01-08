@@ -3726,9 +3726,9 @@ function phoneDisplayToObjects(){
 											showSaveUpdate();
 										}});
 	}
-	
+
 	function writePrivate(){
-		log('doing write public');
+		log('doing write private');
 		$.post("/writer/write-foaf-private", {key : get_cookie_id()}, function(data){
 										if(data=='null'){
 											window.location='/continue';
@@ -3736,6 +3736,40 @@ function phoneDisplayToObjects(){
 											showSaveUpdate();
 										}});
 	}
+
+	function writePublicWebDav(){
+		log('doing write public webdav');
+        	var uri = document.getElementById('webdavpublicuri').value;
+        	var username = document.getElementById('webdavpublicusername').value;
+        	var password = document.getElementById('webdavpublicpassword').value;
+
+		$.post("/writer/write-web-dav", {key : get_cookie_id(), privacy : 'public', uri : uri, username : username, password : password}, function(data){ 
+									if(data){
+										//window.location='/continue';
+										showSaveUpdate('webdavpublicsaveInfo',data);
+									} else {
+										showSaveUpdate('webdavpublicsaveInfo');
+									}
+									});
+	}
+
+	function writePrivateWebDav(){
+		log('doing write private webdav');
+        	var uri = document.getElementById('webdavprivateuri').value;
+        	var username = document.getElementById('webdavprivateusername').value;
+        	var password = document.getElementById('webdavprivatepassword').value;
+
+		$.post("/writer/write-web-dav", {key : get_cookie_id(), privacy: 'private', uri : uri, username : username, password : password}, function(data){
+									if(data){
+										//window.location='/continue';
+										showSaveUpdate('webdavprivatesaveInfo',data);
+									} else {
+										showSaveUpdate('webdavprivatesaveInfo');
+									}
+									});
+	}
+
+
 
 	function writePublicAndPrivate(){
 		log('doing write public and private');
@@ -3749,12 +3783,19 @@ function phoneDisplayToObjects(){
 								});
 	}
 	
-	function showSaveUpdate(){
+	function showSaveUpdate(elementName,errormsg) { 
 
-		var currentTime = new Date()
-		var hours = currentTime.getHours()
-		var minutes = currentTime.getMinutes()
-		var seconds = currentTime.getSeconds()
+		if (!elementName) {
+			elementName = "saveInfo";
+		}
+		if (!errormsg) {
+			errormsg = "Saved at: ";
+		}
+		errormsg = errormsg + " at: ";
+		var currentTime = new Date();
+		var hours = currentTime.getHours();
+		var minutes = currentTime.getMinutes();
+		var seconds = currentTime.getSeconds();
 		var timeString=hours+":";
 		
 		if (minutes < 10){
@@ -3773,8 +3814,10 @@ function phoneDisplayToObjects(){
 			timeString+="AM";
 		}
 		
-		var saveElement = document.getElementById('saveInfo');
-		saveElement.childNodes[0].nodeValue="Saved at: "+timeString;
+		//var saveElement = document.getElementById('saveInfo');
+		var saveElement = document.getElementById(elementName);
+		//saveElement.childNodes[0].nodeValue="Saved at: "+timeString;
+		saveElement.childNodes[0].nodeValue=errormsg+timeString;
 		greenFade(saveElement);
 
 	}

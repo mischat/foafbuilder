@@ -71,6 +71,78 @@ class WriterController extends Zend_Controller_Action
 	return $results;
   }
 
+  public function writeWebDavAction() {
+        if (!check_key('post')) {
+                error_log("POST hijack attempt ");
+                exit();
+        }
+	$uri_ori = $_POST['uri'];
+	if (!preg_match('/^https{0,1}:\/\/.*\/[^\/]*$/',$uri_ori)) {
+		echo "You need to point to a the FOAF Document URI desired e.g. http://example.com/foaf.rdf";
+		return true;
+	}
+	$username = $_POST['username'];
+	if ($username == "") {
+		echo "You need to input a username";
+		return true;
+	}
+	$password = $_POST['password'];
+	if ($username == "") {
+		echo "You need to input a password";
+		return true;
+	}
+
+	$uri = preg_replace('/^http:\/\//','',$uri_ori);
+
+	if (preg_match('/\/$/',$uri)) {
+		/*If it ends in a slash, then we should add foaf.rdf to the end of it!*/
+		$uri .= "foaf.rdf";
+	}
+
+	$remote_path = "webdav://$username:$password@$uri";
+	require_once( 'HTTP/WebDAV/Client.php' );
+	$mode = 'w';
+	$options = array();
+	$opend_path = array();
+	$webdav_client = new HTTP_WebDAV_Client_Stream();
+	$status = $webdav_client->stream_open( $remote_path, $mode, $options, $opend_path );
+	if ( $status === false ) {
+		error_log( 'Webdav stream_open failed for private foaf' );
+		echo ( 'Webdav stream_open failed for private foaf' );
+		return true;
+	}
+
+        require_once 'FoafData.php';
+
+	if ($_POST['privacy'] == "private") {
+		$publicFoafData = FoafData::getFromSession(false);
+	} else {
+		$publicFoafData = FoafData::getFromSession(true);
+	}
+	$this->view->model = $publicFoafData->getModel();
+	$this->view->model->setBaseUri(NULL);
+	$result = $this->view->model->find(NULL, NULL, NULL);
+
+	$result = $this->removeLanguageTags($result);
+
+	$data = $result->writeRdfToString();
+	$hash = $publicFoafData->getURI();
+
+ 	//very dirty !
+	$data = str_replace($hash,"",$data);
+
+	$status = $webdav_client->stream_write( $data );
+	if ( $status === false ) {
+		error_log( 'Webdav stream_write failed for public foaf' );
+		echo( 'Webdav stream_write failed for public foaf' );
+		return true;
+	}
+
+	$webdav_client->stream_close();
+	error_log("WebDAV success writing to webdav");
+	return false;
+  }
+
   /* This function should be used to download a FOAF file to your desktop */
   public function writeFoafn3PrivateAction() {
         require_once 'FoafData.php';
