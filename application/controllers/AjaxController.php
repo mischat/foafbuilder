@@ -16,6 +16,69 @@ class AjaxController extends Zend_Controller_Action {
     private $fieldNamesObject; 
     private $foafData;
     private $privateFoafData;
+	
+	public function loadIfpsAction(){
+		
+		//find and decode the ifps
+		$ifps = $_GET['ifps'];
+		$json = new Services_JSON();
+	        $ifps = $json->decode(stripslashes($ifps));
+		var_dump($ifps);
+
+		//build a query with them
+		$ifps_filter = "FILTER(";
+		foreach($ifps as $ifp){
+			$ifps_filter.=' ?z = '.$ifp.' ||';
+		}
+		$ifps_filter = substr($ifps_filter,0,-2).")";	
+		$query = "
+		PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+		CONSTRUCT {?a ?b ?c}
+		WHERE { 
+		   GRAPH ?graph {
+			?a ?b ?c .
+	   		?x ?y ?z . FILTER(?y=foaf:weblog || ?y=foaf:homepage || ?y=foaf:mbox_sha1sum || ?y=foaf:mbox) . ".$ifps_filter." .
+			{
+				{?graph foaf:primaryTopic ?x} UNION
+				{?x foaf:knows ?someone}
+			}
+		   }
+		} limit 2000";
+		$res = sparql_query_xml(FOAF_EP,$query);
+		echo($query);
+	
+		var_dump($res);
+		if(!$res){
+			error_log('No RDF found here');
+			//TODO: do something here
+		}
+		
+	
+                //shove the data into a temporary file
+                $filename_1 = BUILDER_TEMP_DIR.md5(microtime()*microtime());
+                $filehandle_1 = fopen($filename_1,'w+');
+                fwrite($filehandle_1,$res);
+
+		//if they are logged in then get our stuff
+        	$defaultNamespace = new Zend_Session_Namespace('Garlik');
+        	if($defaultNamespace->authenticated && $defaultNamespace->uri){
+	                //TODO MISCHA, public and private load
+	                error_log('Authenticated ! with an openid!');
+	                //$this->foafData->getModel()->load($uri);
+	                //$this->foafData->replacePrimaryTopic($uri);
+	        }
+	
+
+		//load it into the required foafdata object
+		$this->loadFoaf();
+		ini_set('memory_limit','128M'); 
+		$this->foafData->addLJRDFtoModel($filename_1,$this->foafData->getUri());
+		$this->foafData->replacePrimaryTopic();
+			
+		//remove the file
+		unlink($filename_1);
+	}
 
 	public function loadExtractorAction(){
     	
