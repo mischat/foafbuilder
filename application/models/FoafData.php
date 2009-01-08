@@ -124,7 +124,6 @@ class FoafData {
 
 			$this->model->addWithoutDuplicates($triple);
 		}
-		$this->replacePrimaryTopic($newPrimaryTopic);
 
 	} catch (exception $e) {
 		exit;
