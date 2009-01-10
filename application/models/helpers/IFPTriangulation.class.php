@@ -58,9 +58,7 @@ class IFPTriangulation {
 	}
 
 	static function doIFPTriangulation($ifp_array){	
-
 		$ifp_array =  array_unique  ( $ifp_array);
-	
 		$ifp_query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 					SELECT DISTINCT ?ifp_wanted WHERE {
 					   ?person ?predicate_already_have ?ifp_already_have .
@@ -74,11 +72,6 @@ class IFPTriangulation {
 					         || ?predicate_wanted = foaf:mbox_sha1sum
 					         || ?predicate_wanted = foaf:mbox)";
 		
-		
-$lame = join('^^^^',$ifp_array);	
-
-	error_log("gaddd $lame hjadsgdahdjsg ");
-		
 		$already_have_filter="";
 		$want_filter="";
 		foreach($ifp_array as $ifp){
@@ -88,13 +81,21 @@ $lame = join('^^^^',$ifp_array);
 				&& $ifp
 				&& $ifp != "NULL" 
 				&& substr($ifp,0,2)!="_:"){
-					if ($ifp != "<mailto:>" && $ifp != '"da39a3ee5e6b4b0d3255bfef95601890afd80709"' && $ifp != '"08445a31a78661b5c746feff39a9db6e4e2cc5cf"' && $ifp != '""' & $ifp != '"20cb76cb42b39df43cb616fffdda22dbb5ebba32"' ) {
+
+				/*This is how you unserialize the IFP blacklist*/
+				$ifpblacklist = unserialize(IFP_BLACKLIST);
+				
+				foreach ($ifpblacklist as $badifp) {
+				//error_log("Just checking what the badifo is $badifp");
+				//if ($ifp != "<mailto:>" && $ifp != '"da39a3ee5e6b4b0d3255bfef95601890afd80709"' && $ifp != '"08445a31a78661b5c746feff39a9db6e4e2cc5cf"' && $ifp != '""' & $ifp != '"20cb76cb42b39df43cb616fffdda22dbb5ebba32"' ) {
+					if ($ifp != $badifp) {
 						$want_filter.=" ?ifp_wanted != ".$ifp." &&";
 						$already_have_filter.=" ?ifp_already_have = ".$ifp." ||";			
 					}
+				}
 			}
 		}
-		
+			
 
 		if($already_have_filter != ""){
 			$ifp_query.="FILTER(".substr($already_have_filter,0,-2).")";
@@ -114,14 +115,18 @@ $lame = join('^^^^',$ifp_array);
 		$results = sparql_query(FOAF_EP,$ifp_query);
 		$return_array = array();
 		
+		$ifpblacklist = unserialize(IFP_BLACKLIST);
 		foreach($results as $res){		
 			$ifp = @$res['?ifp_wanted'];
-			if ($ifp != "<mailto:>" && $ifp != '"da39a3ee5e6b4b0d3255bfef95601890afd80709"' && $ifp != '"08445a31a78661b5c746feff39a9db6e4e2cc5cf"' && $ifp != '""' & $ifp != '"20cb76cb42b39df43cb616fffdda22dbb5ebba32"' ) {
-				array_push($return_array,$ifp);
+			foreach ($ifpblacklist as $badifp) {
+				//error_log("Just checking what the badifp is $badifp");
+				if ($ifp != $badifp) {
+					array_push($return_array,$ifp);
+				}
 			}
 		}
-		
-		return $return_array;
+
+		return array_unique($return_array);
 	}
 }
 

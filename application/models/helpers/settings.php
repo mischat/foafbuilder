@@ -13,6 +13,7 @@ define('QDOS_ROOT', 'http://qdos.com/');
 $ifpblacklist = array("<mailto:>",'"da39a3ee5e6b4b0d3255bfef95601890afd80709"','"08445a31a78661b5c746feff39a9db6e4e2cc5cf"','""','"20cb76cb42b39df43cb616fffdda22dbb5ebba32"');
 define ('IFP_BLACKLIST',serialize($ifpblacklist));
 
+define ('FRIENDS_THRESHOLD', 100);
 /*Live Settings*/
 define('BUILDER_URL','http://foafbuilder.qdos.com/');
 define('IMAGE_URL',BUILDER_URL.'images/');
