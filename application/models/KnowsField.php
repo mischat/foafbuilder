@@ -145,8 +145,13 @@ class KnowsField extends Field {
 		/*get all known ifps of this person by making use of the foaf.qdos.com KB*/
         	$ifps = $this->getTriangulatedIfps($foafData);              
         	
-        	$knowsUserIfps = $this->getKnowsUserIfps($ifps,$foafData);
+		error_log("The size of the user's ifps....".sizeof($ifps));
+
         	$userKnowsIfps = $this->getUserKnowsIfps($foafData);   
+		error_log("The size of user knows ifps....".sizeof($userKnowsIfps));
+
+        	$knowsUserIfps = $this->getKnowsUserIfps($ifps,$foafData);
+		error_log("The sixe of knows user ifps....".sizeof($knowsUserIfps));
 
         	/*TODO: check that this works*/
         	$mutualFriendsIfps = $this->getMutualFriendsIfps($userKnowsIfps, $knowsUserIfps);
@@ -398,21 +403,31 @@ class KnowsField extends Field {
     			}
 		}
     	}
-    	
-    	/*loop through the people they know and triangulate their IFPs*/
-        $userKnowsIfps = array();
-        foreach($actualIfpArray as $key => $row){
-        	$thisFriendsIfps = array_merge($row,IFPTriangulation::doIterativeIFPTriangulation($row));
-        	
-        	if(!isset($userKnowsIfps[$key])){
-        		$userKnowsIfps[$key] = array();	
-        	}
-        	
-        	$userKnowsIfps[$key] = array_merge($userKnowsIfps[$key],$thisFriendsIfps);
-           	
+	$userKnowsIfps = array();
+
+	error_log("The size is ".sizeof($actualIfpArray)."\n");
+	if (sizeof($actualIfpArray) > FRIENDS_THRESHOLD) {
+		foreach($actualIfpArray as $key => $row){
+			if (preg_match('/^http:\/\//',$key)) {
+				$userKnowsIfps[$key] = array();
+			} else {		
+				$userKnowsIfps[$key] = $row;
+			}
+		}	
+	} else {	
+		/*loop through the people they know and triangulate their IFPs*/
+		foreach($actualIfpArray as $key => $row){
+			//error_log("A key is in the else clause ...$key");
+			$thisFriendsIfps = array_merge($row,IFPTriangulation::doIterativeIFPTriangulation($row));
+			if(!isset($userKnowsIfps[$key])){
+				$userKnowsIfps[$key] = array();	
+			}
+			$userKnowsIfps[$key] = array_merge($userKnowsIfps[$key],$thisFriendsIfps);
+		}
         }
         
-        
+	//var_dump($userKnowsIfps);
+	//exit(0);
     	return $userKnowsIfps;
     }
     
@@ -511,8 +526,6 @@ class KnowsField extends Field {
 								FILTER(?infriend_predicate = foaf:homepage || ?infriend_predicate = foaf:weblog || ?infriend_predicate = foaf:mbox  || ?infriend_predicate = foaf:mbox_sha1sum) .				
 						    	FILTER(".substr($inquery,0,-3).")				
                 		}";
-
-
 			//error_log('[INFRIEND QUERY]'.$inquery);
                         //TODO: continue where I left off.  I just added the optional and I want
                         //to use the infriend uri to get some of the details in order to make sure libby knows dan as she should
@@ -537,18 +550,25 @@ class KnowsField extends Field {
                     array_push($knows[$value],$row['?infriend_ifp']);
                  }	
                       
-              
-    			/*loop through the people who know them and triangulate their IFPs*/
-                 	
-        		$knowsUserIfps = array();
-        		foreach($knows as $key => $values){
-        			$thisIfpArray = IFPTriangulation::doIterativeIFPTriangulation($values);
-        			$knowsUserIfps[$key] = $thisIfpArray;
-        		}
-        		
-
-        		//echo("KNOWS USER IFPS:");
-        		//var_dump($knowsUserIfps);
+		/*loop through the people who know them and triangulate their IFPs*/
+		$knowsUserIfps = array();
+		if (sizeof($knows) > FRIENDS_THRESHOLD) {
+			foreach($knows as $key => $row){
+				//error_log("The value of $key is".$key);
+				if (preg_match('/^http:\/\//',$key)) {
+					$knowsUserIfps[$key] = array();
+				} else {		
+					$knowsUserIfps[$key] = $row;
+				}
+			}
+		} else {
+			foreach($knows as $key => $values){
+				$thisIfpArray = IFPTriangulation::doIterativeIFPTriangulation($values);
+				$knowsUserIfps[$key] = $thisIfpArray;
+			}
+		}	
+        	//echo("KNOWS USER IFPS:");
+        	//var_dump($knowsUserIfps);
                 return $knowsUserIfps;
     }
     
