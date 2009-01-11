@@ -30,7 +30,6 @@ class AjaxController extends Zend_Controller_Action {
 		if(empty($ifps)){
 			return;
 		}
-		//var_dump($ifps);
 
 		//build a query with them
 		$ifps_filter = "FILTER(";
@@ -43,15 +42,27 @@ class AjaxController extends Zend_Controller_Action {
 		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 		SELECT DISTINCT ?graph
 		WHERE { 
-		   GRAPH ?graph {
+		    GRAPH ?graph {
 	   			?x ?y ?z . FILTER(?y=foaf:weblog || ?y=foaf:homepage || ?y=foaf:mbox_sha1sum || ?y=foaf:mbox) . ".$ifps_filter." .
-			{	{?graph foaf:primaryTopic ?x} UNION
-				{?x foaf:knows ?someone}}
-		   }
+				?x foaf:knows ?someone .
+		    }
 		} limit 500";
-		error_log("graphQuery:".$graphQuery);
+		
+		$graphQuery2=
+		"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                SELECT DISTINCT ?graph
+                WHERE { 
+                    GRAPH ?graph {
+                                ?x ?y ?z . FILTER(?y=foaf:weblog || ?y=foaf:homepage || ?y=foaf:mbox_sha1sum || ?y=foaf:mbox) . ".$ifps_filter." .
+                                ?graph foaf:primaryTopic ?x .
+                    }
+                } limit 500";
+
 		$res = sparql_query(FOAF_EP,$graphQuery);
-		//var_dump($res);
+		$res2 = sparql_query(FOAF_EP,$graphQuery2);
+		var_dump($res);
+		var_dump($res2);
 		if(empty($res)){
 			return;
 		}
@@ -64,6 +75,13 @@ class AjaxController extends Zend_Controller_Action {
 			}
 			$triplesQuery .= " { GRAPH ".$row['?graph']." {?a ?b ?c}} UNION";
 		}
+		foreach($res2 as $row){
+                        if(!isset($row['?graph']) || strpos($row['?graph'],'http://foaf.qdos.com/delicious')){
+                                continue;
+                        }
+                        $triplesQuery .= " { GRAPH ".$row['?graph']." {?a ?b ?c}} UNION";
+                }
+
 		$triplesQuery = substr($triplesQuery,0,-5)."}";
 		error_log("triplesQuery:".$triplesQuery);
 		/*doing it all in one query does not work for JXT, so do two
