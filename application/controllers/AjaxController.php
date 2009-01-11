@@ -19,11 +19,18 @@ class AjaxController extends Zend_Controller_Action {
 	
 	public function loadIfpsAction(){
 		
+		set_time_limit(150);
 		//find and decode the ifps
-		$ifps = $_GET['ifps'];
+		$ifps = @$_GET['ifps'];
+		
+		$ifps = substr($ifps,1);
 		$json = new Services_JSON();
 	        $ifps = $json->decode(stripslashes($ifps));
-		var_dump($ifps);
+
+		if(empty($ifps)){
+			return;
+		}
+		//var_dump($ifps);
 
 		//build a query with them
 		$ifps_filter = "FILTER(";
@@ -31,6 +38,35 @@ class AjaxController extends Zend_Controller_Action {
 			$ifps_filter.=' ?z = '.$ifp.' ||';
 		}
 		$ifps_filter = substr($ifps_filter,0,-2).")";	
+		$graphQuery=
+		"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+		SELECT DISTINCT ?graph
+		WHERE { 
+		   GRAPH ?graph {
+	   			?x ?y ?z . FILTER(?y=foaf:weblog || ?y=foaf:homepage || ?y=foaf:mbox_sha1sum || ?y=foaf:mbox) . ".$ifps_filter." .
+			{	{?graph foaf:primaryTopic ?x} UNION
+				{?x foaf:knows ?someone}}
+		   }
+		} limit 500";
+		error_log("graphQuery:".$graphQuery);
+		$res = sparql_query(FOAF_EP,$graphQuery);
+		//var_dump($res);
+		if(empty($res)){
+			return;
+		}
+		error_log("b");
+		$triplesQuery = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                                 construct{?a ?b ?c} WHERE { ";
+		foreach($res as $row){
+			if(!isset($row['?graph']) || strpos($row['?graph'],'http://foaf.qdos.com/delicious')){
+				continue;
+			}
+			$triplesQuery .= " { GRAPH ".$row['?graph']." {?a ?b ?c}} UNION";
+		}
+		$triplesQuery = substr($triplesQuery,0,-5)."}";
+		error_log("triplesQuery:".$triplesQuery);
+		/*doing it all in one query does not work for JXT, so do two
 		$query = "
 		PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -44,17 +80,16 @@ class AjaxController extends Zend_Controller_Action {
 				{?x foaf:knows ?someone}
 			}
 		   }
-		} limit 2000";
-		$res = sparql_query_xml(FOAF_EP,$query);
-		echo($query);
-	
-		var_dump($res);
+		n limit 500000";*/
+		$res = sparql_query_xml(FOAF_EP,$triplesQuery);
+		//echo($query);
+		//var_dump($res);
 		if(!$res){
 			error_log('No RDF found here');
 			//TODO: do something here
 		}
 		
-	
+		error_log(0);
                 //shove the data into a temporary file
                 $filename_1 = BUILDER_TEMP_DIR.md5(microtime()*microtime());
                 $filehandle_1 = fopen($filename_1,'w+');
@@ -69,12 +104,16 @@ class AjaxController extends Zend_Controller_Action {
 	                //$this->foafData->replacePrimaryTopic($uri);
 	        }
 	
-
+		//echo($res);
+		//return;
 		//load it into the required foafdata object
-		$this->loadFoaf();
+		$this->loadFoaf(true);
 		ini_set('memory_limit','128M'); 
+		error_log(1);
 		$this->foafData->addLJRDFtoModel($filename_1,$this->foafData->getUri());
+		error_log(2);
 		$this->foafData->replacePrimaryTopic();
+		error_log(3);
 			
 		//remove the file
 		unlink($filename_1);
@@ -308,12 +347,11 @@ class AjaxController extends Zend_Controller_Action {
     	/*build up a sparql query to get the values of all the fields we need*/
 
         $this->loadFoaf();
-        
+        //echo($this->foafData->getPrimaryTopic());
         $this->fieldNamesObject = new FieldNames($fieldName,$this->foafData,$this->privateFoafData);  	
         $this->view->results = array();
         $this->view->results['private'] = array();
         $this->view->results['public'] = array();
-        
         foreach($this->fieldNamesObject->getAllFieldNames() as $field){
            	//one day we might need to cope with multiple fields of the same type
         	if($field->getData()){
@@ -331,17 +369,20 @@ class AjaxController extends Zend_Controller_Action {
     
     /*gets the foaf (either from the uri or from the session) as well as adding stuff to the view*/
 
-    private function loadFoaf() {
+    private function loadFoaf($makeAnew=false) {
 
     	require_once 'FoafData.php';
         require_once 'FieldNames.php';
         require_once 'Field.php';  
         
         /* This returns a null if nothing in session! */
-        $this->foafData = FoafData::getFromSession(true);
-	$this->privateFoafData = FoafData::getFromSession(false);
+	if(!$makeAnew){
+        	$this->foafData = FoafData::getFromSession(true);
+		$this->privateFoafData = FoafData::getFromSession(false);
+	} 
 		
-		/* Instantiate objects */
+	
+	/* Instantiate objects */
         if (!$this->foafData){
         	//echo('new object 1');
             $this->foafData = new FoafData(false,true);	  

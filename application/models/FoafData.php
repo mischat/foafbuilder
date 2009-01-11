@@ -212,6 +212,7 @@ class FoafData {
 		}
         	//TODO must make sure that we handle having a non "#me" foaf:Person URI
 	    	$newPrimaryTopic = $replacementUri.$fragment;
+		//echo($foafData->isPublic()."  ".$replacementUri." dsdsds");
 		
 	    	/*replace the old primary topics with the new one*/
 		if (substr($oldPrimaryTopic, 0, 5) == 'bNode') {
