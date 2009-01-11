@@ -41,11 +41,15 @@ class InterestsField extends Field {
 	                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
 	                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 	                PREFIX dc:  <http://purl.org/dc/elements/1.1/>
+			PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 	                SELECT ?foafInterests ?foafInterestTitles
 	                WHERE{
 			   <".$foafData->getPrimaryTopic()."> foaf:interest ?foafInterests 
 			   OPTIONAL {
 				?foafInterests dc:title ?foafInterestTitles
+			   }
+			   OPTIONAL{
+				?foafInterests rdfs:label ?foafInterestTitles
 			   }
 			}";
 
@@ -94,6 +98,7 @@ class InterestsField extends Field {
 
                 //remove all triples that are hanging off this one
                 if(!$foundSubTriples->triples || empty($foundSubTriples->triples)){
+		     $foafData->getModel()->remove($triple);
                       continue;
                 }
                 foreach($foundSubTriples->triples as $subTriple){
@@ -105,6 +110,9 @@ class InterestsField extends Field {
 	$dctitle_res = new Resource("http://purl.org/dc/elements/1.1/title");
 	foreach($value->values as $thisValue){
 		$foafData->getModel()->addWithoutDuplicates(new Statement ($primary_topic_resource,$interest_resource,new Resource((string) $thisValue->uri))); 
+		if(!property_exists($thisValue,'title') || ! $thisValue->title){
+			continue;
+		}
 		$foafData->getModel()->addWithoutDuplicates(new Statement (new Resource((string)$thisValue->uri),$dctitle_res,new Literal((string) $thisValue->title))); 
 	}
     }
