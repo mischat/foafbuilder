@@ -1267,7 +1267,7 @@ function renderMboxFields(data,isPublic){
 	} else {
 		/*create an empty field but only if this is the first one XXX this depends on this function being called in the public sense initially*/
 		if(isPublic){
-			createGenericInputElement(name, 'example@example.com', i,false,true,false,!isPublic);
+			createGenericInputElement(name, 'example@example.com', i,false,true,false,true);
 		}
 	}	
 	
