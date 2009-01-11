@@ -9,6 +9,13 @@ class IndexController extends Zend_Controller_Action
     }
     
     public function indexAction(){
-    	
+	
+	$defaultNamespace = new Zend_Session_Namespace('Garlik');
+	var_dump($defaultNamespace);
+        if($defaultNamespace->authenticated){
+                $this->view->authenticated = 'true';
+	} else {
+                $this->view->authenticated = 'false';   	
+	}
     }
 }
