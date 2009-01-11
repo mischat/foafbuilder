@@ -1,7 +1,6 @@
 <?
 require_once 'FieldNames.php';
 require_once 'Field.php';
-
 //TODO: only grab maps data when we need it.
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -40,6 +39,14 @@ require_once 'Field.php';
                        	<input name="q" value="" id="search_box_top"/>
                         <a href="javascript:document.forms[0].submit()"><img border="0" alt="Find" id="find_button" src="/images/find.gif"/></a>
                     </form>
+                        <?
+                                if($this->authenticated && $this->authenticated=='true'){
+                                        echo("<div id='loggedIn'>You are signed in</div>");
+                                } else {
+                                        echo("<div id='loggedIn'><a href='/logon'><img id='signin' alt='Sign in' src='/images/btn-signin.png'></a></div>");
+                                }
+                        ?>
+
                 </div>
                 <div id="content">
                 	<img src='/images/foafbuilder_logo.png' class='builderLogo' alt='FOAF Builder Logo'/>

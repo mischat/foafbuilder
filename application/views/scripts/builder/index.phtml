@@ -1,17 +1,14 @@
 <?
 //TODO: need to generate forms for input elements to aid with eventual w3c compliance
-
 ?>
 <div id='foafUrlContainer'>
 		<?php if(property_exists($this,'publicUri') && $this->publicUri){
                                 echo("<div class='foafUrlTitle'>Your Public FOAF URI: </div><div class='foafUrl'>".$this->publicUri."</div>");
-
                 } ?>
 		<br/>
 
 		<?php if(property_exists($this,'privateUri') && $this->privateUri){
                                 echo("<div class='foafUrlTitle'>Your Private FOAF URI: </div><div class='foafUrl'>".$this->privateUri."</div>");
-
                 } ?>
 		
 </div>
@@ -39,14 +36,6 @@
 		<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
 	</td>
 	<td>
-		<?php /*
-			if($this->authenticated && $this->authenticated=='true'){
-				echo("<div id='loggedIn'>You are logged in</div>");
-			} else {
-				echo("<div id='loggedIn'><a href='/logon'>Log in</a></div>");	
-			}
-		     */
-		?>		
 	</td>
 </tr>
 </table>
@@ -178,6 +167,6 @@
 </div>
 
 <script type='text/javascript'>
-loadFoaf('load-the-basics');
-var authenticated = <?php echo($this->authenticated); ?>
+	loadFoaf('load-the-basics');
+	var authenticated = <?php echo($this->authenticated); ?>
 </script>

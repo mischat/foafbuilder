@@ -11,6 +11,17 @@
 				<form method='post' id='openidForm' action='/logon/do-openid'>
 					<p>In order to login and add to your FOAF profile you will need enter your OpenID.  If you do not have an OpenID click <a href="https://www.myopenid.com/signup">here</a>. If you have an OpenID you can use it to identify yourself to us now. Your OpenID provider might ask you to log in if you have not done so recently.</p>
 					<span>OpenID:    </span><input id='openid_identifier' class='urlField' name='openid_identifier' value=''><br/>
+						
+					<?
+						//if it is a failed login then render an error message
+						if(property_exists($this,'status') && $this->status && $this->status == 'fail'){
+							?>	
+							<span class="errorMessage">Sorry, your OpenId is not valid.  Please try again.</span>
+							<?
+						}
+					?>
+
+
 					<p><small>For example, fnivramd.livejournal.com</small></p>
 					<input id='openid_action' name='openid_action' type='submit' value='login'/>&nbsp;&nbsp;&nbsp;<img src='/images/ajax-loader.gif' id='ajaxLoader'/>
 

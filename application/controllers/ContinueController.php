@@ -13,9 +13,11 @@ class ContinueController extends Zend_Controller_Action
 
 	public function indexAction(){
 
+		$this->view->status = @$_GET['status'];
 	}
 
     public function doOpenidAction() {
+
 	$defaultNamespace = new Zend_Session_Namespace('Garlik');
 	$defaultNamespace->authenticated = false;
 	

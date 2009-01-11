@@ -16,7 +16,7 @@ class BuilderController extends Zend_Controller_Action
     }
 
     public function indexAction(){	
-	
+
 	$defaultNamespace = new Zend_Session_Namespace('Garlik');
 	
 	if($defaultNamespace->authenticated){

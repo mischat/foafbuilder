@@ -13,6 +13,7 @@ class LogonController extends Zend_Controller_Action
 
     public function indexAction(){
 
+		$this->view->status = @$_GET['status'];
     }
 
     //TODO MISCHA DIRTY
