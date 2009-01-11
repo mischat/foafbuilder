@@ -2,6 +2,17 @@ a{
 	color:#CF0072;
 	text-decoration:none;
 }
+#signin{
+	border: 0;
+}
+#loggedIn{
+	float:right;
+	margin-right:5px;
+	margin-top:25px;
+}
+.errorMessage{
+	color:#ff0000;
+}
 #foafBirthday_container{
 	margin-bottom: 25px;	
 }
