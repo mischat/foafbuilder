@@ -15,6 +15,7 @@ class AdvanceController extends Zend_Controller_Action
 		$defaultNamespace = new Zend_Session_Namespace('Garlik');
 
         	if($defaultNamespace->authenticated){
+                	$this->view->authenticated = 'true';
 
                 	$foafData = FoafData::getFromSession();
                 	if($foafData && $foafData->getUri() && $foafData->getUri() != 'http://foafbuilder.qdos.com/people/example.com/myopenid/foaf.rdf'){
@@ -26,6 +27,8 @@ class AdvanceController extends Zend_Controller_Action
                         	$this->view->privateUri = $privateFoafData->getUri();
                 	}
         
+		} else {
+                	$this->view->authenticated = 'false';
 		}
 	}
 }
