@@ -127,11 +127,8 @@ class AjaxController extends Zend_Controller_Action {
 		//load it into the required foafdata object
 		$this->loadFoaf(true);
 		ini_set('memory_limit','128M'); 
-		error_log(1);
 		$this->foafData->addLJRDFtoModel($filename_1,$this->foafData->getUri());
-		error_log(2);
 		$this->foafData->replacePrimaryTopic();
-		error_log(3);
 			
 		//remove the file
 		unlink($filename_1);
@@ -190,7 +187,7 @@ class AjaxController extends Zend_Controller_Action {
 			//$uriLoadOk = $this->foafData->getModel()->load($uri);
 			$uriLoadOk = $this->foafData->addRDFtoModel($uri,$this->foafData->getUri());
 
-		//	$this->foafData->replacePrimaryTopic($uri);
+			$this->foafData->replacePrimaryTopic();
 			$this->foafData->replaceGeneratorAgent();
 
 			//TODO MISCHA TO PUT BACK IN
