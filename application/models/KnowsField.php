@@ -48,7 +48,6 @@ class KnowsField extends Field {
 					$successfulRemove = 1;	
 				}
 			}
-			var_dump($results);
 		}
 
 		return $successfulRemove;
@@ -103,7 +102,6 @@ class KnowsField extends Field {
 
 		//$val = $friend->ifps[0];
 		//$ret;
-		var_dump($friend);
 		//get ifp type
 		$query = 'PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 			  PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -202,18 +200,16 @@ class KnowsField extends Field {
     							$thisFriendsIFPs = array_unique(array_merge($userKnowsIFPs,$userKnowsIFPs));
     							
     							//add  mutual friend
-								array_push($mutualFriends,$thisFriendsIFPs); 
-								//do appropriate cleaning
-								array_push($userKnowsRemoveKeys,$userKnowsURI);
-								array_push($knowsUserRemoveKeys,$knowsUserURI);   	
-								break;
+							array_push($mutualFriends,$thisFriendsIFPs); 
+							//do appropriate cleaning
+							array_push($userKnowsRemoveKeys,$userKnowsURI);
+							array_push($knowsUserRemoveKeys,$knowsUserURI);   	
+							break;
     						}
     					}
     				}
     			}
-
     		}
-    		
     	}
     	
     	//clean out userknows/knows users that are now mutual friends
@@ -233,18 +229,19 @@ class KnowsField extends Field {
     private function getDetailsFromIfps($userKnowsIfps){
     	//TODO: need to ask this query over the inMemModel as well
     		
-    	 	//TODO: put this at the start of the details section so we can preserve the uri goodness here
-      	 	 $userKnowsIfps = $this->uniqueIterativelyUsingIfps($userKnowsIfps);
+      	 	$userKnowsIfps = $this->uniqueIterativelyUsingIfps($userKnowsIfps);
+	
         	//var_dump($userKnowsIfps);
     		//array to store all the details of people that the user knows
     		$userKnowsDetails = array();
         	
         	foreach($userKnowsIfps as $thisUri => $thisFriendsIfps){
-				
+			
         		$inquery = '';
 	        	foreach($thisFriendsIfps as $ifp){
-	                if(isset($ifp) && $ifp && substr($ifp,0,2)!="_:"){
-	                    $inquery.=" ?ifp = ".$ifp."||";
+
+		                if(isset($ifp) && $ifp && substr($ifp,0,2)!="_:"){
+		                    $inquery.=" ?ifp = ".$ifp."||";
 	               }
 	            }
 	                
@@ -335,6 +332,7 @@ class KnowsField extends Field {
     /*get the ifps of the people who this person knows from the loaded foaf files, keyed on the persons uri*/
     private function getUserKnowsIfps($foafData){
     	
+	//get any ifps that are in the foaf file
     	$query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX ya: <http://blogs.yandex.ru/schema/foaf/>
 						SELECT DISTINCT ?homepage ?weblog ?mbox ?mbox_sha1sum ?uri
 						WHERE {
@@ -354,6 +352,8 @@ class KnowsField extends Field {
 						}";
     	 //FILTER(?ifp_predicate = foaf:homepage || ?ifp_predicate = foaf:weblog || ?ifp_predicate = foaf:mbox  ||?ifp_predicate = foaf:mbox_sha1sum);
     	$potentialIfpArray = $foafData->getModel()->SparqlQuery($query);
+
+	
     	$actualIfpArray = array();
     	
     	if(!empty($potentialIfpArray)){
@@ -398,8 +398,7 @@ class KnowsField extends Field {
                                         array_push($actualIfpArray[$row['?uri']->uri],'"'.$row['?mbox_sha1sum']->uri.'"@EN');
                                 } else if(property_exists($row['?mbox_sha1sum'],'label') && $row['?mbox_sha1sum']->label){
                                         array_push($actualIfpArray[$row['?uri']->uri],'"'.$row['?mbox_sha1sum']->label.'"@EN');
-     		                   }
-                        
+     		                }
     			}
 		}
     	}
@@ -426,25 +425,50 @@ class KnowsField extends Field {
 		}
         }
         
-	//var_dump($userKnowsIfps);
-	//exit(0);
+
+	//get some ifps from the uris
+	$filterValue = "FILTER(";
+	foreach($userKnowsIfps as $key => $value){
+		if(substr($key,0,5) != 'bNode'){
+			$filterValue .= " ?uri = <".$key."> ||";
+		}
+	}
+	$filterValue = substr($filterValue,0,-2).")";
+        $query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/> PREFIX bio: <http://purl.org/vocab/bio/0.1/> PREFIX ya: <http://blogs.yandex.ru/schema/foaf/>
+                                                SELECT DISTINCT ?uri ?ifp
+                                                WHERE {
+                                                                ?uri ?ifp_predicate ?ifp .
+                                                                ".$filterValue." FILTER(?ifp_predicate = foaf:mbox || ?ifp_predicate = foaf:mbox_sha1sum 
+								|| ?ifp_predicate = foaf:weblog || ?ifp_predicate = foaf:homepage)
+                                
+                                                }";
+        //FILTER(?ifp_predicate = foaf:homepage || ?ifp_predicate = foaf:weblog || ?ifp_predicate = foaf:mbox  ||?ifp_predicate = foaf:mbox_sha1sum);
+        $ifpsFromUri = sparql_query(FOAF_EP,$query);
+	foreach($ifpsFromUri as $row){
+		
+		if(isset($userKnowsIfps[$row['?uri']])){
+			array_push($userKnowsIfps[$row['?uri']],$row['?ifp']);
+		} else {
+			$userKnowsIfps[$row['?uri']] = array();
+			array_push($userKnowsIfps[$row['?uri']],$row['?ifp']);
+		}
+	}
     	return $userKnowsIfps;
     }
     
     /*combines all the elements which share at least one ifp*/
     //XXX is this correct and fool proof or does it need to be done iteratively.
     private function uniqueIterativelyUsingIfps($userKnowsIfps){
- 		//echo("LENGTH:".sizeOf($userKnowsIfps)."\n");
+ 	//echo("LENGTH:".sizeOf($userKnowsIfps)."\n");
     	
     	$this->uniqueArrayUsingIfps($userKnowsIfps);
-   		//echo("LENGTHaft:".sizeOf($userKnowsIfps)."\n");
-    //	var_dump($userKnowsIfps);
+   	//echo("LENGTHaft:".sizeOf($userKnowsIfps)."\n");
+    	//var_dump($userKnowsIfps);
     	//TODO we can do better than that!
     	return  $userKnowsIfps;
     	
     }
     
-    //doesn't work! XXX
     private function uniqueArrayUsingIfps(&$userKnowsIfps){
     	
     	$ret = array();//the array we'
@@ -501,9 +525,10 @@ class KnowsField extends Field {
     
     /*get ifps, keyed on the uri, of people who say they know the user*/
     private function getKnowsUserIfps($ifps,$foafData){
-    	$inquery='';
+    		
+		$inquery='';
         		
-        		foreach($ifps as $ifp){
+        	foreach($ifps as $ifp){
                         if(isset($ifp) && $ifp && substr($ifp,0,2)!="_:"){
                                 $inquery.=" ?ifp = ".$ifp." || ";
                                 $inquery.=' ?ifp ="'.sparql_strip($ifp).'"@EN || ';//XXX is this OK? TODO FIXME
