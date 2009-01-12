@@ -138,7 +138,6 @@ class HoldsAccountField extends Field {
 				$foafData->getModel()->addWithoutDuplicates($newStatement);
 			}
 
-/*Removed the writing of accountProfilePage 
 			if(property_exists($holdsAccountContents,'foafAccountProfilePage') && $holdsAccountContents->foafAccountProfilePage){
                                 $newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($holdsAccountContents->foafAccountProfilePage));
                                 $foafData->getModel()->addWithoutDuplicates($newStatement);
@@ -153,7 +152,6 @@ class HoldsAccountField extends Field {
 
 				}
 			}
-*/
 		}
 	}
 
