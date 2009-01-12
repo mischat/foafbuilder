@@ -22,7 +22,7 @@ class MboxField extends Field {
     	
         /*don't sparql query the model etc if a full instantiation is not required*/
         if (!$fullInstantiation) {
-			return;
+		return;
         } 
 
 	if($foafDataPublic){
@@ -85,25 +85,38 @@ class MboxField extends Field {
 	
     /*saves the values created by the editor in value... as encoded in json. */
     public function saveToModel(&$foafData, $value) {
-
 			require_once 'FieldNames.php';
 			
 			$sha1Sum_resource = new Resource('http://xmlns.com/foaf/0.1/mbox_sha1sum');
 			$predicate_resource = new Resource('http://xmlns.com/foaf/0.1/mbox');
 			$primary_topic_resource = new Resource($foafData->getPrimaryTopic());
-			
+
+			//First to remove the sha1sums, dont remove if no corresponding mbox exists
 			//find existing triples
 			$foundModel = $foafData->getModel()->find($primary_topic_resource,$predicate_resource,NULL);
-			//remove existing triples
-			foreach($foundModel->triples as $triple){
-				//echo('removing mbox triples');
-				$foafData->getModel()->remove($triple);
-			}
-
-			//find existing triples
 			$foundModel2 = $foafData->getModel()->find($primary_topic_resource,$sha1Sum_resource,NULL);
+
 			//remove existing triples
 			foreach($foundModel2->triples as $triple){
+				//A flag to see if mbox_sha1sums where here from the outset
+				$flag = 0;
+				//Loop through the mbox's and compare them	
+				foreach($foundModel->triples as $mboxtriple){
+					if (md5($mboxtriple->obj->label) == $triple->obj->label) {	
+						$flag ++;
+					}
+				}
+				if ($flag > 0) {
+					$foafData->getModel()->remove($triple);
+				} else {
+					error_log("Yay, we are keeping mbox triples ow....");
+				}
+			}
+			
+			//find existing triples
+
+			//remove existing triples
+			foreach($foundModel->triples as $triple){
 				//echo('removing mbox triples');
 				$foafData->getModel()->remove($triple);
 			}
