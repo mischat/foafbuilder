@@ -122,37 +122,37 @@ class HoldsAccountField extends Field {
                                 continue;
                         }
 
-			//create an account triple here and add it to the model.
-			$accountStatement = new Statement(new Resource($foafData->getPrimaryTopic()),new Resource('http://xmlns.com/foaf/0.1/holdsAccount'),$holdsAccountBnode);
-			$bNodeStatement = new Statement($holdsAccountBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource('http://xmlns.com/foaf/0.1/OnlineAccount'));			
-			$foafData->getModel()->addWithoutDuplicates($accountStatement); 
-			$foafData->getModel()->addWithoutDuplicates($bNodeStatement); 
-				
-			//var_dump($holdsAccountContents);
-			if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage){
-				$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountServiceHomepage'), new Resource($holdsAccountContents->foafAccountServiceHomepage));
-				$foafData->getModel()->addWithoutDuplicates($newStatement);
-			}		
-			if(property_exists($holdsAccountContents,'foafAccountName') && $holdsAccountContents->foafAccountName){
-				$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountName'), new Literal($holdsAccountContents->foafAccountName));
-				$foafData->getModel()->addWithoutDuplicates($newStatement);
-			}
-
-			if(property_exists($holdsAccountContents,'foafAccountProfilePage') && $holdsAccountContents->foafAccountProfilePage && $holdsAccountContents->foafAccountProfilePage != "") { 
-                                $newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($holdsAccountContents->foafAccountProfilePage));
-                                $foafData->getModel()->addWithoutDuplicates($newStatement);
-                        } else if(property_exists($holdsAccountContents,'foafAccountName') && $holdsAccountContents->foafAccountName){
+			if ((property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage && $holdsAccountContents->foafAccountServiceHomepage != "" && property_exists($holdsAccountContents,'foafAccountName') && $holdsAccountContents->foafAccountName &&  $holdsAccountContents->foafAccountName != "" ) || (property_exists($holdsAccountContents,'foafAccountProfilePage') && $holdsAccountContents->foafAccountProfilePage && $holdsAccountContents->foafAccountProfilePage != "")) { 
+				//create an account triple here and add it to the model.
+				$accountStatement = new Statement(new Resource($foafData->getPrimaryTopic()),new Resource('http://xmlns.com/foaf/0.1/holdsAccount'),$holdsAccountBnode);
+				$bNodeStatement = new Statement($holdsAccountBnode,new Resource('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),new Resource('http://xmlns.com/foaf/0.1/OnlineAccount'));			
+				$foafData->getModel()->addWithoutDuplicates($accountStatement); 
+				$foafData->getModel()->addWithoutDuplicates($bNodeStatement); 
 
 				if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage){
-
-					if ($mypage != "") {	
-						$myPage = $this->usernameToUri($holdsAccountContents->foafAccountName,$holdsAccountContents->foafAccountServiceHomepage,$patterns); 
-						$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($myPage));
-						$foafData->getModel()->addWithoutDuplicates($newStatement);
-					}
-
+					$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountServiceHomepage'), new Resource($holdsAccountContents->foafAccountServiceHomepage));
+					$foafData->getModel()->addWithoutDuplicates($newStatement);
+				}		
+				if(property_exists($holdsAccountContents,'foafAccountName') && $holdsAccountContents->foafAccountName){
+					$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountName'), new Literal($holdsAccountContents->foafAccountName));
+					$foafData->getModel()->addWithoutDuplicates($newStatement);
 				}
-			}
+				if(property_exists($holdsAccountContents,'foafAccountProfilePage') && $holdsAccountContents->foafAccountProfilePage && $holdsAccountContents->foafAccountProfilePage != "") { 
+					$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($holdsAccountContents->foafAccountProfilePage));
+					$foafData->getModel()->addWithoutDuplicates($newStatement);
+				} else if(property_exists($holdsAccountContents,'foafAccountName') && $holdsAccountContents->foafAccountName){
+
+					if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage){
+
+						if ($mypage != "") {	
+							$myPage = $this->usernameToUri($holdsAccountContents->foafAccountName,$holdsAccountContents->foafAccountServiceHomepage,$patterns); 
+							$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($myPage));
+							$foafData->getModel()->addWithoutDuplicates($newStatement);
+						}
+
+					}
+				}
+			}//added in test to make I dont write out rogue bnodes
 		}
 	}
 
@@ -199,7 +199,8 @@ class HoldsAccountField extends Field {
 		//find them all
 		$foundAccounts =  $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/holdsAccount'), NULL);
 		$foundAccounts1 = $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/accountName'), NULL);		
-		$foundAccounts2 = $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/OnlineAccount'), NULL);		
+		//$foundAccounts2 = $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/OnlineAccount'), NULL);		
+		$foundAccounts2 = $foafData->getModel()->find(NULL, NULL, new Resource('http://xmlns.com/foaf/0.1/OnlineAccount'));		
 		$foundAccounts3 = $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/accountServiceHomepage'), NULL);		
 		$foundAccounts4 = $foafData->getModel()->find(NULL, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), NULL);		
 
