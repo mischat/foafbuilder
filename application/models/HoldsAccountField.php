@@ -138,17 +138,18 @@ class HoldsAccountField extends Field {
 				$foafData->getModel()->addWithoutDuplicates($newStatement);
 			}
 
-			if(property_exists($holdsAccountContents,'foafAccountProfilePage') && $holdsAccountContents->foafAccountProfilePage){
+			if(property_exists($holdsAccountContents,'foafAccountProfilePage') && $holdsAccountContents->foafAccountProfilePage && $holdsAccountContents->foafAccountProfilePage != "") { 
                                 $newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($holdsAccountContents->foafAccountProfilePage));
                                 $foafData->getModel()->addWithoutDuplicates($newStatement);
                         } else if(property_exists($holdsAccountContents,'foafAccountName') && $holdsAccountContents->foafAccountName){
 
 				if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage){
 
-					
-					$myPage = $this->usernameToUri($holdsAccountContents->foafAccountName,$holdsAccountContents->foafAccountServiceHomepage,$patterns); 
-					$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($myPage));
-                                	$foafData->getModel()->addWithoutDuplicates($newStatement);
+					if ($mypage != "") {	
+						$myPage = $this->usernameToUri($holdsAccountContents->foafAccountName,$holdsAccountContents->foafAccountServiceHomepage,$patterns); 
+						$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($myPage));
+						$foafData->getModel()->addWithoutDuplicates($newStatement);
+					}
 
 				}
 			}
