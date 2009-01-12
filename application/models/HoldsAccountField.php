@@ -144,8 +144,9 @@ class HoldsAccountField extends Field {
 
 					if(property_exists($holdsAccountContents,'foafAccountServiceHomepage') && $holdsAccountContents->foafAccountServiceHomepage){
 
-						if ($mypage != "") {	
+
 							$myPage = $this->usernameToUri($holdsAccountContents->foafAccountName,$holdsAccountContents->foafAccountServiceHomepage,$patterns); 
+						if ($myPage != "") {	
 							$newStatement = new Statement($holdsAccountBnode, new Resource('http://xmlns.com/foaf/0.1/accountProfilePage'), new Resource($myPage));
 							$foafData->getModel()->addWithoutDuplicates($newStatement);
 						}
