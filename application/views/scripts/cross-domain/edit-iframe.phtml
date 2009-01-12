@@ -1,0 +1,39 @@
+<?php
+	//FIXME: these should all be one view
+	//require_once("helpers/JSON.php");
+	//We don't want any HTML gubbins here
+	$this->layout()->setLayout('ajax');
+	
+	//var_dump($this->results);
+	//$json = new Services_JSON();
+	//echo $json->encode($this->results);
+?>
+	<html>
+	<head>
+		<script language="javascript" type="text/javascript" src="/js/jquery.js"></script>
+		<script>
+				var awaitingRequest = false;
+				setInterval(function() {
+					
+						//if we haven't already made the request to fill up the foafeditor with stuff and the ifps have been sent in the hash then make the request
+						if (window.location.hash && !awaitingRequest) { 
+						
+							//get the string containing ifps from the hash of the location of this window
+							var ifpString = window.location.hash;
+							//make the request and then redirect the main window to the builder
+							awaitingRequest = true;
+
+							$.get("/ajax/load-ifps", {ifps : ifpString}, function(data){
+                                                                parent.window.location.hash = 'done';
+							 	//alert("Done"+data);
+                                                        });
+						}	
+				},100);
+		</script>
+	</head>
+	<body>
+	</body>
+	</html>
+		
+	
+
