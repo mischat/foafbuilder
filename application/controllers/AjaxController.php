@@ -61,8 +61,6 @@ class AjaxController extends Zend_Controller_Action {
 
 		$res = sparql_query(FOAF_EP,$graphQuery);
 		$res2 = sparql_query(FOAF_EP,$graphQuery2);
-		var_dump($res);
-		var_dump($res2);
 		if(empty($res)){
 			return;
 		}
