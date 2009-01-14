@@ -18,19 +18,24 @@ class AjaxController extends Zend_Controller_Action {
     private $privateFoafData;
 	
 	public function loadIfpsAction(){
-		
+		error_log("Hmmm what's going on here?");
 		set_time_limit(150);
-		//find and decode the ifps
-		$ifps = @$_GET['ifps'];
 		
+		//find and decode the ifps
+		$ifps = urldecode($_GET['ifps']);
+		error_log("hmmm".$ifps);
+		var_dump($ifps);	
+	
+		error_log("this request is made");
 		$ifps = substr($ifps,1);
 		$json = new Services_JSON();
 	        $ifps = $json->decode(stripslashes($ifps));
 
+		error_log("this request is made1");
 		if(empty($ifps)){
 			return;
 		}
-
+		error_log("this request is made2 ".implode('-----',$ifps));
 		//build a query with them
 		$ifps_filter = "FILTER(";
 		foreach($ifps as $ifp){
@@ -61,10 +66,18 @@ class AjaxController extends Zend_Controller_Action {
 
 		$res = sparql_query(FOAF_EP,$graphQuery);
 		$res2 = sparql_query(FOAF_EP,$graphQuery2);
+
+		foreach($res as $row){
+			error_log("Resrow: ".$row['?graph']);
+		}
+		foreach($res2 as $row){
+			error_log("Resrow1: ".$row['?graph']);
+		}
+
 		if(empty($res)){
 			return;
 		}
-		error_log("b");
+
 		$triplesQuery = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                                  construct{?a ?b ?c} WHERE { ";
 		foreach($res as $row){
@@ -104,7 +117,7 @@ class AjaxController extends Zend_Controller_Action {
 			error_log('No RDF found here');
 			//TODO: do something here
 		}
-		
+		error_log("results:".$res);
 		error_log(0);
                 //shove the data into a temporary file
                 $filename_1 = BUILDER_TEMP_DIR.md5(microtime()*microtime());
@@ -130,6 +143,8 @@ class AjaxController extends Zend_Controller_Action {
 			
 		//remove the file
 		unlink($filename_1);
+		error_log("this request is made end");
+		error_log(implode(' -------- '.$defaultNamespace->foafData->getModel()->triples));
 	}
 
 	public function loadExtractorAction(){

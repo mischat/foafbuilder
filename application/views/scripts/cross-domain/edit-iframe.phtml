@@ -1,4 +1,5 @@
 <?php
+	require_once("helpers/settings.php");
 	//FIXME: these should all be one view
 	//require_once("helpers/JSON.php");
 	//We don't want any HTML gubbins here
@@ -12,26 +13,77 @@
 	<head>
 		<script language="javascript" type="text/javascript" src="/js/jquery.js"></script>
 		<script>
+		function getHTTPObject() { 
+			if (typeof XMLHttpRequest != 'undefined') { 
+				return new XMLHttpRequest(); 
+			} try { 
+				return new ActiveXObject("Msxml2.XMLHTTP"); 
+			} catch (e) { 
+				try { 
+					return new ActiveXObject("Microsoft.XMLHTTP"); 
+				} catch (e) {} 
+			} return false; 
+		}
+
+		function URLEncode (clearString) {
+			var output = '';
+  			var x = 0;
+  			clearString = clearString.toString();
+  			var regex = /(^[a-zA-Z0-9_.]*)/;
+
+  			while (x < clearString.length) {
+    				var match = regex.exec(clearString.substr(x));
+    				if (match != null && match.length > 1 && match[1] != '') {
+    					output += match[1];
+      					x += match[1].length;
+    				} else {
+      					if (clearString[x] == ' '){
+        					output += '+';
+      					} else {
+        					var charCode = clearString.charCodeAt(x);
+        					var hexVal = charCode.toString(16);
+        					output += '%' + ( hexVal.length < 2 ? '0' : '' ) + hexVal.toUpperCase();
+      					}
+    				  x++;
+    				}
+  			}
+			return output;
+		}
+		</script>
+	</head>
+	<body>
+		<script>
 				var awaitingRequest = false;
 				setInterval(function() {
 					
-						//if we haven't already made the request to fill up the foafeditor with stuff and the ifps have been sent in the hash then make the request
+						//if we haven't already made the request to fill up the foafbuilder with stuff and the ifps have been sent in the hash then make the request
 						if (window.location.hash && !awaitingRequest) { 
-						
+							var ifpString = window.location.hash;
+							
 							//get the string containing ifps from the hash of the location of this window
 							var ifpString = window.location.hash;
 							//make the request and then redirect the main window to the builder
 							awaitingRequest = true;
-
-							$.get("/ajax/load-ifps", {ifps : ifpString}, function(data){
-                                                                parent.window.location.hash = 'done';
-							 	//alert("Done"+data);
-                                                        });
+							var http = getHTTPObject(); 
+							http.open("GET", "<? echo(BUILDER_URL); ?>ajax/load-ifps?ifps="+URLEncode(ifpString), true); 
+							http.onreadystatechange = function() { 
+								if (http.readyState == 4) { 
+                                                        		document.getElementById('crossBrowserIframe').src = 'http://luke.foaf.qdos.com/crossBrowserIframeChild.php#done';
+								} 
+							};
+							http.send(null);
+							/*
+							$.get("http://foafeditor.qdos.com/ajax/load-ifps", {ifps : ifpString}, function(data){
+								alert(data);
+                                                                document.getElementById('crossBrowserIframe').src = 'http://luke.foaf.qdos.com/crossBrowserIframeChild.php#done';
+                                                        });*/
 						}	
 				},100);
+	
+
+				   
 		</script>
-	</head>
-	<body>
+		<iframe id = "crossBrowserIframe" class="crossBrowserIframe" style="width:1px;height:1px;display:none;" src="http://luke.foaf.qdos.com/crossBrowserIframeChild.php"></iframe>
 	</body>
 	</html>
 		
