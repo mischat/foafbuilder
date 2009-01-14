@@ -68,15 +68,10 @@
 							http.open("GET", "<? echo(BUILDER_URL); ?>ajax/load-ifps?ifps="+URLEncode(ifpString), true); 
 							http.onreadystatechange = function() { 
 								if (http.readyState == 4) { 
-                                                        		document.getElementById('crossBrowserIframe').src = 'http://luke.foaf.qdos.com/crossBrowserIframeChild.php#done';
+                                                        		document.getElementById('crossBrowserIframe').src = '<? echo(FOAF_ROOT); ?>crossBrowserIframeChild.php#done';
 								} 
 							};
 							http.send(null);
-							/*
-							$.get("http://foafeditor.qdos.com/ajax/load-ifps", {ifps : ifpString}, function(data){
-								alert(data);
-                                                                document.getElementById('crossBrowserIframe').src = 'http://luke.foaf.qdos.com/crossBrowserIframeChild.php#done';
-                                                        });*/
 						}	
 				},100);
 	
