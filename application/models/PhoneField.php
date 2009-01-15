@@ -112,20 +112,20 @@ class PhoneField extends Field {
     /*mangles the email address for display purposes*/
 	private function onLoadManglePhoneNo($value){
 		//TODO: more mangling will probably at some point be required here
-		$ret = str_replace('tel:','',$value);
-		return $ret;
+		if (!preg_match('/^callto:\/\//',$value)) {
+			$value = str_replace('tel:','',$value);
+		} 
+		return $value;
 	}
 	
     /*mangles the email address  for saving purposes*/
 	private function onSaveManglePhoneNo($value){
 		//TODO: more mangling will at some point probably be required here
-		$ret = $value;
-		
-		if(substr($value,0,4) != 'tel:'){
-			$ret = 'tel:'.$value;
+		if(substr($value,0,4) != 'tel:' && !preg_match('/^callto:\/\//',$value)){
+			$value = 'tel:'.$value;
 		}
 		
-		return $ret;
+		return $value;
 	}
 	
     private function isPhoneNoValid($value) {
