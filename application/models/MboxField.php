@@ -102,8 +102,12 @@ class MboxField extends Field {
 				$flag = 0;
 				//Loop through the mbox's and compare them	
 				foreach($foundModel->triples as $mboxtriple){
-					if (md5($mboxtriple->obj->label) == $triple->obj->label) {	
-						$flag ++;
+					if (property_exists($mboxtriple,'obj')) {
+						if (property_exists($mboxtriple->obj,'label')) {
+							if (md5($mboxtriple->obj->label) == $triple->obj->label) {	
+								$flag ++;
+							}
+						}
 					}
 				}
 				if ($flag > 0) {
