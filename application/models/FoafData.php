@@ -120,9 +120,9 @@ class FoafData {
 
 	try {
 		foreach($tempmodel->triples as $triple){
-			//TODO MISCHA §
-
-			$this->model->addWithoutDuplicates($triple);
+			if (!(property_exists($triple->obj,'label') && $triple->obj->label == '')) {
+				$this->model->addWithoutDuplicates($triple);
+			}
 		}
 
 	} catch (exception $e) {
@@ -238,7 +238,7 @@ class FoafData {
 
 	        //XXX speak to mischa about this one
 	        if ($oldPrimaryTopic != $newPrimaryTopic && $oldPrimaryTopic != PUBLIC_URL.'example.com/myopenid/foaf.rdf#me' && $oldPrimaryTopic != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf#me') {
-	        	$model->add(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
+	        	$model->addWithoutDuplicates(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
 	        } 
         } 
         
