@@ -41,12 +41,13 @@ class HomepageField extends Field {
             if ($foafData->getPrimaryTopic()) {
                 $queryString = 
                     "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                    PREFIX dc: <http://purl.org/dc/elements/1.1/>
                     PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
                     PREFIX bio: <http://purl.org/vocab/bio/0.1/>
                     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                     SELECT ?foafHomepage
                     WHERE{
-                            <".$foafData->getPrimaryTopic()."> foaf:homepage ?foafHomepage                  
+                            <".$foafData->getPrimaryTopic()."> foaf:homepage ?foafHomepage . OPTIONAL {?foafHomepage dc:title ?title}
                     };";
     
                 $results = $foafData->getModel()->SparqlQuery($queryString);
@@ -67,12 +68,12 @@ class HomepageField extends Field {
                         if (isset($row['?foafHomepage']->uri) && $this->isHomepageValid($row['?foafHomepage']->uri)) {
                             array_push($this->data[$privacy]['foafHomepageFields']['values'],$row['?foafHomepage']->uri);
                             /*Over here to put in the homepage title*/
-                            $title = $this->getHomepageTitle($row['?foafHomepage']->uri);
-                            if ($title) {
-                                error_log("[foaf_editor] Homepage title returned");
-                                $new_statement = new Statement(new Resource($row['?foafHomepage']->uri),new Resource("http://purl.org/dc/elements/1.1/title"),new Literal($title));
-                                $foafData->getModel()->addWithoutDuplicates($new_statement);
-                            } 
+                                $title = $this->getHomepageTitle($row['?foafHomepage']->uri);
+                                if ($title) {
+                                    error_log("[foaf_editor] Homepage title returned");
+                                    $new_statement = new Statement(new Resource($row['?foafHomepage']->uri),new Resource("http://purl.org/dc/elements/1.1/title"),new Literal($title));
+                                    $foafData->getModel()->addWithoutDuplicates($new_statement);
+                                } 
                         } else if (isset($row['?foafHomepage']->label) && $this->isHomepageValid($row['?foafHomepage']->label)) {
                             if (preg_match('/^https?:\/\//',$row['?foafHomepage']->label)) {
                                 array_push($this->data[$privacy]['foafHomepageFields']['values'],$row['?foafHomepage']->label);
@@ -147,7 +148,7 @@ class HomepageField extends Field {
 
     /* This function needs to be hacked to work properly, needs to grab the html and need to try to extract*/
     function getHomepageTitle($url) {
-            ini_set('default_socket_timeout', 2);  
+            ini_set('default_socket_timeout', 1);  
             $input = @fopen($url, 'r');
             if ($input != false) { 
                 $text = fread($input, 1024);
