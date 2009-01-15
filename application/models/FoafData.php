@@ -36,7 +36,7 @@ class FoafData {
 		$this->openid = $defaultNamespace->url;
 	} else {
 		error_log("[builder] The user has NOT AUTHENTICATED! ");
-		$this->openid = "example.com/myopenid";
+		$this->openid = EXAMPLE_OPENID;
 	}
 
         $this->isPublic = $isPublic;
@@ -54,7 +54,7 @@ class FoafData {
 	
         if (!$this->isPublic) {
 		//If match then one of ours ...
-		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/oauth/',$this->uri) && $this->uri != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf') {
+		if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/oauth/',$this->uri) && $this->uri != PRIVATE_URL.EXAMPLE_OPENID.'/data/foaf.rdf') {
 			$cachename = cache_filename($this->uri);
 			if (file_exists(PRIVATE_DATA_DIR.$cachename)) {
 				$uri = 'file://'.PRIVATE_DATA_DIR.$cachename;
@@ -65,7 +65,7 @@ class FoafData {
 		//In future make OAuth dance here ...
     	} else if ($this->isPublic) {
 		//If match then one of ours ...
-                if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/people/',$this->uri) && $this->uri != PUBLIC_URL.'example.com/myopenid/foaf.rdf') {
+                if (preg_match('/^http:\/\/[a-zA-Z0-0\-\_]*\.qdos\.com\/people/',$this->uri) && $this->uri != PUBLIC_URL.EXAMPLE_OPENID.'/foaf.rdf') {
 			$cachename = cache_filename($this->uri);
 			if (file_exists(PUBLIC_DATA_DIR.$cachename)) {
 				$uri = 'file://'.PUBLIC_DATA_DIR.$cachename;
@@ -100,7 +100,6 @@ class FoafData {
 	/*make sure that the uri and primary topic of the document is consistent*/
 
         $this->replacePrimaryTopic($this->uri);	
-        $this->replaceGeneratorAgent();
 	$this->putInSession();
     }
 
@@ -118,12 +117,16 @@ class FoafData {
 	$tempmodel->load($uri);
 	FoafData::replacePrimaryTopicInModel($tempmodel,$replacementUri,$uri,$this->getPrimaryTopic(),false,$isLJ);
 
+	//Add in the generatorAgent triples
 	try {
 		foreach($tempmodel->triples as $triple){
-			if (!(property_exists($triple->obj,'label') && $triple->obj->label == '')) {
+			$triple = FoafData::cleanTriple($triple);
+			if ($triple) {
 				$this->model->addWithoutDuplicates($triple);
 			}
 		}
+		$this->model->addWithoutDuplicates(new Statement (new Resource($replacementUri),new Resource ("http://webns.net/mvcb/generatorAgent"), new Resource (BUILDER_URL)));
+		$this->model->addWithoutDuplicates(new Statement (new Resource($replacementUri),new Resource ("http://webns.net/mvcb/errorReportsTo"), new Resource (SUPPORT_EMAIL)));
 
 	} catch (exception $e) {
 		exit;
@@ -133,51 +136,34 @@ class FoafData {
 	return 0;
     }
 
-    //Remove the generator agent and add our own
-    public function replaceGeneratorAgent() {
-	if (!$this->getUri()) {
-		$gen_agent = new Resource('http://webns.net/mvcb/generatorAgent');
-		$reports_to = new Resource('http://webns.net/mvcb/errorReportsTo');
-		$mailto_admin = new Resource('mailto:admin.qdos.com');
-		$builder = new Resource(BUILDER_URL);
-		$primary_topic_resource = new Resource($this->getUri());
-		
-		//find existing triples
-		$foundModel = $this->model->find($primary_topic_resource,$gen_agent,NULL);
-		
-		//remove existing triples
-		foreach($foundModel->triples as $triple){
-			error_log('[foafeditor] found generator agent triple and removing now');
-			$this->model->remove($triple);
-		}
-
-		$statement = new Statement($primary_topic_resource,$gen_agent,$builder);
-		$this->model->addWithoutDuplicates($statement);
-
-		$foundModel = $this->model->find($primary_topic_resource,$reports_to,NULL);
-		//remove existing triples
-		foreach($foundModel->triples as $triple){
-			$this->model->remove($triple);
-		}
-
-		$statement = new Statement($primary_topic_resource,$reports_to,$mailto_admin);
-		$this->model->addWithoutDuplicates($statement);
+    static function cleanTriple($triple) {
+	if ((property_exists($triple->obj,'label') && $triple->obj->label == '')) {
+		$triple = false;
 	}
-    }	
+
+	if ($triple->pred->uri == "http://webns.net/mvcb/generatorAgent") {
+error_log($triple->subj->uri);
+		$temptriple = new Statement(new Resource ($triple->subj->uri),new Resource ($triple->pred->uri),new Resource(BUILDER_URL));
+		$triple = $temptriple;
+	}
+	if ($triple->pred->uri == "http://webns.net/mvcb/errorReportsTo") {
+		$temptriple = new Statement(new Resource ($triple->subj->uri),new Resource ($triple->pred->uri),new Resource(SUPPORT_EMAIL));
+		$triple = $temptriple;
+	}
+	return $triple;
+   }
     
     private function addRdfsSeeAlso() {
 	//TODO in the future I need to query the Oauth_servers database to check what their private URL is
 	error_log('The user openid is '.$this->openid);
-	if ($this->isPublic) {
+	if ($this->isPublic && $this->openid != EXAMPLE_OPENID) {
 		$this->model->addWithoutDuplicates(new Statement (new Resource ($this->getUri()),new Resource('http://www.w3.org/2002/07/owl#sameAs'), new Resource(PRIVATE_URL.$this->openid.'/data/foaf.rdf#me')));
 		$this->model->addWithoutDuplicates(new Statement (new Resource ($this->getUri()),new Resource('http://www.w3.org/2000/01/rdf-schema#seeAlso'), new Resource(PRIVATE_URL.$this->openid.'/data/foaf.rdf')));
 	}
 
     }
 
-
     public static function replacePrimaryTopicInModel(&$model,$replacementUri,$uri,$prim,$foafData = false,$isLJ){
-	
 	/*get primary topics*/
 	//get the primary topic in a different way for livejournal
 	if(!$isLJ){
@@ -224,12 +210,13 @@ class FoafData {
 	        $newPrimaryTopicRes = new Resource($newPrimaryTopic);
 		$foafDataRes = new Resource($uri."#me");
 		
-	        $model->replace($oldPrimaryTopicRes,NULL,NULL,$newPrimaryTopicRes);
+	        $model->replace(new Resource($uri),NULL,NULL,new Resource($replacementUri));
+	        $model->replace(NULL,NULL,new Resource($uri),new Resource($replacementUri));
 	        $model->replace(NULL,NULL,$oldPrimaryTopicRes,$newPrimaryTopicRes);
+	        $model->replace($oldPrimaryTopicRes,NULL,NULL,$newPrimaryTopicRes);
 	        $model->replace(NULL,NULL,$foafDataRes,$newPrimaryTopicRes);
-	        $model->replace(NULL,NULL,$foafDataRes,$newPrimaryTopicRes);
+	        $model->replace($foafDataRes,NULL,NULL,$newPrimaryTopicRes);
 
-		
 	        /*just to make sure we have the right primary topic down*/
 		if($foafData){
 			error_log("foafData passed in ");
@@ -237,9 +224,10 @@ class FoafData {
 	        }
 
 	        //XXX speak to mischa about this one
-	        if ($oldPrimaryTopic != $newPrimaryTopic && $oldPrimaryTopic != PUBLIC_URL.'example.com/myopenid/foaf.rdf#me' && $oldPrimaryTopic != PRIVATE_URL.'example.com/myopenid/data/foaf.rdf#me') {
-	        	$model->addWithoutDuplicates(new Statement($newPrimaryTopicRes,new Resource("http://www.w3.org/2000/01/rdf-schema#seeAlso"),$oldPrimaryTopicRes));
+	        if ($oldPrimaryTopic != $newPrimaryTopic && $oldPrimaryTopic != PUBLIC_URL.EXAMPLE_OPENID.'/foaf.rdf#me' && $oldPrimaryTopic != PRIVATE_URL.EXAMPLE_OPENID.'/data/foaf.rdf#me') {
+	        	$model->addWithoutDuplicates(new Statement($newPrimaryTopicRes, new Resource("http://www.w3.org/2002/07/owl#sameAs"),$oldPrimaryTopicRes));
 	        } 
+
         } 
         
         /*make sure that the document has only one uri*/
@@ -253,10 +241,11 @@ class FoafData {
 	//and replace them
 	if($foundDocTriples && property_exists($foundDocTriples,'triples') && !empty($foundDocTriples->triples)){
 	    	foreach($foundDocTriples->triples as $triple){
-	    		$model->replace($triple->subj,NULL,NULL,$replacementUriRes);
-	    		$model->replace(NULL,NULL,$triple->subj,$replacementUriRes);
+			$model->remove($triple);
 	       	}
-	 }
+	}
+	$model->addWithoutDuplicates(new Statement($replacementUriRes,$predicate,$object));
+
 
     }
 
@@ -289,8 +278,6 @@ class FoafData {
 	$oldPersonUriRes = new Resource($first);
 	$oldDocUriRes = new Resource($page);
 
-error_log("uri = $uri ending $ending first $first and page $page and the new primaryTopic is $lame");
-		
 	//$this->getModel()->replace($oldDocUriRes,new Resource("<http://xmlns.com/foaf/0.1/primaryTopic>"),NULL,$newDocUriRes);
 	$this->getModel()->replace($oldDocUriRes,NULL,NULL,$newDocUriRes);
 	$this->getModel()->replace($oldPersonUriRes,NULL,NULL,$newPersonUriRes);
@@ -388,8 +375,7 @@ error_log("uri = $uri ending $ending first $first and page $page and the new pri
 
 */
     public function getEmptyDocument(){
-    	
-//	$graphset = ModelFactory::getDatasetMem('GarlikDataset');
+	//$graphset = ModelFactory::getDatasetMem('GarlikDataset');
 	$model = new NamedGraphMem($this->uri);
 	$this->model = $model;
 	

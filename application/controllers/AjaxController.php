@@ -201,8 +201,6 @@ class AjaxController extends Zend_Controller_Action {
 			$uriLoadOk = $this->foafData->addRDFtoModel($uri,$this->foafData->getUri());
 
 			$this->foafData->replacePrimaryTopic();
-			$this->foafData->replaceGeneratorAgent();
-
 			//TODO MISCHA TO PUT BACK IN
 			if ($uriLoadOk != 1){
 				$this->view->results['uriFound'] = true;
@@ -577,7 +575,6 @@ class AjaxController extends Zend_Controller_Action {
                 
                 $newPublicModel->load($filename_1);
                 $publicFoafData->replacePrimaryTopic($publicFoafData->getUri());
-                $publicFoafData->replaceGeneratorAgent();
                 $publicFoafData->setModel($newPublicModel);
           		
                 unlink($filename_1);
@@ -596,7 +593,6 @@ class AjaxController extends Zend_Controller_Action {
             	
             	$newPrivateModel->load($filename_2);
             	$privateFoafData->replacePrimaryTopic($privateFoafData->getUri());
-            	$privateFoafData->replaceGeneratorAgent();
                 $privateFoafData->setModel($newPrivateModel);
                  
                	unlink($filename_2);
