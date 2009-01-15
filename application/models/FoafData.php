@@ -262,9 +262,10 @@ class FoafData {
 
     //replace the existing primary topic with either newPrimaryTopic or a hash of the uri
     //TODO: get rid of $uri in here
-    public function replacePrimaryTopic($uri){
+    public function replacePrimaryTopic($uri,$isLJ=false){
 	
-	FoafData::replacePrimaryTopicInModel($this->model, $this->uri, $this->uri,$this->getPrimaryTopic(),$this);
+	FoafData::replacePrimaryTopicInModel($this->model, $this->uri, $this->uri,$this->getPrimaryTopic(),$this,$isLJ);
+
     }
 
     //This should be called to update the model after login
