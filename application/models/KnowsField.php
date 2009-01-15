@@ -445,7 +445,9 @@ class KnowsField extends Field {
         //FILTER(?ifp_predicate = foaf:homepage || ?ifp_predicate = foaf:weblog || ?ifp_predicate = foaf:mbox  ||?ifp_predicate = foaf:mbox_sha1sum);
         $ifpsFromUri = sparql_query(FOAF_EP,$query);
 	foreach($ifpsFromUri as $row){
-		
+		if(!isset($row['?uri']) || !isset($row['?ifp'])){
+			continue;
+		}
 		if(isset($userKnowsIfps[$row['?uri']])){
 			array_push($userKnowsIfps[$row['?uri']],$row['?ifp']);
 		} else {
