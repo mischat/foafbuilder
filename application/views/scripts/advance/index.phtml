@@ -1,5 +1,6 @@
 <?	
-	//We don't want to laod all the scripts
+  //We don't want to laod all the scripts
+  $this->layout()->setLayout('minimal');
 ?>
 <div id='foafUrlContainer'>
                 <?php if(property_exists($this,'publicUri') && $this->publicUri){
