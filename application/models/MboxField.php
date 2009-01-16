@@ -37,9 +37,6 @@ class MboxField extends Field {
     private function doFullLoad(&$foafData){
 	    $queryString = 
 	                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-	                PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-	                PREFIX bio: <http://purl.org/vocab/bio/0.1/>
-	                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 	                SELECT ?foafMbox
 	                WHERE{
 	                <".$foafData->getPrimaryTopic()."> foaf:mbox ?foafMbox .
