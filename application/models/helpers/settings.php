@@ -8,7 +8,7 @@ define('QDOS_EXT', 'http://extractor.qdos.com:8081/');
 define('FOAF_PATH', '/usr/local/src/qdos-dev/foaf');
 define('QDOS_ROOT', 'http://qdos.com/');
 define('EXAMPLE_OPENID', 'example.org/myopenid');
-define('SUPPORT_EMAIL', 'support@qdos.com');
+define('SUPPORT_EMAIL', 'mailto:support@qdos.com');
 
 /*The IFP_BLACKLISt*/
 
