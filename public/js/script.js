@@ -261,6 +261,7 @@ function genericObjectsToDisplay(data){
 	/*for the new style privacy stuff*/
 	simpleFieldsObjectsToDisplay(data);
 	mboxFieldsObjectsToDisplay(data);
+	mboxsha1FieldsObjectsToDisplay(data);
 	phoneFieldsObjectsToDisplay(data);
 	//addressFieldsObjectsToDisplay(data);
 	depictionFieldsObjectsToDisplay(data);
@@ -337,6 +338,20 @@ function simpleFieldsObjectsToDisplay(data){
 		renderSimpleFields(data.public,true);
 	}
 }
+
+
+function mboxsha1FieldsObjectsToDisplay(data){
+	if(!data){
+		return;
+	}
+	if(data.private){
+		renderMboxShaFields(data.private,false);
+	}
+	if(data.public){
+		renderMboxShaFields(data.public,true);
+	}
+}
+
 
 function mboxFieldsObjectsToDisplay(data){
 	if(!data){
@@ -1241,6 +1256,40 @@ function renderNearestAirportFields(data,isPublic){
 	}
 }
 
+function renderMboxShaFields(data,isPublic){
+	if(!data || !data.foafMboxShaFields || typeof(data.foafMboxShaFields) == 'undefined'){
+		return;
+	}
+	
+	var name = data.foafMboxShaFields.name;
+	var label = data.foafMboxShaFields.displayLabel;
+	
+	/*build the container if it isn't there already*/
+	var containerElement = document.getElementById(name+"_container");
+	if(!containerElement){
+		containerElement = createFieldContainer(name, label);
+	}
+
+	
+	/*render each individual phone element*/	
+	var i = containerElement.childNodes.length;
+	if(typeof(data.foafMboxShaFields.values) != 'undefined' && data.foafMboxShaFields.values && typeof(data.foafMboxShaFields.values[0])!='undefined'){
+		for(mbox in data.foafMboxShaFields.values){
+			createGenericInputElement(name, data.foafMboxShaFields.values[mbox], i,false,false,false,!isPublic);	
+			i++;
+		}
+	} else {
+		/*create an empty field but only if this is the first one XXX this depends on this function being called in the public sense initially*/
+		if(isPublic){
+			createGenericInputElement(name, '13dbc4ea7e4fc55ae706562a14ab5b444f805d8c', i,false,true,false,true);
+		}
+	}	
+	
+	/*create an add link XXX this means we have to display public fields before private ones*/
+	if(isPublic){
+		createGenericAddElement(containerElement,name,label,true);
+	}
+}
 
 /*renders the appropriate mbox fields*/
 function renderMboxFields(data,isPublic){
@@ -2034,6 +2083,7 @@ function displayToObjects(name){
 		case 'load-contact-details':
 			//addressDisplayToObjects();
 			mboxDisplayToObjects();
+			mboxshaDisplayToObjects();
 			phoneDisplayToObjects();
 			break;
 		case 'load-accounts':
@@ -2699,6 +2749,51 @@ function depictionDisplayToObjects(){
 	}
 }
 
+function mboxshaDisplayToObjects(){
+	var containerElement = document.getElementById('foafMboxSha_container');
+	
+	if(!containerElement){
+		return
+	}
+	if(typeof(globalFieldData.foafMboxShaFields) == 'undefined' || !globalFieldData.foafMboxShaFields){
+		return;
+	}
+	if(typeof(globalPrivateFieldData.foafMboxShaFields) == 'undefined' || !globalPrivateFieldData.foafMboxShaFields){
+		return;
+	}
+	
+	/*remove the existing values*/
+	globalFieldData.foafMboxShaFields.values = new Array();
+	globalPrivateFieldData.foafMboxShaFields.values = new Array();
+		
+	/*add the elements that are present in the display again*/
+	for(i=0 ; i <containerElement.childNodes.length ; i++){
+				
+		var element = containerElement.childNodes[i];
+					
+		//we only want input elements
+		if(element.className != 'fieldInput'){	
+			continue;
+		}
+	    	//XXX naughty
+                if(element.style.color && element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
+                        continue;
+		}
+		var privacyBox = document.getElementById('privacycheckbox_'+element.id);
+		
+		/*no privacy checkbox, so skip to next childNode*/
+		if(typeof(privacyBox) == 'undefined' || !privacyBox){
+			continue;
+		}	
+		
+		/*put it into the appropriate field data object, private or not private*/
+		if(!privacyBox.checked){	
+			globalFieldData.foafMboxShaFields.values.push(element.value);
+		} else {
+			globalPrivateFieldData.foafMboxShaFields.values.push(element.value);
+		}		
+	}
+}
 
 function mboxDisplayToObjects(){
 	var containerElement = document.getElementById('foafMbox_container');

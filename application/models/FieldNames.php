@@ -93,6 +93,7 @@ class FieldNames {
 	private function instantiateContactDetailsFields($fullInstantiation = true){
 		$this->allFieldNames['foafPhone'] = new PhoneField($this->foafData,$this->privateFoafData,$fullInstantiation);
 		$this->allFieldNames['foafMbox'] = new MboxField($this->foafData,$this->privateFoafData,$fullInstantiation);
+		$this->allFieldNames['foafMboxSha'] = new MboxShaField($this->foafData,$this->privateFoafData,$fullInstantiation);
 		$this->allFieldNames['address'] = new AddressField($this->foafData,$this->privateFoafData,$fullInstantiation);
 	}
 	
