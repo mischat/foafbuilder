@@ -64,10 +64,9 @@ class AddressField extends Field {
     	//remove all the address fields
 	$this->removeAllExistingAddressTriples($foafData);
 	
-	var_dump($value->home);
-
-	var_dump($value->office);
-		//save the new addresses
+	//var_dump($value->home);
+	//var_dump($value->office);
+	//save the new addresses
         $this->saveAddressFieldsToModel($foafData,$value->home,'home');
         $this->saveAddressFieldsToModel($foafData,$value->office,'office');
     }
