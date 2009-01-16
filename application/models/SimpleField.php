@@ -162,44 +162,26 @@ class SimpleField extends Field{
 		//add new triples
 		$valueArray = get_object_vars($value);
 		foreach($valueArray[$this->name]->values as $thisValue){
-			if($this->type == 'literal'){
+			$value_res_or_literal = null;
+			if($this->type == 'literal' && $thisValue != ""){
 				$value_res_or_literal = new Literal($thisValue);
-			} else if($this->type == 'resource'){
+			} else if($this->type == 'resource' && $thisValue != 'http://' && $thisValue != 'mailto:'){
 				$value_res_or_literal = new Resource($thisValue);
 			} 		
-			$new_statement = new Statement($primary_topic_resource,$predicate_resource,$value_res_or_literal);	
-			if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/givenname') {
-				$phones = $phones = double_metaphone($thisValue);
-				foreach ($phones as $phone) {
-					if ($phone != "") {
-						$phone_statement = new Statement($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
-						$model->addWithOutDuplicates($phone_statement);
+			if ($value_res_or_literal != null) {
+				$new_statement = new Statement($primary_topic_resource,$predicate_resource,$value_res_or_literal);	
+				if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/givenname') {
+					$phones = $phones = double_metaphone($thisValue);
+					foreach ($phones as $phone) {
+						if ($phone != "") {
+							$phone_statement = new Statement($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
+							$model->addWithOutDuplicates($phone_statement);
+						}
 					}
+					
 				}
-				
-			}
-			if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/family_name') {
-				$phones = $phones = double_metaphone($thisValue);
-				foreach ($phones as $phone) {
-					if ($phone != "") {
-						$phone_statement = new Statement($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
-						$model->addWithOutDuplicates($phone_statement);
-					}
-				}
-			}
-			if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/surname') {
-				$phones = $phones = double_metaphone($thisValue);
-				foreach ($phones as $phone) {
-					if ($phone != "") {
-						$phone_statement = new Statement($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
-						$model->addWithOutDuplicates($phone_statement);
-					}
-				}
-			}
-			if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/name') {
-				$names = split(' ',$thisValue);
-				foreach ($names as $name) {
-					$phones = $phones = double_metaphone($name);
+				if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/family_name') {
+					$phones = $phones = double_metaphone($thisValue);
 					foreach ($phones as $phone) {
 						if ($phone != "") {
 							$phone_statement = new Statement($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
@@ -207,8 +189,31 @@ class SimpleField extends Field{
 						}
 					}
 				}
+				if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/surname') {
+					$phones = $phones = double_metaphone($thisValue);
+					foreach ($phones as $phone) {
+						if ($phone != "") {
+							$phone_statement = new Statement($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
+							$model->addWithOutDuplicates($phone_statement);
+						}
+					}
+				}
+				if ($this->predicateUri == 'http://xmlns.com/foaf/0.1/name') {
+					$names = split(' ',$thisValue);
+					foreach ($names as $name) {
+						$phones = $phones = double_metaphone($name);
+						foreach ($phones as $phone) {
+							if ($phone != "") {
+								$phone_statement = new Statement($primary_topic_resource,new Resource('http://qdos.com/schema#metaphone'), new Literal($phone));
+								$model->addWithOutDuplicates($phone_statement);
+							}
+						}
+					}
+				}
+				$model->addWithOutDuplicates($new_statement);
+			} else {
+				error_log("an empty triple was generated in a simplefield".$this->predicateUri);
 			}
-			$model->addWithOutDuplicates($new_statement);
 		}
 	}
 	
