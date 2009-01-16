@@ -1281,7 +1281,7 @@ function renderMboxShaFields(data,isPublic){
 	} else {
 		/*create an empty field but only if this is the first one XXX this depends on this function being called in the public sense initially*/
 		if(isPublic){
-			createGenericInputElement(name, '13dbc4ea7e4fc55ae706562a14ab5b444f805d8c', i,false,true,false,true);
+			createGenericInputElement(name, 'bd7185c8fdb0add87644c225b7ab9c562667f03d', i,false,true,false,true);
 		}
 	}	
 	
