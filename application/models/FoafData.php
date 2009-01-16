@@ -31,8 +31,7 @@ class FoafData {
 
 	//Check if authenicated
 	if($defaultNamespace->authenticated == true) {
-		error_log("[builder] The user has AUTHENTICATED! ");
-		error_log("the openid is ".$this->openid);
+		error_log("[builder] The user has AUTHENTICATED! and the openid is ".$this->openid);
 		$this->openid = $defaultNamespace->url;
 	} else {
 		error_log("[builder] The user has NOT AUTHENTICATED! ");
@@ -142,7 +141,6 @@ class FoafData {
 	}
 
 	if ($triple->pred->uri == "http://webns.net/mvcb/generatorAgent") {
-error_log($triple->subj->uri);
 		$temptriple = new Statement(new Resource ($triple->subj->uri),new Resource ($triple->pred->uri),new Resource(BUILDER_URL));
 		$triple = $temptriple;
 	}
@@ -155,7 +153,6 @@ error_log($triple->subj->uri);
     
     private function addRdfsSeeAlso() {
 	//TODO in the future I need to query the Oauth_servers database to check what their private URL is
-	error_log('The user openid is '.$this->openid);
 	if ($this->isPublic && $this->openid != EXAMPLE_OPENID) {
 		$this->model->addWithoutDuplicates(new Statement (new Resource ($this->getUri()),new Resource('http://www.w3.org/2002/07/owl#sameAs'), new Resource(PRIVATE_URL.$this->openid.'/data/foaf.rdf#me')));
 		$this->model->addWithoutDuplicates(new Statement (new Resource ($this->getUri()),new Resource('http://www.w3.org/2000/01/rdf-schema#seeAlso'), new Resource(PRIVATE_URL.$this->openid.'/data/foaf.rdf')));
@@ -271,14 +268,12 @@ error_log($triple->subj->uri);
 
 	$this->setUri($uri);
 	$this->setPrimaryTopic($uri.$ending);
-	$lame = $this->getPrimaryTopic();
 	
 	$newDocUriRes = new Resource($uri);
 	$newPersonUriRes = new Resource($uri.$ending);
 	$oldPersonUriRes = new Resource($first);
 	$oldDocUriRes = new Resource($page);
 
-	//$this->getModel()->replace($oldDocUriRes,new Resource("<http://xmlns.com/foaf/0.1/primaryTopic>"),NULL,$newDocUriRes);
 	$this->getModel()->replace($oldDocUriRes,NULL,NULL,$newDocUriRes);
 	$this->getModel()->replace($oldPersonUriRes,NULL,NULL,$newPersonUriRes);
 	$this->getModel()->replace(NULL,NULL,$oldPersonUriRes,$newPersonUriRes);
