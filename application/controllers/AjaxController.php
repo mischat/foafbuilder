@@ -19,7 +19,6 @@ class AjaxController extends Zend_Controller_Action {
 	
 	public function loadIfpsAction(){
 		set_time_limit(150);
-
                 //find and decode the ifps
                 $ifps = urldecode($_GET['ifps']);
 
