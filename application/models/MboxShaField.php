@@ -8,7 +8,7 @@ class MboxShaField extends Field {
      	
     	//XXX this is a bit inefficient
         $this->name = 'foafMboxSha';
-        $this->label = 'Mbox Sha1sums';
+        $this->label = 'Email Sha1sums';
 	
        	$this->data['public']['foafMboxShaFields'] = array();
         $this->data['public']['foafMboxShaFields']['values'] = array();
