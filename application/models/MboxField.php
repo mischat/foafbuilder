@@ -113,7 +113,6 @@ class MboxField extends Field {
 					error_log("Yay, we are keeping mbox triples ow....");
 				}
 			}
-			
 			//find existing triples
 
 			//remove existing triples
