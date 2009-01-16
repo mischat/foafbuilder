@@ -337,7 +337,7 @@ $default_prefixes = array(
    'foaf' => 'http://xmlns.com/foaf/0.1/',
    'word' => 'http://xmlns.com/wordnet/1.6/',
    'admin' => 'http://webns.net/mvcb/',
-   'skype' => 'callto://',
+   'callto' => 'callto://',
    'flickr' => 'http://flickr.qdos.com/schema/',
    'lastfm' => 'http://foaf.qdos.com/lastfm/schema/',
    'skos' => 'http://www.w3.org/2004/02/skos/core#',
@@ -351,13 +351,11 @@ $default_prefixes = array(
    'wot' => 'http://xmlns.com/wot/0.1/',
    'cc' => 'http://creativecommons.org/ns#',
    'geo' => 'http://www.w3.org/2003/01/geo/wgs84_pos#',
-   'mail' => 'mailto:',
+   'mailto' => 'mailto:',
    'cert' => 'http://www.w3.org/ns/auth/cert#',
    'rsa' => 'http://www.w3.org/ns/auth/rsa#',
    'tel' => 'tel:'
 );
-
-
 
 // ----------------------------------------------------------------------------------
 // InfModel
