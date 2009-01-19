@@ -78,13 +78,13 @@ class MboxShaField extends Field {
 
 		//First to remove the sha1sums, dont remove if no corresponding mbox exists
 		$foundModel = $foafData->getModel()->find($primary_topic_resource,$sha1Sum_resource,NULL);
+		
+		$mboxes = $foafData->getModel()->find($primary_topic_resource,new Resource("http://xmlns.com/foaf/0.1/mbox"),NULL);
 
 		//remove existing triples
 		foreach($foundModel->triples as $triple){
 			$foafData->getModel()->remove($triple);
-			error_log("I am removing a Sha1sum now .....".$triple->obj->label);
 		}
-		
 		//add new triples
 		$valueArray = $value->values;
 		
@@ -92,14 +92,12 @@ class MboxShaField extends Field {
 			if(!$thisValue || $thisValue == '' || trim($thisValue) == '' || !trim($thisValue)){
 				continue;			
 			}
-
 			if ($this->isShaValid($thisValue)) {
 				$literalValue = new Literal($thisValue);
 				
 				$mbox_Sha1Statement = new Statement($primary_topic_resource,$sha1Sum_resource,$literalValue);	
 				
 				$foafData->getModel()->addWithoutDuplicates($mbox_Sha1Statement);
-			error_log("I am adding a Sha1sum now .....$thisValue");
 			}
 		}
     }
@@ -108,7 +106,6 @@ class MboxShaField extends Field {
     private function isShaValid($value) {
 	if (preg_match('/^[a-z0-9]{40}$/',$value)) {
 		return true;
-		error_log("yay ... valid sha1sum ....");
 	} 
 	return false;
     }
