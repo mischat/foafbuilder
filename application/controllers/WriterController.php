@@ -123,6 +123,7 @@ class WriterController extends Zend_Controller_Action
 	$this->view->model->setBaseUri(NULL);
 	$result = $this->view->model->find(NULL, NULL, NULL);
 
+        $this->doPostProcessing($publicFoafData);
 	$result = $this->removeLanguageTags($result);
 
 	$data = $result->writeRdfToString();
@@ -153,6 +154,7 @@ class WriterController extends Zend_Controller_Action
 	$this->view->model->setBaseUri(NULL);
 	$result = $this->view->model->find(NULL, NULL, NULL);
 
+        $this->doPostProcessing($publicFoafData);
 	$result = $this->removeLanguageTags($result);
 
 	$data = $result->writeRdfToString();
@@ -179,6 +181,7 @@ class WriterController extends Zend_Controller_Action
 	$this->view->model->setBaseUri(NULL);
 	$result = $this->view->model->find(NULL, NULL, NULL);
 
+	$this->doPostProcessing($publicFoafData);
 	$result = $this->removeLanguageTags($result);
 
 	$data = $result->writeRdfToString();
@@ -195,6 +198,20 @@ class WriterController extends Zend_Controller_Action
 	    ->appendBody($data);
     }
     
+  public function doPostProcessing(&$foafData) {
+	$docUriRes = new Resource($foafData->getURI());
+	$predUriRes = new Resource("http://purl.org/dc/terms/modified");
+	$results = $foafData->getModel()->find($docUriRes,$predUriRes,NULL);
+
+	if ($results) {
+		foreach ($results->triples as $result) {
+			$foafData->getModel()->remove($result);
+		}
+	}
+	$foafData->getModel()->addWithoutDuplicates(new Statement($docUriRes,$predUriRes,new Literal(date("Y-m-d"))));
+  }
+
+ 
   public function writeFoafAction() {
         require_once 'FoafData.php';
         
