@@ -133,6 +133,119 @@ function loadFoaf(name,url){
   	
 }
 
+/*mangles the changes in the Sha1sum Radio buttons, before saving*/
+function sha1sumSaveFoaf() {
+	/*Get the value of the checkbox*/
+        var containerElement = document.getElementById("foafMboxSha_container");
+
+	var selected = "";
+ 	/*add the elements that are present in the display again*/
+        for(i=0 ; i <containerElement.childNodes.length ; i++){
+
+                var element = containerElement.childNodes[i];
+
+                //we only want radio input elements
+                if(element.className != 'fieldMboxShaRadio'){
+                        continue;
+                }
+		/*now we have the value of the selected radio button*/
+		if (element.checked) {
+			selected = element.value;
+		}
+        }
+	/*Do something if we have a value here*/
+	if (selected == "allpublic" || selected == "allprivate") {
+
+		for (i=0; i < containerElement.childNodes.length ; i++) {
+
+			var element = containerElement.childNodes[i];
+
+			if (element.className != "fieldInput") {
+				continue;
+			}
+	
+	                var privacy = document.getElementById('privacycheckbox_'+element.id);
+
+			if (selected == "allprivate") {
+				privacy.checked = true;
+			} else {
+				privacy.checked = false;
+			}
+		}
+	} else if (selected == "followmbox") {
+        	var containerMboxElement = document.getElementById("foafMbox_container");
+		for (j=0; j < containerMboxElement.childNodes.length; j++) {
+			var element = containerMboxElement.childNodes[j];
+
+			if (element.className != "fieldInput") {
+				continue;
+			}
+		
+			var containerShaElement = document.getElementById("foafMboxSha_container");
+			var sha1sum = sha1(mangleMailto(element.value));
+			var mboxPrivacy = document.getElementById('privacycheckbox_'+element.id);
+
+			for (i=0 ; i < containerShaElement.childNodes.length; i++) {
+				var shaelement = containerShaElement.childNodes[i];
+		
+				if (shaelement.className != "fieldInput") {			
+					continue;
+				}
+				
+				/*So here we have a match*/
+				if (shaelement.value == sha1sum) {
+					var shaPrivacy = document.getElementById('privacycheckbox_'+shaelement.id);
+					shaPrivacy.checked = mboxPrivacy.checked;
+				}
+			}
+		}
+
+	}
+	//This should happen at the end ... 
+	saveFoaf();
+}
+
+/*special save for the Mbox's*/
+function mboxSaveFoaf() {
+	if (currentPage != 'load-contact-details') {
+		return;
+	}
+
+	var mboxContainerElement = document.getElementById("foafMbox_container");
+	var shaContainerElement = document.getElementById("foafMboxSha_container");
+
+	for (i=0;i < mboxContainerElement.childNodes.length;i++) {
+		var addmeFlag = true;
+		var mboxElement = mboxContainerElement.childNodes[i];	
+
+		if (mboxElement.className != "fieldInput") {
+			continue;
+		}	
+		if (mboxElement.value == "example@example.com") {
+			continue;
+		}
+
+		var sha1sum = sha1(mangleMailto(mboxElement.value));
+		for (j=0;j < shaContainerElement.childNodes.length;j++) {
+			var shaElement = shaContainerElement.childNodes[j];	
+
+			if (shaElement.className != "fieldInput") {
+				continue;
+			}	
+			if (shaElement.value == sha1sum) {
+				addmeFlag = false;
+				continue;
+			}
+		}
+		if (addmeFlag) {
+			 var x = shaContainerElement.childNodes.length;
+
+		        /*render each individual phone element*/
+                        createGenericInputElement("foafMoxSha", sha1sum, x,"foafMboxSha_container",false,false,true);
+		}
+	}
+}
+
 /*saves all the foaf data*/
 function saveFoaf(){
 	
@@ -158,7 +271,7 @@ function saveFoaf(){
 
 /*Clears FOAF model from session*/
 function clearFoaf() {
-		/*destroy the session and go back to the start page*/
+	/*destroy the session and go back to the start page*/
         turnOnLoading();
         $.post("/ajax/clear-Foaf", { }, function(){turnOffLoading();window.location='/'},null);
         
@@ -1270,6 +1383,49 @@ function renderMboxShaFields(data,isPublic) {
 
         var i = containerElement.childNodes.length;
 
+	if (!isPublic){
+		/*Create the radio buttons as needed*/
+		containerElement.appendChild(document.createElement("br"));
+
+		var newElement1 = document.createElement('input');
+                newElement1.className = "fieldMboxShaRadio";
+		newElement1.setAttribute('type','radio');       
+		newElement1.setAttribute('id','mboxsharadio0');       
+		newElement1.setAttribute('name','mboxsharadio');       
+		newElement1.setAttribute('value','allprivate');
+		//newElement1.onchange = function(){ saveFoaf();};
+		newElement1.onchange = function(){ sha1sumSaveFoaf();};
+
+		var newElement2 = document.createElement('input');
+                newElement2.className = "fieldMboxShaRadio";
+		newElement2.setAttribute('type','radio');       
+		newElement2.setAttribute('id','mboxsharadio1');       
+		newElement2.setAttribute('name','mboxsharadio');       
+		newElement2.setAttribute('value','allpublic');
+		//newElement2.onchange = function(){ saveFoaf();};
+		newElement2.onchange = function(){ sha1sumSaveFoaf();};
+
+		var newElement3 = document.createElement('input');
+                newElement3.className = "fieldMboxShaRadio";
+		newElement3.setAttribute('type','radio');       
+		newElement3.setAttribute('id','mboxsharadio2');       
+		newElement3.setAttribute('name','mboxsharadio');       
+		newElement3.setAttribute('value','followmbox');
+		//newElement3.onchange = function(){ saveFoaf();};
+		newElement3.onchange = function(){ sha1sumSaveFoaf();};
+		newElement3.checked = true;
+
+		containerElement.appendChild(newElement1);
+		var privacyText = document.createTextNode('All Private');
+		containerElement.appendChild(privacyText);
+		containerElement.appendChild(newElement2);
+		var privacyText = document.createTextNode('All Public');
+		containerElement.appendChild(privacyText);
+		containerElement.appendChild(newElement3);
+		var privacyText = document.createTextNode('Follow Email');
+		containerElement.appendChild(privacyText);
+	}
+
 	/*render each individual phone element*/	
 	if(typeof(data.foafMboxShaFields.values) != 'undefined' && data.foafMboxShaFields.values && typeof(data.foafMboxShaFields.values[0])!='undefined'){
 		for(mbox in data.foafMboxShaFields.values){
@@ -1296,46 +1452,9 @@ function renderMboxShaFields(data,isPublic) {
 			i++;
 		}
 	} 
-	/*create an add link XXX this means we have to display public fields before private ones*/
-	if(isPublic){
+	if (isPublic) {
+		/*create an add link XXX this means we have to display public fields before private ones*/
 		createGenericAddElement(containerElement,name,label,false);
-	}
-	if (isPublic){
-
-		containerElement.appendChild(document.createElement("br"));
-
-		var newElement1 = document.createElement('input');
-                newElement1.className = "fieldMboxSha";
-		newElement1.setAttribute('type','radio');       
-		newElement1.setAttribute('name','mboxsharadio');       
-		newElement1.setAttribute('value','allprivate');
-		newElement1.onchange = function(){ saveFoaf();};
-
-		var newElement2 = document.createElement('input');
-                newElement2.className = "fieldMboxSha";
-		newElement2.setAttribute('type','radio');       
-		newElement2.setAttribute('name','mboxsharadio');       
-		newElement2.setAttribute('value','allpublic');
-		newElement2.onchange = function(){ saveFoaf();};
-
-
-		var newElement3 = document.createElement('input');
-                newElement3.className = "fieldMboxSha";
-		newElement3.setAttribute('type','radio');       
-		newElement3.setAttribute('name','mboxsharadio');       
-		newElement3.setAttribute('value','followmbox');
-		newElement3.onchange = function(){ saveFoaf();};
-		newElement3.checked = true;
-
-		containerElement.appendChild(newElement1);
-		var privacyText = document.createTextNode('All Private');
-		containerElement.appendChild(privacyText);
-		containerElement.appendChild(newElement2);
-		var privacyText = document.createTextNode('All Public');
-		containerElement.appendChild(privacyText);
-		containerElement.appendChild(newElement3);
-		var privacyText = document.createTextNode('Follow Email');
-		containerElement.appendChild(privacyText);
 	}
 }
 
@@ -1359,13 +1478,13 @@ function renderMboxFields(data,isPublic){
 	if(typeof(data.foafMboxFields.values) != 'undefined' && data.foafMboxFields.values && typeof(data.foafMboxFields.values[0])!='undefined'){
 		for(mbox in data.foafMboxFields.values){
 			//createGenericInputElement(name, data.foafMboxFields.values[mbox], i,false,false,false,!isPublic);	
+			//newElement.setAttribute('onfocus','aveFoaf()');
 
 			var newElement = document.createElement('input');
 			newElement.id = name+'_'+i;
 			newElement.setAttribute('value',data.foafMboxFields.values[mbox]);
-			newElement.onchange = function(){ saveFoaf();};
-			newElement.onfocus = function(){ saveFoaf();};
-			//newElement.setAttribute('onfocus','saveFoaf()');
+			newElement.onchange = function(){ mboxSaveFoaf();};
+			newElement.onfocus = function(){ mboxSaveFoaf();};
 
 			createMboxInputElementRemoveLink(newElement.id,name+"_container");
 			createGenericInputElementRemoveLink(newElement.id,name+"_container");
@@ -1377,8 +1496,23 @@ function renderMboxFields(data,isPublic){
 		}
 	} else {
 		/*create an empty field but only if this is the first one XXX this depends on this function being called in the public sense initially*/
-		if(isPublic){
-			createGenericInputElement(name, 'example@example.com', i,false,true,false,true);
+		if (isPublic) {
+			var value = 'example@example.com';
+			//createGenericInputElement(name, 'example@example.com', i,false,true,false,true);
+			var newElement = document.createElement('input');
+			newElement.id = name+'_'+i;
+			newElement.setAttribute('value',value);
+			newElement.onchange = function(){ mboxSaveFoaf();};
+                        newElement.style.color = '#dddddd';
+                        newElement.onfocus = function(){if(this.value==value){this.value ='';this.style.color='#000000';}};
+			newElement.className = 'fieldInput';
+
+			createMboxInputElementRemoveLink(newElement.id,name+"_container");
+			createGenericInputElementRemoveLink(newElement.id,name+"_container");
+			createGenericInputElementPrivacyBox(newElement.id,name+"_container",isPublic);
+
+			document.getElementById(name+"_container").appendChild(newElement);
+			i++;
 		}
 	}	
 	/*create an add link XXX this means we have to display public fields before private ones*/
@@ -1386,7 +1520,6 @@ function renderMboxFields(data,isPublic){
 		createMboxAddElement(containerElement,name,label,true);
 	}
 }
-
 
 /*Render the location map*/
 function renderAddressFields(data,isPublic){
@@ -3394,18 +3527,30 @@ function phoneDisplayToObjects(){
 		/*remove the add element*/
 		var addElement = document.getElementById(addElementId);
 		addElement.parentNode.removeChild(addElement);
-		var value = '';
-		/*append a child node*/
-		if(displayLabel){
-			value = 'Enter '+displayLabel+' here';
-		}
-		
-		createGenericInputElement(name,value,thisElementCount,containerId,true,false,defaultIsPrivate);
-                createMboxInputElementRemoveLink(addElement.id,addElementId+"_container");
 
+/********************************************/
+//		createGenericInputElement(name,value,thisElementCount,containerId,true,false,defaultIsPrivate);
+//              createMboxInputElementRemoveLink(addElement.id,addElementId+"_container");
+//		createGenericAddElement(name+"_container",addElement.id,"Email",true);
+/*******************************************/
+
+		var value = 'example@example.com';
+		var addElement = document.createElement('input');
+		addElement.id = name+'_'+thisElementCount;
+		addElement.setAttribute('value',value);
+                addElement.style.color = '#dddddd';
+                addElement.className = 'fieldInput';
+		addElement.onfocus = function(){if(this.value==value){this.value ='';this.style.color='#000000';}};
+		addElement.onchange = function(){ mboxSaveFoaf();};
+
+		createMboxInputElementRemoveLink(addElement.id,name+"_container");
+		createGenericInputElementRemoveLink(addElement.id,name+"_container");
+		createGenericInputElementPrivacyBox(addElement.id,name+"_container",false);
 
 		/*re add the add element*/
 		document.getElementById(containerId).appendChild(addElement);
+
+		createMboxAddElement(document.getElementById(containerId),"foafMbox","Email",true);
 	}
 	
 	function createGenericAddElement(container,name,displayLabel,defaultIsPrivate){
@@ -3546,7 +3691,6 @@ function phoneDisplayToObjects(){
 
 		document.getElementById(contname).appendChild(newElement);
 		newElement.className = 'fieldInput';
-		
 		
 		return newElement;
 	}
@@ -4148,7 +4292,6 @@ function removeMboxInputElement(removeId,removeDivId) {
                 return
         }
 
-
 	var inputElementMangled = sha1(mangleMailto(inputElement.value));
 
         for(i=0 ; i <secondcontainerElement.childNodes.length ; i++){
@@ -4307,7 +4450,7 @@ function addFriend(friendDivId){
 	
 	/*Add to the appropriate box*/
 	if(isUserKnows || isMutualFriend){
-		alert("Already there!");//TODO: add some sort of scrolling fading thing
+		//alert("Already there!");//TODO: add some sort of scrolling fading thing
 		
 	} else if(!isKnowsUser){//a non mutual friend
 		/*get container element*/
@@ -4470,7 +4613,6 @@ function makeMutualFriend(friendDivId){
 			});
 	
 }
-
 /*removes the input element with the given id as well as its corresponding remove element*/
 //TODO: this is badly named
 function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
@@ -4479,6 +4621,14 @@ function removeGenericInputElement(inputIdForRemoval, removeDivId, isImage){
 	var removeElement = document.getElementById(removeDivId);
 	var privacyDiv = document.getElementById("privacydiv_"+inputIdForRemoval);
 	
+
+	//TODO MISCHA ... This is really dirty! 
+	var bothDiv = removeDivId.replace(/removeLink/, "removebothLink");
+	var removeBothElement = document.getElementById(bothDiv);
+	if (removeBothElement) {
+		removeBothElement.parentNode.removeChild(removeBothElement);
+	}
+
 	if(isImage){
 		var source = inputElement.src;
 		$.post("/file/remove-image", {key: get_cookie_id(), filename: source}, function(){saveFoaf();},null);
