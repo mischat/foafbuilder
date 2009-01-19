@@ -339,8 +339,7 @@ function simpleFieldsObjectsToDisplay(data){
 	}
 }
 
-
-function mboxsha1FieldsObjectsToDisplay(data){
+function mboxsha1FieldsObjectsToDisplay(data) {
 	if(!data){
 		return;
 	}
@@ -351,7 +350,6 @@ function mboxsha1FieldsObjectsToDisplay(data){
 		renderMboxShaFields(data.public,true);
 	}
 }
-
 
 function mboxFieldsObjectsToDisplay(data){
 	if(!data){
@@ -1256,7 +1254,7 @@ function renderNearestAirportFields(data,isPublic){
 	}
 }
 
-function renderMboxShaFields(data,isPublic){
+function renderMboxShaFields(data,isPublic) {
 	if(!data || !data.foafMboxShaFields || typeof(data.foafMboxShaFields) == 'undefined'){
 		return;
 	}
@@ -1270,24 +1268,74 @@ function renderMboxShaFields(data,isPublic){
 		containerElement = createFieldContainer(name, label);
 	}
 
-	
+        var i = containerElement.childNodes.length;
+
 	/*render each individual phone element*/	
-	var i = containerElement.childNodes.length;
 	if(typeof(data.foafMboxShaFields.values) != 'undefined' && data.foafMboxShaFields.values && typeof(data.foafMboxShaFields.values[0])!='undefined'){
 		for(mbox in data.foafMboxShaFields.values){
 			createGenericInputElement(name, data.foafMboxShaFields.values[mbox], i,false,false,false,!isPublic);	
 			i++;
 		}
-	} else {
-		/*create an empty field but only if this is the first one XXX this depends on this function being called in the public sense initially*/
-		if(isPublic){
-			createGenericInputElement(name, 'bd7185c8fdb0add87644c225b7ab9c562667f03d', i,false,true,false,true);
+	} 
+	/*render each individual phone element*/	
+	if(typeof(data.foafMboxFields.values) != 'undefined' && data.foafMboxFields.values && typeof(data.foafMboxFields.values[0])!='undefined'){
+		for(mbox in data.foafMboxFields.values){
+			if (data.foafMboxFields.values[mbox] != 'example@example.com') {
+				var shaflag = false;
+				var mangled = sha1(mangleMailto(data.foafMboxFields.values[mbox]));
+				
+				for (sha in data.foafMboxShaFields.values) {
+					if (data.foafMboxShaFields.values[sha] == mangled) {
+						shaflag = true;
+					}
+				}
+				if (!shaflag) {
+					createGenericInputElement(name, mangled, i,false,false,false,!isPublic);	
+				}
+			}	
+			i++;
 		}
-	}	
-	
+	} 
 	/*create an add link XXX this means we have to display public fields before private ones*/
 	if(isPublic){
-		createGenericAddElement(containerElement,name,label,true);
+		createGenericAddElement(containerElement,name,label,false);
+	}
+	if (isPublic){
+
+		containerElement.appendChild(document.createElement("br"));
+
+		var newElement1 = document.createElement('input');
+                newElement1.className = "fieldMboxSha";
+		newElement1.setAttribute('type','radio');       
+		newElement1.setAttribute('name','mboxsharadio');       
+		newElement1.setAttribute('value','allprivate');
+		newElement1.onchange = function(){ saveFoaf();};
+
+		var newElement2 = document.createElement('input');
+                newElement2.className = "fieldMboxSha";
+		newElement2.setAttribute('type','radio');       
+		newElement2.setAttribute('name','mboxsharadio');       
+		newElement2.setAttribute('value','allpublic');
+		newElement2.onchange = function(){ saveFoaf();};
+
+
+		var newElement3 = document.createElement('input');
+                newElement3.className = "fieldMboxSha";
+		newElement3.setAttribute('type','radio');       
+		newElement3.setAttribute('name','mboxsharadio');       
+		newElement3.setAttribute('value','followmbox');
+		newElement3.onchange = function(){ saveFoaf();};
+		newElement3.checked = true;
+
+		containerElement.appendChild(newElement1);
+		var privacyText = document.createTextNode('All Private');
+		containerElement.appendChild(privacyText);
+		containerElement.appendChild(newElement2);
+		var privacyText = document.createTextNode('All Public');
+		containerElement.appendChild(privacyText);
+		containerElement.appendChild(newElement3);
+		var privacyText = document.createTextNode('Follow Email');
+		containerElement.appendChild(privacyText);
 	}
 }
 
@@ -1310,7 +1358,21 @@ function renderMboxFields(data,isPublic){
 	var i = containerElement.childNodes.length;
 	if(typeof(data.foafMboxFields.values) != 'undefined' && data.foafMboxFields.values && typeof(data.foafMboxFields.values[0])!='undefined'){
 		for(mbox in data.foafMboxFields.values){
-			createGenericInputElement(name, data.foafMboxFields.values[mbox], i,false,false,false,!isPublic);	
+			//createGenericInputElement(name, data.foafMboxFields.values[mbox], i,false,false,false,!isPublic);	
+
+			var newElement = document.createElement('input');
+			newElement.id = name+'_'+i;
+			newElement.setAttribute('value',data.foafMboxFields.values[mbox]);
+			newElement.onchange = function(){ saveFoaf();};
+			newElement.onfocus = function(){ saveFoaf();};
+			//newElement.setAttribute('onfocus','saveFoaf()');
+
+			createMboxInputElementRemoveLink(newElement.id,name+"_container");
+			createGenericInputElementRemoveLink(newElement.id,name+"_container");
+			createGenericInputElementPrivacyBox(newElement.id,name+"_container",!isPublic);
+
+			document.getElementById(name+"_container").appendChild(newElement);
+			newElement.className = 'fieldInput';
 			i++;
 		}
 	} else {
@@ -1319,10 +1381,9 @@ function renderMboxFields(data,isPublic){
 			createGenericInputElement(name, 'example@example.com', i,false,true,false,true);
 		}
 	}	
-	
 	/*create an add link XXX this means we have to display public fields before private ones*/
 	if(isPublic){
-		createGenericAddElement(containerElement,name,label,true);
+		createMboxAddElement(containerElement,name,label,true);
 	}
 }
 
@@ -2749,6 +2810,7 @@ function depictionDisplayToObjects(){
 	}
 }
 
+//function mboxshOLDaDisplayToObjects(){
 function mboxshaDisplayToObjects(){
 	var containerElement = document.getElementById('foafMboxSha_container');
 	
@@ -2792,6 +2854,50 @@ function mboxshaDisplayToObjects(){
 		} else {
 			globalPrivateFieldData.foafMboxShaFields.values.push(element.value);
 		}		
+	}
+
+        var secondcontainerElement = document.getElementById('foafMbox_container');
+
+        if(!secondcontainerElement){
+                return
+        }
+        if(typeof(globalFieldData.foafMboxFields) == 'undefined' || !globalFieldData.foafMboxFields){
+                return;
+        }
+        if(typeof(globalPrivateFieldData.foafMboxFields) == 'undefined' || !globalPrivateFieldData.foafMboxFields){
+                return;
+        }
+	/*add the elements that are present in the display again*/
+
+	for(i=0 ; i <secondcontainerElement.childNodes.length ; i++){
+				
+		var element = secondcontainerElement.childNodes[i];
+					
+		//we only want input elements
+		if(element.className != 'fieldInput'){	
+			continue;
+		}
+	    	//XXX naughty
+                if(element.style.color && element.style.color != '#000000' && element.style.color != 'rgb(0, 0, 0)'){
+                        continue;
+		}
+		var privacyBox = document.getElementById('privacycheckbox_'+element.id);
+		
+		/*no privacy checkbox, so skip to next childNode*/
+		if(typeof(privacyBox) == 'undefined' || !privacyBox){
+			continue;
+		}	
+		
+		var mangled = mangleMailto(element.value);
+		if (mangled) {
+			mangled = sha1(mangled);
+			/*put it into the appropriate field data object, private or not private*/
+			if(!privacyBox.checked){	
+				globalFieldData.foafMboxShaFields.values.push(mangled);
+			} else {
+				globalPrivateFieldData.foafMboxShaFields.values.push(mangled);
+			}		
+		}
 	}
 }
 
@@ -2839,6 +2945,8 @@ function mboxDisplayToObjects(){
 			globalPrivateFieldData.foafMboxFields.values.push(element.value);
 		}		
 	}
+
+
 }
 
 function imgDisplayToObjects(){
@@ -3263,6 +3371,42 @@ function phoneDisplayToObjects(){
 			
 			return newFieldValueContainer;
 	}
+	function createMboxAddElement(container,name,displayLabel,defaultIsPrivate){
+	
+		/*create add link and attach it to the container*/
+		var addDiv = document.createElement("div");
+		addDiv.id = name+"_addLinkContainer";
+		addDiv.className = "addLinkContainer";
+		var addLink = document.createElement('a');
+		addLink = makeCursorAPointer(addLink);
+		addLink.appendChild(document.createTextNode("+Add another "+displayLabel));
+		addLink.className="addLink";
+		
+		//it needs to work in ie
+		addLink.href = "javascript:createMboxInputElementAboveAddLink('"+name+"',document.getElementById('"+addDiv.id+"').parentNode.childNodes.length,'"+container.id+"','"+addDiv.id+"','"+displayLabel+"','"+defaultIsPrivate+"');";
+
+		addDiv.appendChild(addLink);
+		container.appendChild(addDiv);
+	
+	}
+	//TODO: can we get rid of thisElementCount?
+	function createMboxInputElementAboveAddLink(name,thisElementCount,containerId,addElementId,displayLabel,defaultIsPrivate){
+		/*remove the add element*/
+		var addElement = document.getElementById(addElementId);
+		addElement.parentNode.removeChild(addElement);
+		var value = '';
+		/*append a child node*/
+		if(displayLabel){
+			value = 'Enter '+displayLabel+' here';
+		}
+		
+		createGenericInputElement(name,value,thisElementCount,containerId,true,false,defaultIsPrivate);
+                createMboxInputElementRemoveLink(addElement.id,addElementId+"_container");
+
+
+		/*re add the add element*/
+		document.getElementById(containerId).appendChild(addElement);
+	}
 	
 	function createGenericAddElement(container,name,displayLabel,defaultIsPrivate){
 	
@@ -3297,6 +3441,27 @@ function phoneDisplayToObjects(){
 		/*re add the add element*/
 		document.getElementById(containerId).appendChild(addElement);
 	}
+
+	/*creates the special remove link with the removeID for mbox's*/
+	function createMboxInputElementRemoveLink(removeId,containerId){
+		
+		/*create remove link and attach it to the container div*/
+		var containerDiv = document.getElementById(containerId);
+		if(containerDiv){
+			var removeDiv = document.createElement("div");
+			removeDiv.id = removeId+"removebothLinkContainer";
+			removeDiv.className = "removebothLinkContainer";
+			var removeLink = document.createElement('a');
+			removeLink = makeCursorAPointer(removeLink);
+			removeLink.appendChild(document.createTextNode("- Remove Both"));
+			removeLink.id="_removebothLink";
+			removeLink.className="removebothLink";
+			removeLink.setAttribute("href" , "javascript:removeMboxInputElement('"+removeId+"','"+removeDiv.id+"')");
+			removeDiv.appendChild(removeLink);
+			containerDiv.appendChild(removeDiv);
+		}
+	}
+
 	
 	/*creates a remove link with the removeId being the input element to be removed*/
 	function createGenericInputElementRemoveLink(removeId,containerId,isImage){
@@ -3951,6 +4116,80 @@ function phoneDisplayToObjects(){
 	
 /*---------------------------Add/remove element handlers---------------------------*/
 
+function removeMboxInputElement(removeId,removeDivId) {
+
+        var containerElement = document.getElementById('foafMbox_container');
+
+	/*Get the ids*/
+        var inputElement = document.getElementById(removeId);
+        var removeElement = document.getElementById(removeDivId);
+	var removeOriElement = document.getElementById(removeId+"removeLinkContainer");
+
+        var privacyDiv = document.getElementById("privacydiv_"+removeId);
+
+        /*remove the old element*/
+        if(inputElement){
+                inputElement.parentNode.removeChild(inputElement);
+        }
+        if(removeElement){
+                removeElement.parentNode.removeChild(removeElement);
+        }
+        if(removeOriElement){
+                removeOriElement.parentNode.removeChild(removeOriElement);
+        }
+        if(privacyDiv){
+                privacyDiv.parentNode.removeChild(privacyDiv);
+        }
+
+        /*remove the old one*/
+	var secondcontainerElement = document.getElementById('foafMboxSha_container');
+
+        if(!secondcontainerElement){
+                return
+        }
+
+
+	var inputElementMangled = sha1(mangleMailto(inputElement.value));
+
+        for(i=0 ; i <secondcontainerElement.childNodes.length ; i++){
+                var newelement = secondcontainerElement.childNodes[i];
+                if(newelement.className != 'fieldInput'){ 
+                        continue;
+                }
+		
+		if (newelement.value == inputElementMangled && inputElement.value != 'example@example.com') {
+			var inputElement = document.getElementById(newelement.id);
+			var removeElement = document.getElementById(newelement.id+'removeLinkContainer');
+			var privacyDiv = document.getElementById("privacydiv_"+newelement.id);
+			if(inputElement){
+				inputElement.parentNode.removeChild(inputElement);
+			}
+			if(removeElement){
+				removeElement.parentNode.removeChild(removeElement);
+			}
+			if(privacyDiv){
+				privacyDiv.parentNode.removeChild(privacyDiv);
+			}
+		}
+
+        }
+
+        saveFoaf();
+        /*update the global data object but don't save*/
+}
+
+function mangleMailto(mailto) {
+	re = /^.*@.*\..*$/;
+	if (!mailto.match(re)) {
+		return false;
+	}	
+	if (mailto.substr(0,6) != 'mailto:') {
+		mailto = 'mailto:'+mailto;
+	} 
+	return mailto;
+}
+
+
 /*remove the mutual friend whose div is given by the id removeId*/
 function removeMutualFriendElement(removeId,removeDivId){
 
@@ -3998,7 +4237,7 @@ function removeUserKnowsElement(removeId,removeDivId){
 	knowsDisplayToObjects();
 	
 	/*update the global data object but don't save*/
-	knowsDisplayToObjects();
+	//knowsDisplayToObjects();
 	
 }
 

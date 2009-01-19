@@ -96,22 +96,22 @@ class MboxField extends Field {
 			//remove existing triples
 			foreach($foundModel2->triples as $triple){
 				//A flag to see if mbox_sha1sums where here from the outset
-				$flag = 0;
+		//		$flag = 0;
 				//Loop through the mbox's and compare them	
-				foreach($foundModel->triples as $mboxtriple){
-					if (property_exists($mboxtriple,'obj')) {
-						if (property_exists($mboxtriple->obj,'label')) {
-							if (md5($mboxtriple->obj->label) == $triple->obj->label) {	
-								$flag ++;
-							}
-						}
-					}
-				}
-				if ($flag > 0) {
+		//		foreach($foundModel->triples as $mboxtriple){
+		//			if (property_exists($mboxtriple,'obj')) {
+		//				if (property_exists($mboxtriple->obj,'label')) {
+		//					if (md5($mboxtriple->obj->label) == $triple->obj->label) {	
+		//						$flag ++;
+		//					}
+		//				}
+		//			}
+		//		}
+		//		if ($flag > 0) {
 					$foafData->getModel()->remove($triple);
-				} else {
-					error_log("Yay, we are keeping mbox triples ow....");
-				}
+		//		} else {
+		//			error_log("Yay, we are keeping mbox triples ow....");
+		//		}
 			}
 			//find existing triples
 
