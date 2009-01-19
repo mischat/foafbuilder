@@ -76,7 +76,7 @@ class BasedNearField extends Field {
     //XXX: should be able to use rap's remove with NULLs for pred/obj
     public function removeTripleRecursively($triple, &$foafData){
     	
-	if (($triple instanceof BlankNode)) {
+	if (($triple->obj instanceof BlankNode)) {
 		$foundHangingStuff = $foafData->getModel()->find($triple->obj,NULL,NULL);
 		
 		if($foundHangingStuff && $foundHangingStuff->triples){
@@ -90,6 +90,8 @@ class BasedNearField extends Field {
 							$foafData->getModel()->remove($subSubTriple);
 						}
 					}
+					$foafData->getModel()->remove($subTriple);
+				} else {
 					$foafData->getModel()->remove($subTriple);
 				}
 			}
