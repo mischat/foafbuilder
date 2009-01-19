@@ -216,7 +216,6 @@ class FoafData {
 
 	        /*just to make sure we have the right primary topic down*/
 		if($foafData){
-			error_log("foafData passed in ");
 	        	$foafData->setPrimaryTopic($newPrimaryTopic);
 	        }
 
