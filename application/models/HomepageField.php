@@ -120,13 +120,15 @@ class HomepageField extends Field {
                         $new_statement = new Statement($primary_topic_resource,$predicate_resource,new Resource($thisValue));	
                         $foafData->getModel()->addWithoutDuplicates($new_statement);
                         /*Try and get the Hompage title from the HTML*/
-                        $title = $this->getHomepageTitle($thisValue);
-                        if ($title) {
-                            error_log("[foaf_editor] Homepage title returned");
-                            $new_statement = new Statement(new Resource($thisValue),new Resource("http://purl.org/dc/elements/1.1/title"),new Literal($title));
-                            $foafData->getModel()->addWithoutDuplicates($new_statement);
-                        } 
-                        //TODO MISCHA ... mangle the name to put something in here!
+                        $result = $foafData->getModel()->find(new Resource($thisValue),new Resource("http://purl.org/dc/elements/1.1/title"),NULL);
+                        if (!$result) { 
+                            $title = $this->getHomepageTitle($thisValue);
+                            if ($title) {
+                                error_log("[foaf_editor] Homepage title returned");
+                                $new_statement = new Statement(new Resource($thisValue),new Resource("http://purl.org/dc/elements/1.1/title"),new Literal($title));
+                                $foafData->getModel()->addWithoutDuplicates($new_statement);
+                            } 
+                        }
                     } else {
                         error_log("[foaf_editor] Homepage not added");
                     }
