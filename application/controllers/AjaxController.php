@@ -18,43 +18,37 @@ class AjaxController extends Zend_Controller_Action {
     private $privateFoafData;
 	
 	public function loadIfpsAction(){
-		error_log("Hmmm what's going on here?");
 		set_time_limit(150);
-		
-		//find and decode the ifps
-		$ifps = urldecode($_GET['ifps']);
-		error_log("hmmm".$ifps);
-		var_dump($ifps);	
-	
-		error_log("this request is made");
-		$ifps = substr($ifps,1);
-		$json = new Services_JSON();
-	        $ifps = $json->decode(stripslashes($ifps));
 
-		error_log("this request is made1");
-		if(empty($ifps)){
-			return;
-		}
-		error_log("this request is made2 ".implode('-----',$ifps));
-		//build a query with them
-		$ifps_filter = "FILTER(";
-		foreach($ifps as $ifp){
-			$ifps_filter.=' ?z = '.$ifp.' ||';
-		}
-		$ifps_filter = substr($ifps_filter,0,-2).")";	
-		$graphQuery=
-		"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-		SELECT DISTINCT ?graph
-		WHERE { 
-		    GRAPH ?graph {
-	   			?x ?y ?z . FILTER(?y=foaf:weblog || ?y=foaf:homepage || ?y=foaf:mbox_sha1sum || ?y=foaf:mbox) . ".$ifps_filter." .
-				?x foaf:knows ?someone .
-		    }
-		} limit 500";
-		
-		$graphQuery2=
-		"PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                //find and decode the ifps
+                $ifps = urldecode($_GET['ifps']);
+
+                $ifps = substr($ifps,1);
+                $json = new Services_JSON();
+                $ifps = $json->decode(stripslashes($ifps));
+
+                if(empty($ifps)){
+                        return;
+                }
+                //build a query with them
+                $ifps_filter = "FILTER(";
+                foreach($ifps as $ifp){
+                        $ifps_filter.=' ?z = '.$ifp.' ||';
+                }
+                $ifps_filter = substr($ifps_filter,0,-2).")";
+                $livejournalGraphQuery=
+                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                SELECT DISTINCT ?graph
+                WHERE { 
+                    GRAPH ?graph {
+                                ?x ?y ?z . FILTER(?y=foaf:weblog || ?y=foaf:homepage || ?y=foaf:mbox_sha1sum || ?y=foaf:mbox) . ".$ifps_filter." .
+                                ?x foaf:knows ?someone .
+                    }
+                } limit 500";
+
+                $nonLivejournalGraphQuery=
+                "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
                 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
                 SELECT DISTINCT ?graph
                 WHERE { 
@@ -64,88 +58,94 @@ class AjaxController extends Zend_Controller_Action {
                     }
                 } limit 500";
 
-		$res = sparql_query(FOAF_EP,$graphQuery);
-		$res2 = sparql_query(FOAF_EP,$graphQuery2);
+                $livejournalRes = sparql_query(FOAF_EP,$livejournalGraphQuery);
+                $nonLivejournalRes = sparql_query(FOAF_EP,$nonLivejournalGraphQuery);
 
-		foreach($res as $row){
-			error_log("Resrow: ".$row['?graph']);
-		}
-		foreach($res2 as $row){
-			error_log("Resrow1: ".$row['?graph']);
-		}
-
-		if(empty($res)){
-			return;
-		}
-
-		$triplesQuery = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-                                 construct{?a ?b ?c} WHERE { ";
-		foreach($res as $row){
-			if(!isset($row['?graph']) || strpos($row['?graph'],'http://foaf.qdos.com/delicious')){
-				continue;
-			}
-			$triplesQuery .= " { GRAPH ".$row['?graph']." {?a ?b ?c}} UNION";
-		}
-		foreach($res2 as $row){
-                        if(!isset($row['?graph']) || strpos($row['?graph'],'http://foaf.qdos.com/delicious')){
-                                continue;
+		/*separate livejournal and non livejournal stuff*/
+                $livejournalGraphs = array();
+                $nonLivejournalGraphs = array();
+                foreach($livejournalRes as $liveUri){
+                        $isLivejournalUri = true;
+                        foreach($nonLivejournalRes as $nonLiveUri){
+                                if($nonLiveUri == $liveUri){
+                                        $isLivejournalUri = false;
+                                }
                         }
-                        $triplesQuery .= " { GRAPH ".$row['?graph']." {?a ?b ?c}} UNION";
+                        if($isLivejournalUri){
+                                array_push($livejournalGraphs,$liveUri);
+                        } else {
+                                array_push($nonLivejournalGraphs,$liveUri);
+                        }
+                }
+                //query for the actual triples
+                if(@$livejournalGraphs && @!empty($livejournalGraphs)){
+
+                        $livejournalTriplesQuery = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                                         construct{?a ?b ?c} WHERE { ";
+                        foreach($livejournalGraphs as $row){
+                                if(!isset($row['?graph']) || strpos($row['?graph'],'http://foaf.qdos.com/delicious')){
+                                        continue;
+                        }
+                                $livejournalTriplesQuery .= " { GRAPH ".$row['?graph']." {?a ?b ?c}} UNION";
+                        }
+                        $livejournalTriplesQuery = substr($livejournalTriplesQuery,0,-5)."}";
+                        echo($livejournalTriplesQuery);
+                        $livejournalRes2 = sparql_query_xml(FOAF_EP,$livejournalTriplesQuery);
                 }
 
-		$triplesQuery = substr($triplesQuery,0,-5)."}";
-		error_log("triplesQuery:".$triplesQuery);
-		/*doing it all in one query does not work for JXT, so do two
-		$query = "
-		PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-		CONSTRUCT {?a ?b ?c}
-		WHERE { 
-		   GRAPH ?graph {
-			?a ?b ?c .
-	   		?x ?y ?z . FILTER(?y=foaf:weblog || ?y=foaf:homepage || ?y=foaf:mbox_sha1sum || ?y=foaf:mbox) . ".$ifps_filter." .
-			{
-				{?graph foaf:primaryTopic ?x} UNION
-				{?x foaf:knows ?someone}
-			}
-		   }
-		n limit 500000";*/
-		$res = sparql_query_xml(FOAF_EP,$triplesQuery);
-		//echo($query);
-		//var_dump($res);
-		if(!$res){
-			error_log('No RDF found here');
-			//TODO: do something here
-		}
-		error_log("results:".$res);
-		error_log(0);
-                //shove the data into a temporary file
-                $filename_1 = BUILDER_TEMP_DIR.md5(microtime()*microtime());
-                $filehandle_1 = fopen($filename_1,'w+');
-                fwrite($filehandle_1,$res);
 
-		//if they are logged in then get our stuff
-        	$defaultNamespace = new Zend_Session_Namespace('Garlik');
-        	if($defaultNamespace->authenticated && $defaultNamespace->uri){
-	                //TODO MISCHA, public and private load
-	                error_log('Authenticated ! with an openid!');
-	                //$this->foafData->getModel()->load($uri);
-	                //$this->foafData->replacePrimaryTopic($uri);
-	        }
-	
-		//echo($res);
-		//return;
-		//load it into the required foafdata object
-		$this->loadFoaf(true);
-		ini_set('memory_limit','128M'); 
-		$this->foafData->addLJRDFtoModel($filename_1,$this->foafData->getUri());
-		$this->foafData->replacePrimaryTopic();
-			
-		//remove the file
-		unlink($filename_1);
-		error_log("this request is made end");
-		error_log(implode(' -------- '.$defaultNamespace->foafData->getModel()->triples));
-	}
+
+                if(@$nonLivejournalGraphs && @!empty($nonLivejournalGraphs)){
+
+                        $nonLivejournalTriplesQuery = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+                                 construct{?a ?b ?c} WHERE { ";
+                        foreach($nonLivejournalGraphs as $row){
+                                if(!isset($row['?graph']) || strpos($row['?graph'],'http://foaf.qdos.com/delicious')){
+                                        continue;
+                                }
+                                $nonLivejournalTriplesQuery .= " { GRAPH ".$row['?graph']." {?a ?b ?c}} UNION";
+                        }
+                        $nonLivejournalTriplesQuery = substr($nonLivejournalTriplesQuery,0,-5)."}";
+                        echo($nonLivejournalTriplesQuery);
+                        $nonLivejournalRes2 = sparql_query_xml(FOAF_EP,$nonLivejournalTriplesQuery);
+                }
+
+		 //shove the data into a temporary file
+                if(@$livejournalRes2 && @!empty($livejournalRes2)){
+                        $filenameLivejournal = BUILDER_TEMP_DIR.md5(uniqid('temp_rdf_lj'));
+                        $filehandleLivejournal = fopen($filenameLivejournal,'w+');
+                        fwrite($filehandleLivejournal,$livejournalRes2);
+                }
+                if(@$nonLivejournalRes2 && @!empty($livejournalRes2)){
+                        $filenameNonLivejournal = BUILDER_TEMP_DIR.md5(uniqid('temp_rdf_nonlj_'));
+                        $filehandleNonLivejournal = fopen($filenameNonLivejournal,'w+');
+                        fwrite($filehandleNonLivejournal,$nonLivejournalRes2);
+                }
+
+                //if they are logged in then get our stuff
+                $defaultNamespace = new Zend_Session_Namespace('Garlik');
+                if($defaultNamespace->authenticated && $defaultNamespace->uri){
+                        //TODO MISCHA, public and private load
+                        error_log('Authenticated ! with an openid!');
+                }
+
+                //load it into the required foafdata object
+                $this->loadFoaf(true);
+                ini_set('memory_limit','128M');
+
+                if(@$filenameNonLivejournal){
+                        $this->foafData->addRDFtoModel($filenameNonLivejournal,$this->foafData->getUri());
+                        $this->foafData->replacePrimaryTopic($this->foafData->getUri());
+                        unlink($filenameNonLivejournal);
+                }
+                if(@$filenameLivejournal){
+                        $this->foafData->mangleBnodes();
+                        $this->foafData->addLJRDFtoModel($filenameLivejournal,$this->foafData->getUri());
+                        $this->foafData->replacePrimaryTopic($this->foafData->getUri());
+                        unlink($filenameLivejournal);
+                }
+        }
+
 
 	public function loadExtractorAction(){
     	
