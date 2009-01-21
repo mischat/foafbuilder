@@ -226,6 +226,9 @@ function mboxSaveFoaf() {
 		}
 
 		var sha1sum = sha1(mangleMailto(mboxElement.value));
+
+		var privacyCheckbox = document.getElementById('privacycheckbox_'+mboxElement.id);
+
 		for (j=0;j < shaContainerElement.childNodes.length;j++) {
 			var shaElement = shaContainerElement.childNodes[j];	
 
@@ -238,12 +241,17 @@ function mboxSaveFoaf() {
 			}
 		}
 		if (addmeFlag) {
-			 var x = shaContainerElement.childNodes.length;
+			var x = shaContainerElement.childNodes.length;
 
-		        /*render each individual phone element*/
-                        createGenericInputElement("foafMoxSha", sha1sum, x,"foafMboxSha_container",false,false,true);
+			var addAnother = document.getElementById("foafMboxSha_addLinkContainer");
+			addAnother.parentNode.removeChild(addAnother);
+
+                        createGenericInputElement("foafMoxSha", sha1sum, x,"foafMboxSha_container",false,false,privacyCheckbox.checked);
+        		createGenericAddElement(shaContainerElement,"foafMboxSha","Email Sha1sum",true);
 		}
+	
 	}
+	saveFoaf();
 }
 
 /*saves all the foaf data*/
@@ -1447,9 +1455,10 @@ function renderMboxShaFields(data,isPublic) {
 				}
 				if (!shaflag) {
 					createGenericInputElement(name, mangled, i,false,false,false,!isPublic);	
+					i++;
 				}
 			}	
-			i++;
+
 		}
 	} 
 	if (isPublic) {
@@ -1488,7 +1497,8 @@ function renderMboxFields(data,isPublic){
 
 			createMboxInputElementRemoveLink(newElement.id,name+"_container");
 			createGenericInputElementRemoveLink(newElement.id,name+"_container");
-			createGenericInputElementPrivacyBox(newElement.id,name+"_container",!isPublic);
+			//createGenericInputElementPrivacyBox(newElement.id,name+"_container",!isPublic);
+			createMboxInputElementPrivacyBox(newElement.id,name+"_container",!isPublic);
 
 			document.getElementById(name+"_container").appendChild(newElement);
 			newElement.className = 'fieldInput';
@@ -1509,7 +1519,8 @@ function renderMboxFields(data,isPublic){
 
 			createMboxInputElementRemoveLink(newElement.id,name+"_container");
 			createGenericInputElementRemoveLink(newElement.id,name+"_container");
-			createGenericInputElementPrivacyBox(newElement.id,name+"_container",isPublic);
+			//createGenericInputElementPrivacyBox(newElement.id,name+"_container",isPublic);
+			createMboxInputElementPrivacyBox(newElement.id,name+"_container",isPublic);
 
 			document.getElementById(name+"_container").appendChild(newElement);
 			i++;
@@ -3545,7 +3556,8 @@ function phoneDisplayToObjects(){
 
 		createMboxInputElementRemoveLink(addElement.id,name+"_container");
 		createGenericInputElementRemoveLink(addElement.id,name+"_container");
-		createGenericInputElementPrivacyBox(addElement.id,name+"_container",false);
+		//createGenericInputElementPrivacyBox(addElement.id,name+"_container",false);
+		createMboxInputElementPrivacyBox(addElement.id,name+"_container",false);
 
 		/*re add the add element*/
 		document.getElementById(containerId).appendChild(addElement);
@@ -3631,6 +3643,36 @@ function phoneDisplayToObjects(){
 			containerDiv.appendChild(removeDiv);
 		}
 	}
+
+	/*creates a privacy checkbox for the particular element passed in, in the container passed in*/
+	function createMboxInputElementPrivacyBox(elementId,containerId,isPrivate){
+		/*create remove link and attach it to the container div*/
+		var containerDiv = document.getElementById(containerId);
+		if(containerDiv){
+			var privacyDiv = document.createElement("div");
+			privacyDiv.id = "privacydiv_"+elementId;
+			privacyDiv.className = "privacyContainer";
+			
+			var privacyText = document.createTextNode('Private?');
+			privacyDiv.appendChild(privacyText);
+		
+			var lineBreak = document.createElement("br");
+			privacyDiv.appendChild(lineBreak);
+			
+			var privacyCheckbox = document.createElement('input');
+			privacyCheckbox.onchange = function(){ sha1sumSaveFoaf(); };
+			privacyCheckbox.setAttribute('type','checkbox');
+			privacyCheckbox.id = "privacycheckbox_"+elementId;
+			privacyDiv.appendChild(privacyCheckbox);
+			
+			containerDiv.appendChild(privacyDiv);
+
+			/*must be done after appending because of IE*/
+			privacyCheckbox.checked = isPrivate;
+		}
+	}
+	
+	
 	
 	/*creates a privacy checkbox for the particular element passed in, in the container passed in*/
 	function createGenericInputElementPrivacyBox(elementId,containerId,isPrivate){
