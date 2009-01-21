@@ -89,7 +89,6 @@ class AjaxController extends Zend_Controller_Action {
                                 $livejournalTriplesQuery .= " { GRAPH ".$row['?graph']." {?a ?b ?c}} UNION";
                         }
                         $livejournalTriplesQuery = substr($livejournalTriplesQuery,0,-5)."}";
-                        echo($livejournalTriplesQuery);
                         $livejournalRes2 = sparql_query_xml(FOAF_EP,$livejournalTriplesQuery);
                 }
 
@@ -106,7 +105,6 @@ class AjaxController extends Zend_Controller_Action {
                                 $nonLivejournalTriplesQuery .= " { GRAPH ".$row['?graph']." {?a ?b ?c}} UNION";
                         }
                         $nonLivejournalTriplesQuery = substr($nonLivejournalTriplesQuery,0,-5)."}";
-                        echo($nonLivejournalTriplesQuery);
                         $nonLivejournalRes2 = sparql_query_xml(FOAF_EP,$nonLivejournalTriplesQuery);
                 }
 
@@ -144,6 +142,23 @@ class AjaxController extends Zend_Controller_Action {
                         $this->foafData->replacePrimaryTopic($this->foafData->getUri());
                         unlink($filenameLivejournal);
                 }
+		
+		//TODO: this is an innefficient hack
+                $filenameTemp = BUILDER_TEMP_DIR.md5(uniqid('temp_rdf_lj'));
+                $filehandleTemp = fopen($filenameTemp,'w+');
+		$foundStuff = $this->foafData->getModel()->find(NULL,NULL,NULL);
+
+		if($foundStuff){
+
+                	fwrite($filehandleTemp,$foundStuff->writeRdfToString());
+
+			foreach($this->foafData->getModel()->triples as $triple){
+                                $this->foafData->getModel()->remove($triple);
+                        }
+
+			$this->foafData->addRDFtoModel($filenameTemp,$this->foafData->getUri());
+		}
+	
         }
 
 
