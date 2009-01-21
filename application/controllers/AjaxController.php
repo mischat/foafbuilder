@@ -158,6 +158,7 @@ class AjaxController extends Zend_Controller_Action {
 
 			$this->foafData->addRDFtoModel($filenameTemp,$this->foafData->getUri());
 		}
+		unlink($filenameTemp);
 	
         }
 
