@@ -347,6 +347,7 @@ $default_prefixes = array(
    'air' => 'http://www.megginson.com/exp/ns/airports#',
    'dc' => 'http://purl.org/dc/elements/1.1/',
    'dcterms' => 'http://purl.org/dc/terms/',
+   'pim' => 'http://www.w3.org/2000/10/swap/pim/contact#',
    'vcard' => 'http://www.w3.org/2001/vcard-rdf/3.0#',
    'wot' => 'http://xmlns.com/wot/0.1/',
    'cc' => 'http://creativecommons.org/ns#',
