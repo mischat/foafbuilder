@@ -384,7 +384,7 @@ function genericObjectsToDisplay(data){
 	mboxFieldsObjectsToDisplay(data);
 	mboxsha1FieldsObjectsToDisplay(data);
 	phoneFieldsObjectsToDisplay(data);
-	//addressFieldsObjectsToDisplay(data);
+	addressFieldsObjectsToDisplay(data);
 	depictionFieldsObjectsToDisplay(data);
 	imgFieldsObjectsToDisplay(data);
 	nearestAirportFieldsObjectsToDisplay(data);
@@ -2089,6 +2089,8 @@ function renderKnowsFields(data){
 			countryInputElement.value = address[prefix+'Country'];
 		}
 	
+		placeAddressDisplayToObjects(prefix,bNodeKey);
+		saveFoaf();
 	}
 	
 	
@@ -2286,7 +2288,7 @@ function displayToObjects(name){
 			simpleFieldsDisplayToObjects();
 			break;
 		case 'load-contact-details':
-			//addressDisplayToObjects();
+			addressDisplayToObjects();
 			mboxDisplayToObjects();
 			mboxshaDisplayToObjects();
 			phoneDisplayToObjects();
@@ -2540,6 +2542,7 @@ function addressDisplayToObjects(){
 	/*populate the appropriate objects*/
 	placeAddressDisplayToObjects('home');
 	placeAddressDisplayToObjects('office');
+
 }
 
 
@@ -3337,7 +3340,7 @@ function phoneDisplayToObjects(){
 	/*copies values from display for an address of type prefix (e.g. office, home) into the globalFieldData object
 	bNodeToPanTo specifies the bnode that the map should pan to, if any.*/
 	function placeAddressDisplayToObjects(prefix,bNodeToPanTo){
-		
+
 	   	/*get a new container and do some initial checks*/
 	   	var containerElement = document.getElementById('address_container');
 	   	
@@ -5116,37 +5119,42 @@ function officeDisplayToObjectsGeoCode(point) {
 }
 
 function anyPrefixDisplayToObjectsGeoCode(prefix,point){
-
 	if(typeof(prefix) == 'undefined' || !prefix){
-			log('error');
-			return;
-		}
-	    var homeArray = existingAddressDetailsToGeoCode[prefix];
-	    var bNodekey = homeArray['bnode'];
-	    var doPan = homeArray['doPan'];
-	    var isPrivate = homeArray['isPrivate'];
+		log('error');
+		return;
+	}
+	var homeArray = existingAddressDetailsToGeoCode[prefix];
+	var bNodekey = homeArray['bnode'];
+	var doPan = homeArray['doPan'];
+	var isPrivate = homeArray['isPrivate'];
 
-		if(typeof(point != 'undefined') && point){
-	   		//move the point and the centre of the map
-	           mapMarkers[bNodekey].setLatLng(point);
-    		    log('geocoding2');
-		}
+	if(typeof(point != 'undefined') && point){
+		//move the point and the centre of the map
+		mapMarkers[bNodekey].setLatLng(point);
+		log('geocoding2');
+	}
 
-	    //update the display to show the new latitude and longitude	  	
-	    updateLatLongText(bNodekey,mapMarkers[bNodekey]);
-		
-	    //set the global data with the appropriate stuff
-	    if(isPrivate){
-		globalPrivateFieldData.addressFields[prefix][bNodekey]['latitude'] = point.lat();
-		globalPrivateFieldData.addressFields[prefix][bNodekey]['longitude'] = point.lat();
-	     } else {
-		globalFieldData.addressFields[prefix][bNodekey]['latitude'] = point.lat();
-		globalFieldData.addressFields[prefix][bNodekey]['longitude'] = point.lat();
-	     }
-			
-		if(doPan){
-			map.panTo(point);
-	    }
+	//update the display to show the new latitude and longitude	  	
+	updateLatLongText(bNodekey,mapMarkers[bNodekey]);
+
+	//set the global data with the appropriate stuff
+	var lati = "";
+	var longi = "";
+
+	if (point != null) {
+		lati = point.lat();
+		longi = point.lng();
+	}
+	if(isPrivate){
+		globalPrivateFieldData.addressFields[prefix][bNodekey]['latitude'] = lati;
+		globalPrivateFieldData.addressFields[prefix][bNodekey]['longitude'] = longi;
+	} else {
+		globalFieldData.addressFields[prefix][bNodekey]['latitude'] = lati;
+		globalFieldData.addressFields[prefix][bNodekey]['longitude'] = longi;
+	}
+	if (doPan) {
+		map.panTo(point);
+	}
 }
 
 
