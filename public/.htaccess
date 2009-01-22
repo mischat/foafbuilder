@@ -8,7 +8,7 @@ AddDefaultCharset utf-8
 AddOutputFilterByType DEFLATE text/html text/plain text/css application/x-javascript
 ErrorDocument 404 /page_not_found.html
 <ifmodule mod_expires.c>
-  <filesmatch "\.(jpg|gif|png|css|js)$">
+  <filesmatch "\.(jpg|gif|png)$">
        ExpiresActive on
        ExpiresDefault "access plus 1 year"
    </filesmatch>
