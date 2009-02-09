@@ -75,7 +75,8 @@ class IFPTriangulation {
 		$already_have_filter="";
 		$want_filter="";
 		foreach($ifp_array as $ifp){
-	
+
+			$badFlagOne = false;	
 			//weed out duff/empty results or dangerous bnodes
 			if( isset($ifp)
 				&& $ifp
@@ -86,12 +87,15 @@ class IFPTriangulation {
 				$ifpblacklist = unserialize(IFP_BLACKLIST);
 				
 				foreach ($ifpblacklist as $badifp) {
-				//error_log("Just checking what the badifo is $badifp");
-				//if ($ifp != "<mailto:>" && $ifp != '"da39a3ee5e6b4b0d3255bfef95601890afd80709"' && $ifp != '"08445a31a78661b5c746feff39a9db6e4e2cc5cf"' && $ifp != '""' & $ifp != '"20cb76cb42b39df43cb616fffdda22dbb5ebba32"' ) {
-					if ($ifp != $badifp) {
-						$want_filter.=" ?ifp_wanted != ".$ifp." &&";
-						$already_have_filter.=" ?ifp_already_have = ".$ifp." ||";			
+					//error_log("Just checking what the badifo is $badifp");
+					//if ($ifp != "<mailto:>" && $ifp != '"da39a3ee5e6b4b0d3255bfef95601890afd80709"' && $ifp != '"08445a31a78661b5c746feff39a9db6e4e2cc5cf"' && $ifp != '""' & $ifp != '"20cb76cb42b39df43cb616fffdda22dbb5ebba32"' ) {
+					if ($ifp == $badifp) {
+						$badFlagOne = true;
 					}
+				}
+				if (!$badFlagOne) {
+					$want_filter.=" ?ifp_wanted != ".$ifp." &&";
+					$already_have_filter.=" ?ifp_already_have = ".$ifp." ||";			
 				}
 			}
 		}
@@ -117,13 +121,19 @@ class IFPTriangulation {
 		
 		$ifpblacklist = unserialize(IFP_BLACKLIST);
 		foreach($results as $res){		
+
+			$badflag = false;
 			$ifp = @$res['?ifp_wanted'];
 			foreach ($ifpblacklist as $badifp) {
 				//error_log("Just checking what the badifp is $badifp");
-				if ($ifp != $badifp) {
-					array_push($return_array,$ifp);
+				if ($ifp == $badifp) {
+					$badflag = true;
 				}
 			}
+			if (!$badflag) {
+				array_push($return_array,$ifp);
+			}
+		
 		}
 
 		return array_unique($return_array);

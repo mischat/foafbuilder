@@ -7,7 +7,7 @@ define('QDOS_EXT', 'http://extractor.qdos.com:8081/');
 define('QDOS_ROOT', 'http://qdos.com/');
 define('EXAMPLE_OPENID', 'example.org/myopenid');
 define('SUPPORT_EMAIL', 'mailto:support@qdos.com');
-$ifpblacklist = array("<mailto:>",'"da39a3ee5e6b4b0d3255bfef95601890afd80709"','"08445a31a78661b5c746feff39a9db6e4e2cc5cf"','""','"20cb76cb42b39df43cb616fffdda22dbb5ebba32"','<http://www.google.com/>','<http://www.google.com>','<http://www.bbc.co.uk/>','<http://bbc.co.uk>','"02085a0d20a5f574c1ce6cfe42bba6e85cfe07cf"');
+$ifpblacklist = array("<mailto:>",'"da39a3ee5e6b4b0d3255bfef95601890afd80709"','"08445a31a78661b5c746feff39a9db6e4e2cc5cf"','""','"20cb76cb42b39df43cb616fffdda22dbb5ebba32"','<http://www.google.com/>','<http://www.google.com>','<http://www.bbc.co.uk/>','<http://bbc.co.uk>','"02085a0d20a5f574c1ce6cfe42bba6e85cfe07cf"','"50c02ff93e7d477ace450e3fbddd63d228fb23f3\\""');
 define ('IFP_BLACKLIST',serialize($ifpblacklist));
 define ('FRIENDS_THRESHOLD', 100);
 
