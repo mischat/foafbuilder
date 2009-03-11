@@ -376,9 +376,11 @@ class FoafData {
 	$primaryResource = new Resource($this->uri."#me");
 	$personalProfileDocumentTriple = new Statement(new Resource($this->uri), new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/PersonalProfileDocument"));
 	$primaryTopicTriple = new Statement(new Resource($this->uri), new Resource("http://xmlns.com/foaf/0.1/primaryTopic"),$primaryResource);
+	$foafPersonTriple = new Statement($primaryResource, new Resource("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),new Resource("http://xmlns.com/foaf/0.1/Person"));
 	
 	$this->model->addWithoutDuplicates($personalProfileDocumentTriple);
 	$this->model->addWithoutDuplicates($primaryTopicTriple);
+	$this->model->addWithoutDuplicates($foafPersonTriple);
 	
 	$this->primaryTopic = $primaryResource->uri;
 	//$this->graphset = $graphset;
